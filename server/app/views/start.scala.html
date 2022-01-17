@@ -1,0 +1,130 @@
+@*
+ * sb admin template based on bootstrap 4
+ *@
+@import play.filters.csrf._
+@(ucName: String, ucParam: String, ucInfo: String, ucContext: String, langs: Seq[(String,String)], lrm:Boolean=true)(implicit request: RequestHeader, msgs: MessagesProvider, assetsFinder: AssetsFinder)
+@getAppMsg(name: String) = @{ msgs.messages("app." + name) }
+
+
+<!DOCTYPE html>
+<html lang='@getAppMsg("lang")'>
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	  <meta name="description" content="TTC Turnierprogramm - Turnierservice - Tourney Service">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+	  <title>@getAppMsg("title")</title>
+		
+		<!-- update bootstrap
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap/css/bootstrap.min.css")'>
+		-->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	  
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/github-markdown.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/atom-one-light.css")'>
+	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
+
+	  <!-- update bootstrap datetimepicker-->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "css/bootstrap-datetimepicker.min.css")'>
+
+	  @scalajs.html.scripts("client", routes.Assets.at("/public", _).toString, name => getClass.getResource(s"/public/$name") != null)  
+	  
+	  <!--
+	    Autor: Robert Lichtenegger / Copyright: Robert Lichtenegger - Cloud Service Lifecycle Management
+	    Turnierprogramm TTC Freising Lerchenfeld
+	    Tourney Service / Tournament Service
+	    Date: 2022/01/16
+	  -->
+	  
+	</head>
+	<body class="fixed-nav sticky-footer bg-dark sidenav-toggler" id="page-top" onunload='InputCtrl.eventUnload();' onhashchange='InputCtrl.eventHashchange();'>
+	  
+	  <!-- NAVIGATION -->
+	  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+	    <a class="navbar-brand" onclick='InputCtrl.redirect("home"); return false;'>
+	      <img alt="TT Logo" height="30" width="46" src="@assetsFinder.path("img/logo.png")" >
+	      <span id="APP__Title" class="text-white"><strong>&nbsp; @getAppMsg("title")</strong></span>
+	    </a>
+	    
+	    <button id="navbarResponsiveButton" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive">
+	      <span class="navbar-toggler-icon"></span>
+	    </button>
+	    
+	    <div class="collapse navbar-collapse" id="navbarResponsive">
+	      @component.sidebar(msgs)
+	      <ul class="navbar-nav sidenav-toggler" id="appMainToggler">
+          <li class="nav-item">
+            <a class="nav-link text-center" id="sidenavToggler"><i class="fa fa-fw fa-angle-left"></i></a>
+          </li>
+        </ul>
+        @component.header(getAppMsg("lang"), langs, msgs)    
+	    </div>
+	  </nav>
+	    
+	  <!-- Start Content -->
+	  <div class="content-wrapper">
+	    <div id="APP__Info">
+	  	  <h2>TTC Turnierprogramm TTC Freising Lerchenfeld 64 e.V.</h2>
+	      <h2>Turnier Service</h2>
+	      <h2>Tourney Service</h2>
+	      <h3>Update Datum: @getAppMsg("date")</h3>
+			</div>
+	    
+	    <span id="APP__Headline">
+        <footer class="tuse-sticky-header">
+          <div class="container-fluid text-secondary text-center"><small id="APP__Headline__Content"></small></div>                  
+        </footer>
+        <div class="container-fluid mb-3"></div>
+      </span>
+     
+	    <div class="container-fluid">
+				<div id="APP__Result" class="alert alert-success alert-dismissible fade show" role="alert">
+					<strong id="APP__Result__Head">Welcome!</strong>&nbsp;&nbsp;<span id="APP__Result__Body">Great to see you here.</span>
+					<button type="button" class="close" onclick='InputCtrl.setResult(false);'><span>&times;</span></button>
+				</div>
+				
+	      <!-- Main Content -->
+	      <div id="mainContent" class="mb-5"></div>	          
+	    </div>
+	    
+			@component.footer(msgs)
+	   
+	    <!-- Scroll to Top Button-->
+	    <a class="scroll-to-top rounded" href="#page-top"><i class="fa fa-angle-up"></i></a>
+			
+			<!-- dynamic loaded dialogs -->
+			<span id="APP__Load"></span>
+			<span id="APP__DlgBox__Load"></span>
+			<span id="APP__DlgInfo__Load"></span>
+			<span id="APP__DlgPlayfield__Load"></span>
+
+		</div>
+		<!-- End Content -->
+
+		<!-- Bootstrap core JavaScript-->
+		<script src='@routes.Assets.at("/public", "js/jquery-3.4.1.min.js")'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js" integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script>
+		
+	  <script src='@routes.Assets.at("/public", "js/sb-admin.min.js")'></script>
+	  <script src='@routes.Assets.at("/public", "js/highlight.pack.js")'></script>
+	  <script src='@routes.Assets.at("/public", "js/showdown.min.js")'></script>
+	  <script src='@routes.Assets.at("/public", "js/yaml.min.js")'></script>
+	
+    <!-- DateTimepicker for Bootstrap -->	
+		<script src='@routes.Assets.at("/public", "js/bootstrap-datetimepicker.min.js")'></script>
+		<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+		<script>
+      App.start('@ucName', '@ucParam', '@ucInfo', '@ucContext', '@getAppMsg("lang")', '@getAppMsg("date")', '@getAppMsg("version")', '@CSRF.getToken(request).map(t=>t.value).getOrElse("")');
+		</script>
+      
+
+	</body>
+</html>

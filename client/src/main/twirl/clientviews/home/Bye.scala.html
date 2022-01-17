@@ -1,0 +1,19 @@
+@**
+ * Template Logout
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._ 
+ 
+@(message: String)(implicit ucp: UseCaseParam)
+<div class="container h-100">
+    <div class="row">
+        <div class="col-sm-2" ></div>
+        <div class="col-sm-8 text-center">
+            <img class="img-fluid" src="assets/img/logo.png" alt="Hello!">
+            <h4>@message</h4>
+        </div>
+        <div class="col-sm-2" ></div>
+    </div>
+</div>

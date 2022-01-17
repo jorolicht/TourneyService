@@ -1,0 +1,46 @@
+@*
+ * template for certificates
+ *@
+
+@(orgDir: String, title: String, tourney: String, competition: String, place: String, name: String, club: String, date: String, lang: String)
+
+<!DOCTYPE html>
+<html lang="@lang">
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	  <meta name="description" content="TTC Turnierprogramm - Urkunde">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+	  <title>@title</title>
+	  <link rel="stylesheet" href="/assets/css/print.css")">
+
+	  <!--
+	    Autor: Robert Lichtenegger / Copyright: Robert Lichtenegger - Cloud Service Lifecycle Management
+	    Turnierprogramm TTC Freising Lerchenfeld
+	    Tourney Service / Tournament Service
+	    Date: 2019/05/25
+	  -->
+		<script type="text/javascript">
+			function zoom() {
+					document.body.style.zoom = "100%" 
+			}
+    </script>
+		
+	</head>
+	<body onload="zoom()">
+		<div id="CertificateBackground"> 	
+			<img class="print_center_image" src="/public/clubs/@orgDir/certificate.png"/>
+    </div>
+	  <div id="CertificateFrame"> 	
+			<div id="CertificateTourney">@tourney</div>
+			<div id="CertificateCompetition">@competition</div>
+			<div id="CertificatePlace">@place</div>
+			<div id="CertificateName">@name</div>
+			<div id="CertificateClub">@club</div>
+			<div id="CertificateDate">@date</h5>
+		</div>
+	</body>
+</html>
+

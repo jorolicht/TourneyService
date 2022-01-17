@@ -1,0 +1,7 @@
+@*
+ * Template for generalbutton
+ *@
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@(btnName: String, btnId: String, btnClass: String, func: String, args: String*)(implicit ucp: UseCaseParam)
+@{ Html(_button(btnName, btnId, btnClass, func, args: _*)) }

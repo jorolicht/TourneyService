@@ -1,0 +1,115 @@
+@*
+ * Sidebar
+ *@
+
+@(msgs: MessagesProvider)
+
+@sbLI1(uc: String) = @{ 
+    val m=msgs.messages(s"sidebar.title.${uc}"); 
+    val attribs=s""" title='${m}' class='nav-item' data-placement='right' data-sbentry='${uc}'  """;
+    Html(attribs) 
+}
+
+@sbA2(uc: String) = @{ 
+  val m=msgs.messages(s"sidebar.title.${uc}"); 
+  val attribs=s"""title='${m}' data-parent='#APP__Sidebar' class='nav-link nav-link-collapse collapsed' data-toggle='collapse' href='#APP__Sidebar__${uc}' onclick="InputCtrl.eventSidebar('${uc}', true)" """;  
+  Html(attribs) 
+}
+
+@sbUL2(uc: String, redir: String) = @{ 
+  val attribs=s""" id='APP__Sidebar__${uc}' class="sidenav-second-level collapse" data-sbredir-${uc}='${redir}'  """; 
+  Html(attribs) 
+}
+
+@sbLI2(uc: String) = @{ 
+  val m=msgs.messages(s"sidebar.title.${uc}"); 
+  val attribs=s""" title='${m}' class='nav-item tuse-sidenav-higher-level' data-placement='right' data-sbentry='${uc}' """;
+  Html(attribs) 
+}
+
+@sbIconEntry(icon: String, uc: String) = @{ 
+  val title=msgs.messages(s"sidebar.title.${uc}");
+  val label=msgs.messages(s"sidebar.label.${uc}");
+  val content=s"""<i class='fa fa-fw ${icon}'></i><span class='nav-link-text'>${label}</span>"""; 
+  val anchor=s"""<a title='${title}' class='sidebar-link nav-link' data-sbtext='${uc}' href='#' onclick="InputCtrl.eventSidebar('${uc}'); false">${content}</a> """;  
+  Html(anchor)
+}
+
+@sbIconEntryBadge(icon: String, uc: String) = @{ 
+  val title=msgs.messages(s"sidebar.title.${uc}");
+  val label=msgs.messages(s"sidebar.label.${uc}");
+  val content=s"""<i class='fa fa-fw ${icon}'></i><span class='nav-link-text'>${label}</span>"""; 
+  val anchor=s"""<a title='${title}' class='sidebar-link nav-link' data-sbtext='${uc}' href='#' onclick="InputCtrl.eventSidebar('${uc}'); false">${content} &nbsp;<span id='APP__${uc}__SidebarBadge' class="badge badge-light" style='display:none'></span> </a> """;  
+  Html(anchor)
+}
+
+
+@sbEntry(uc: String) = @{ 
+  val title=msgs.messages(s"sidebar.title.${uc}");
+  val label=msgs.messages(s"sidebar.label.${uc}");
+  val content=s"""<span class='nav-link-text'>${label}</span>"""; 
+  val anchor=s"""<a title='${title}' class='sidebar-link nav-link' data-sbtext='${uc}' href='#' onclick="InputCtrl.eventSidebar('${uc}'); false">${content}</a> """;  
+  Html(anchor)
+}
+
+@sbText(uc: String)  = @{ 
+  val m=msgs.messages(s"sidebar.label.${uc}"); 
+  val elem=s"""<span class='nav-link-text'>${m}</span>""";  
+  Html(elem) 
+}
+
+@sbIconText(icon: String, uc: String)  = @{ 
+  val m=msgs.messages(s"sidebar.label.${uc}"); 
+  val elem=s"""<i class='fa fa-fw ${icon}'></i><span class='nav-link-text'>${m}</span>""";  
+  Html(elem) 
+}
+
+
+<!-- START Navigation Sidebar -->
+<ul id="APP__Sidebar" class="navbar-nav navbar-sidenav">
+
+  <li @sbLI1("HomeSearch")>@sbIconEntry("fa-search","HomeSearch")</li>
+  <li @sbLI1("InfoDisabled")>@sbIconEntry("fa-info","InfoDisabled")</li>
+
+  <!-- IDENT(Info): 1 fa-info -->
+  <li @sbLI1("InfoEnabled") data-toggle="tooltip" data-original-title="Turnier Information" style='display:none'>
+      <a @sbA2("InfoEnabled")>@sbIconText("fa-info", "InfoEnabled")</a>
+      <ul @sbUL2("InfoEnabled", "InfoSchedule")>
+          <li @sbLI2("InfoSchedule")>@sbEntry("InfoSchedule")</li>
+          <li @sbLI2("InfoCompetition")>@sbEntry("InfoCompetition")</li>
+          <li @sbLI2("InfoPlayer")>@sbEntry("InfoPlayer")</li>
+          <li @sbLI2("InfoResult")>@sbEntry("InfoResult")</li>
+          <li @sbLI2("InfoPlayfield")>@sbEntry("InfoPlayfield")</li>
+          <li @sbLI2("InfoCertificate")>@sbEntry("InfoCertificate")</li>
+      </ul>
+  </li>
+  <li @sbLI1("OrganizeTourney") style='display:none'>@sbIconEntry("fa-home", "OrganizeTourney")</li>
+
+  <li @sbLI1("OrganizeCompetition") style='display:none'>
+    <a @sbA2("OrganizeCompetition")>@sbIconText("fa-list-alt", "OrganizeCompetition")</a>
+    <ul @sbUL2("OrganizeCompetition", "OrganizeCompetition")>
+      <li @sbLI2("OrganizeCompetitionDraw")>@sbEntry("OrganizeCompetitionDraw")</li>
+      <li @sbLI2("OrganizeCompetitionInput")>@sbEntry("OrganizeCompetitionInput")</li>
+      <li @sbLI2("OrganizeCompetitionView")>@sbEntry("OrganizeCompetitionView")</li>
+    </ul>
+  </li>
+
+
+  <li @sbLI1("OrganizePlayer") style='display:none'>@sbIconEntryBadge("fa-user", "OrganizePlayer")</li>
+  <li @sbLI1("OrganizePlayfield") style='display:none'>@sbIconEntry("fa-table", "OrganizePlayfield")</li>
+  <li @sbLI1("OrganizeCertificate") style='display:none'>@sbIconEntry("fa-trophy", "OrganizeCertificate")</li>
+  <li @sbLI1("OrganizeReport") style='display:none'>@sbIconEntry("fa-list-alt", "OrganizeReport")</li>
+
+
+    <!-- IDENT(Admin): 1 fa-lock -->
+  <li @sbLI1("Admin") data-toggle="tooltip" data-original-title="Administration" style='display:none'>
+    <a @sbA2("Admin")>@sbIconText("fa-lock","Admin")</a>
+    <ul @sbUL2("Admin", "AdminLicense")>
+      <li @sbLI2("AdminLicense")>@sbIconEntry("fa-cog", "AdminLicense")</li>
+      <li @sbLI2("AdminDatabase")>@sbIconEntry("fa-database", "AdminDatabase")</li>
+      <li @sbLI2("AdminReport")>@sbIconEntry("fa-list-alt", "AdminReport")</li>
+    </ul>
+  </li> 
+
+</ul>
+<!-- END Navigation Sidebar -->   

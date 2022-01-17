@@ -1,0 +1,50 @@
+@*
+ * Template for Standard Dialog Box
+ *@
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(header: String, body: String, buttons: Seq[String], defButton: Int=0, sameSize: Boolean= false)(implicit ucc: UseCaseParam)
+
+
+<!-- START Modal Dialog Box Dialog  -->
+<div class="modal fade" @id("Modal") tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      @if(header==""){
+        <div class="modal-header">
+          <h5 class="modal-title">@body</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+        </div>
+      }else{
+        <div class="modal-header">
+          <h5 class="modal-title">@header</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+        </div>
+        
+        <div class="modal-body"><p class="small" @id("Body")>@body</p></div>
+      }
+      
+      <div class="modal-footer" @id("Footer")>
+        @if(sameSize){
+          <div class="container">
+            <div class="row">
+              @for((b,i) <- buttons.zipWithIndex) {
+                <div class="col">
+                  <button @id(s"Click_${i+1}") class="btn btn-outline-secondary btn-xs btn-block" type="button" @if(defButton==i){ autofocus }>@msg(b)</button>
+                </div>
+              }                  
+            </div>
+          </div>
+        }else{
+          @for((b,i) <- buttons.zipWithIndex) {
+            <button @id(s"Click_${i+1}") class="btn btn-outline-secondary btn-xs" type="button" @if(defButton==i){ autofocus } >@msg(b)</button>
+          }
+        }
+      </div>
+      
+    </div>
+  </div>
+</div>
+<!-- END Modal Dialog Box  -->

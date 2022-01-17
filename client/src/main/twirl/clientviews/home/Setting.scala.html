@@ -1,0 +1,21 @@
+@*
+ * Template for registering 
+ *@
+@import clientviews.component.input.html._
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import upickle.default._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+ 
+<div class="container-fluid alert-secondary">
+  <div class="row alert-primary justify-content-center mb-2">
+    <h3>@msg("hdg")</h3>
+  </div>
+</div>
+
+@card("ChgContact", msg("contact.hdg") , clientviews.home.setting.html.Contact(ctx), "ReqContactChange","req.contactChange")
+@card("ChgPassword", msg("password.hdg"), clientviews.home.setting.html.Password(ctx), "ReqPasswordChange","req.pwChange")
+
+</div>

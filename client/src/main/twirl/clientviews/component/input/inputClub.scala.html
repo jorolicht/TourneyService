@@ -1,0 +1,12 @@
+@*
+ * Template for club name input element
+ *@
+@import clientviews.component.helper.html._ 
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+
+@(name: String, init: String, lbl: String="input.club.lbl", hlp: String="input.club.hlp", plh: String="input.club.plh", _class: String="", readonly: Boolean=false, list: Boolean=false)(implicit ucp: UseCaseParam)
+
+@{ if (lbl!="") Html(_lblFor(name, "mb-0", lbl)) }
+@{ Html(_inputClub(name, init, plh, _class, readonly, list)) }
+@{ if (hlp!="") Html(_hlpFor(name, hlp)) }

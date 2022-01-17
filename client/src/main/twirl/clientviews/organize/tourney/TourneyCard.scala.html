@@ -1,0 +1,48 @@
+@*
+ * Template Organize Tourney Main Table
+ *@
+@import shared.model.TournBase
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@* Action Events:
+ * - ListSelect
+ * - ListEdit
+ * - ListDelete
+ *@
+
+@(selId: Long, tonys: Seq[TournBase])(implicit ucc: UseCaseParam)
+@getPrivat(value:Boolean) = @{ if(value) msg_("tourney.privat") else msg_("tourney.public")  }
+
+@if(tonys.isEmpty){
+  <div class="alert alert-info text-center mb-0" role="alert">
+    <span class="tuse-font-1">@msg("noTourneys")</span>
+  </div>
+}else{ 
+  <table @id("TourneyTbl") class="table table-sm small table-hover tuse-border mb-0">
+		<tbody>
+      <tr style="border-bottom:2px solid #ccc;">
+        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.date")</strong></td>
+        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
+        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.typ")</strong></td>
+        <td class="text-center tuse-height"><strong>@msg("tbl.hdr.visible")</strong></td>
+        <td class="text-right tuse-height"><strong>@msg("tbl.hdr.action")</strong></td>
+      </tr>
+      <tr @id("TourneyDummy")></tr>
+      @for(tony <- tonys) {
+				<tr data-toId='@tony.id' @actionEvent("Select", "onclick") >	
+					<td class="text-left tuse-height">@tony.getStartDate(msg_("app.lang"))</td>
+					<td class="text-left tuse-height">@tony.name</td>
+					<td class="text-left tuse-height">@msg_("tourney.typ." + tony.typ)</td>
+					<td class="text-center tuse-height">@getPrivat(tony.privat)</td>
+					<td class="text-right tuse-height">
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("Edit", "onclick")><i class="fa fa-pencil"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("View", "onclick")><i class="fa fa-eye"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("Delete", "onclick")><i class="fa fa-trash"></i></a>		
+					</td>
+				</tr>	
+			}
+	  </tbody>
+  </table>
+}

@@ -1,0 +1,85 @@
+@*
+ * Template for drawing switzer system
+ *
+ * Start Test:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+ * 
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(grName: String, grId: Int, grSize: Int, pos: Int)(implicit ucc: UseCaseParam)
+@grpName(grName: String, size: Int) = @{ Html(s"""
+  <td rowspan="${size*2}" style="width:30px;" class="border p-1 text-center"><h5 class="font-weight-bold">${grName}</h5></td>""")
+}
+
+@grpPos(pos:Int) = @{ Html(s"""  
+  <td rowspan="2" style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">${pos}</small></td>
+  <td rowspan="2" contenteditable='true' style="width:30px;" class="border-top border-bottom border-right text-center p-1">
+    <small data-drawPos='@i' data-sno='' class="font-weight-bold text-info">${pos}</small>
+  </td>""")  
+}
+@grpNameClubTTR(pos:Int) = @{ Html(s"""
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='@pos'>Lastname, Firstname</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='@pos'>Club</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='@pos' >TTR</small></td>""")  
+}
+@tdrb() = @{ Html(s"""<td class="tdDrawGroup border-right border-bottom"></td>""") }
+@tdr()  = @{ Html(s"""<td class="tdDrawGroup border-right"></td>""") }
+@tdb()  = @{ Html(s"""<td class="tdDrawGroup border-bottom"></td>""") }
+@tdt()  = @{ Html(s"""<td class="tdDrawGroup border-top"></td>""") }
+@tdtr()  = @{ Html(s"""<td class="tdDrawGroup border-top border-right"></td>""") }
+@td(x:String="") = @{ Html(s"""<td class="tdDrawGroup">${x}</td>""") }
+
+<tr><td colspan="6" style="border-bottom: 1px solid black; height:1px;"></td><td colspan="3" style="height:1px;"></td></tr>
+@grSize match {
+  case 3 => {
+    <tr>@grpName(grName, grSize) @grpPos(pos) @grpNameClubTTR(pos) @tdb @td() @td("")</tr>
+    <tr>@tdr @td() @td()</tr>
+    <tr>@grpPos(pos+1) @grpNameClubTTR(pos+1) @tdr @td() @td("")</tr>
+    <tr>@tdr @td() @td()</tr>
+    <tr>@grpPos(pos+2) @grpNameClubTTR(pos+2) @tdrb @td() @td("")</tr>
+    <tr>@td() @td() @td()</tr>
+  }
+
+  case 4 => {
+    <tr>@grpName(grName, grSize) @grpPos(pos) @grpNameClubTTR(pos) @tdb @td() @td("")</tr>
+    <tr>@tdt @tdtr @td()</tr>
+    <tr>@grpPos(pos+1) @grpNameClubTTR(pos+1) @td() @tdr @td("")</tr>
+    <tr>@tdtr @tdr @td()</tr>
+    <tr>@grpPos(pos+2) @grpNameClubTTR(pos+2) @tdrb @tdr @td("")</tr>
+    <tr>@td() @tdr @td()</tr>    
+    <tr>@grpPos(pos+3) @grpNameClubTTR(pos+3) @tdb @tdrb @td("")</tr>
+    <tr>@td() @td() @td()</tr>
+  }
+
+  case 5 => {
+    <tr>@grpName(grName, grSize) @grpPos(pos) @grpNameClubTTR(pos) @tdb @td()</tr>
+    <tr>@tdt @tdtr @td()</tr>
+    <tr>@grpPos(pos+1) @grpNameClubTTR(pos+1) @td() @tdr</tr>
+    <tr>@tdtr @tdr @td()</tr>  
+    <tr>@grpPos(pos+2) @grpNameClubTTR(pos+2) @tdr @tdr</tr>
+    <tr>@tdr @tdr @td()</tr>
+    <tr>@grpPos(pos+3) @grpNameClubTTR(pos+3) @tdrb @tdr</tr>
+    <tr>@td() @tdr @td()</tr>
+    <tr>@grpPos(pos+4) @grpNameClubTTR(pos+4) @tdb @tdrb</tr>
+    <tr>@td() @td() @td()</tr>
+  }
+
+  case 6 => {
+    <tr>@grpName(grName, grSize) @grpPos(pos) @grpNameClubTTR(pos) @td() @td() @td()</tr>
+    <tr>@tdt @tdt @tdtr</tr>
+    <tr>@grpPos(pos+1) @grpNameClubTTR(pos+1) @td() @td() @tdr </tr>
+    <tr>@tdt @tdtr @tdr </tr>  
+    <tr>@grpPos(pos+2) @grpNameClubTTR(pos+2) @td() @tdr @tdr</tr>
+    <tr>@tdtr @tdr @tdr</tr>
+    <tr>@grpPos(pos+3) @grpNameClubTTR(pos+3) @tdrb @tdr @tdr</tr>
+    <tr>@td() @tdr @tdr</tr>
+    <tr>@grpPos(pos+4) @grpNameClubTTR(pos+4) @tdb @tdrb  @tdr</tr>
+    <tr>@td() @td() @tdr</tr>
+    <tr>@grpPos(pos+5) @grpNameClubTTR(pos+5) @tdb @tdb  @tdrb</tr>
+    <tr>@td() @td() @td()</tr>
+  }
+
+}

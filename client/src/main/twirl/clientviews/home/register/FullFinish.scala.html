@@ -1,0 +1,29 @@
+@*
+ * Template for registering license step full-confirm
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._
+@import clientviews.component.input.html._
+@import clientviews.component.helper.html._
+
+@(licCode: String, orgDir: String, invoicePDFFile: String)(implicit ucp: UseCaseParam)
+@border()=@{ Html("""<div class="row mt-2 mb-1 alert-primary"><div class="col ml-2 mr-2 border-bottom border-secondary"></div></div>""")}
+
+@* state full-finish *@ 
+<div @data("view", "full-finish") class="row mb-1 alert-primary">
+  
+  <div class="form-group row mb-1 mt-1">
+    <div class="col-6 ml-1">
+      @{ Html(msg("fullfinish.prolog")) }  
+      <h5>@licCode</h5> 
+      @{ Html(msg("fullfinish.epilog")) }
+    </div>      
+
+    <div class="col mb-2 mt-2 text-center">
+      <embed src='/content/clubs/@{orgDir}/@{invoicePDFFile}' height='495' width='350' type="application/pdf">
+    </div>
+  </div>  
+
+</div>
+

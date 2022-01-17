@@ -1,0 +1,1164 @@
+###
+# Message Entries
+###
+greeting                                              = Welcome!
+
+###
+# App Main Messages
+###
+  app.mockup                                          = false
+  app.version = 2021-07EN151
+  app.date    = 2021-07-17
+
+  app.url.home                                        = https://www.turnier-service.info
+  app.url.doc                                         = https://turnier-service.org/handbook/
+  app.url.download                                    = https://turnier-service.org/download/
+
+  app.error                                           = Oops ... unfortunately we couldn't deliver this page.
+  app.error.tip                                       = Please keep calm, get some coffee if necessary and reconsider your entry.
+  app.srv.error                                       = Oops ... that looks like a server or programming error.
+  app.srv.error.tip                                   = Please keep calm, get coffee if necessary and inform those responsible in a friendly manner.
+  app.lang                                            = de
+  app.title                                           = Tournament Service
+  app.ping                                            = Ping from IP address {0} with license: {1}
+  app.test                                            = Language {0} is en ... # 'ÄöüÜl @% &? ß! ^^ °
+  app.emailhelp                                       = Please enter a valid email address
+#END App Main Messages
+
+###
+# Header and Footer
+###
+  app.header.title                                    = <strong> &nbsp; Tournament Service </strong>
+  app.header.title.club                               = <strong> &nbsp; Tournament Service </strong> - {0}
+  app.header.title.playfields                         = <strong> &nbsp; {0} </strong> - {1}
+  app.header.title.demo.playfields                    = <strong> &nbsp; TTC DEMO e.V. </strong> - Tournament Demo
+
+  app.header.manager                                  = TOURNAMENT MANAGEMENT
+  app.header.login                                    = LOGIN
+  app.header.logout                                   = LOGOUT
+  app.header.loginInfo                                = User:
+  app.header.club                                     = Club
+  app.header.club.error                               = Club / unknown
+  app.header.register                                 = REGISTRATION
+  app.header.download                                 = DOWNLOAD
+  app.header.handbook                                 = MANUAL
+  app.header.register                                 = REGISTRATION
+  app.header.demo                                     = DEMO
+  app.header.configuration                            = SETTINGS
+
+
+  app.footer.copyright1                               = Copyright
+  app.footer.copyright2                               = ClApLiMa (Cloud Application Lifecycle Management)
+  
+  app.footer.impressum                                = Imprint
+  app.footer.dataprotection                           = Data Protection
+  app.footer.author                                   = Author: {0}
+  app.footer.changedate                               = Last update: {0}
+#END header and footer
+
+###
+# Sidebar labels on titles
+###
+  sidebar.label.HomeSearch                            = Tournament Search
+  sidebar.label.InfoEnabled                           = TournamentInfo
+  sidebar.label.InfoDisabled                          = TournamentInfo
+  sidebar.label.InfoSchedule                          = Schedule
+  sidebar.label.InfoCompetition                       = Competitions
+  sidebar.label.InfoPlayer                            = Participant
+  sidebar.label.InfoResult                            = Results
+  sidebar.label.InfoPlayfield                         = Table Allocation
+  sidebar.label.InfoCertificate                       = Certificates
+  sidebar.label.OrganizeTourney                       = Tournaments
+  sidebar.label.OrganizeCompetition                   = Competitions
+  sidebar.label.OrganizePlayer                        = Player
+  sidebar.label.OrganizePlayfield                     = Table Allocation
+  sidebar.label.OrganizeCertificate                   = Certificates
+  sidebar.label.OrganizeReport                        = Reports
+  sidebar.label.Admin                                 = Administration
+  sidebar.label.AdminLicense                          = License
+  sidebar.label.AdminDatabase                         = Database
+  sidebar.label.AdminReport                           = Reports
+  sidebar.label.OrganizeCompetitionDraw               = Auslosung
+  sidebar.label.OrganizeCompetitionInput              = Eingabe
+  sidebar.label.OrganizeCompetitionView               = Anzeige
+
+  sidebar.title.HomeSearch                            = Tournament Search
+  sidebar.title.Info                                  = Tournament Information
+  sidebar.title.InfoDisabled                          = Please select a tourney
+  sidebar.title.InfoSchedule                          = Tournament Announcement
+  sidebar.title.InfoCompetition                       = Competitions
+  sidebar.title.InfoPlayer                            = Tournament Participant
+  sidebar.title.InfoResult                            = Results
+  sidebar.title.InfoPlayfield                         = table Occupancy
+  sidebar.title.InfoCertificate                       = Player Placement and Certificate Printing
+  sidebar.title.OrganizeTourney                       = Tournament Management Homepage
+  sidebar.title.OrganizeCompetition                   = Competition Selection of Tournament
+  sidebar.title.OrganizePlayer                        = Player (Registration, Waiting List)
+  sidebar.title.OrganizePlayfield                     = Manage Table Occupancy
+  sidebar.title.OrganizeCertificate                   = Manage Certificates
+  sidebar.title.OrganizeReport                        = Reports
+  sidebar.title.Admin                                 = Administration
+  sidebar.title.AdminLicense                          = License Management
+  sidebar.title.AdminDatabase                         = Data Management
+  sidebar.title.AdminReport                           = Reports
+#END sidebar
+
+###
+# Usecase: HomeMain
+###
+  home.main.LoginRequired                             = Login required!
+  home.main.UnknownPage                               = Sorry, page not found!
+  home.main.Welcome                                   = Welcome!
+  home.main.GoodBye                                   = Bye!
+  home.main.Error                                     = An error occurred!
+  home.main.Cookie                                    = Unfortunately, nothing works without cookies!
+#END HomeMain
+
+###
+# Usecase HomeError
+###
+home.error.title                                      = ERROR!
+home.error.image                                      = showError
+home.error.alt                                        = An error occurred
+
+
+###
+# Usecase: HomeConsole
+###
+home.console.title                                    = Console
+home.console.btn.submit                               = Submit
+
+
+###
+# Usecase: HomeRegister
+###
+home.register.hdg.start                               = Registration
+home.register.hdg.free.confirm                        = Confirm Registration
+home.register.hdg.free.finish                         = Registration Completed
+home.register.hdg.full.confirm                        = Confirm Registration and Order
+home.register.hdg.full.finish                         = Registration Successful / Invoice
+home.register.license.header                          = License
+home.register.plh.zip                                 = ZIP
+home.register.plh.city                                = Anytown
+home.register.plh.street                              = Example Hwy
+home.register.lbl.zip                                 = ZIP Code
+home.register.lbl.city                                = City
+home.register.lbl.street                              = Street with House Number
+home.register.lbl.radio.free                          = free License
+home.register.lbl.radio.full                          = full License
+home.register.hlp.clubname.inuse                      = Name of the club or keyword already in use
+home.register.hlp.zip                                 = Please enter a valid zip code (at least 2 characters)
+home.register.hlp.city                                = Please enter a valid city (at least 2 characters)
+home.register.hlp.street                              = Please enter a valid street including house number (at least 2 characters)
+home.register.hlp.country                             = Please select a country
+home.register.hlp.code                                = &nbsp; Unfortunately, the confirmation code is incorrect.
+
+home.register.onefreeLicense                          = <ul class = "mb-0"> <li> oneFree </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.multifreeLicense                        = <ul class = "mb-0"> <li> multiFree </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.onefullLicense                          = <ul class = "mb-0"> <li> oneFull </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.multifullLicense                        = <ul class = "mb-0"> <li> multiFull </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+
+home.register.oneCompVersion                          = A competition version
+home.register.multiCompVersion                        = MORE competition version
+home.register.btn.free.back                           = BACK
+home.register.btn.free.request                        = Request a Free License
+home.register.btn.free.confirm                        = Send license
+home.register.btn.full.back                           = BACK
+home.register.btn.full.request                        = Request a Paid License
+home.register.btn.full.confirm                        = Order with License-Fee
+home.register.btn.code.resend                         = SEND AGAIN
+
+home.register.address.for.nameclub                    = License for <strong> {0} {1} </strong> - club: <strong> {2} </strong>
+home.register.freeconfirm.name                        = Free license for <strong> {0} </strong>
+home.register.confirm.entercode                       = <small> Please enter the 4-digit confirmation code that we sent to: <strong> {0} </strong>. </small>
+home.register.address.for.email                       = Email: <strong> {0} </strong>
+home.register.freefinish.prolog                       = <p> Thank you for registering, </h5> <p> below is the license string (= & # 60; club name / license code &#62;). Simply enter all of this bold text in the setup menu with cut / paste. The file can then be saved and copied as required for each tournament (there is no copy protection or similar). </p>home.register.freefinish.epilog = <h5> The documentation can be found <a href="https://turnier-service.info/doc/"> here </a>. Wishes and suggestions for improvement are gladly accepted at <a href="mailto:info@turnier-service.org"> info@turnier-service.org</a><p> Sporty greetings and good luck with your tournaments </p>
+
+home.register.fullconfirm.name                        = Paid/Full License for <strong> {0} </strong>
+home.register.fullconfirm.clubname                    = Club: <strong> {0} </strong>
+home.register.fullfinish.prolog                       = <h5> Thank you for registering, </h5> <p> below you find the license string (= &#60; club name/license code &#62;). Simply copy/paste the bold text into the setup menu. The file can then be saved and copied as required for each tournament (there is no copy protection or similar).</p>
+
+home.register.fullfinish.epilog                       = <p> The documentation can be found <a href="https://turnier-service.org/"> here </a>. Any  suggestions for improvement are gladly accepted at <a href="mailto:info@turnier-service.org"> info@turnier-service.org </a> <p> The license string and the invoice was sent to the specified email address.</p><p> Greetings and good luck with your tournaments </p>
+home.register.fullconfirm.item.hdl                    = tournament service usage license (full) at a price of € 39.50
+home.register.fullconfirm.item.cnt                    = 2
+home.register.fullconfirm.item.content.1              = Unrestricted local use of the Excel-based software
+home.register.fullconfirm.item.content.2              = 1 year of use of the online tournament services (max. 3 tournaments) from the date of purchase
+home.register.check.withdrawal                        = I have read the <a href="#" onclick='InputCtrl.setContent("/content/withdrawal.md")'> cancellation policy </a> and hereby accept them.
+home.register.lbl.gtc                                 = I have read the <a href="#" onclick='InputCtrl.setContent("/content/gtc.md")'> general terms and conditions </a> and I agree to them.
+home.register.lbl.withdrawal                          = The cancellation policy and terms and conditions must be recognized and accepted.
+#END HomeRegister
+
+###
+# Usecase: HomeLogin
+###
+  home.login.hdg                                      = Tournament Management - Login
+  home.login.btn.req.newPassword                      = FORGOT PASSWORD
+  home.login.btn.req.authPassword                     = LOGIN
+  home.login.btn.req.authGoogle                       = Login with Google
+  home.login.lbl.user                                 = Email or License Key
+  home.login.hlp.user                                 = Please enter your email address or the first part of your license key
+  home.login.plh.user                                 = john.doe@toodle-oh.com
+  home.login.bye                                      = Goodbye!
+  home.login.dlg.hdg                                  = Login Error
+  home.login.dlg.text                                 = Email / License String and/or Password not Correct.
+  home.login.dlg.title.err.reqPw                      = Password Reset Error
+  home.login.dlg.wrongemail.hdg                       = Error Resetting Password
+  home.login.dlg.wrongemail.text                      = Please enter the correct email address.
+  home.login.dlg.title.ok.reqPw                       = Reset the password
+  home.login.dlg.body.ok.reqPw                        = New password was sent to {0}. Check the spam filter settings or the mailbox for unwanted e-mail (junk mail folder) if you have not received an e-mail. Change the newly received password in the settings.
+#END HomeLogin
+
+###
+# Usecase: HomeSetting - Change User / Club Settings
+###
+  home.setting.hdg                                    = Settings
+  home.setting.password.hdg                           = Change Password
+  home.setting.contact.hdg                            = Change Contact Details
+  home.setting.btn.req.contactChange                  = SAVE
+  home.setting.hlp.city                               = Please enter a valid city (at least 2 characters)
+  home.setting.hlp.street                             = Please enter a valid street including house number (at least 2 characters)
+  
+  home.setting.hlp.zip                                = Please enter a valid zip code
+  home.setting.lbl.zip                                = ZIP Code
+  home.setting.lbl.city                               = City
+  home.setting.lbl.street                             = Street with House Number
+  home.setting.lbl.country                            = Country
+  home.setting.plh.zip                                = ZIP Code
+  home.setting.plh.city                               = e.g. NYC
+  home.setting.plh.street                             = e.g. Housten Street
+  home.setting.plh.country                            = e.g. NY
+  
+  home.setting.contactChange.failure.dlg.hdg          = Update failed
+  home.setting.contactChange.success.dlg.text         = The contact details have been updated successfully
+  home.setting.btn.req.pwChange                       = CHANGE PASSWORD
+  home.setting.pwChange.failure.dlg.hdg               = Update failed
+  home.setting.pwChange.success.dlg.hdg               = Update finished
+  home.setting.pwChange.success.dlg.text              = Password update successful
+#END HomeSetting
+
+
+###
+# Use case: HomeSearch - searching tourneys
+###
+  home.search.hint                                    = Name of the tournament or club
+  home.search.label                                   = Tournament Search
+  home.search.dlg.hdg                                 = Search Failed
+  home.search.headline                                = Welcome!
+  home.search.info                                    = Please enter your search term and then click on ENTER/RETURN. You can click on the listed tourneys
+  home.search.noEntryMsg                              = No matching tourney fond
+  home.search.table.date                              = Date
+  
+  home.search.table.club                              = Club
+  home.search.table.tourney                           = Tournament
+  home.search.lbl.typ                                 = <strong> Sport </strong>
+  home.search.lbl.year                                = <strong> Year </strong>
+  home.search.lbl.string                              = <strong> Tournament Search </strong>
+  home.search.plh.string                              = Name of the Tournament or Club
+#END HomeSearch
+
+
+###
+# General Labels
+###
+  tourney.typ.None                                    = Sport
+  tourney.typ.name                                    = Sport
+  tourney.typ.-1                                      = type of sport
+  tourney.typ.0                                       = any
+  tourney.typ.1                                       = table tennis
+  tourney.typ.2                                       = sheep's head
+  tourney.typ.3                                       = chess
+  tourney.typ.4                                       = football
+  tourney.typ.5                                       = basketball
+  tourney.typ.6                                       = tennis
+  tourney.typ.7                                       = golf
+  tourney.typ.8                                       = darts
+  tourney.typ.9                                       = ski race
+  tourney.typ.10                                      = handball
+  tourney.typ.11                                      = volleyball
+  tourney.typ.12                                      = agility
+               
+  tourney.visibility                                  = Visibility              
+  tourney.privat                                      = private
+  tourney.public                                      = public
+  tourney.error.startDate                             = Invalid date for tournament start
+  tourney.error.endDate                               = Invalid date for the end of the tournament
+  tourney.error.name                                  = The tournament name must be at least 8 characters long
+  tourney.error.typ                                   = Please select type of sport
+  tourney.error.privat                                = Please set visibility
+
+  competition.status.-99                              = status
+  competition.status.-1                               = REGISTRATION
+  competition.status.0                                = READY TO START
+  competition.status.1                                = PRELIMINARY DRAW
+  competition.status.2                                = PRELIMINARY RESULT ENTRY
+  competition.status.3                                = PRELIMINARY ROUND FINISHED
+  competition.status.4                                = INTERMEDIATE DRAW
+  competition.status.5                                = INTERMEDIATE RESULT ENTRY
+  competition.status.6                                = INTERMEDIATE ROUND FINISHED
+  competition.status.7                                = FINAL DRAW
+  competition.status.8                                = FINAL RESULT ENTRY
+  competition.status.9                                = FINAL ROUND FINISHED
+
+  competition.agegroup.1                              = Women
+  competition.agegroup.2                              = Gentlemen
+  competition.agegroup.3                              = Girls
+  competition.agegroup.4                              = Boys
+  competition.agegroup.5                              = Student
+  competition.agegroup.6                              = Schoolgirls
+  competition.agegroup.7                              = Youth 18
+  competition.agegroup.8                              = Youth 15
+  competition.agegroup.9                              = Youth 14
+  competition.agegroup.10                             = Youth 13
+  competition.agegroup.11                             = Youth 12
+  competition.agegroup.12                             = Youth 11
+  competition.agegroup.13                             = Seniors 40
+  competition.agegroup.14                             = Seniors 45
+  competition.agegroup.15                             = Seniors 50
+  competition.agegroup.16                             = Seniors 55
+  competition.agegroup.17                             = Seniors 60
+  competition.agegroup.18                             = Seniors 65
+  competition.agegroup.19                             = Seniors 70
+  competition.agegroup.20                             = Seniors 75
+  competition.agegroup.21                             = Seniors 80
+
+  competition.typ.0                                   = Typ
+  competition.typ.1                                   = SINGLE
+  competition.typ.2                                   = DOUBLE
+  competition.typ.3                                   = MIXED
+  competition.typ.4                                   = TEAM
+  competition.typ.5                                   = UNKNOWN
+
+  competition.class.1                                 = A-Class
+  competition.class.2                                 = B-Class
+  competition.class.3                                 = C-Class
+  competition.class.4                                 = D-Class
+  competition.class.5                                 = E-Class
+
+  competition.sex.0                                   = Restriction
+  competition.sex.1                                   = Men only
+  competition.sex.2                                   = Women only
+  competition.sex.3                                   = Men and Women
+
+  competition.phase.0                                 = READY
+  competition.phase.1                                 = GROUP PRELIMINARY ROUND
+  competition.phase.2                                 = GROUP INTERMEDIATE ROUND
+  competition.phase.3                                 = GROUP FINAL
+  competition.phase.4                                 = GROUP-TROSTRUNDE
+  competition.phase.6                                 = KO PRE-ROUND
+  competition.phase.7                                 = KO-INTERMEDIATE ROUND
+  competition.phase.8                                 = KO FINAL
+  competition.phase.9                                 = KO-TROSTRUNDE
+
+  certificate.place.range                             = {0}. - {1}. place
+  certificate.place.value                             = {0}. place
+  certificate.title                                   = Certificate {0}
+  certificate.hdr                                     = Tournament Certificates
+  certificate.locationdate                            = {0}, the {1}
+
+  download.typ.1                                      = TourneyRegistrations.csv
+#END General Labels
+
+
+###
+# Use case Organizer Home / Selection
+###
+  organize.tourney.main.card.hdr                        = Tournament Selection
+  organize.tourney.noTourneys                           = no tournaments available / registered
+  organize.tourney.tbl.hdr.date                         = Start Date
+  organize.tourney.tbl.hdr.name                         = Tourney Name
+  organize.tourney.tbl.hdr.typ                          = Sport
+  organize.tourney.tbl.hdr.visible                      = Visibility
+  organize.tourney.tbl.hdr.action                       = Action
+
+# Tourney Organizer Add / Edit Form
+organize.tourney.plh.TourneyStartDate                 = Start Date &#128197;
+organize.tourney.plh.TourneyEndDate                   = End Date &#128197;
+organize.tourney.form.optionals                       = Optional Information
+organize.tourney.form.tourney                         = Tournament Name
+organize.tourney.form.plaho.tourney                   = <tournament name>, allowed special characters (_ # @! :-)
+organize.tourney.form.plaho.contact.name              = Tournament director: lastname, first name
+organize.tourney.form.plaho.contact.email             = Email: john.doe@domain.com
+organize.tourney.form.plaho.contact.phone             = Phone: +49 199 9999999
+organize.tourney.form.plaho.addr.description          = Description e.g. gym
+organize.tourney.form.plaho.addr.country              = <country>
+organize.tourney.form.plaho.addr.zip                  = <ZIP>
+organize.tourney.form.plaho.addr.city                 = <city>
+organize.tourney.form.plaho.addr.street               = <street  with house number>
+
+organize.tourney.list.card.hdr                        = List of Tourneys
+organize.tourney.form.help.name                       = e.g. Club Championship 2025 - allowed special characters (-_ # @@! :)
+organize.tourney.form.btn.contact                     = CONTACT
+organize.tourney.form.btn.address                     = ADDRESS
+organize.tourney.form.btn.submit                      = CREATE
+organize.tourney.form.btn.change                      = CHANGE
+organize.tourney.form.mandatory                       = mandatory information
+
+organize.tourney.result.msg.ok                        = {0} Start time: {1}
+organize.tourney.result.hdr.ok                        = Competition registered successfully:
+organize.tourney.upd.result.msg.ok                    = {0} changed successfully
+organize.tourney.upd.result.hdr.ok                    = Competition:
+organize.tourney.error.read.hdr                       = Error Reading Competition:
+
+organize.tourney.result.msg.error                     = {0}
+organize.tourney.result.hdr.error                     = Registration Error:
+organize.tourney.confirm.delete.hdr                   = Confirm Deletion
+organize.tourney.confirm.delete.msg                   = Delete Tournament {0}?
+
+organize.tourney.confirm.delete.btn.ok                = DELETE
+organize.tourney.confirm.delete.btn.cancel            = CANCEL
+
+# Organizer TourneyConfig update form / section
+  organize.tourney.upload.card.hdr                      = Data Import / Upload
+  
+  organize.tourney.upload.typ.clicktt                   = ClickTT file
+  organize.tourney.upload.typ.invitation                = Tournament Announcement
+  organize.tourney.upload.typ.clublogo                  = Club Logo
+  organize.tourney.upload.typ.certpic                   = Image for Certificate Printing
+  organize.tourney.upload.typ.clubbanner                = Image for Club Banner
+  organize.tourney.upload.typ.result                    = Result File
+  
+  organize.tourney.btn.upload.submit                    = SUBMIT
+  organize.tourney.upload.info.clicktt                  = ClickTT Participant File (XML file)
+  organize.tourney.upload.info.invitation               = Tournament Announcement (markdown format)
+  organize.tourney.upload.info.clublogo                 = Club Logo (Format: png | Height: 60px | Width: 90px)
+  organize.tourney.upload.info.certpic                  = Certificate Logo (Format: png | Din A4 aspect ratio: 7: 5, e.g. height: 297mm x width: 210mm)
+  organize.tourney.upload.info.clubbanner               = Club Banner (format: png | aspect ratio: 10: 1, e.g. height: 100px x width: 1000px)
+  organize.tourney.upload.info.result                   = CSV file with the final result for the user to print out certificates
+  
+  organize.tourney.upload.noFile                        = Invalid file selection / no file selected.
+  organize.tourney.upload.notTournSel                   = Upload of the advertisement not possible because no tournament has been selected.
+  organize.tourney.upload.unknownSel                    = Invalid upload selection
+  organize.tourney.upload.msgbox.header                 = Upload ClickTT participant file
+  organize.tourney.upload.msgbox.body1                  = Click on UPDATE to add the ClickTT participant file to the existing tournament {0} (any existing file will be   overwritten). Click on NEW generates a new tournament.
+  organize.tourney.upload.msgbox.body2                  = Should a new tournament be created with this ClickTT participant file?
+  organize.tourney.upload.spinner                       = Uploading file ...
+  organize.tourney.upload.error.0                       = Upload error - server not available
+  organize.tourney.upload.error.1                       = Upload error - {0}
+  organize.tourney.upload.ok.0                          = The file was uploaded successfully
+  organize.tourney.upload.ok.1                          = The ClickTT participant file was uploaded successfully
+  
+  organize.tourney.download.card.hdr                    = Data Export / Download
+  organize.tourney.download.notify.list                 = Registration List
+  organize.tourney.download.notify.info                 = Download list of registrations in CSV format (file name: Registrations.csv)
+  organize.tourney.download.notify.filename             = Registrations.csv
+  organize.tourney.download.notify.filehdr              = Start number, surname, first name, TTR, club, competition
+  organize.tourney.dlg.error                            = Error executing tourney action
+#END Organize Tourney
+
+
+###
+# Use case Tourney Organize Competitions
+###
+  organize.certificate.btn.print                        = CERTIFICATE
+  organize.competition.config.card                      = Configuration
+      
+  organize.competition.hdr                              = Competitions
+  organize.competition.btn.new                          = CREATE NEW COMPETITION
+  organize.competition.confirm.delete.hdr               = Confirm Deletion
+  organize.competition.confirm.delete.msg               = Delete Competition {0}?
+  organize.competition.confirm.single.delete.hdr        = Delete Single Participation
+  organize.competition.confirm.double.delete.hdr        = Delete Double Participation
+  organize.competition.confirm.single.delete.msg        = Remove Single {0} from {1}?
+  organize.competition.confirm.double.delete.msg        = Remove Double {0} from {1}?
+  organize.competition.confirm.delete.btn.ok            = DELETE
+  organize.competition.confirm.delete.btn.cancel        = CANCEL
+  organize.competition.card.hdr.new                     = Create New Competition
+  organize.competition.card.hdr.edit                    = Edit Competition ({0})
+  organize.competition.card.form.btn.submit             = SAVE
+  
+  dlg.card.comp.Title                                   = Competition
+  dlg.card.comp.plh.name                                = Name of Competition
+  dlg.card.comp.plh.startTime                           = Start Time &#128197;
+  dlg.card.comp.lbl.NameCompose                         = Generate competition name from Age Group, Class and Type
+  dlg.card.comp.plh.TTRFrom                             = fromTTR*
+  dlg.card.comp.plh.TTRTo                               = toTTR*
+  dlg.card.comp.lbl.optionals                           = Optional Input
+  dlg.card.comp.plh.AgeGroup                            = Age Group*
+  dlg.card.comp.plh.Class                               = Game Class*
+  dlg.card.comp.input.optional                          = *) Optional Information
+  dlg.card.comp.hlp.name                                = Competition name must be at least 3 characters long
+  dlg.card.comp.hlp.typ                                 = Please set typ of competition
+  dlg.card.comp.hlp.status                              = Please select status
+  dlg.card.comp.hlp.startTime                           = Starttime of competition must be within the range of the tourney start- and end date
+
+  organize.competition.main.tbl.hdr.no                  = #
+  organize.competition.main.tbl.hdr.description         = Sescription
+  organize.competition.main.tbl.hdr.time                = Start Time
+  organize.competition.main.tbl.hdr.ttr                 = TTR-Range
+  organize.competition.main.tbl.hdr.count               = Number
+  organize.competition.main.tbl.hdr.status              = Status
+  organize.competition.main.tbl.hdr.signup              = Registration
+  organize.competition.main.tbl.noEntry                 = No Competitions Configured
+  organize.competition.nocompselect                     = Currently no competition selected
+  organize.competition.noplayer                         = Currently no player configured
+  organize.competition.tit.edit                         = Edit Competition
+  organize.competition.tit.view                         = View Competition
+  organize.competition.tit.start                        = Start Competition 
+  organize.competition.tit.delete                       = Delete Competition
+  
+  organize.competition.participant.card                 = Participants
+  organize.competition.player.tbl.hdr.no                = #
+  organize.competition.player.tbl.hdr.name              = Name
+  organize.competition.player.tbl.hdr.club              = Club
+  organize.competition.player.tbl.hdr.year              = Birthyear
+  organize.competition.player.tbl.hdr.signup            = Registration
+  organize.competition.player.tbl.hdr.status            = Participation
+  organize.competition.player.tbl.hdr.action            = Action
+  
+  organize.competition.double.tbl.hdr.no                = # · #
+  organize.competition.double.tbl.hdr.name              = Name / Name
+  organize.competition.double.tbl.hdr.club              = Club / Club
+  organize.competition.double.tbl.hdr.signup            = Registration
+  organize.competition.double.tbl.hdr.status            = Participation
+  organize.competition.double.tbl.hdr.action            = Action
+  organize.competition.confirm.create.msg               = Create new competition {0}?
+  organize.competition.confirm.change.msg               = Change competition {0}?
+
+  organize.competition.draw.table.group                 = Group
+  organize.competition.draw.table.pos                   = POS
+  organize.competition.draw.table.name                  = Lastname, Firstname
+  organize.competition.draw.table.club                  = Club
+  organize.competition.draw.table.ttr                   = TTR
+
+  organize.competition.draw.noSelection                 = No competition selected.
+  organize.competition.draw.noSection                   = No competition section defined.
+  organize.competition.draw.invalidSection              = Configuration for competition section not supported.
+
+  dlg.card.cfg.section.Title                            = Competition Configuration 
+  dlg.card.cfg.section.lbl.Name                         = Game System Selection for {0} Participants
+  dlg.card.cfg.section.option.100                       = Preliminary Round with Groups of Size 3 to 9
+  dlg.card.cfg.section.option.101                       = Preliminary Round with Groups of Size 3
+  dlg.card.cfg.section.option.102                       = Preliminary Round with Groups of Size 3 and 4
+  dlg.card.cfg.section.option.103                       = Preliminary Round with Groups of Size 4
+  dlg.card.cfg.section.option.104                       = Preliminary Round with Groups of Size 4 and 5
+  dlg.card.cfg.section.option.105                       = Preliminary Round with Groups of Size 5
+  dlg.card.cfg.section.option.106                       = Preliminary Round with Groups of Size 5 and 6
+  dlg.card.cfg.section.option.107                       = Preliminary Round with Groups of Size 6
+  dlg.card.cfg.section.option.108                       = Round Robin
+  dlg.card.cfg.section.option.109                       = KO-System
+  dlg.card.cfg.section.option.110                       = Swiss-System
+
+  dlg.card.cfg.section.lbl.Winset                       = Winning Sets
+  dlg.card.cfg.section.btn.draw                         = START DRAW
+
+#END Organize Competition
+
+
+###
+# Use case Tourney Organize Player
+###
+organize.player.email.confirm                         = mailto:{0}?subject=Registration Confirmation&body=Hello%20dear%20sports%20fan,%0D%0A%0D%0AI%20Your%20registration%20is%20confirmed%0D%0A%0D%0AGood%20luck%20and%20have%20fun,%20your%20tourney%20manager
+organize.player.email.reject                          = mailto: {0}?subject=Registration%20Rejection&body=Hello%20dear%20Sports%20fan,%0D%0A%0D%0A%20Sorry%20but%20your%20registration%20was%20rejected,%0D%0A%0D%0AKind%20regards,%20your%20tourney%20manager
+organize.player.email.wait                            = mailto: {0}?subject=Waiting%20List&body=Hello%20dear%20sports%20fan,%0D%0A%0D%0ADue&20to%20the&20many%20registrations&20we&20but&20you%20on&20the%20waiting%20list,0D%0A%0D%0AKind%20regards,%20your%20tourney%20manager
+organize.player.hdr.confirm                           = Registration Confirmation
+organize.player.body.confirm                          = Should a confirmation email be sent to the participant?
+organize.player.hdr.reject                            = Rejection of Registration
+organize.player.body.reject                           = Should an e-mail be sent to the participant for information?
+organize.player.hdr.wait                              = Put ​​participant on waiting list
+organize.player.body.wait                             = Should an e-mail be sent to the participant for information?
+organize.player.btn.cancel                            = CANCEL
+organize.player.btn.no                                = NO
+organize.player.btn.yes                               = YES
+organize.player.player.noentry                        = no entries
+organize.player.player.hdr                            = Registrations
+organize.player.player.tbl.hdr.no                     = #
+organize.player.player.tbl.hdr.name                   = Name [club]
+organize.player.player.tbl.hdr.competition            = Competition
+organize.player.player.tbl.hdr.signup                 = Registration
+organize.player.player.tbl.hdr.status                 = Participation
+organize.player.player.btn.accept                     = CONFIRM
+organize.player.player.btn.reject                     = REJECT
+organize.player.player.btn.wait                       = WAITING LIST
+organize.player.badge.waiting.one                     = A player is still waiting for his registration confirmation
+organize.player.badge.waiting.more                    = {0} players are waiting for their registration confirmations
+organize.player.wait.hdr                              = Waiting List
+organize.player.wait.noentry                          = no entries
+organize.player.wait.tbl.hdr.no                       = #
+organize.player.wait.tbl.hdr.name                     = Name [club]
+organize.player.wait.tbl.hdr.competition              = Competition
+organize.player.wait.tbl.hdr.signup                   = Registration
+organize.player.wait.tbl.hdr.status                   = Participation
+organize.player.wait.btn.accept                       = CONFIRM
+organize.player.wait.btn.reject                       = REJECT
+organize.player.reject.hdr                            = Rejections
+organize.player.reject.noentry                        = no entries
+organize.player.reject.tbl.hdr.no                     = #
+organize.player.reject.tbl.hdr.name                   = Name [club]
+organize.player.reject.tbl.hdr.competition            = Competition
+organize.player.reject.tbl.hdr.signup                 = Registration
+organize.player.reject.tbl.hdr.status                 = Participation
+organize.player.reject.btn.accept                     = CONFIRM
+organize.player.reject.btn.wait                       = WAITING LIST
+organize.playfield.button.add                         = NEW
+organize.playfield.error.noEvent                      = Table entry managemet possible after selecting a tourney!
+organize.playfield.tableNo                            = Table
+organize.playfield.compName                           = Competition
+organize.playfield.playerA                            = Player A
+organize.playfield.playerB                            = Player B
+organize.playfield.info                               = Info
+organize.playfield.noEntry                            = No table entries available
+organize.playfield.btn.req.fullscreen                 = Switch to Fullscreen Mode
+organize.playfield.btn.req.playfield.edit             = Edit Table Entries
+organize.playfield.tableview                          = Table View
+#END Organize Playfield
+
+
+###
+# Usecase Common
+###
+common.certificate.noentry                            = Final results not yet available
+common.certificate.hdr.place                          = Placement
+common.certificate.hdr.name                           = Name
+common.certificate.hdr.club                           = Club
+common.certificate.place                              = {0} Place
+
+###
+# Usecase TourneyInfo
+###
+info.disabled.title                                   = HINT
+info.disabled.image                                   = notlucky
+info.disabled.alt                                     = Tournament information not available - tournament selection required
+info.disabled.description                             = Tournament information is only available after selecting a tournament. Selection through tourney search.
+
+info.player.count                                     = Number of players:
+info.player.noEntry                                   = There are no competitions with registered players
+info.player.count                                     = Number of players:
+info.player.header.nr                                 = #
+info.player.header.name                               = Name
+info.player.header.club                               = Club
+info.player.header.place                              = Placement
+info.player.header.ttr                                = TTR
+info.player.noplayer                                  = No players registered
+
+info.competition.description                          = Competition
+info.competition.ttrRange                             = TTR range
+info.competition.startTime                            = StartTime
+info.competition.cntPlayer                            = #Player
+info.competition.status                               = Status
+info.competition.noEntry                              = There are no competition entries
+
+info.certificate.btn.print                            = CERTIFICATE
+   
+info.playfield.tableNo                                = Table
+info.playfield.compName                               = Competition
+info.playfield.playerA                                = Player A
+info.playfield.playerB                                = Player B
+info.playfield.info                                   = Info
+info.playfield.noEntry                                = No table entries available
+
+info.schedule.register                                = Registration
+info.schedule.description                             = Competition
+info.schedule.ttrRange                                = TTR Range
+info.schedule.startTime                               = StartTime
+info.schedule.competitions                            = Competitions
+info.schedule.competition                             = Competition
+info.schedule.noEntry                                 = Currently no competition entries available
+info.schedule.optionalinfo                            = Tournament Information
+info.schedule.info                                    = Tournament
+info.schedule.date                                    = Date
+info.schedule.email                                   = Email Address
+info.schedule.date.range                              = {0} - {1}
+info.schedule.selcompetition                          = Competition Selection
+info.schedule.placeholder.playerdata                  = Player Data
+info.schedule.placeholder.name                        = Lastname, First Name
+info.schedule.placeholder.club                        = Club
+info.schedule.placeholder.email                       = john.doe@domain.com
+info.schedule.placeholder.ttr                         = TTR Value
+info.schedule.placeholder.year                        = Year
+info.schedule.button.submit                           = SIGN UP
+info.schedule.hint                                    = Currently no further information has been provided by the organizer.
+info.schedule.comps.header.startTime                  = Start Time
+info.schedule.comps.header.description                = Competition
+info.schedule.comps.header.ttrRange                   = TTR Range
+info.schedule.comps.header.status                     = Status
+info.schedule.comps.header.noEntry                    = Currently no competitions configured by organizer.
+info.schedule.comps.header.noParts                    = Registrations
+info.schedule.signup.invalidComp                      = Please select a competition.
+info.schedule.signup.invalidname                      = Please enter your name in the format: <lastname>, <first name>.
+info.schedule.signup.closed                           = Registrations are no longer possible.
+info.schedule.signup.notyetopen                       = Currently no registrations are possible (yet)
+info.schedule.signup.error                            = Please use your email to register.
+info.schedule.signup.ok                               = Your registration has been sent to the tourney manager
+info.schedule.signup.error.header                     = Error during registration:
+info.schedule.signup.ok.header                        = Registration approved:
+info.schedule.consent.text                            = Consent to electronic data processing. The provided data will solely be used for the tourney management. This includes passing game results to the organizer and possibly forwarding results to responsible sports associations as well as publication of the game results with names and club names.
+
+info.results.noEntries                                = Competitions not yet started
+
+
+###
+# Use case full screen
+###
+fullscreen.playfields.header.table                    = Table
+fullscreen.playfields.header.match                    = Match
+fullscreen.playfields.header.info                     = Info
+fullscreen.playfields.noEntryMsg                      = Currently no Table Entries
+fullscreen.playfields.title                           = Table View
+   
+# Participant Pages
+ParticipantList.noEntry                               = no tournament selected / no tournament data found
+ParticipantList.clickHint                             = Click on competition to get players
+   
+###
+# Use case Tourney Program Administrator
+###
+admin.notallowed.header                               = Security Check
+admin.notallowed.body                                 = You are not allowed to do administrative tasks
+admin.upload.header                                   = Upload Licenses
+admin.button.upload                                   = UPLOAD
+admin.upload.info                                     = License file in CSV format
+admin.license.view                                    = License Management
+admin.license.club                                    = Club
+admin.license.placeholder.club                        = Club Name
+admin.license.clubid                                  = ClubId
+admin.license.placeholder.clubid                      = Club Number
+admin.license.directory                               = Directory
+admin.license.placeholder.directory                   = Club Directory / Club Path
+admin.license.name                                    = Name
+admin.license.placeholder.name                        = Last Name, First Name
+admin.license.info                                    = Info
+admin.license.email                                   = Email Contact
+admin.license.placeholder.email                       = john.doe@domain.com
+admin.license.license                                 = License
+admin.license.placeholder.license                     = <clubdir / licensecode>
+admin.license.delete.header                           = Delete License
+admin.license.delete.body                             = Are you sure to delete {0} 's license?
+admin.license.delete.body.error                       = Please select a license first!
+admin.license.delete.button.cancel                    = CANCEL
+admin.license.delete.button.ok                        = DELETE
+admin.license.delete.button.error.ok                  = OK
+admin.license.update.header                           = License Update
+admin.license.update.body                             = Are you sure to change {0} 's license?
+admin.license.update.button.cancel                    = CANCEL
+admin.license.update.button.ok                        = UPDATE
+admin.license.yes                                     = Yes
+admin.license.no                                      = No.
+
+admin.database.View                                   = Administration of Tourney Databases
+admin.database.tourneyid                              = Tourney Identifier
+admin.database.placeholder.tourneyid                  = #
+admin.database.club                                   = Club
+admin.database.placeholder.club                       = Club Name
+admin.database.date                                   = Date
+admin.database.placeholder.date                       = Format: YYYYMMDD
+admin.database.orgdir                                 = Club Path
+admin.database.placeholder.orgdir                     = <path> / <directory>
+
+
+###
+# Invoice Messages
+###
+  invoice.title                                       = Tournament Service Invoice
+  invoice.lang                                        = en
+  invoice.literally                                   = Invoice
+
+  invoice.myaddress.name                              = Robert Lichtenegger
+  invoice.myaddress.street                            = Finkenstr. 36a
+  invoice.myaddress.zip                               = 85356
+  invoice.myaddress.city                              = Freising
+  invoice.myaddress.country                           = Germany
+  invoice.taxNr                                       = 115/244/90953
+
+  invoice.description                                 = Invoice Line
+  invoice.amount                                      = Amount
+  invoice.label.date                                  = Invoice Date:
+  invoice.label.number                                = Invoice Number:
+  invoice.label.bank.name                             = Bank
+  invoice.label.bank.iban                             = IBAN
+  invoice.label.bank.bicSwift                         = BIC / Swift
+  invoice.label.bank.recipient                        = Recipient
+  invoice.label.duedate                               = Payment Deadline:
+  invoice.duedate                                     = Payable within 30 days
+
+  invoice.bank.url                                    = https://www.ing.de/
+  invoice.bank.name                                   = ING
+  invoice.bank.iban                                   = DE97 5001 0517 0216 8999 55
+  invoice.bank.bicSwift                               = INGDDEFFXXX
+  invoice.bank.recipient                              = Robert Lichtenegger
+  invoice.label.vat                                   = 19% sales tax is included in the invoice amount
+  invoice.label.paypal.recipient                      = <span style="color: #0000FF"> Pay </span> <span style="color: #1E90FF">Pal</span>
+  invoice.paypal.recipient                            = robert.lichtenegger@icloud.com
+  invoice.transfer.withInvoiceNumber                  = Please enter the invoice number as the purpose
+  invoice.footer.thanks                               = Thank you for purchasing the license and have fun with your tourneys. Please send questions and suggestions to <a href='mailto:info@turnier-serivce.org'> info@turnier-service.org</a>
+  invoice.footer.url                                  = Internet: &nbsp; <a href="https://www.turnier-service.info"> <span style="text-decoration:underline;"> www.turnier-service.info</span></a>
+  invoice.label.taxNr                                 = Tax Number:
+  invoice.label.total                                 = Total Amount:
+  invoice.label.transferTo                            = Please transfer the total amount to:
+  invoice.label.alternativ                            = or:
+
+  invoice.vat                                         = 19.00
+  invoice.currency                                    = EUR
+  invoice.item1.description                           = Tournament Program License (full)
+  invoice.item1.price                                 = 39.50
+  invoice.email.name                                  = invoice.pdf
+#END Invoice Messages
+
+
+###
+# Default values
+###
+  default.country                                     = Germany
+#END default values
+
+
+###
+# Email messages
+###
+  email.code.from                                     = Tournament Service <info@turnier-service.org>
+  email.code.subject                                  = Tournament Program Verification Code
+  email.code.title                                    = Verification Code
+  email.code.greeting                                 = Dear sports fan {0},
+  email.code.body.html                                = <p>The verification code is: <strong>{0}</strong></p><p>Please enter this code in the registration page. </p> <p>Kind regards</p><p> Tournament Service Team </p>
+  email.code.body.plain                               = The verification code is: {0} \n Please enter this code in the registration page. \n\n Best regards \n\n Tournament Service Team
+
+  email.password.from                                 = Tournament Service <info@turnier-service.org>
+  email.password.subject                              = Tournament Program Authentication Information
+  email.password.title                                = Password Reset
+  email.password.greeting                             = Dear sports fan {0},
+  email.password.body.html                            = <p>your new password: <strong>{0}</strong></p><p> Please log in with the new password and change it immediately (in settings) </p><p>Kind regards</p><p>Tournament Service Team</p>
+  email.password.body.plain                           = your new password: {0} \n Please log in with the new password and change it immediately (in settings). \n\n Kind regards \n\n Tournament Service Team
+
+  email.license.from                                  = Tournament Service <info@turnier-service.org>
+  email.license.subject                               = Tournament Program License Code
+
+  email.license.title                                 = Tournament Program License Code
+  email.license.greeting                              = Dear sports fan {0},
+  email.license.prolog.html                           = <p>attached the license string (= &#60;club name / license code&#62;). Simply enter the whole bold text in the setup menu with cut/paste. The Excel file can then be saved and copied as required for each tournament (there is no copy protection or similar). </p>
+  email.license.html                                  = <h5>{0}</h5>
+  email.license.full.epilog.html                      = <p>The license string works with the free and full version. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the <a href="https://turnier-service.org/">documentation</a> here. THANK YOU!</p><p> Sporty greetings and good luck with your tournaments</p><p> Robert / Tournament Service Team </p>
+  email.license.free.epilog.html                      = <p>The license string works with the free and full version with restrictions. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the <a href="https://turnier-service.org/">documentation</a> here. THANK YOU!</p><p>Sporty greetings and good luck with your tournaments</p><p> Robert / Tournament Service Team</p>
+  email.license.prolog.plain                          = \n\n attached you find the license string (= &#60;club name / license code&#62;). Simply enter the whole bold text in the setup menu with cut/paste. The Excel file can then be saved and copied as required for each tournament (there is no copy protection or similar). \n
+  email.license.plain                                 = \n\n {0} \n\n
+  email.license.full.epilog.plain                     = \n The license string works with the free and full version. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the documentation here: "https://turnier-service.org/". THANKS! \n\n Sporty greetings and good luck with your tournaments \n\n Robert / Tournament Service Team \n
+  email.license.free.epilog.plain                     = \nThe license string works with the free and full version to a limited extent. If you have any suggestions for improvements or noticed any errors, please get in touch. You can find the documentation here: "https://turnier-service.org/". THANKS! \n\n Sporty greetings and good luck with your tournaments \n\n Robert / Tournament Service Team \ n
+#END Email messages
+
+
+###
+# Standard buttons
+###
+  std.btn.ok                                          = OK
+  std.btn.start                                       = START
+  std.btn.edit                                        = EDIT  
+  std.btn.save                                        = SAVE
+  std.btn.delete                                      = DELETE
+  std.btn.update                                      = UPDATE
+  std.btn.upload                                      = UPLOAD
+  std.btn.download                                    = DOWNLOAD
+  std.btn.new                                         = NEW
+  std.btn.add                                         = ADD
+  std.btn.cancel                                      = CANCEL
+  std.btn.close                                       = CLOSE
+  std.btn.xclose                                      = <span>&times;</span>
+#END standard buttons
+
+###
+# Dialogue
+###
+  dlg.canceled                                        = Dialog canceled
+  dlg.box.cancel                                      = CANCEL
+  dlg.box.update                                      = UPDATE
+  dlg.box.new                                         = NEW
+  dlg.box.ok                                          = OK
+  dlg.box.yes                                         = YES
+  dlg.box.no                                          = NO
+  dlg.box.cookietitle                                 = Yes, this website also uses cookies.
+  dlg.box.cookiemessage                               = We only use cookies internally in our web application for the session status and to personalize content. We do not pass on any information about the use of our website to third parties. If you want to continue using our website, you have to press OK and thereby give your consent to our cookies. If you do not want cookies, simply close the browser window, otherwise you will be redirected to our static website.
+
+  dlg.ShowError.hdr                                   = Check your input
+
+  dlg.card.tourney.new.hdr                               = Input - Basic Tourney Data 
+  dlg.card.tourney.update.hdr                            = Update - Basic Tourney Data 
+  dlg.card.tourney.lbl.Name                              = Tourney Name
+  dlg.card.tourney.lbl.StartDate                         = Startdate
+  dlg.card.tourney.lbl.EndDate                           = Enddate
+
+  dlg.card.tourney.optional.hdr                          = Optional Data
+  dlg.card.tourney.plh.Name                              = Name at least 10 Chars
+  dlg.card.tourney.hlp.Name                              = Please enter more than 9 chars for tourney name  
+  dlg.card.tourney.hlp.Typ                               = Please select typ of sport
+  dlg.card.tourney.hlp.nowDate                           = Start date have to be in the future not in the past
+  dlg.card.tourney.hlp.endDate                           = End date must be after start date (or same date)
+  dlg.card.tourney.hlp.Visibility                        = Please select tourney visibility
+
+  dlg.card.tourney.plh.contact.name                      = e.g. Doe, John
+  dlg.card.tourney.plh.contact.email                     = e.g. john.doe@email.com
+  dlg.card.tourney.plh.contact.phone                     = Phone number e.g.  001 45 99944411  
+  dlg.card.tourney.plh.addr.description                  = Name of gym
+  dlg.card.tourney.plh.addr.zip                          = ZIP
+  dlg.card.tourney.plh.addr.street                       = Street with number
+  dlg.card.tourney.plh.addr.city                         = City
+
+
+  dlg.upload.header                                   = Add Tournament Information
+  dlg.upload.body                                     = The tournament information (e.g. tournament announcement) must be in Markdown format. Markdown documents are plain text files and can be easily read without further conversion. A good introduction is available at <a href = "https://www.heise.de/mac-and-i/artikel/Markdown-bei-Mac-und-iOS-Apps-Tipps-und-Cheat-Sheet-2105025.html "> here </a>.
+  dlg.upload.cancel                                   = CANCEL
+  dlg.upload.submit                                   = UPLOAD
+
+  dlg.playfield.header                                = Add Field Entry
+  dlg.playfield.body                                  = Please enter field number (table number), competition and player data.
+  dlg.playfield.button.submit                         = SUBMIT
+  dlg.playfield.button.cancel                         = CANCEL
+  dlg.playfield.playerA                               = Player A
+  dlg.playfield.playerB                               = Player B
+  dlg.playfield.competition                           = Competition
+  dlg.playfield.club                                  = Club (optional)
+  dlg.playfield.name                                  = Last Name, First Name
+  dlg.playfield.info                                  = Information (optional, e.g. finals)
+  dlg.playfield.nr                                    = Table
+  dlg.playfield.help1                                 = Please correct your entries, the fields for competition and the names of the games must not be empty.
+  dlg.playfield.help2                                 = Please correct your entries, enter the field number (table).
+  dlg.playfield.option.game                           = Game
+  dlg.playfield.option.event                          = Tournament
+
+  dlg.emailplayer.hdr.accept                          = Send Confirmation
+  dlg.emailplayer.body.accept                         = Should a confirmation email be sent to the player?
+  dlg.emailplayer.hdr.reject                          = Send rejection
+  dlg.emailplayer.body.reject                         = Send rejection of the registration to the player.
+  dlg.emailplayer.msg.option.accept                   = Add message:
+  dlg.emailplayer.msg.option.reject                   = Please enter a brief reason:
+  dlg.emailplayer.msg.plh                             = Optional message to the player
+  dlg.emailplayer.btn.yes                             = YES
+  dlg.emailplayer.btn.no                              = NO
+
+  dlg.input.btn.exec                                  = EXECUTE
+#END dialogs
+
+###
+#  START Dialog Cards
+###
+  dlg.card.reg.single.lbl.Name                        = Single
+  dlg.card.reg.single.lbl.TTR                         = TTR-Value
+  dlg.card.reg.single.lbl.Club                        = Club
+  dlg.card.reg.single.lbl.Email                       = E-Mail
+  dlg.card.reg.single.lbl.Year                        = Birthyear
+  dlg.card.reg.single.plh.Name                        = <lastname, firstname>
+  dlg.card.reg.single.plh.Club                        = <name of club >
+  dlg.card.reg.single.plh.Email                       = john.doe@email.de
+  dlg.card.reg.single.notSpecified                    = not specified
+  dlg.card.reg.single.header                          = Player
+  dlg.card.reg.single.status.hdr                      = Status player for competition:
+  dlg.card.reg.single.status.register                 = (pre-)registered
+  dlg.card.reg.single.status.participate              = participating
+
+  dlg.card.reg.double.Title                           = Double
+  dlg.card.reg.double.lbl.Name1                       = Name Player 1
+  dlg.card.reg.double.plh.Name1                       = <lastname, firstname>
+  dlg.card.reg.double.lbl.Name2                       = Name Player 2
+  dlg.card.reg.double.plh.Name2                       = <lastname, firstname>
+  dlg.card.reg.double.status.hdr                      = Status of double for competition:
+  dlg.card.reg.double.status.register                 = (pre-)registered
+  dlg.card.reg.double.status.participate              = participating
+#END Dialog Cards
+
+
+###
+# Messages
+###
+  msg.processing                                      = Please wait ...
+#END messages
+
+
+###
+# Group / KO round
+###
+  group.name                                          = Group {0}
+  group.hdr.name                                      = Name
+  group.hdr.balls                                     = Balls
+  group.hdr.sets                                      = Sets
+  group.hdr.games                                     = Games
+  group.hdr.position                                  = Place
+
+  ko.last128                                          = 128 Field
+  ko.last64                                           = 64 Field
+  ko.last32                                           = 32 Field
+  ko.last16                                           = Round of 16
+  ko.quarterfinal                                     = Quarterfinals
+  ko.semifinal                                        = Semi-Finals
+  ko.final                                            = Final
+  ko.winner                                           = Winner
+  ko.3rdPlaceMatch                                    = 3rd Place
+#END Group / KO-Round
+
+###
+# Input labels, placeholder and help
+###
+  input.email.lbl                                     = Club Contact / Email Address
+  input.email.hlp                                     = Please enter a valid email address
+  input.email.plh                                     = john.doe@domain.com
+  input.password.lbl                                  = Password
+  input.password.new.lbl                              = New Password (min. 6 characters)
+  input.password.repeat.lbl                           = Repeat Password
+  input.password.hlp                                  = Password must be at least 6 characters long, contain one uppercase and one lowercase letter and a number
+  input.password.repeat.hlp                           = Passwords must match
+  input.name.lbl                                      = Club Contact (last name, first name)
+  input.name.hlp                                      = Please enter club contact in the format &lt;last name&gt;, &lt;first name&gt;
+  input.name.plh                                      = Doe, John
+  input.country.lbl                                   = Country
+  input.country.hlp                                   = Please select a country
+  input.club.lbl                                      = Club Name / Keyword
+  input.club.hlp                                      = Special characters allowed, but at least 8 characters [a-z] [A-Z], maximum 64 characters
+  input.club.plh                                      = Jacksonville Buccaneers
+#END input
+
+
+###
+# Error Codes / Messages separated by "<#>"
+###
+  err0000.communication.error                         = Communication error: could not connect to server
+  err0001.decode.error                                = Error decoding: {0} Note: {1}
+  err0002.ajax.reset                                  = Reset authentication failed {0} {1}
+  err0003.ajax.authBasic                              = Basic authentication failed {0} {1}
+  err0004.login.blocked                               = User authentication blocked for one hour
+  err0005.login.password                              = User authentication failed ({0}. attempt)
+  err0006.login.licEmail                              = E-mail / license {0} {1} or password not correct.
+  err0007.ajax.getJson                                = communication error getJson call: {0} {1}
+  err0008.ajax.postJson                               = Communication error postJson call: {0} {1}
+  err0009.ajax.postForm                               = Communication error postForm call: {0} {1}
+  err0010.call.delComp                                = ????
+  err0011.trny.load                                   = Tournament {0} could not load
+  err0012.trny.read                                   = Error reading the tournament {0} orgDir / startDate: {1}
+  err0013.trny.insufficient.rights                    = Missing access rights
+  err0014.trny.compNotFound                           = Competition {0} not found
+  err0015.trny.compDate                               = Invalid date for competition {0}
+  err0016.trny.compExistsAlready                      = Competition with the same name already exists
+  err0017.trny.compUpdate                             = Cannot update the competition
+  err0018.get.decode                                  = GET action invalid parameters: {0}
+  err0019.call.getComps                               = Decoding error getComps call
+  err0020.decode.Competition                          = Error decoding a competition: {0}
+  err0021.call.getCompNumber                          = Error decoding the function call getCompNumber, competition: {0}
+  err0022.post.decode                                 = POST action invalid parameters: {0}
+  err0023.post.regSingle                              = POST action regSingle failed
+  err0024.svc.setPlayerEmail.notFound                 = Service setPlayerEmail failed, PlayerId not found {0}
+  err0025.svc.getParticipantPlacement                 = Service getParticipantPlacement failed no entry for {0} {1}
+  err0026.svc.setParticipantPlacement                 = Service setParticipantPlacement failed no entry for {0} {1
+  err0027.tourney.setParticipantStatus                = Method setParticipantStatus failed, no entry for {0} {1}
+  err0029.svc.getPlayfield                            = Service getPlayfield failed, no entry for {0}
+  err0030.svc.getCompStatus                           = Service getCompStatus failed, no data for competition {0}
+  err0031.svc.getCompName                             = Service getCompName failed, no data for competition {0}
+  err0032.svc.setTournBase                            = Service setTournBase failed, no data for tournament {0}
+  err0033.svc.getContent                              = File not readable / available: {0}
+  err0034.ajax.getRequest                             = Communication error Ajax.get call: {0} {1}
+  err0035.svc.getCfgFile                              = Configuration file not readable / available: {0}
+  err0036.call.fileExists                             = FileExists function call failed: {0}
+  err0037.call.getTournCfg                            = function call getTournCfg decoding error: {0}
+  err0038.decode.Players                              = decoding error data type players: {0}
+  err0039.call.getTournPlayers                        = function call getTournPlayers decoding error: {0}
+  err0040.call.getTournClubs                          = function call getTournClubs decoding error: {0}
+  err0041.call.getParticipant2Comps                   = function call getParticipant2Comps decoding error: {0}
+  err0042.decode.Contact                              = Error decoding a contact: {0}
+  err0043.decode.Address                              = Error decoding an address: {0}
+  err0044.decode.Players                              = Error decoding data type Players (from Seq[String]): {0}
+  err0045.decode.Participant2Comps                    = Decoding error participant-competition assignments (from Seq[String]): {0}
+  err0046.internal.server                             = Internal Server Error: {0}
+  err0047.post.addTournCTT                            = function call addTournCTT, invalid/missing parameter
+  err0048.trny.addSect                                = function call addSect, previous missing
+  err0049.decode.Playfield                            = Error while decoding the field information: {0}
+  err0050.decode.Club                                 = Error decoding the club: {0}
+  err0051.decode.Playfields                           = Error decoding the list of field information: {0}
+  err0052.get.unkown                                  = Function call {0} not available
+  err0053.get.fileExists                              = GET action fileExists failed: {0}
+  err0054.decode.Participant2Comp                     = decoding error participant-competition assignment: {0}
+  err0055.decode.Participant2Comps                    = Decoding error participant-competition assignments: {0}
+  err0056.decode.Clubs                                = decoding error, data type clubs: {0}
+  err0057.call.regDouble                              = decoding error reqDouble function call: {0}
+  err0058.post.regDouble                              = POST action reqDouble failed: {0}
+  err0059.decode.Placement                            = Decoding error placement: {0}
+  err0060.decode.Clubs                                = Decoding error, data type Clubs (from Seq[String]): {0}
+  err0061.decode.Competitions                         = Decoding error data type Competitions (from Seq[String]): {0}
+  err0062.decode.TournBase                            = Decoding error, data type TournBase: {0}
+  err0063.post.unknown                                = POST action unknown: {0}
+  err0064.svc.addTournBase                            = Service addTournBase Error during execution: {0} {1}
+  err0065.svc.addTourney                              = Service addTourney Error during execution: {0} {1}
+  err0066.decode.Int                                  = decoding error data type Integer: {0}
+  err0067.decode.Long                                 = decoding error data type Long: {0}
+  err0068.decode.Boolean                              = decoding error data type Boolean: {0}
+  err0069.decode.String                               = decoding error data type String: {0}
+  err0070.decode.Tourney                              = decoding error data type Tourney: {0}
+  err0071.decode.TournRun                             = decoding error, data type TournRun: {0}
+  err0080.access.invalidRights                        = Insufficient access rights
+  err0081.database.add                                = Database error while adding records
+  err0082.database.save                               = Database error while backing up
+  err0083.database.insert                             = Database error while inserting
+  err0084.decode.PfieldInfo                           = decoding error data type PfieldInfo: {0}
+  err0085.access.insufficientRights                   = Requested action not allowed, insufficient authorization
+  err0086.access.notAuthenticated                     = Incorrect login data
+  err0087.access.UnexpectedProviderError              = The (login) provider reported an unexpected error
+  err0088.access.couldNotAuthenticate                 = Error message reported by the (login) provider, authentication not possible
+  err0089.ctrl.noMatchingTourney                      = No matching tournament found
+  err0090.internal.sidebarRedirect                    = Error in sidebar forwarding to directory entry
+  err0091.ajax.logout                                 = Error message GET action: {0} {1}
+  err0092.email.password.send                         = Password update could not be sent: {0}
+  err0093.email.user.notfound                         = Password update could not be sent because email {0} is not registered
+  err0094.login.noLic                                 = Authentication not possible as there is no valid license
+  err0095.login.licenseupdate                         = Error updating the license database (contact administrator)
+  err0096.login.emailpassword                         = Email and / or password not correct
+  err0097.login.invalid                               = User not authorized for this action
+  err0098.usecase.unknown                             = Invalid application action or invalid command: {0}
+  err0099.decode.License                              = Decoding error, data type license: {0}
+  err0100.licrequest.inuse                            = Registration error, club name is already in use
+  err0101.licrequest.database                         = License-Database not available
+  err0102.licrequest.format                           = General error, registration request not valid
+  err0103.license.delete                              = Licenses {0} could not be deleted
+  err0104.license.update                              = Licenses {0} could not be updated
+  err0105.notallowed                                  = User action is not authorized
+  err0106.ctrl.sendVerifyCode                         = Error sending the verification code to: {0}
+  err0107.sendEmail.parameter                         = Invalid parameters when sending an email
+  err0108.sendEmail.exception                         = Error sending: {0}
+  err0109.sendEmail.service                           = Email invalid or email service not available
+  err0110.sendEmail.clubNotfound                      = Error, license could not be sent, club not found
+  err0111.generate.PdfInvoice                         = Invoice could not be generated
+  err0112.decode.req.invoice                          = Invalid parameters when decoding the license request
+  err0123.svc.requestLicense                          = Service requestLicense Error during decoding: {0}
+  err0124.invalidActionRequest                        = Requested action not possible: {0}
+  err0125.setContentMD                                = Error reading Markdown document: {0}
+  err0126.fileNotAvailable                            = File {0} not available
+  err0127.svc.delPlayfield                            = Service delPlayfield code {0} no longer registered
+  err0128.upload.file                                 = ClickTT participant file could not be loaded, reason: {0}
+  err0129.access.admin                                = Sorry, no administration rights
+  err0130.ctrl.uploadLic                              = Controller error in routine uploadLic
+  err0131.login.emailnotfound                         = No club with organizer {0} registered
+  err0132.decode.Player                               = Decoding error data type player: {0}
+  err0133.get.noTourneyFound                          = GET action getTournBase error - no tournament with Id {0} found
+  err0134.crypto.NoSessionCookie                      = No session cookie available
+  err0135.crypto.SessionTimeout                       = Session timeout
+  err0136.crypto.SessionDecoding                      = Error decoding / decrypting the session
+  err0137.user.fileNotFound                           = File: {0} not found
+  err0138.crypto.paramlist                            = Parameter list cannot be decoded
+  err0139.crypto.StringParam                          = Parameter {0} of type String not found
+  err0140.crypto.LongParam                            = Parameter {0} of type Long not found
+  err0141.crypto.IntParam                             = Parameter {0} of type Int not found
+  err0142.crypto.Boolean                              = Parameter {0} of type Boolean not found
+  err0143.decode.Competitions                         = Decoding error data type Competitions: {0}
+  err0144.decode.TournBases                           = Decoding error TournBases data type: {0}
+  err0145.user.download                               = Download not possible (please check authorization)
+  err0146.fileaccess.config                           = Configuration files {0} or {1} could not be read
+  err0147.decode.ResultEntrys                         = Decoding error data type ResultEntrys: {0}
+  err0148.decode.ResultEntry                          = Decoding error data type ResultEntry: {0}
+  err0149.cache.moveFile                              = Error while renaming / deleting files: {0}
+  err0150.access.notAuthorized                        = Insufficient authorization
+  err0151.ctrl.getTournBase                           = Controller error in getTournBase routine
+  err0152.ctrl.regTournBase                           = Controller error in routine regTournBase: {0}
+  err0153.trny.addComp                                = Invalid identifier for new for competition {0}
+  err0154.trny.setComp                                = Invalid identifier for setting competition
+
+  err0155.svc.addPlayer                               = Invalid identifier in routine addPlayer {0}
+  err0156.svc.addPlayer                               = Error in routine addPlayer, player {0} already exists
+  err0157.svc.setPlayer                               = Error in routine setPlayer, invalid identifier for {0}
+  err0158.svc.setPlayer                               = Error in routine setPlayer, player {0} already exists
+
+  err0159.Player.parseName                            = Wrong format of player name, required: <lastname>, <firstname>
+  err0160.Player.parseEmail                           = Email format not valid 
+  err0161.Club.parseName                              = Wrong format of club name
+  err0162.Player.already.exists                       = Player with this name exists already
+  err0163.Player.already.registered                   = Player already registered with competition
+  err0164.RegDouble.Name.missing                      = Name of Player {0} missing
+
+  err0165.decode.Match                                = decoding error, data type Match: {0}
+  err0166.decode.Matches                              = decoding error, data type Matches: {0}
+  err0167.decode.CompSystem                           = decoding error, data type CompSystem: {0}
+  err0168.ajax.getJson                                = communication error: {0}
+  err0169.trny.addSect                                = function call addSect, section exists already
+  err0170.trny.setSectPlayer                          = function call setSectPlayer, section {0} does not exist
+
+#END error codes / messages

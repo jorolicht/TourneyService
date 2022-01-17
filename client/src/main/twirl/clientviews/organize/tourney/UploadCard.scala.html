@@ -1,0 +1,37 @@
+@*
+ * Organize Tourney Upload Card
+ *@
+@import shared.model.TournBase 
+@import shared.utils.Constants._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+@import clientviews.component.html.radioCard
+
+@(lang: String)(implicit ucc: UseCaseParam)
+
+<!-- Upload Card for general and tourney specific files -->
+@content(name: String, uldType: String)(implicit ucc: UseCaseParam) = {
+  <div>
+    <form @id("UploadForm" + "_" + uldType) method="post" enctype="multipart/form-data">
+      <div class="d-flex justify-content-between">
+        <div class="mt-2">
+          <h6>@name</h6> 
+        </div>
+        <div>
+          <input @id("Input" + uldType) type="file" class="form-control-file form-control-sm" name="file" @actionEvent("UploadChange", "onchange")>
+        </div>
+        <div class="mt-1">
+           @actionButton(uldType, "upload.submit", "btn-xs")
+        </div>
+      </div>  
+    </form>
+  </div>
+}
+
+<small @id("UploadError") style="display:none" class="form-text text-white bg-danger pl-2 mb-2">Error</small>
+@radioCard(ULD_CLICKTT, "TourneyUpload", "upload.typ.clicktt",    content(msg("upload.info.clicktt"),    ULD_CLICKTT))
+@radioCard(ULD_INVIT,   "TourneyUpload", "upload.typ.invitation", content(msg("upload.info.invitation"), ULD_INVIT))
+@radioCard(ULD_LOGO,    "TourneyUpload", "upload.typ.clublogo",   content(msg("upload.info.clublogo"),   ULD_LOGO))
+@radioCard(ULD_CERT,    "TourneyUpload", "upload.typ.certpic",    content(msg("upload.info.certpic"),    ULD_CERT))
+@radioCard(ULD_BANNER,  "TourneyUpload", "upload.typ.clubbanner", content(msg("upload.info.clubbanner"), ULD_BANNER))

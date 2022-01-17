@@ -1,0 +1,51 @@
+@*
+ * Template Organize Tourney (Homepage)
+ *@
+@import shared.model.TournBase
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.organize.tourney.html._
+
+@(toId: Long)(implicit ucp: UseCaseParam)
+
+<div class="card mt-2">
+	<div class="tuse-card-header d-flex justify-content-between">		
+		<div class="mt-2 ml-1">  
+			<a @Html(collapse("TourneyCard")) >
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("main.card.hdr")</h6>
+			</a> 
+		 </div>
+		 <div class="mt-1 mr-2">@actionButton("New", "std.btn.new", "btn-xs")</div>
+	</div>
+	<div @id("TourneyCard") class="tuse-card-body pb-2 collapse"></div>
+</div>
+ 
+<div class="card mt-2 pb-0">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">
+			<a @Html(collapse("UploadCard")) >
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("upload.card.hdr")</h6>
+			</a>
+		</div>
+	</div>
+
+
+	<div @id("UploadCard")' class="card-body pb-2 pt-0 collapse">
+		@UploadCard(msg_("app.lang"))
+	</div>
+</div>
+
+<div class="card mt-2 pb-0">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">
+			<a @Html(collapse("DownloadCard")) >
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("download.card.hdr")</h6>
+			</a>
+		</div>
+	</div>
+
+	<div @id("DownloadCard")' class="card-body pb-2 pt-0 collapse">
+		@DownloadCard(toId, msg_("app.lang"))
+	</div>
+</div>

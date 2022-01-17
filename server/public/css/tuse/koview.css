@@ -1,0 +1,146 @@
+table.KoTable {
+  border-spacing:1px;
+  font-size: 0.85rem;
+}  
+
+td.KoHead1 {
+  margin: 2px;
+  padding:2px 2px 4px 8px;
+}
+
+td.KoCol0 {
+  font-size: 1rem;
+  text-align:center;
+  font-weight: bold;
+  border:1pt solid black;
+  margin:1px;
+  padding:5px 10px 5px 10px;
+}
+
+td.KoCol1A {
+  min-width:120px;
+  display:table-cell;
+  vertical-align:bottom;
+  border-bottom:1pt solid black;
+  margin: 2px;
+  padding:2px 2px 4px 8px;
+}
+
+td.KoCol1B {
+  display:table-cell;
+  vertical-align:top;
+  margin: 2px;
+  padding:2px 2px 4px 8px;
+}
+
+td.KoCol2A {
+  min-width:120px;
+  display:table-cell;
+  vertical-align:bottom;
+  border-bottom:1pt solid black;
+  margin:2px;
+  padding:2px;
+}
+
+td.KoCol2B {
+  min-width:120px;
+  display:table-cell;
+  vertical-align:bottom;
+  border-bottom:1pt solid black;
+  border-right:1pt solid black;
+  margin:2px;
+  padding:2px;
+}
+
+td.KoCol2R {
+  font-size: 0.75rem;
+  display:table-cell;
+  vertical-align:top;
+  text-align:left;
+  margin:2px;
+  padding:2px;
+}
+
+td.KoColxP {
+  min-width:120px;
+  display:table-cell;
+  vertical-align:bottom;
+  border-bottom:1pt solid black;
+  margin:2px;
+  padding:2px;
+}
+
+td.KoColxR {
+  min-width:120px;
+  font-size: 0.75rem;
+  display:table-cell;
+  vertical-align:top;
+  margin:2px;
+  padding:2px;
+}
+
+
+td.KoSetA {
+  min-width:20px;
+  font-size: 0.65rem;
+  text-align:center;
+  font-weight: bold;
+  border-bottom:1pt solid black;
+  padding:15px 5px 0px 5px;
+  margin:2px 2px 0px 2px;
+}
+
+td.KoSetB {
+  font-size: 0.65rem;
+  text-align:center;
+  font-weight: bold;
+  padding: 0px 5px 15px 5px;
+  margin:  0px 2px 2px 2px;
+}  
+
+td.KoSetxA {
+  min-width:20px;
+  font-size: 0.65rem;
+  text-align:center;
+  font-weight: bold;
+  border-left:1pt solid black;
+  border-bottom:1pt solid black;
+  padding:15px 2px 0px 0px;
+  margin:2px 2px 0px 0px;
+}
+
+td.KoSetxB {
+  font-size: 0.65rem;
+  text-align:center;
+  font-weight: bold;
+  border-left:1pt solid black;
+  padding: 0px 2px 15px 0px;
+  margin:  0px 2px 2px 0px;
+}  
+
+p.KoClub {
+  color:grey;
+  text-transform: uppercase;
+  line-height:100%;
+  font-size: 0.80em;
+  margin: 0;
+  padding: 2px 0px 0px 0px;
+}
+
+p.KoBalls {
+  line-height:100%;
+  margin: 0;
+  padding: 0;
+}
+
+p.KoPlayer {
+  line-height:100%;
+  margin: 0;
+  padding: 0;
+}
+
+p.KoDummy {
+  line-height:50%;
+  margin: 0;
+  padding: 0;
+}

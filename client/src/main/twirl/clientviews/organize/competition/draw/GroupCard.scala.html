@@ -1,0 +1,44 @@
+@*
+ * Template for drawing switzer system
+ *
+ * Start Test:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+ * 
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@* group vector entry:
+ *   grName: String
+ *   grId:   Int
+ *   grSize: Int 
+ *   pos:    Int
+ *@
+
+@(coId: Long, secId: Int, groups: Array[(String, Int, Int, Int)])(implicit ucc: UseCaseParam)
+
+<div class="m-1">
+  <table @id(s"Draw_${coId}_${secId}")>
+    <tr>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.group")Gruppe</small></th>
+      <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
+      <th>
+        <div class="text-center ml-1 mr-1">
+          <button  data-coId='@coId' data-secId='@secId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+          </button>
+        </div>
+      </th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr")</small></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+    @for(g<-groups) {
+      @Group(g._1, g._2, g._3, g._4) 
+    }
+  </table>
+</div> 

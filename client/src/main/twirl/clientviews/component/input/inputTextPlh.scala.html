@@ -1,0 +1,16 @@
+@*
+ * Template for text input element
+ *@
+@import shared.utils.twirlhelper._ 
+@import shared.utils.UseCaseParam 
+@import clientviews.component.helper.html._
+
+@(name: String, init: String="", _class: String="", lbl: String="_", hlp: String="_", plh: String="_", minlength:Int=0)(implicit ucp: UseCaseParam)
+
+@{ if (lbl=="_") Html(_lblFor(name, "mb-0", msgLbl(name))) }
+@{ if (lbl!="" & lbl!="_")  Html(_lblFor(name, "mb-0", lbl)) }
+
+@{ Html(_inputTextPlh(name, init, plh, _class, minlength)) }
+
+@{ if (hlp=="_") Html(_hlpFor(name, msgHlp(name))) }
+@{ if (hlp!="" & hlp!="_") Html(_hlpFor(name, hlp)) }

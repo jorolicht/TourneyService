@@ -1,0 +1,33 @@
+@*
+ * Template for input select option country
+ *@
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+
+@(name: String, _init: String="", lbl: String="input.country.lbl", hlp: String="input.country.hlp", _class: String="")(implicit ucp: UseCaseParam)
+@countries=@{List(
+  "Argentina", "Australia", "Austria", "Belgium", "Bosnia and Herzegovina", "Brazil", "Bulgaria", 
+  "Canada", "Chile", "China", "Costa Rica", "Croatia", "Czech Republic", "Deutschland", "Denmark", "Egypt", 
+  "Estonia", "Finland", "France", "Germany", "Greece", "Hong Kong", "Hungary", "Iceland", 
+  "India", "Indonesia", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Luxembourg", 
+  "Mexico", "Monaco", "Netherlands", "Norway", "Peru", "Poland", "Russian Federation", "Singapore", 
+  "Slovakia", "Slovenia", "South Africa", "Spain", "Sweden", "Switzerland", "Thailand", "Turkey", 
+  "Ukraine", "United Kingdom", "United States", "Viet Nam", "Other"
+)}
+@eventCountry(_event:String)=@{ Html(_eventCountry(_event)) }
+
+@{ if (lbl!="") Html(_lblFor(name, "mb-0", lbl)) }
+<select @id(name) class='form-control @{_class}'  @eventCountry("onchange")>
+  
+  <option value='' @if(_init==""){selected} >---</option>
+  @for(country<-countries){
+    @if(country==_init){
+      <option value='@country' selected>@country</option>
+    }else{
+      <option value='@country'>@country</option>
+    } 
+  }
+</select>
+@{ if (hlp!="") Html(_hlpFor(name, hlp)) }
+

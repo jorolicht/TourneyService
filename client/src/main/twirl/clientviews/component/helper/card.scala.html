@@ -1,0 +1,21 @@
+@*
+ * Template for bootstrap card
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._
+
+@(name: String, header: String, content: Html, btnAction: String="", btnMsgKey: String="")(implicit ucp: UseCaseParam)
+<div class="card mt-2">
+	<div class="tuse-card-header pb-0 pt-0">		
+		<div class="float-left mt-2">  
+				<a href="javascript:InputCtrl.eventCard('toggle','@{ucp.idBase}__CardMain@{name}','@{ucp.idBase}__CardBtn@{name}')">
+					<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@header<span @id(s"CardBadgeHdg${name}") class="badge badge-secondary ml-2"></span></h6>
+			  </a> 
+			</div>
+			<div class="float-right mt-1 mr-2">
+        @if(btnAction!=""){<span @id(s"CardBtn${name}") style='display:none' class="col ml-2 pb-2">@actionButton(btnAction, btnMsgKey, "btn-xs")</span>}
+				<span @id(s"CardBadgeRight${name}") class="badge badge-secondary"></span>
+			</div>
+	</div>
+	<div @id(s"CardMain${name}") class="tuse-card-body pb-2 collapse">@content</div>
+</div>

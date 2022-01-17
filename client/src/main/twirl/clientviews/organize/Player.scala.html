@@ -1,0 +1,52 @@
+@*
+ * Template Organize Player
+ * input Sequence of Player (id, name, clubname, status, coName, coId, coTyp) 
+ *@
+
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@()(implicit ucp: UseCaseParam)
+
+<span @id("SortByNo") hidden>0</span>
+<span @id("SortByName") hidden>0</span>
+<span @id("SortByComp") hidden>0</span>
+<span @id("SortByStatus") hidden>0</span>
+
+<div class="card mt-2">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">  
+				<a @Html(collapse("MainCard"))>
+					<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("player.hdr") <span @id("CardBadge") class="badge badge-secondary ml-2"></span></h6>
+					<span @id("CardBadge") class="badge badge-secondary"></span>
+			  </a> 
+			</div>
+			<div class="float-right mt-2 mr-2">  
+				<span @id("CardBadge") class="badge badge-secondary"></span>
+			</div>
+	</div>
+	<div @id("MainCard") class="tuse-card-body pb-2 collapse"></div>
+</div>
+
+<div class="card mt-2">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">  
+				<a @Html(collapse("WaitCard"))>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("wait.hdr")</h6>
+			</a> 
+		 </div>
+	</div>
+	<div @id("WaitCard") class="tuse-card-body pb-2 collapse"></div>
+</div>
+
+<div class="card mt-2">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">  
+			<a @Html(collapse("RejectCard"))>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("reject.hdr")</h6>
+			</a> 
+		</div>
+	</div>
+	<div @id("RejectCard") class="tuse-card-body pb-2 collapse"></div>
+</div>

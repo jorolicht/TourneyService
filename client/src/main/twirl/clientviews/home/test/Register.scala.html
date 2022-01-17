@@ -1,0 +1,38 @@
+@*
+ * Template for Error Page
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@(testInfo: String, message: String, pdfFile: String, licCode: String)(implicit ucp: UseCaseParam) 
+
+<samp><b>@{testInfo}: </b>@message</samp>
+
+<div class="container-fluid alert-secondary">
+  <div class="row alert-primary justify-content-center mb-2">
+    <h3 @data("view", "start") style='display:none'>@msg("hdg.start")</h3>
+    <h3 @data("view", "free-confirm") style='display:none'>@msg("hdg.free.confirm")</h3>
+    <h3 @data("view", "free-finish")  style='display:none'>@msg("hdg.free.finish")</h3>
+    <h3 @data("view", "full-confirm") style='display:none'>@msg("hdg.full.confirm")</h3>
+    <h3 @data("view", "full-finish")  style='display:none'>@msg("hdg.full.finish")</h3>
+  </div>
+</div>
+
+<div class="container-fluid pt-1 pb-0 alert-primary">
+
+  <div class="form-group row mb-1  alert-primary">
+    <div class="col-6 ml-1">
+      @{ Html(msg("fullfinish.prolog")) }  
+      <h5>@licCode</h5> 
+      @{ Html(msg("fullfinish.epilog")) }
+    </div>      
+
+    <div @data("view", "full-start") class="col mb-2 mt-2 text-center">
+      <embed src='/content/clubs/demooooo/@{pdfFile}' height='495' width='350' type="application/pdf">
+    </div>
+  </div>  
+
+</div>
+ 

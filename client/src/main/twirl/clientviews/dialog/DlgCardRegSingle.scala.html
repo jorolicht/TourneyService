@@ -1,0 +1,110 @@
+@*
+ * Template for Player Dialog
+ * 
+ * Start Test Dialog:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegSingle
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@(fromYear: Int = 2015, toYear: Int = 1920)(implicit ucc: UseCaseParam)
+
+<!--  START Modal Dialog for Registering a Single Participant --> 
+<div class="modal fade" @id("Modal") tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" @id("Title")><i class="fa fa-user" aria-hidden="true"></i>&nbsp; @msg("Title")</h5>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>  
+      </div>
+      
+      <!--  START Body Player --> 
+      <div class="modal-body">
+        <div @id("Form") class="container-fluid">
+
+          <div class="form-row mb-0">
+            <div class="form-group col-sm-6 mb-0">
+              @lbl("Name", "ml-1 mb-0 col-form-label-sm")
+              <input @id("Name") type="text" class="form-control form-control-sm border" @list("NameList") @plh("Name") @actionEvent("Name", "onchange") >
+              <datalist @id("NameList")></datalist>		
+            </div>
+            
+            <div class="form-group col-sm-6 mb-0">
+              @lbl("Club", "ml-1 mb-0 col-form-label-sm")
+              @{ Html(_inputClub("Club", "", "_", "form-control-sm border", false, true)) }
+
+              <datalist @id("ClubList")></datalist>		
+            </div>
+          </div>  
+
+          <div class="form-row mb-0">
+            <div class="form-group col-sm-10 mb-0">
+              @lbl("Email", "ml-1 mb-0 col-form-label-sm")
+              @{ Html(_inputEmail("Email", "form-control-sm", "", false)) }
+            </div>
+            
+            <div class="form-group col-sm-2 mb-0">
+              @lbl("Year", "ml-1 mb-0 col-form-label-sm")
+              <select @id("Year") class="form-control-sm" >
+                <option value='None' selected>---</option>
+                @for(i <- fromYear to toYear by -1) { <option value='@i' >@i</option> }
+              </select>
+            </div>        
+          </div> 
+
+          <div class="form-row mb-0">
+            <div class="form-group col-sm-3 mb-0">
+              @lbl("TTR", "ml-1 mb-0 col-form-label-sm")
+              <input @id("TTR") type="text" class="form-control form-control-sm border" size="5" value="">
+            </div>                        
+ 
+            <div class="form-group col-sm-9 mb-0 align-self-end">
+              <div class="float-right">
+                <input type="radio" @id("GenderFemale") class="" @name("Gender") value="1">
+                <label @forAttr("GenderFemale")><i class="fa fa-female mr-2" aria-hidden="true"></i></label>
+                <input type="radio" @id("GenderMale") class="" @name("Gender") value="2">
+                <label @forAttr("GenderMale")><i class="fa fa-male mr-2" aria-hidden="true"></i></label>
+                <input type="radio" @id("GenderNone") class="" @name("Gender") value="0" checked>
+                <label class="col-form-label-sm" @forAttr("GenderNone")>@msg("notSpecified")</label>         
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!--  END Body Player -->
+      <div class="modal-footer pt-1 pb-0">
+
+        <div @id("FormFooter") class="container-fluid">
+          <div class="row">
+            <div class="col-sm-12">
+              <span class="col-form-label-sm">@msg("status.hdr")</span>
+              <span @id("Class") class="col-form-label-sm font-weight-bold"></span>         
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6 pb-0">              
+              <input type="radio" @id("Register") class="" @name("PlayerStatus") value="0">
+              <label class="col-form-label-sm" @forAttr("Register")>@msg("status.register")</label>
+            </div>
+            <div class="col-sm-6 pb-0">              
+              <input type="radio" @id("Participate") class="" @name("PlayerStatus") value="1" checked>
+              <label class="col-form-label-sm" @forAttr("Participate")>@msg("status.participate")</label>
+            </div>
+          </div>
+
+        </div> 
+      </div>
+
+      <div class="modal-footer">
+        <button @id("Cancel") class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.cancel")</button>
+        <button @id("Submit") class="btn btn-outline-secondary btn-xs" type="button" >@msg_("std.btn.save")</button>     
+      </div>
+    </div>
+  </div>
+</div>
+<!--  END Modal Example Modal Dialog --> 

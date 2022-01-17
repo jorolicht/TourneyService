@@ -1,0 +1,28 @@
+@*
+ * Template for Spinner - waiting for a result
+ *@
+
+@(pref: String = "APP__DlgSpinner", mpref: String = "dlg.spinner")
+
+@id(name : String) = @{ pref + "__" + name }
+
+<!-- START Modal Dialog for Spinner -->
+<div class="modal fade" id='@id("Modal")' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="rounded border bg-light clearfix mb-2" id='@id("Type")'>
+      <div class="row">
+        <div id='@id("Image")' class="col-2 mt-2 mb-2 ml-2 mr-2">
+          <img class="img-fluid" src="assets/img/spinner150.gif" alt="Loading ..."> 
+        </div>
+        <div class="col float-left my-auto">
+          <span class="mt-2 mb-2" id='@id("Content")'>Example Button floated left</span>
+        </div>
+        <div class="col-1 float-right">
+		      <button type="button" class="close mt-2 mb-2 mr-2" data-dismiss="modal"><span>&times;</span></button>
+        </div>      
+      </div>
+    </div>    
+  </div>
+</div>
+<!-- END Modal Dialog for Spinner -->
+

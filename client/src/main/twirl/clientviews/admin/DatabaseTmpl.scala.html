@@ -1,0 +1,67 @@
+@*
+ * Template for Admin Database Management
+ *@
+@(msgs: Map[String,String]) 
+@id(name: String) = @{ "APP__Admin-Database__" + name }
+@msg(name: String) = @{ if (msgs.isDefinedAt("admin.database." + name)) msgs("admin.database." + name) else "admin.database." + name }
+
+@button(msg: String, func: String, arg: String="") = @{ 
+  s"""<button onclick="""" + func +"('" + arg + "')" + s"""" type="button" class="btn btn-outline-secondary btn-xs mt-1">""" + msgs(msg) + "</button>" 
+}
+
+<div class="card mt-2"> 
+	
+	<div class="tuse-card-header">  <!-- START Card Header -->
+		<div class="float-left mt-2">
+		   <a href='javascript:InputCtrl.collapse("@id("Header")", "@id("Body")");'>
+		      <h6 class="text-dark">
+		      <i class="fa fa-fw fa-bars"></i>@msg("view")
+		      </h6>
+		   </a>	      
+		 </div> 
+		<div id="@id("Header")" class="float-right mp-0 mr-1 collapse">
+			@Html(button("EXPORT","AdminDatabase.export"))
+		</div>
+	</div>                          <!-- END Card Header -->
+	
+	<div id="@id("Body")" class="tuse-card-body pb-2 collapse">
+
+		<div class="w-100 mb-2">      <!-- START Input Area -->
+			<div class="form-row">      <!-- START Input ROW -->
+
+				<div class="col-sm-3">	
+						<div class="input-group mb-1">
+								<div class="input-group-prepend">
+									<span class="input-group-text form-control-xs" ><strong>@msg("tourneyid")</strong></span>
+								</div>
+								<input id='@id("FormTourneyId")' type="text" class="form-control-xs w-50" placeholder='@msg("placeholder.tourneyid")' value="">
+						</div>
+				</div>	
+	
+				<div class="col-sm-5">	
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs" id="basic-addon1"><strong>@msg("orgdir")</strong></span>
+							</div>
+							<input id='@id("FormClub")' type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.orgdir")'>
+					</div>
+				</div>	
+				
+				<div class="col-sm-4">
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs" id="basic-addon1"><strong>@msg("date")</strong></span>
+							</div>
+							<input id='@id("FormDate")' type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.date")'>
+					</div>
+				</div>
+
+			</div>                      <!-- END Input ROW -->
+		</div>                        <!-- END Input Area -->
+
+		<div>
+			<pre id='@id("Content")'></pre>
+		</div>
+		
+	</div>                          <!-- END Card Body -->
+</div>                            <!-- END Card -->

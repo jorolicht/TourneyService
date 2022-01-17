@@ -1,0 +1,69 @@
+@*
+ * Template for drawing a KO-system
+ *
+ * Start Test:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+ * 
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coId: Long, secId: Int, size: Int)(implicit ucc: UseCaseParam)
+
+@koEntry(pos: Int) = @{ Html(s""" 
+  <tr data-drawPos=${pos}>
+    <td rowspan='2' class='border p-1 text-center'>
+      <small class='font-weight-bold'>${pos}</small>
+    </td>
+    <td rowspan='2' contenteditable='true' class='border-top border-bottom border-right p-1 text-center'>
+      <small data-drawPos='@i' data-sno='' class='font-weight-bold text-info'>${pos}</small>
+    </td>    
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='@pos'>Lastname, Firstname</small></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='@pos'>Club</small></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='@pos' >TTR</small></td>
+    <td data-hideColumn="" rowspan="2" class="border-top border-bottom border-right p-1"><small id="DrawPos_Grp_${pos}">A2</small></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+  </tr>
+  <tr>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+    <td class='tdDrawGroup'></td>
+  </tr>
+""") }
+
+
+<div class="m-1">
+  <table @id(s"Draw_${coId}_${secId}") class="border border-primary">
+    <tr>
+      <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
+      <th>
+        <div class="text-center ml-1 mr-1">
+          <button data-coId='@coId' data-secId='@secId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+          </button>
+        </div>
+      </th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr") </small></th>
+      <th data-hideColumn=''><small class="font-weight-bold ml-1 mr-1 hidden">@msg("table.ttr")</small></th>
+      <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th>
+    </tr>
+    @for(i<-1 to size){
+      @koEntry(i)
+    }
+  </table>
+</div>

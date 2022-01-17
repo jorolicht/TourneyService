@@ -1,0 +1,9 @@
+@*
+ * Template for option list for player birthyear
+ *@
+@(start: Int, finish: Int, description: String)
+
+<option value="0" selected>@description</option>
+@for(i <- start to finish by -1) {
+  <option value='@i' >@i</option>
+}

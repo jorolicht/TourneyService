@@ -1,0 +1,36 @@
+@*
+ *  Email sending registration code
+ *@
+@(name: String, license: String, fullVersion: Boolean, html: Boolean)(implicit request: RequestHeader, msgs: MessagesProvider, assetsFinder: AssetsFinder)
+@msg(name: String, args: String*) = @{ msgs.messages("email.license." + name, args: _*) }
+@msg_(name: String, args: String*) = @{ msgs.messages(name, args: _*) }
+
+@if(!html){
+  @msg("greeting", name)
+  @Html(msg("prolog.plain"))
+  @Html(msg_("email.license.plain", license))
+  @if(fullVersion){
+    @Html(msg("full.epilog.plain"))
+  }else{
+    @Html(msg("free.epilog.plain"))
+  }
+}else{
+<!DOCTYPE html>
+<html lang='@{msgs.messages("app.lang")}' >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@msg("title")</title>
+  </head>
+  <body style="margin:5; padding:5;">
+    <p>@msg("greeting", name)</p>
+    @Html(msg("prolog.html"))
+    @Html(msg_("email.license.html", license))
+    @if(fullVersion){
+      @Html(msg("full.epilog.html"))
+    }else{
+      @Html(msg("free.epilog.html"))
+    }
+  </body>
+</html>
+}

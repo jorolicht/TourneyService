@@ -1,0 +1,100 @@
+@*
+ * Template Show Tourney Information
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+ 
+@(info: String, date: String, organizer: String, colist: Seq[(Long, String, Int, String, String, String, Int)])(implicit ucc: UseCaseParam)
+@coLiVal(id: Long, coTyp: Int) = @{ s"${id}__${coTyp}" }
+
+<div @id("RegisterCard") class="card mt-2">                                      
+  <div class="tuse-card-header">
+    <div class="float-left mt-2">
+      <a href="javascript:InputCtrl.collapse('@{ s"${ucc.idBase}__RegisterBody"}'); InfoSchedule.reset();" 
+        <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("register")</h6>
+      </a>	      
+    </div>
+  </div>
+
+  <div @id("RegisterBody") class="tuse-card collapse">
+
+    <div @id("RegisterOpen") class="ml-2 mr-2 mt-2">
+        <div class="form-input">    
+          <form @id("Form")>
+
+            <div class="form-group row mb-1"> 
+              <div class="col-2"><label for='@_name("Competition")'>@msg("competition")</label></div>  
+              <div class="col-6">
+                <select @id("Competition") class="custom-select-sm form-control form-control-sm"  onchange="InfoSchedule.verifyComp();">
+                  <option value="0__unknown" selected>@msg("selcompetition")</option>
+                  @for( co <- colist) {
+                    @if(-1 == co._7) { <option value='@coLiVal(co._1,co._3)'>@co._2 @co._5</option> }
+                  } 
+                </select>
+              </div>
+              <div class="col-2">&nbsp;</div>
+              <div class="col-2 float-right text-right">
+                @button("button.submit","SignUp","btn-xs","SignUp")
+              </div>      
+            </div>
+
+            <div class="form-group row mb-1">
+                <div class="col-2"><label for='@_name("PlayerEmail")'>@msg("email")</label></div>  
+                <div class="col-6" > 
+                  <div class="input-group">  
+                    <input @id("PlayerEmail") type="text" class="form-control form-control-sm" 
+                      @plh("email") onfocusout="InfoSchedule.verifyEmail(this.value);">
+                  </div>    
+                </div>
+                <div class="col-4">&nbsp;</div>
+            </div>
+
+            <div class="form-group row mb-0"> 
+                <div class="col-2"><label for='@_name("PlayerName")' >@msg("placeholder.playerdata")</label></div>          
+                <div class="col-3">
+                  <input @id("PlayerName") type="text" class="form-control form-control-sm" @plh("name") >
+                </div>
+                <div class="col-3" > 
+                  <input @id("PlayerClub") type="text" class="form-control form-control-sm" @plh("club") >
+                </div>
+                <div class="col-2"> 
+                  <select @id("PlayerYear") class="custom-select-sm form-control form-control-sm" ></select>
+                </div>
+                <div class="col-2" > 
+                  <input @id("PlayerTTR") type="text" class="form-control form-control-sm" @plh("ttr") >
+                </div>                                                
+            </div> 
+
+            <div class="form-group row mb-1 mr-2 ml-2">
+              <div class="col-12">
+                <input @id("CheckConsent") @onclick("CheckConsent") type="checkbox" class="form-check-input form-control-sm  mt-0 pt-0" >
+                <label class="form-check-label col-form-label-xs " for=@{ucc.idBase + "__" + "CheckConsent"}>@msg("consent.text")</label>                       
+              </div>
+            </div>
+
+            <div @id("DoublePlayer") class="form-group row mb-1"  >
+              <div class="col-2">&nbsp;</div>                
+              <div class="col-3" > 
+                <input @id("PlayerName2") type="text" class="form-control form-control-sm" @plh("name") >
+              </div>
+              <div class="col-3" > 
+                <input @id("PlayerClub2") type="text" class="form-control form-control-sm" @plh("club") >
+              </div>
+              <div class="col-2"> 
+                <select  @id("PlayerYear2") class="custom-select-sm form-control form-control-sm" ></select>
+              </div>
+              <div class="col-2" > 
+                <input @id("PlayerTTR2") type="text" class="form-control form-control-sm" @plh("ttr") >
+              </div>                                                
+            </div> 
+          </form> 
+          
+        </div>
+        <div @id("Help") class="mb-2" >
+          <small class="form-text text-light bg-danger text-white">&nbsp;<span @id("HelpText") ></span></small> 
+        </div>
+
+    </div>                          
+  </div>
+</div>

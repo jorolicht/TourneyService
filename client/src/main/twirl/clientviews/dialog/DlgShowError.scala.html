@@ -1,0 +1,30 @@
+@*
+ * Template for ShowError Dialog
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@()(implicit ucc: UseCaseParam)
+
+<!--  START Modal Dialog for ShowError --> 
+<div class="modal fade" @id("Modal") tabindex="-1" style='z-index:10000' role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" @id("Header")>Header</h6>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      
+      <div @id("Content") class="modal-body mb-0">
+      </div>     
+      
+      <div class="modal-footer">
+        <button @id("Submit") class="btn btn-outline-secondary btn-xs" type="button">@msg_("std.btn.ok")</button>      
+      </div>
+    </div>
+  </div>
+</div>
+<!--  END Modal Dialog --> 

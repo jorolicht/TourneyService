@@ -1,0 +1,170 @@
+@*
+ * Template for registering 
+ *@
+@import upickle.default._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+ 
+<div class="container-fluid alert-secondary">
+  <div class="row alert-primary justify-content-center mb-2">
+    <h3 @data("view", "start")>@msg("hdg.start")</h3>
+    <h3 @data("view", "free-confirm") style='display:none'>@msg("hdg.free.confirm")</h3>
+    <h3 @data("view", "free-finish")  style='display:none'>@msg("hdg.free.finish")</h3>
+    <h3 @data("view", "full-confirm") style='display:none'>@msg("hdg.full.confirm")</h3>
+    <h3 @data("view", "full-finish")  style='display:none'>@msg("hdg.full.finish")</h3>
+  </div>
+</div>
+
+<div class="container-fluid pt-1 pb-0 alert-primary">  
+
+  @**
+   ** Common secction for register usecase
+   **@
+  @* step start *@
+  <form @data("view", "start") >  
+    <div class="form-group row mb-1 alert-primary">
+      <div class="col-6 ml-1">
+        @inputName("name", ctx("name").str)
+      </div>
+      <div @data("view", "full-start") class="col-2">
+        @inputTextPlh("zip", ctx("zip").str)
+      </div>
+      <div @data("view", "full-start") class="col">
+        @inputTextPlh("city", ctx("city").str)
+      </div>
+    </div>
+
+    <!-- <div class="col-sm-4 col-md-2">@inputTextPlh("zip", ctx("zip").str)</div> -->
+
+    <div class="form-group row mb-1 alert-primary">
+      <div class="col-6 ml-1">
+        @inputClub("clubname", ctx("clubname").str)
+      </div>
+      <div @data("view", "full-start") class="col-3">
+        @inputTextPlh("street", ctx("street").str)
+      </div>
+      <div @data("view", "full-start") class="col">
+        @inputCountry("country", ctx("country").str)
+      </div>
+    </div>
+
+    <div class="form-group row mb-1  alert-primary">
+      <div class="col-6 ml-1">
+        @inputEmail("email", ctx("email").str, "")
+      </div>      
+
+      <div @data("view", "full-start") class="col">
+        @inputPassword("password")
+      </div>
+    </div>
+
+    <div class="form-group row mt-2 mb-1 alert-primary">
+      <div class="col ml-2 mr-2 border-bottom border-secondary">
+        <label>@msg("license.header")</label>
+      </div>
+    </div>
+
+    <div class="form-group row mb-1 alert-primary">
+      <!-- FREE License -->
+      <div class="col-6 ml-1">
+        @inputRadio("FreeSelect","LicenseSelect","form-check-input ml-2 mr-1")
+        <label class="ml-4" for="RadioFree">&nbsp;@msg("lbl.radio.free")</label>
+
+        <div class="list-group">
+          <div @id("LicenseFree1") class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">@msg("oneCompVersion")</h6>
+            </div>
+            @getHtml("onefreeLicense")
+          </div>
+
+          <div @id("LicenseFreeX") class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">@msg("multiCompVersion")</h6>
+            </div>
+            @getHtml("multifreeLicense")
+          </div>
+        </div>
+
+      </div> <!-- -->
+
+      <!-- FULL License -->
+      <div class="col">
+        @inputRadio("FullSelect","LicenseSelect","form-check-input ml-2 mr-1")
+        <label class="ml-4" for="RadioFull">&nbsp;@msg("lbl.radio.full")</label>
+        
+        <div class="list-group">
+          <div @id("LicenseFull1") class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">@msg("oneCompVersion")</h6>
+            </div>
+            @getHtml("onefullLicense")
+          </div>
+
+          <div @id("LicenseFullX") class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">@msg("multiCompVersion")</h6>
+            </div>
+            @getHtml("multifullLicense")
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="form-group row mt-2 alert-primary">
+      <div class="col ml-2 pt-2 pb-2">
+        @actionButton("FreeRequest", "free.request", "btn-sm")
+      </div>
+      <div class="col ml-2 pt-2 pb-2">
+        @actionButton("FullRequest", "full.request", "btn-sm")
+      </div>
+    </div>
+
+  </form>
+
+
+  @**
+   ** Section for registering free version
+   **@
+  @* state free-confirm *@  
+  <span @id("FreeConfirm")></span>
+
+  @* state free-finish *@
+  <div @data("view", "free-finish") class="form-group row mb-1 alert-primary" style='display:none'>
+    <div class="col ml-2 mr-2 pb-2">
+      @{ Html(msg("freefinish.prolog")) }  
+      <h5 @id("FreeLicenseCode") >LicenseCode</h5> 
+      @{ Html(msg("freefinish.epilog")) }
+    </div>
+  </div>
+
+
+  @**
+   ** Section for registering full version
+   **@
+  @* state full-1 *@ 
+  <span @id("FullConfirm")></span>
+
+  @* state full-finish *@ 
+  <span @id("FullFinish")></span>
+
+  @* state processing *@ 
+  <div @data("view", "processing") class="row mb-1 alert-primary" style='display:none'>
+    <span @id("Processing")></span>
+  </div> 
+
+
+  @* state error *@ 
+  <div @data("view", "error") class="container-fluid pt-2 pb-2 " style='display:none'>
+    <div class="row align-items-center">
+      <div class="col-3"><img class="img-fluid" src="/public/img/error.png"></div>
+      <div class="col-auto"><h4 @id("ErrorMsg")></h4></div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,51 @@
+@*
+ * Show Tourney Table/Playfield template
+ *@
+@import shared.model.Playfield
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(pfs: Seq[Playfield], msgs: Map[String,String])(implicit ucp: UseCaseParam)
+
+@if(pfs.isEmpty) {
+  <div class="alert alert-info text-center" role="alert">
+      <span class="tuse-font-1">@msg("noEntry")</span>
+  </div>
+} else {
+  <table class="table table-sm small">
+    <tbody>
+      <tr style="border-bottom:2px solid #ccc;">
+        <td class="text-left"   style="width:4%;"><strong>@msg("tableNo")</strong></td>
+        <td class="text-left"   style="width:18%;"><strong>@msg("compName")</strong></td>
+        <td class="text-right"  style="width:27%;"><strong>@msg("playerA")</strong></td>
+        <td class="text-center" style="width:2%;">-</td>
+        <td class="text-left"   style="width:27%;"><strong>@msg("playerB")</strong></td>
+        <td class="text-right"  style="width:22%;"><strong>@msg("info")</strong></td>
+      </tr>           
+      @for(pf <- pfs) {
+        @if(pf.nr == 0) {    
+          <tr>
+            <td class="text-center" colspan="6"><strong>@pf.info</strong></td>
+          </tr>    
+        } 
+      }
+      @for(pf <- pfs) {
+        @if(pf.nr != 0) {
+          <tr>
+            <td class="text-left">@pf.nr</td>
+            <td class="text-left">@pf.pClass</td>
+            <td class="text-right">@pf.playerA
+              @if(pf.clubA != "") { <span class="vtbl_club">[@pf.clubA]</span> }
+            </td>
+            <td class="text-center">-</td>
+            <td class="text-left">@pf.playerB
+              @if(pf.clubB != "") { <span class="vtbl_club">[@pf.clubB]</span> }
+            </td>
+            <td class="text-right">@pf.info</td>
+          </tr>
+        }
+      } 
+    </tbody>
+  </table>
+}

@@ -1,0 +1,41 @@
+@*
+ * Template Organize Competition
+ *
+ * Start Test Dialog:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrgComp
+ *
+ *@
+
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@()(implicit ucp: UseCaseParam)
+
+<div class="card mt-2">
+	<div class="tuse-card-header d-flex justify-content-between">
+		<div class="mt-2 ml-1">
+			<a @Html(collapse("CompCard"))>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("CompCard")</h6>
+			</a>			
+		</div>
+
+		<div class="mt-1 mr-2 text-right">
+			@actionButton("AddCompetition", "std.btn.new", "btn-xs")
+			@actionButton("StartCompetition", "std.btn.start", "btn-xs")
+		</div>
+	</div>
+	<div @id("CompCard") class="tuse-card-body text-center ml-2 mr-2 mb-0 p-2 collapse"></div>
+</div>
+
+<div class="card mt-2">
+	<div class="tuse-card-header d-flex justify-content-between">		
+		<div class="mt-2 ml-1">  
+			<a @href("ParticipantCard")>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("participant.card")</h6>
+			</a> 
+		 </div>
+		 <div class="mt-1 mr-2">@actionButton("RegParticipant", "std.btn.add", "btn-xs")</div>
+	</div>
+	<div @id("ParticipantCard") class="tuse-card-body pb-2 collapse"></div>
+</div>

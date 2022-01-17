@@ -1,0 +1,34 @@
+@*
+ * Template List Tourneys
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+@import shared.model.TournBase
+
+@(tonys: Seq[TournBase], msgs: Map[String,String])(implicit ucp: UseCaseParam)
+@if(tonys.isEmpty) {
+	<div class="alert alert-danger" role="alert">
+	  @msg("noEntryMsg")
+	</div>  
+} else {
+	<div>
+	  <table class="table table-hover tuse-border">
+		  <tbody>
+		    <tr style="border-bottom:2px solid #ccc;">
+		       <td class="tuse-height"><strong>@msg("table.date")</strong></td>
+		       <td class="tuse-height"><strong>@msg("table.club")</strong></td>
+		       <td class="tuse-height"><strong>@msg("table.tourney")</strong></td>
+		    </tr>	  
+        @for(tony <- tonys) {
+					<tr @onclick("Select", tony.id.toString)">
+						<td class="tuse-height">@tony.getStartDate(msgs("app.lang"))</td>
+						<td class="tuse-height">@tony.organizer</td>
+						<td class="tuse-height">@tony.name</td>
+		    </tr>
+				}
+		  </tbody>
+	 </table>
+	</div>
+}

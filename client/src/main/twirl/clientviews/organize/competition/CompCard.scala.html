@@ -1,0 +1,62 @@
+@*
+ * Template Organize Competition Main Table
+ *@
+@import shared.model.Competition
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(comps: Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)], coId: Long)(implicit ucc: UseCaseParam)
+@idCount(cnt: Long) = @{ ucc.idBase + "__Count_" + cnt }
+@checked(value: Boolean) = @{ if(value) "checked" else "" } 
+
+<table @id("MainTbl") class="table table-sm small table-hover tuse-border">
+	<tbody>
+		<tr style="border-bottom:2px solid #ccc;">
+			<td class="text-left tuse-height"><strong>@msg("main.tbl.hdr.no")</strong></td>
+			<td class="text-left tuse-height"><strong>@msg("main.tbl.hdr.description")</strong></td>
+			<td class="text-left tuse-height"><strong>@msg("main.tbl.hdr.time")</strong></td>
+			<td class="text-left tuse-height"><strong>@msg("main.tbl.hdr.ttr")</strong></td>
+			<td class="text-center tuse-height"><strong>@msg("main.tbl.hdr.count")</strong></td>
+			<td class="text-right tuse-height"><strong>@msg("main.tbl.hdr.status")</strong></td>
+			<td class="text-center tuse-height"><strong>@msg("main.tbl.hdr.signup")</strong></td>
+			<td class="text-right tuse-height"></td>
+		</tr>	
+
+	@if(comps.isEmpty) {
+		<tr>      
+			<td colspan="9" class="text-center">
+				<div class="alert alert-info" role="alert">
+					<span class="tuse-font-1">@msg("main.tbl.noEntry")</span>
+				</div>
+			</td>
+		</tr>
+	} else {			
+		@for(co <- comps) {	
+			<tr data-coId='@co._1' @id(co._1.toString) @actionEvent("SelectCompetition", "onclick")>  
+				<td class="text-left tuse-height"><strong>@co._1</strong</td>
+				<td class="text-left tuse-height">@Competition.genName(co._2, co._3, co._4, msg_("competition.typ."+co._5))</td>
+				<td class="text-left tuse-height">@co._6</td>
+				<td class="text-left tuse-height">@co._10</td>
+				<td id="@idCount(co._1)" class="text-center tuse-height">@co._7/@co._8</td>
+				<td @id("CompStatus_"+co._1.toString)' class="text-right tuse-height">@msg_("competition.status." + co._9)</td>
+				<td class="text-center tuse-height"> 
+					@if(-1==co._9 | 0==co._9){
+						<div class="form-check-inline">
+							<input data-coId='@co._1' class="form-check-input" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(-1==co._9) >
+						</div>
+					} 
+				</td>
+				<td class="text-right tuse-height">
+					@if(co._9<=0){
+					  <a @id("icon.edit") @tit("edit") data-coId='@co._1' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
+					}
+					<a @tit("view") data-coId='@co._1' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
+					<a @tit("delete") data-coId='@co._1' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
+					<a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
+				</td>
+			</tr>
+		}
+	}      
+	</tbody>
+</table>

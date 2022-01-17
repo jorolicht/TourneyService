@@ -1,0 +1,129 @@
+@*
+ * Template for Admin License
+ *@
+
+@import shared.model.License
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+
+@(licenses: Seq[License])(implicit ucc: UseCaseParam)
+@collapse(id1: String, id2: String) = @{ s""" href='javascript:InputCtrl.collapse("${ucc.idBase}__${id2}", "${ucc.idBase}__${id2}")' """ }	
+
+<div class="card mt-2">
+	<div class="tuse-card-header">		
+		<div class="float-left mt-2">
+		   <a @collapse("Header","Body")>
+		      <h6 class="text-dark">
+		      <i class="fa fa-fw fa-bars"></i>@msg("view")
+		      </h6>
+		   </a>	      
+		 </div> 
+		<div @id("Header") class="float-right mp-0 mr-1 collapse">
+			@button("std.button.delete","","btn-xs","Delete")
+			@button("std.button.update","","btn-xs","Update")
+			@button("std.button.upload","","btn-xs","Upload")
+			@button("std.button.download","","btn-xs","Download")
+		</div>
+	</div> 
+	
+	<div @id("Body") class="tuse-card-body pb-2 collapse">
+
+		<div class="w-100 mb-2">
+			<div class="form-row">
+					<div class="col-sm-2">	
+							<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text form-control-xs" ><strong>@msg("clubid")</strong></span>
+									</div>
+									<input @id("FormClubId") type="text" class="form-control-xs w-50" placeholder='@msg("placeholder.clubid")' value="" readonly>
+							</div>
+						</div>	
+
+						<div class="col-sm-2">	
+								<div class="input-group mb-1">
+										<div class="input-group-prepend">
+											<span class="input-group-text form-control-xs" for="@id("FormInfo")"><strong>@msg("info")</strong></span>
+										</div>
+										<select @id("FormInfo") class="custom-select form-control-xs">
+											<option value="1">@msg("yes")</option>
+											<option value="0" selected>@msg("no")</option>
+										</select>
+								</div>
+							</div>	
+
+				<div class="col-sm-4">	
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs" id="basic-addon1"><strong>@msg("club")</strong></span>
+							</div>
+							<input @id("FormClub") type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.club")' readonly>
+					</div>
+				</div>	
+				
+				<div class="col-sm-4">
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs" id="basic-addon1"><strong>@msg("directory")</strong></span>
+							</div>
+							<input @id("FormOrgDir") type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.directory")' readonly>
+					</div>
+				</div>	
+			</div>
+			
+			<div class="form-row">
+					<div class="col-sm">	
+							<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<span class="input-group-text form-control-xs"><strong>@msg("name")</strong></span>
+									</div>
+									<input @id("FormName") type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.name")'>
+							</div>
+						</div>	
+
+				<div class="col-sm">	
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs"><strong>@msg("email")</strong></span>
+							</div>
+							<input @id("FormEMail") type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.email")'>
+					</div>
+				</div>	
+				
+				<div class="col-sm">
+					<div class="input-group mb-1">
+							<div class="input-group-prepend">
+								<span class="input-group-text form-control-xs"><strong>@msg("license")</strong></span>
+							</div>
+							<input @id("FormLicense") type="text" class="form-control-xs w-70" placeholder='@msg("placeholder.license")' readonly>
+					</div>
+				</div>	
+			</div>
+		</div>
+
+		<div>
+			<table class="table tuse-border table-hover table-sm small">
+				<tbody @id("LicenseTable")>
+					<tr @id("License_0") @onclick("Select", "0") ></tr>
+						<td class="tuse-height"><strong>#</strong></td>
+						<td class="text-left tuse-height"><strong>@msg("club")</strong></td>
+						<td class="text-left tuse-height"><strong>@msg("name")</strong></td>
+						<td class="text-right tuse-height"><strong>@msg("email")</strong></td>
+					</tr>	
+						@for(license <- licenses) {				
+							<tr @id("License_" + license.id) @onclick("Select", license.id.toString) >
+								<td class="text-left tuse-height">@license.id</td>
+								<td class="text-left tuse-height">@license.club</td>
+								<td class="text-left tuse-height">@license.name</td>
+								<td class="text-right tuse-height">@license.email</td>
+								<td style="display:none;">@license.orgDir</td>
+								<td style="display:none;">@license.licStr</td>
+                <td style="display:none;">@license.reqTStamp</td>
+								<td style="display:none;">@license.fullVersion</td>
+							</tr>				
+						}
+				</tbody>
+			</table>
+	  </div>
+	</div>
+</div>

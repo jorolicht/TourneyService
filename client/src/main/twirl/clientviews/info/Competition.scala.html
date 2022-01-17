@@ -1,0 +1,39 @@
+@*
+ * Template User Info List Competitions
+ *@
+@import shared.utils.Constants._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+
+@(comps: Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)])(implicit ucp: UseCaseParam)
+
+@if(comps.isEmpty) {  
+  <div class="alert alert-info text-center" role="alert">
+    <span class="tuse-font-1">@msg("noEntry")</span>
+  </div>
+ } else {	
+  <table class="table table-sm small">
+    <tbody>
+      <tr style="border-bottom:2px solid #ccc;">
+        <td class="text-left"><strong>@msg("description")</td>
+        <td class="text-left"><strong>@msg("ttrRange")</strong></td>
+        <td class="text-left"><strong>@msg("startTime")</strong></td>
+        <td class="text-center"><strong>@msg("cntPlayer")</strong></td>
+        <td class="text-right"><strong>@msg("status")</strong></td>
+      </tr>	   
+      @for(co <- comps) {
+        <tr>
+          <td class="text-left tuse-height">@co._2</td>
+          <td class="text-left tuse-height">@co._10</td>
+          <td class="text-left tuse-height">@co._11</td>
+          <td class="text-center tuse-height">@co._7</td>
+          @if(co._9 != CS_RESET){
+            <td class="text-right tuse-height">@msg_(s"competition.status.${co._9}")</td>  
+          } else {
+            <td class="text-right tuse-height"></td> 
+          }
+          </tr>
+      }
+    </tbody>
+  </table>
+}

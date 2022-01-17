@@ -1,0 +1,45 @@
+@*
+ * Template for usecase HomeSearch
+ *@
+ @import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@(fromYear: Int, toYear: Int, curYear: Int, msgs: Map[String,String])(implicit ucp: UseCaseParam)
+<div class="card mb-10">
+  <img class="card-img-top" src="/assets/img/intro.jpg" alt="Card image cap">
+  <div class="card-body">
+    <h5 class="card-title">@msg("headline")</h5>
+    <p class="card-text">@msg("info")</p>
+    
+    <div @id("Result")></div>
+
+		<form action="#" @onsubmit("") >
+			<div class="form-group row mb-1"> 
+				<input type="submit" hidden>
+				<div class="col-7">
+					@lbl("string", "")
+					<input @id("string") type="text" class="form-control input-sm" maxlength="40" @plh("string") autofocus>
+				</div> 
+				<div class="col-3">
+					@lbl("typ", "")
+					<select class="form-control form-control-sm" @onchange("","typ") @id("typ")>
+						@for(i <- 0 to 12) {
+							<option value='@i' @if(i==1){selected} >@msg_("tourney.typ."+i)</option>
+						} 
+					</select>
+				</div>    
+
+				<div class="col-2">
+					@lbl("year", "")
+					<select class="form-control form-control-sm" @onchange("","year") @id("year")>
+						@for(i <- fromYear to toYear){
+							<option @if(i==curYear){selected} value="@i">@i</option>
+						}  
+					</select>
+
+				</div>
+			</div>
+		</form>    
+  </div>
+</div>

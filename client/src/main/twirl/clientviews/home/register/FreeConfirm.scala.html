@@ -1,0 +1,52 @@
+@*
+ * Template for registering license step free-confirm
+ *@
+@import upickle.default._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+ 
+@* state free-confirm *@  
+<form @data("view", "free-confirm") style='display:none'>  
+
+  <div class="form-group row mb-1 alert-primary">
+    <div class="col ml-2 mr-2 text-center">
+      <p>@{ Html(msg("freeconfirm.name", ctx("name").str)) }</p>
+      <p><strong>@ctx("clubname").str</strong></p>
+    </div>
+  </div>
+
+  <div class="form-group row mb-1">
+    <div class="col ml-2 mr-2">
+      <p>
+        @{ Html(msg("confirm.entercode", ctx("email").str)) }
+        @actionButton("codeResend", "code.resend", "btn-xs")
+      </p>
+    </div>
+
+    <div class="col-auto">
+      <div class="pr-1 pt-1 pl-2 pb-1 ml-2 mr-2 mb-2 mt-2 alert-secondary border border-secondary">
+        <input @id("code") class="tuse__CodeInput mb-2" maxlength="4" value="">
+      </div>
+    </div>
+    <div class="col ml-2 mr-2">
+      @helpText("code")
+    </div>    
+  </div>    
+
+
+  <div class="form-group row mt-2 mb-1 alert-primary">
+    <div class="col ml-2 mr-2 border-bottom border-secondary"></div>
+  </div>
+
+  <div class="form-group row mt-2 pb-1 alert-primary">
+    <div class="col ml-2 pt-2 pb-2">
+      @actionButton("FreeBack", "free.back", "btn-sm")
+    </div>
+    <div class="col ml-2 pt-2 pb-2">
+      @actionButton("FreeConfirm", "free.confirm", "btn-sm")
+    </div>
+  </div>
+</form>

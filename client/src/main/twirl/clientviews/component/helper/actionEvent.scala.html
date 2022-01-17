@@ -1,0 +1,7 @@
+@*
+ * Template for onclick
+ *@
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@(_key: String, _event: String)(implicit ucp: UseCaseParam)
+@{ Html(_actionEvent(_key: String, _event: String)) }

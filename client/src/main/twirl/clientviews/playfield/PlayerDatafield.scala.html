@@ -1,0 +1,10 @@
+@*
+ * Template for Playfield Datafield for player
+ *@
+@(players: Seq[(String, String)])
+
+@for(player <- players) {	
+	<option data-value="@player._1">@player._2</option>
+}
+
+	

@@ -1,0 +1,34 @@
+@*
+ * Template Show Tourney Results
+ *@
+@import shared.model._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._
+@import clientviews.component.helper.html._
+
+@(co2NameStatus: Map[Long,(String, String)], co2coph: Map[Long, Seq[CompPhase]])(implicit ucp: UseCaseParam)
+@collapse(id: String)=@{ s""" href=javascript:InputCtrl.collapse('${ucp.idBase}__${id}') """	}
+
+@if(co2coph.size == 0){
+  <div class="alert alert-info text-center" role="alert">
+    <span class="tuse-font-1">@msg("noEntries")</span>
+  </div>
+} else {
+  @for((coId, cophList) <- co2coph) {
+    <div class="card mb-1">
+      <div class="tuse-card-header">
+        <div class="float-left">
+            <a @collapse("Result_"+coId)>
+                <span class="tuse-font-1 text-dark"><i class="fa fa-fw fa-bars"></i>
+                <span class="tuse-font-1">@co2NameStatus(coId)._1</span>
+              </a>	      
+            </div> 
+          <div class="float-right mr-2"><span class="tuse-font-1 text-dark">@co2NameStatus(coId)._2</span></div>
+      </div>
+    </div>  
+
+    <div @id("Result_"+coId) class="mt-2 collapse">
+      @clientviews.component.tabletennis.html.CompPhaseTmpl(cophList.toIndexedSeq)
+    </div>
+  } 
+}

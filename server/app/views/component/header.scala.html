@@ -1,0 +1,54 @@
+@*
+ * Navigation Header
+ *@
+@(lang: String, langs: Seq[(String,String)], msgs: MessagesProvider)
+@getAppMsg(name: String) = @{ msgs.messages("app." + name) }
+@eventUseCase(ucName: String, ucParam: String="", ucStep: String="") = @{
+  Html(s""" href="#" onclick="InputCtrl.eventUseCase('${ucName}','${ucParam}','${ucStep}'); false" """)
+}
+
+<!-- START Header -->
+<ul class="navbar-nav ml-auto" id="appMainNavbarHeader">
+      
+  <li id="APP__Register" class="nav-item">
+    <a class="nav-link" @eventUseCase("HomeRegister", "freeLicense", "INIT")>@getAppMsg("header.register")</a> 
+  </li>  
+
+  <li class="nav-item">
+    <a class="nav-link" href='@getAppMsg("url.download")'>@getAppMsg("header.download")</a> 
+  </li>  
+  
+  <li class="nav-item">
+    <a class="nav-link" @eventUseCase("HomeDemo")>@getAppMsg("header.demo")</a> 
+  </li>
+
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-lg-2" id="alertsDropdown" href="#" data-toggle="dropdown">
+      &#128100; @getAppMsg("header.manager")
+    </a>
+    <div class="dropdown-menu dropdown-menu-right">
+      <h6 id="APP__User" class="dropdown-header"><strong id="APP__UserName">UserNameEMail</strong></h6>
+      <h6 id="APP__Club" class="dropdown-header"><strong id="APP__ClubName">Club</strong></h6>
+      
+      <a id="APP__Configuration" class="dropdown-item small font-weight-bold" @eventUseCase("HomeSetting","")>
+        <i class="fa fa-cog" aria-hidden="true"></i>&nbsp;@getAppMsg("header.configuration")
+      </a>      
+      
+      <a id="APP__Logout" class="dropdown-item small font-weight-bold" @eventUseCase("HomeLogin","logout")>
+        <i class="fa fa-sign-out" aria-hidden="true"></i>&nbsp;@getAppMsg("header.logout")
+      </a>
+      <a id="APP__Login" class="dropdown-item small font-weight-bold" @eventUseCase("HomeLogin","login")>
+          <i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp;@getAppMsg("header.login")
+      </a>
+      <div class="dropdown-divider"></div> 
+      <a id="APP__Download" class="dropdown-item small font-weight-bold" href='@getAppMsg("url.download")'>
+        <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;@getAppMsg("header.download")
+      </a>      
+      <a id="APP__Handbook" class="dropdown-item small font-weight-bold"  href='@getAppMsg("url.doc")'>
+        <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;@getAppMsg("header.handbook")
+      </a> 
+    </div>
+ </li>
+
+</ul>      
+<!-- End Header -->

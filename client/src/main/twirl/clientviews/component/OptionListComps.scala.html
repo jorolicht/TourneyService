@@ -1,0 +1,11 @@
+@*
+ * Template for option list for player birthyear
+ *@
+@(colist: Seq[(String,String)], description: String)
+
+<option value="-1" selected>@description</option>
+@for( co <- colist) {
+  <option value='@co._1'>@co._2</option>
+} 
+
+

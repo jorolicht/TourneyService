@@ -1,0 +1,22 @@
+@*
+ * Template for testing
+ *@
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+
+@(idName: String, name: String, header: String, body: Html)(implicit ucc: UseCaseParam)
+
+<div class="card mt-2">
+	<div class="tuse-card-header">
+		<div class="float-left mt-2 ml-1">
+			<h6 class="text-dark">
+				<input @id(idName) type="radio" name='@name' onchange="InputCtrl.eventRadioCard(this);">
+				@msg(header)
+			</h6>
+		</div>
+	</div> 
+	<div @id(idName+"Card") data-radiocard='@name' class="tuse-card-body pb-1 collapse">
+		@body
+	</div>
+</div>

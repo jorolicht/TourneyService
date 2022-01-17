@@ -1,0 +1,126 @@
+@*
+ * Template for TournBase Dialog
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@()(implicit ucc: UseCaseParam)
+
+<!--  START Modal Dialog for a Tourney --> 
+<div class="modal fade" @id("Modal") tabindex="-1" style='z-index:9000' role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" @id("Header")>Header</h5>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      
+      <div class="modal-body mb-0">       
+        <div class="form-input">          
+					<input @id("Id")        type='hidden' value=''>
+					<input @id("OrgDir")    type='hidden' value=''>
+					<input @id("Organizer") type='hidden' value=''>
+
+          <div class="form-row">						
+						<div class="col-sm-6">
+					    @inputTextPlh(name="Name",_class="form-control-sm", hlp="", minlength=10)		
+						</div>
+				
+						<div class="form-group col-sm-3">
+							@lbl("StartDate","mb-0")	
+							<div class='input-group date' >
+								<input @id("StartDate") style='padding-left:1px;padding-right:1px' type='text' value='' class="form-control form-control-sm text-center" />
+							</div>
+						</div>
+				
+						<div class="form-group col-sm-3">
+							@lbl("EndDate","mb-0")
+							<div class='input-group date' >
+								<input @id("EndDate") style='padding-left:1px;padding-right:1px' type='text' value='' class="form-control form-control-sm text-center" />
+							</div>
+						</div>
+					</div>
+
+          <div class="form-row">
+						<div class="form-group  col-6">
+							<select @id("Typ") class="form-control form-control-sm" @actionEvent("VISIBILITY", "onchange")>
+								<option value="None" disabled selected>@msg_("tourney.typ.name")</option>
+								<option value="1">@msg_("tourney.typ.1")</option>
+							</select>
+						</div>
+			
+						<div class="form-group  col-6">
+							<select @id("Visibility") class="form-control form-control-sm" @actionEvent("VISIBILITY", "onchange")>
+								<option value="None" disabled selected>@msg_("tourney.visibility")</option>
+								<option value="true">@msg_("tourney.privat")</option>
+								<option value="false">@msg_("tourney.public")</option>
+							</select>
+						</div>
+          </div>
+          
+					<div class="form-row border-bottom">
+						<div class="form-group col-6 mb-0">
+						  <small class="font-weight-bold">@msg("optional.hdr")</small>
+						</div>
+					</div>
+
+          <div class="form-row mt-2">
+						<div class="form-group col-2">
+							<button type="button" class="btn btn-secondary btn-sm">Kontakt</button>
+						</div>
+						<div class="form-group col-10">
+              <input @id("ContactName") type="text" class="form-control form-control-sm" value="" @plh("contact.name")>
+						</div>
+					</div>	
+
+          <div class="form-row">
+						<div class="form-group col-6">
+							<input @id("ContactEMail") type="text" class="form-control form-control-sm mb-1" value="" @plh("contact.email")> 
+						</div>
+						<div class="form-group col-6">
+							<input @id("ContactPhone") type="text" class="form-control form-control-sm" value="" @plh("contact.phone")>
+						</div>
+					</div>	
+
+					<div class="form-row border-bottom">
+						<div class="form-group col-6 mb-0">
+						  <small class="font-weight-bold">Spiellokal</small>
+						</div>
+					</div>
+
+					<div class="form-row mt-2">
+						<div class="form-group col-sm-8">
+							<input @id("AddrDescription") type="text" class="form-control form-control-sm" 
+							value='' @plh("addr.description")>
+						</div>
+						<div class="form-group col-sm-4">
+							@inputCountry("AddrCountry", "", "", "", "form-control-sm")
+						</div>
+					</div>
+				
+					<div class="form-row mb-0">
+						<div class="form-group col-sm-2 mb-0">
+							<input @id("AddrZIP") type="text" class="form-control form-control-sm" value='' @plh("addr.zip") >
+						</div>		
+						<div class="form-group col-sm-5 mb-0">
+							<input @id("AddrCity") type="text" class="form-control form-control-sm" value='' @plh("addr.city") >
+						</div>	
+						<div class="form-group col-sm-5 mb-0">
+							<input @id("AddrStreet") type="text" class="form-control form-control-sm" value='' @plh("addr.street") >
+						</div>
+				  </div>
+        </div>         
+      </div>     
+      
+      <div class="modal-footer">
+        <button @id("BtnCancel") class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.cancel")</button>
+        <button @id("BtnSave")   class="btn btn-outline-secondary btn-xs" type="button">@msg_("std.btn.save")</button>
+				<button @id("BtnClose")  class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.close")</button>    
+      </div>
+    </div>
+  </div>
+</div>
+<!--  END Modal Dialog --> 

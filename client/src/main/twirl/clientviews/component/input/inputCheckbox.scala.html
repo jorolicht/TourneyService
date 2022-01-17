@@ -1,0 +1,18 @@
+@*
+ * Template for input checkbox 
+ *@
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@(key: String, _class: String, small: Boolean=false)(implicit ucp: UseCaseParam)
+
+<div class="form-check @_class">
+  <input class="form-check-input" type="checkbox" value="" @id(key) @actionEvent(key, "onchange")>
+  <label class='form-check-label' @forAttr(key)>
+    @if(small){ 
+      <small>@Html(msgLbl(key))</small> 
+    }else{
+      @Html(msgLbl(key))
+    }
+  </label>
+</div>

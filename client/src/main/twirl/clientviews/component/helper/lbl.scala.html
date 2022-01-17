@@ -1,0 +1,9 @@
+@*
+ * Template for Html label element
+ *@
+
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+
+@(name: String, classAttr: String)(implicit ucp: UseCaseParam)
+@{ Html(_lbl(name, classAttr)) }

@@ -1,0 +1,13 @@
+@*
+ * Template for email input element
+ *@
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+
+@(id: String, init: String, _class: String, lbl: String="input.email.lbl", hlp: String="input.email.hlp", readonly: Boolean=false)(implicit ucp: UseCaseParam)
+
+@{ if (lbl!="") Html(_lblFor(id, "mb-0", lbl)) }
+@{ Html(_inputEmail(id, _class, init, readonly)) }
+@{ if (hlp!="") Html(_hlpFor(id, hlp)) }
+

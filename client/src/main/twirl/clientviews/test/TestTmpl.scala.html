@@ -1,0 +1,14 @@
+@*
+* Template for displaying group results
+*@
+@import shared.model.tabletennis.Group
+@import shared.model.ParticipantEntry 
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+
+@(group: Group)(implicit ucc: UseCaseParam)
+
+<div class="card" style="border:none;">
+ <strong>@{group.name}</strong>
+</div>

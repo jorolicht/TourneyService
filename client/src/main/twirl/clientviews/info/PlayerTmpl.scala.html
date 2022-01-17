@@ -1,0 +1,63 @@
+@*
+ * Template Info of Players
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(comps: Seq[(Long, String, Int, Seq[(String, String, String, String, String)])])(implicit ucp: UseCaseParam)
+
+@if(comps.isEmpty) {  
+  <div class="alert alert-info text-center" role="alert">
+    <span class="tuse-font-1">@msg("noEntry")</span>
+  </div>
+} else {	    
+	@for(co <- comps) {		  
+		<div class="card mb-1">
+			<div class="tuse-card-header">		
+				<div class="float-left mt-1">
+					  <a href="javascript:InputCtrl.collapse('@_name(s"${co._1}List")')" >
+							<span class="tuse-font-1 text-dark"><i class="fa fa-fw fa-bars"></i>
+							<span class="tuse-font-1">@co._2</span>
+						</a>	      
+					</div> 
+				<div class="float-right mr-2"><span class="tuse-font-1 text-dark">@msg("count") @co._3</span></div>
+			</div>
+			
+			<div @id(s"${co._1}List") class="tuse-card-body collapse">
+				@if(co._4.length > 0) {
+					<table class="table tuse-border table-sm small">
+						<tbody>
+							<tr style="border-bottom:2px solid #ccc;">
+								<td class="text-left tuse-height"><strong>@msg("header.nr")</strong></td>
+								<td class="text-left tuse-height"><strong>@msg("header.name")</strong></td>
+								<td class="text-left tuse-height"><strong>@msg("header.club")</strong></td>
+								<td class="text-right tuse-height"><strong>@msg("header.place")</strong></td>
+								<td class="text-right tuse-height"><strong>@msg("header.ttr")</strong></td>
+							</tr>	
+							
+							@for(player <- co._4) {	
+								<tr>  
+									<td class="text-left tuse-height">@player._1</td>
+									<td class="text-left tuse-height">@player._2</td>
+									<td class="text-left tuse-height">@player._3</td>
+                  <td class="text-right tuse-height">
+									  @if(player._4 != "") {
+											<span>@{player._4} &nbsp;</span>
+											<a href="#" class="text-primary" @onclick("PrintPreview", player._1, co._1.toString) >
+												<i class="fa fa-trophy" ></i>
+											</a>
+									  }
+								  </td>
+									<td class="text-right tuse-height">@player._5</td>
+								</tr>				
+							}
+						</tbody>
+					</table>    
+				} else {
+					<span class="tuse-font-1">@msg("noplayer")</span>
+				}
+			</div>
+		</div>		
+	}
+}

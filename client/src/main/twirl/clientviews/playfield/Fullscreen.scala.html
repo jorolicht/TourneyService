@@ -1,0 +1,61 @@
+@*
+ * Show playfields template
+ *@
+@import shared.model.Playfield
+@(pfs: Seq[Playfield], msgs: Map[String,String]) 
+@getMsg(name: String) = @{ msgs("fullscreen.playfields." + name) }
+<div class="card">
+  <div class="card-body">
+  
+     @if(!pfs.isEmpty) {
+	     @if(pfs.head.nr == 0) {
+				 <div class="container-fluid mb-3" style="line-height: 0.5">
+				   <div class="row justify-content-md-center pb-0">
+					 	 <div class="col-12 text-center pb-0">
+				       <div class="alert alert-secondary pb-0" role="alert">
+							   <h6>@pfs.head.info</h6>	        
+				       </div> 
+						 </div>
+					 </div>
+				 </div>		
+	     } 
+     }
+  
+	  <table class="table table-sm">
+		  <thead>
+		    <tr>
+		      <td class="text-center" style="width:16%;"><strong>@getMsg("header.table")</strong></td>
+		      <td colspan="3" class="text-center" style="width:68%;"><strong>@getMsg("header.match")</strong></td>
+		      <td class="text-center" style="width:16%;"><strong>@getMsg("header.info")</strong></td>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    @if(pfs.isEmpty) {
+		      <td colspan="5">
+		        <div class="alert alert-info text-center" role="alert">
+	             @getMsg("noEntryMsg")
+	          </div>  	      
+		      </td>
+		    } else {
+			    @for(pf <- pfs) {
+			      @if(pf.nr !=0) {
+					    <tr>
+					      <td class="text-center" style="width:16%;">@pf.nr</td>
+					      <td class="text-right"  style="width:33%;">@pf.playerA
+					         @if(pf.clubA != "") { <span class="vtbl_club">[@pf.clubA]</span> }
+					      </td>
+					      <td class="text-center" style="width:2%;">-</td>
+					      <td class="text-left"  style="width:33%;">@pf.playerB
+					         @if(pf.clubB != "") { <span class="vtbl_club">[@pf.clubB]</span> }
+					      </td>  
+					      <td class="text-center" style="width:16%;">@pf.pClass
+					        @if(pf.info != "") { <span class="vtbl_info">[@pf.info]</span> }
+					      </td>
+					    </tr>
+					  }
+				  } 
+		    }
+		  </tbody>
+	  </table>
+  </div>
+</div>

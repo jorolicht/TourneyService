@@ -1,0 +1,11 @@
+@*
+ * Template for Playfield Competition Options
+ *@
+@(comps: Seq[(Long,String)], selComp:String, idPref: String="APP__DlgPlayfield", mPref: String = "dlg.playfield")
+@id(name: String) = @{ idPref + "__" + name }
+
+<option  id='@id("Competition_0")' value="-1" @if(selComp==""){ selected }>---</option>
+@for( comp <- comps){
+  <option  id='@id(s"Competition_${comp._1}")' value='@comp._1' @if(comp._2==selComp){selected} >@comp._2</option>	
+} 
+

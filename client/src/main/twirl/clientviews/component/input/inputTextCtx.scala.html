@@ -1,0 +1,10 @@
+@*
+ * Template for text input element
+ *@
+@import upickle.default._
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(name: String, _class: String, _ctx: ujson.Value)(implicit ucp: UseCaseParam)
+@{ Html(_inputTextCtx(name, _class, _ctx)) }

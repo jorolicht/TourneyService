@@ -1,0 +1,13 @@
+@*
+ * Template for name input element
+ *@
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+
+@(name: String, init: String,  lbl: String="input.name.lbl", hlp: String="input.name.hlp", _class: String="", readonly: Boolean=false, list: Boolean=false)(implicit ucp: UseCaseParam)
+
+@{ if (lbl!="") Html(_lblFor(name, "mb-0", lbl)) }
+@{ Html(_inputName(name, _class, init, readonly, list)) }
+@{ if (hlp!="") Html(_hlpFor(name, hlp)) }
+

@@ -1,0 +1,21 @@
+@*
+ * Template for Spinner
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._  
+@import clientviews.component.helper.html._
+
+@(testInfo: String, message: String)(implicit ucp: UseCaseParam) 
+
+<div class="d-flex justify-content-center">
+  <div class="row">
+    <h5>Verarbeitung ...</h5>
+  </div>  
+  <div class="row">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</div>
+ 

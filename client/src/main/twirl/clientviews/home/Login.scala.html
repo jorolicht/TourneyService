@@ -1,0 +1,54 @@
+@*
+ * Template for registering 
+ *@
+@import clientviews.component.input.html._
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import upickle.default._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+ 
+<div class="container-fluid alert-secondary">
+  <div class="row alert-primary justify-content-center mb-2">
+    <h3 @data("view", "start")>@msg("hdg")</h3>
+  </div>
+</div>
+
+<div class="container-fluid pt-1 pb-0 alert-primary">
+  @**
+   ** Common section for login usecase
+   **@
+  <form >  
+    <div class="form-group row mb-1 alert-primary justify-content-center">
+      <div class="col-sm-12 col-md-6">
+        @inputTextPlh(name="user", init=ctx("user").str, minlength=8)
+      </div>
+    </div>
+
+    <div class="form-group row mb-1 alert-primary justify-content-center">
+      <div class="col-sm-12 col-md-6">
+        @inputPassword("password")
+      </div>
+    </div>
+
+    <div class="form-group row mt-2 mb-1 alert-primary">
+      <div class="col ml-2 mr-2 border-bottom border-secondary"></div>
+    </div>
+
+    <div class="form-group row mt-2 alert-primary justify-content-between">
+      <div class="col ml-1 pt-2 pb-2">
+        @actionButton("ReqAuthenticate", "req.authPassword", "btn-sm")
+      </div>
+
+      <div class="col pt-2 pb-2"><a class="btn btn-sm btn-google btn-block text-uppercase btn-outline-secondary" href="/authenticate/google">
+        <img src="https://img.icons8.com/color/16/000000/google-logo.png">@msg("btn.req.authGoogle")</a> 
+      </div>
+
+      <div class="col pt-2 pb-2 text-right">
+        @actionButton("ReqNewPassword", "req.newPassword", "btn-sm")
+      </div>
+    </div>
+  </form>
+
+</div>

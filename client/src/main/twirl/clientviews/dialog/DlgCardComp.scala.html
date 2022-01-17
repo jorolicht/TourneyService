@@ -1,0 +1,117 @@
+@*
+ * Template for Player Dialog
+ *
+ * Test Links
+ * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=Edit#
+ * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=Show#
+ * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=New#
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@()(implicit ucc: UseCaseParam)
+
+<!--  START Modal Dialog for Competition --> 
+<div class="modal fade" @id("Modal") tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" @id("Title")><i class="fa fa-trophy" aria-hidden="true"></i>&nbsp; @msg("Title")</h5>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      
+      <!--  START Body Player --> 
+      <div class="modal-body pb-1">
+        <div @id("Form") class="container-fluid pl-0 pr-0">
+
+          <div class="form-row mb-0">
+            <div class="col-sm-7 form-group">
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <strong><span class="input-group-text-sm" @id("coId")>X</span></strong>
+                </div>
+                @inputTextPlh(name="name",_class="form-control-sm", lbl="", hlp="", minlength=2)
+              </div>
+            </div>
+
+            <div class="form-group col-sm-5">
+              @inputCompStatus("status")
+            </div>
+          </div> 
+
+          <div @id("Compose") class="form-row border-bottom">
+            <div class="col-sm-12 mr-0 pr-0 mb-1">
+              @inputCheckbox("NameCompose", "", true)
+            </div>
+          </div>
+
+          <div class="form-row mb-0 mt-2">
+            <div class="form-group col-sm-4">
+              <select @id("typ") class="form-control form-control-sm" @actionEvent("NameCompose", "oninput")>
+                <option value="0" disabled selected>@msg_("competition.typ.0")</option>
+                @for(i <- 1 to 4) {	<option value="@i">@msg_("competition.typ."+i.toString)</option> } 
+              </select>
+            </div>
+
+            <div class="form-group col-sm-4 mb-0">
+              <input @id("AgeGroup") type="text" class="form-control form-control-sm" 
+                @plh("AgeGroup") @actionEvent("NameCompose", "oninput") value='' list='@_name("AgeGroupList")'>
+              <datalist @id("AgeGroupList")>
+                @for(i <- 1 to 21) { <option data-value="@i">@msg_("competition.agegroup."+i.toString)</option> } 
+              </datalist>		
+            </div>
+
+            <div class="form-group col-sm-4 mb-0">
+              <input @id("Class") type="text" class="form-control form-control-sm mr-2" 
+                @plh("Class") @actionEvent("NameCompose", "oninput") value='' list='@_name("ClassDatalist")'>
+              <datalist @id("ClassDatalist")>
+                  @for(i <- 1 to 5) {	<option data-value="@i">@msg_("competition.class."+i.toString)</option> } 
+              </datalist>	
+            </div>
+          </div>
+
+          <div class="form-row mb-0">
+            <div class="form-group col-sm-4 mb-0">
+              <div class='input-group date' >
+                <input @id("startTime") style='padding-left:1px;padding-right:1px' type='text' value='' 
+                      class="form-control form-control-sm text-center" @plh("startTime") />
+              </div>
+            </div>
+
+            <div class="form-group col-sm-2 mb-0">
+              <input @id("TTRFrom") type="text" class="form-control form-control-sm pl-0 pr-0 text-center" value='' @plh("TTRFrom") >
+            </div>
+            
+            <div class="form-group col-sm-2 mb-0">
+              <input @id("TTRTo") type="text" class="form-control form-control-sm pl-0 pr-0 text-center" value='' @plh("TTRTo") >
+            </div>
+
+            <div class="form-group  col-sm-4 mb-0">
+              <select @id("Sex") class="form-control form-control-sm" >
+                @for(i <- 0 to 3) {	<option value="@i">@msg_("competition.sex."+i.toString)</option> }
+              </select>
+            </div>
+          </div>
+
+          <div @id("Optional") class="form-row">
+            <div class="col-sm-12 mb-0 mt-0">
+              <small>@msg("input.optional")</small> 
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!--  END Body Competition -->
+
+      <div class="modal-footer">
+        <button @id("Cancel") class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal" @display()>@msg_("std.btn.cancel")</button>
+        <button @id("Submit") class="btn btn-outline-secondary btn-xs" type="button" @display()>@msg_("std.btn.save")</button>
+        <button @id("Close")  class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal" @display()>@msg_("std.btn.close")</button>     
+      </div>
+    </div>
+  </div>
+</div>
+<!--  END Modal Dialog --> 

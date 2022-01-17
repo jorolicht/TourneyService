@@ -1,0 +1,53 @@
+@*
+* Template for displaying errors
+*@
+@(msgTop: String, msgBottom: String, lang: String)
+<!DOCTYPE html>
+<html lang="@lang">
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	  <meta name="description" content="TTC Turnierprogramm - Turnierservice - Tourney Service">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+    <title>Error Page</title>
+    
+	  <!--
+	    Autor: Robert Lichtenegger / Copyright: Robert Lichtenegger - Cloud Service Lifecycle Management
+	    Turnierprogramm TTC Freising Lerchenfeld
+	    Tourney Service / Tournament Service
+	    Date: 2020/02/26
+	  -->
+    <style>
+      .amensic-image-wrapper{
+        max-width:60%;
+        height:auto;
+        position: relative;
+        display:block;
+        margin:0 auto;
+        }
+        .amensic-image-wrapper img{
+        width:100% !important;
+        height:auto !important;
+        display:block;
+        }
+      </style>
+
+	</head>
+	<body>  
+
+    <div align="center">
+      <h2>@msgTop</h2>
+    </div>
+
+    <div class="amensic-image-wrapper">
+      <img src="/content/img/error.gif" />
+    </div>
+
+    <div align="center">
+      <h3>@msgBottom</h3>
+    </div>
+      
+	</body>
+</html>

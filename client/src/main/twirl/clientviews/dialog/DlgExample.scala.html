@@ -1,0 +1,51 @@
+@*
+ * Template for Example Dialog
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(header: String)(implicit ucc: UseCaseParam)
+
+<!--  START Modal Example Dialog --> 
+<div class="modal fade" @id("Modal") tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" @id("Title")>@msg("header")</h5>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      
+      <div class="modal-body">  
+        <p class="small">@msg("body")</p>
+       
+        <div class="form-input">
+          <form @id("Form")>
+            <div class="form-group row">
+						  <div class="col-3"></div>
+						  <div class="col-9"></div>            
+            </div> 
+                    
+            <div class="form-group row">
+						  <div class="col-6" >
+						    Column 6
+							</div>
+						  <div class="col-6" > 
+                Column 6
+						  </div>            
+            </div> 
+				    <small @id("Help") class="form-text text-white bg-info" style='display:none'>Here comes the help text!</small>   
+          </form> 
+        </div>
+             
+      </div>     
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.cancel")</button>
+        <button @id("Submit") class="btn btn-outline-primary btn-xs" type="button">@msg_("std.btn.save")</button>      
+      </div>
+    </div>
+  </div>
+</div>
+<!--  END Modal Dialog --> 

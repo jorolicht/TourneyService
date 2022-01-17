@@ -1,0 +1,26 @@
+
+
+@*
+ * Template for Result Info Modal Dialog
+ *@
+ 
+@(title: String="", body: String="")
+<!-- START Modal Dialog for Info -->
+<div class="modal fade" id='APP__DlgInfo' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div id='APP__DlgInfo__Content' class="modal-content bg-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id='APP__DlgInfo__Title'>@title</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div id='APP__DlgInfo__Body' class="modal-body">
+        @body
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END Modal Dialog for Info -->
+
+

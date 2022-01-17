@@ -1,0 +1,41 @@
+@*
+ * Template for registering 
+ *@
+@import clientviews.component.input.html._
+@import clientviews.component.helper.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import upickle.default._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+
+<div class="container-fluid pt-1 pb-2 alert-primary">
+  <form >  
+    <div class="form-group row mb-1 alert-primary justify-content-center">
+      <div class="col-sm-12 col-md-6">
+        <label></label>
+        <h5 class="ml-1">@ctx("club").str</h5>
+      </div>
+      
+      <div class="col-sm-12 col-md-6">
+        @inputPassword("pwChkContact")
+      </div>
+    </div>
+
+    <div class="form-group row mt-2 mb-1 alert-primary">
+      <div class="col ml-2 mr-2 border-bottom border-secondary"></div>
+    </div>
+
+    <div class="form-group row mb-1 alert-primary">
+      <div class="col-sm-12 col-md-6 ml-1">@inputName("newUser", ctx("user").str)</div>
+      <div class="col-sm-4 col-md-2">@inputTextPlh("zip", ctx("zip").str)</div>
+      <div class="col">@inputTextPlh("city", ctx("city").str)</div>
+    </div>  
+
+    <div class="form-group row mb-1 alert-primary">
+      <div class="col-sm-12 col-md-6 ml-1">@inputEmail("newEmail", ctx("email").str, "")</div>   
+      <div class="col-sm-6 col-md-3">@inputTextPlh("street", ctx("street").str)</div>
+      <div class="col">@inputCountry("country", ctx("country").str)</div>
+    </div>
+  </form>
+</div>

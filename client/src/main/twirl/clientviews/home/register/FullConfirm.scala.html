@@ -1,0 +1,74 @@
+@*
+ * Template for registering license step full-confirm
+ *@
+@import upickle.default._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._
+@import clientviews.component.input.html._
+@import clientviews.component.helper.html._
+
+@(ctx: ujson.Value)(implicit ucp: UseCaseParam)
+@border()=@{ Html("""<div class="form-group row mt-2 mb-1 alert-primary"><div class="col ml-2 mr-2 border-bottom border-secondary"></div></div>""")}
+
+@* state full-confirm *@ 
+<form @data("view", "full-confirm") style='display:none'>  
+  <div class="form-group row mt-2 mb-0 alert-primary">
+    <div class="col ml-2 mr-2 mb-0 text-center">
+      <p>@{ Html(msg("fullconfirm.name", ctx("name").str)) }</p>
+      <p class="mb-0">@{ Html(msg("fullconfirm.clubname", ctx("clubname").str)) }</p>
+    </div>
+  </div>
+
+  @border()
+
+  <div class="container mt-2">
+    <div class="row justify-content-center">
+      <h5>@msg("fullconfirm.item.hdl")</h5>
+    </div>
+
+    <ul class="list-group">
+      @for(i<-1 to msg("fullconfirm.item.cnt").toInt){
+        <li class="list-group-item">@msg(s"fullconfirm.item.content.${i}")</li>
+      }
+    </ul>
+  </div>
+
+  @border()
+
+  <div class="form-group row mb-1">
+    <div class="col ml-2 mr-2">
+      <p>
+        @{ Html(msg("confirm.entercode", ctx("email").str)) }
+        @actionButton("codeResend", "code.resend", "btn-xs")
+      </p>
+    </div>
+
+    <div class="col-auto">
+      <div class="pr-1 pt-1 pl-2 pb-1 ml-2 mr-2 mb-2 mt-2 alert-secondary border border-secondary">
+        <input @id("code") class="tuse__CodeInput mb-2" maxlength="4" value="">
+      </div>
+    </div>
+    <div class="col ml-2 mr-2">
+      @helpText("code")
+    </div>    
+  </div>
+
+  @border()
+  
+  @* general terms and conditions *@
+  <div class="row ml-2 mt-2 mb-0 alert-primary">@inputCheckbox("gtc", "mb-0")</div>
+  <div class="row ml-2 mt-1 mb-0 alert-primary">@inputCheckbox("withdrawal", "mb-0")</div>
+  <div class="form-group row ml-2 mb-1 alert-secondary">@helpText("ConfirmConditions")</div>
+
+  @border()
+
+  <div class="form-group row mt-2 alert-primary justify-content-between">
+    <div class="col ml-1 pt-2 pb-2">
+      @actionButton("FullBack", "full.back", "btn-sm")
+    </div>
+    <div class="col pt-2 pb-2 text-right">
+      @actionButton("FullConfirm", "full.confirm", "btn-sm")
+    </div>
+  </div>
+
+</form>

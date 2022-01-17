@@ -1,0 +1,16 @@
+@*
+ * Main Template with Carousel
+ *@
+@(msg: String) 
+ <div class="container h-100">
+
+  <div id="carouselContent" class="mb-5">@msg</div>	
+
+  <script>
+    $('.carousel').carousel({
+    interval: 4000
+    })
+  </script>
+
+</div>
+

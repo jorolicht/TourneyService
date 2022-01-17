@@ -1,0 +1,22 @@
+@*
+ * Template for Date Time Input
+ *@
+@import clientviews.component.helper.html._ 
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+
+@(withTime: Boolean, ph: String, lang: String)(implicit ucc: UseCaseParam)
+
+<div class='input-group date' >
+  <input @id("datetimepicker") type='text' class="form-control form-control-sm border border-dark" placeholder='@ph'/>
+  <span class="input-group-btn">
+      <button class="btn btn-secondary btn-sm disabled" disabled="disabled"><i class="fa fa-lg fa-calendar"></i></button>
+  </span>
+  <script type="text/javascript">
+    $(function () {
+      $('#@_name("datetimepicker")').datetimepicker({
+        locale: '@lang'
+      });
+    });
+  </script>
+</div>

@@ -1,0 +1,95 @@
+@*
+ * Template Show Tourney Information
+ *@
+
+@import shared.utils.Constants._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+ 
+@(info: String, date: String, orgDir: String, organizer: String, colist: Seq[(Long, String, Int, String, String, String, Int)])(implicit ucp: UseCaseParam)
+@coLiVal(id: Long, coTyp: Int) = @{ s"${id}__${coTyp}" }
+@collapse(id: String) = @{ Html(s""" href="javascript:InputCtrl.collapse('${ucp.idBase}__${id}')" """) }	
+
+<div class="card mb-2 text-center">
+  <img class="card-img-top" src='/assets/content/clubs/@orgDir/banner.png' alt="Club Banner">
+  <div class="card-body">
+    <h6 class="card-title">@msg_("greeting")</h6>
+    <h5  class="card-title">@info</h5>
+    <p class="card-text">@date</p>
+    <span class="card-text">@organizer</span>
+  </div>
+</div>
+
+@RegisterCard(info, date, organizer, colist)
+
+<div class="card mt-2"> 
+  <div class="tuse-card-header">  <!-- START Card Header -->
+    <div class="float-left mt-2">
+        <a @collapse("CompsBody") >
+          <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("competitions")</h6>
+        </a>	      
+      </div> 
+  </div>                          <!-- END Card Header -->
+    
+  <div @id("CompsBody") class="tuse-card-body pb-2 collapse">
+
+    @if(colist.isEmpty) { 
+      <div class="text-center">
+        <div class="alert alert-info" role="alert">
+          <span class="tuse-font-1">@msg("comps.header.noEntry")</span>
+        </div>
+      </div>
+    } else {	
+
+      <div class="d-flex justify-content-center">      <!-- START Input Area -->
+        <table class="table table-sm small table-hover">
+          <tbody>
+            <tr style="border-bottom:2px solid #ccc;">
+              <td class="text-left"><strong>@msg("comps.header.startTime")</strong></td>
+              <td class="text-left"><strong>@msg("comps.header.description")</strong></td>
+              <td class="text-left"><strong>@msg("comps.header.status")</strong></td>
+              <td class="text-center"><strong>@msg("comps.header.noParts")</strong></td>
+              <td class="text-right"><strong>@msg("comps.header.ttrRange")</strong></td>
+            </tr>		
+              @for(co <- colist) {
+                <tr>
+                  <td class="text-left tuse-height">@co._4</td>
+                  <td class="text-left tuse-height">@co._2</td>
+                  @if(co._7!=CS_RESET) {
+                    <td class="text-left tuse-height">@msg_("competition.status."+co._7)</td>
+                  } else {
+                    <td class="text-left tuse-height"></td>
+                  }
+                  <td class="text-center tuse-height">@co._6</td>
+                  <td class="text-right tuse-height">@co._5</td>  
+                </tr>
+              }  
+          </tbody>
+        </table>
+
+      </div>                      <!-- END Input Area -->
+    }                                                   
+  </div>                          <!-- END Card Body -->
+</div>                            <!-- END Card -->
+
+
+
+
+<div @id("HintCard") class="card mt-2"> 
+  <div class="tuse-card-header">  <!-- START Card Header -->
+    <div class="float-left mt-2">
+      <a @collapse("HintBody") >
+          <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("optionalinfo")</h6>
+        </a>	      
+      </div> 
+  </div>                          <!-- END Card Header -->
+    
+  <div @id("HintBody") class="tuse-card-body pb-2 collapse">
+    <div @id("HintBodyContent") class="text-left">      <!-- START Input Area -->
+      <div class="alert alert-info" role="alert">
+        <span class="tuse-font-1">@msg("hint")</span>  
+      </div>
+    </div>                                        
+  </div>                          <!-- END Card Body -->
+</div>                            <!-- END Card -->

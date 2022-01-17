@@ -1,0 +1,36 @@
+@*
+ * Footer
+ *@
+@(msgs: MessagesProvider )
+@getMsg(name: String) = @{ msgs.messages("app.footer." + name) }
+@eventUseCase(ucName: String, ucParam: String="", ucStep: String="") = @{
+  Html(s""" href="#" onclick="InputCtrl.eventUseCase('${ucName}','${ucParam}','${ucStep}'); false" """)
+}
+
+<footer id="APP__Footer_Content_MetaData" class="tuse-sticky-footer">
+  <div class="container mb-0">
+    <div class="row border-top border-bottom">
+      <div class="col text-left"><small id="APP__Footer_Content_Author"></small></div>
+      <div class="col text-right"><small id="APP__Footer_Content_ChangeDate"></small></div>                     
+    </div>	    
+  </div>
+</footer>
+
+<footer class="sticky-footer">
+  <div class="container">
+    <div class="text-center">
+      <small>
+        <a id="APP__FooterGerman" href="/setLang?lang=de">
+          <img src="/assets/img/germany-flag-icon-32.png" height="20px"/> 
+        </a>
+        <a id="APP__FooterEnglish" href="/setLang?lang=en">
+          <img src="/assets/img/united-kingdom-flag-icon-32.png" height="20px"/> 
+        </a>
+
+        @getMsg("copyright1")&nbsp;<a href="#" @eventUseCase("HomeConsole", "", "")>&copy;</a>&nbsp;@getMsg("copyright2")
+        <a title="@getMsg("impressum")" href="#" @eventUseCase("HomeMain", "Content", "/content/impressum.md")>@getMsg("impressum")</a>
+        <a title="@getMsg("dataprotection")" href="#" @eventUseCase("HomeMain", "Content", "/content/dataprotection.md")>@getMsg("dataprotection")</a>
+      </small>
+    </div>
+  </div>
+</footer>

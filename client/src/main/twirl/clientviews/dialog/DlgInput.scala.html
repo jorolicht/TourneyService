@@ -1,0 +1,36 @@
+@*
+ * Template for Input Dialog
+ *@
+
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._  
+ 
+@(title: String="")(implicit ucp: UseCaseParam)
+<!-- START Modal Dialog for Input -->
+<div class="modal fade" id='APP__DlgInput' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div id='APP__DlgInput__Content' class="modal-content bg-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id='APP__DlgInput__Title'>@title</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div id='APP__DlgInput__Body' class="modal-body">
+        <input type="hidden" id="APP__DlgInput__UseCase" name="UseCase" value="X">
+
+        <textarea class="form-control mb-2" id="APP__DlgInput__Output" rows="15" style="font-size: 12px; font-family: Consolas" readonly></textarea>
+        @inputText("Input", "mb-2")
+        @actionButton("Submit", "submit", "btn-sm")
+      </div> 
+    </div>    
+  </div>
+
+
+</div>
+<!-- END Modal Dialog Input -->
+
+

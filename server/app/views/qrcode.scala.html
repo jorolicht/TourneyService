@@ -1,0 +1,79 @@
+@*
+ * template for qrcode generation
+ *@
+@(tourneyName: String, dateInfo: String, clubName: String, tourneyUrl: String, 
+  orgDir: String, lang: String, clubLogo: Boolean)(implicit request: RequestHeader, messages: MessagesProvider, assetsFinder: AssetsFinder)
+
+<!DOCTYPE html>
+<html lang="@lang">
+	<head>
+	  <meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <meta name="description" content="TTC Turnierprogramm - QrCode">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+	  <title>QR-Code @tourneyName</title>
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "css/qrcode.css")')">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+		<script src='@routes.Assets.at("/public", "js/qrcode.min.js")'></script>
+
+	  <!--
+	    Autor: Robert Lichtenegger / Copyright: Robert Lichtenegger - Cloud Service Lifecycle Management
+	    Turnierprogramm TTC Freising Lerchenfeld
+	    Tourney Service / Tournament Service
+	    Date: 2020/11/30
+		-->
+		
+	</head>
+
+	<body class="entire-webpage">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+			  <div id="QrLogo">
+					@if(clubLogo){
+						<img class="img-fluid" src="/public/clubs/@orgDir/logo.png"/>
+					}else{
+						<img class="img-fluid" src='@assetsFinder.path("img/TTClubLogoDefault.png")'/>
+					}
+				</div>
+			</div>
+
+      <div class="row justify-content-center">
+				<h2 id="QrTourney">@tourneyName</h2>
+			</div>
+		
+			<div class="row justify-content-center">
+				<h2 id="QrDate">@dateInfo</h2>
+			</div>
+
+			<div class="row justify-content-center">
+				<h2 id="QrClub">@clubName</h2>
+			</div>
+
+
+			<div class="row mt-3 justify-content-center">
+				<div id="qrcode" style="width:100px; height:100px; margin-top:15px;"></div>
+			</div>
+
+			<div class="row justify-content-center">
+				<h3 id="QrUrl">URL:&nbsp;&nbsp;<a href='@tourneyUrl'>@tourneyUrl</a></h3>
+			</div>
+
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		var qrcode = new QRCode(document.getElementById("qrcode"), {
+			width : 100,
+			height : 100
+		});
+		qrcode.makeCode('@tourneyUrl');
+	</script>
+
+</html>

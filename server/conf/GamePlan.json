@@ -1,0 +1,22 @@
+  [
+    { 
+      "name" : "group03",
+      "plan" : [   
+         { "gano": 1, "player1": "P1", "player2": "P2", "ngw" : 2, "ngl" : 0, "round" : 1,  "depend" : [1,2,3,4], "desc": {"de":"Endspiel", "en":"Final"} },
+         { "gano": 2, "player1": "P4", "player2": "L2", "ngw" : 3, "ngl" : 0, "round" : 1,  "depend" : [1,2,3,4], "desc": {} },
+         { "gano": 3, "player1": "W1", "player2": "W2", "ngw" : 4, "ngl" : 0, "round" : 2,  "depend" : [1,2,3,4], "desc": {"de":"Endspiel", "en":"Final"} },
+         { "gano": 4, "player1": "P1", "player2": "P1", "ngw" : 1, "ngl" : 0, "round" : 2,  "depend" : [1,2,3,4], "desc": {"de":"Endspiel", "en":"Final"} }
+      ]
+    },
+    { 
+      "name" : "group04",
+      "plan" : [   
+         { "gano": 7, "player1": "W1", "player2": "W2", "ngw" : 4, "ngl" : 0, "round" : 2,  "depend" : [1,2,3,4], "desc": {"de":"Endspiel", "en":"Final"} },
+         { "gano": 8, "player1": "P1", "player2": "P1", "ngw" : 1, "ngl" : 0, "round" : 2,  "depend" : [1,2,3,4], "desc": {"de":"Endspiel", "en":"Final"} }
+      ]
+    }
+
+ ]   
+    
+      
+ 

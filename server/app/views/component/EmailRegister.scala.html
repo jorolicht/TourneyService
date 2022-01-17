@@ -1,0 +1,51 @@
+@*
+ *  EMail successful register club/user
+ *@
+@(licCode: String, lang: String)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+@if(lang == "de") {
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Turnier-Programm Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body style="margin: 5; padding: 5;">
+    <p>Hallo liebe Sportsfreunde,</p>                                
+    <p>anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste 
+       ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden 
+       (es gibt keinen Kopierschutz o.ä.).</p>
+    
+    <h3>@licCode</h3> 
+    
+    <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler 
+      bemerkt bitte meldet Euch und hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p>      
+    <p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
+    <p>Robert / TTC Freising</p>
+  </body>
+</html> 
+} else {
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Turnier-Programm Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body style="margin: 5; padding: 5;">
+    <p>Hallo liebe Sportsfreunde,</p>                                
+    <p>anbei der Lizenzstring (= (= &#60;Vereinsname/Lizenzcode&#62;)). Diesen gesamten fett gedruckten Text einfach mit cut/paste 
+       ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden 
+       (es gibt keinen Kopierschutz o.ä.).</p>
+    
+    <h3>@licCode</h3> 
+    
+    <p>Der Lizenzstring funktioniert bei der Std und bei der Pro-Version. Achtung, die Pro Version ist noch eine 
+       Beta Version, es gibt noch kein Handbuch dazu, aber es sollte eigentlich vieles/alles selbsterklärend sein. 
+       Falls Ihr Anregung zur Verbesserung habt oder (weitere) Fehler bemerkt bitte meldet Euch. DANKE!</p>      
+    <p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
+    <p>Robert / TTC Freising</p>
+  </body>
+</html> 
+}
+<a href="https://turnier-service.info/doc/">Dokumentation</a>
