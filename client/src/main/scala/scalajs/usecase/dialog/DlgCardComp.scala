@@ -105,7 +105,7 @@ object DlgCardComp extends BasicHtml
     setData("Form", "id", comp.id)
     setData("Form", "rid", comp.rid)
     setData("Form", "name", comp.name)
-    setData("Form", "typ", comp.typ)    
+    setData("Form", "typ", comp.typ) 
     setData("Form", "options", comp.options)
 
     // set start date and time
@@ -126,7 +126,11 @@ object DlgCardComp extends BasicHtml
     setInput("AgeGroup", comp.getAgeGroup)
     setInput("TTRFrom", comp.getFromTTR)
     setInput("TTRTo", comp.getToTTR)
+
     setInput("typ", comp.typ.toString)
+    val (cnt, cntActiv) = trny.getCompCnt(comp)
+    setDisabled("typ", cnt==0)
+    
     setInput("Class", comp.getRatingRemark) 
     setInput("Sex", comp.getSex.toString)
     setCheckbox("NameCompose", comp.isNameComposed())
@@ -146,7 +150,7 @@ object DlgCardComp extends BasicHtml
   }        
 
   // set all input field enabled/disabled
-  def setInputFields(disabled: Boolean) {
+  def setInputFields(disabled: Boolean): Unit = {
     val container = document.querySelector(getIdHa("Form"))
     container.querySelectorAll("input, select").map { elem => 
       setDisabled__(elem.asInstanceOf[HTMLInputElement], disabled)
@@ -165,7 +169,7 @@ object DlgCardComp extends BasicHtml
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
-    def submit(e: Event) {
+    def submit(e: Event): Unit = {
       validate(getInput(), trny, mode) match {
         case Left(eList) => DlgShowError.show(eList)
         case Right(result)   => {

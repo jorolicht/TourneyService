@@ -51,16 +51,16 @@ package object Constants {
 
 
   // competition (section) status types
+  val CSS_AUS   = 101 // Auslosung (Section)
+  val CSS_EIN   = 102 // Eingabe   (Section)
+  val CSS_FIN   = 103 // Finished  (Section) 
+
   val CS_UNKN  = -99 // unknown status
   val CS_WEBRE =  -2 // Registrierung / Anmeldung via WEB
   val CS_REGIS =  -1 // Registrierung / Anmeldung
   val CS_RESET =   0 // RESET
+  val CS_RUN   =   1 // RUNNING  
   
-  val CS_RUN   = 100 // RUNNING   (Section)
-  val CS_AUS   = 101 // Auslosung (Section)
-  val CS_EIN   = 102 // Eingabe   (Section)
-  val CS_FIN   = 103 // Finished  (Section) 
-
   val CS_VRAUS = 1   // Auslosung der Vorrunde
   val CS_VREIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
   val CS_VRFIN = 3   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen

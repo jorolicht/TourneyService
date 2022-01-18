@@ -1,10 +1,17 @@
 @*
  * Template Organize Competition Main Table
  *@
-@import shared.model.Competition
-@import shared.utils.UseCaseParam  
+@import shared.utils.Constants._
 @import shared.utils.twirlhelper._ 
+@import shared.utils.UseCaseParam  
+@import shared.model.Competition
 @import clientviews.component.helper.html._
+
+@* Sequence of:
+ *  Competition:
+ *  (id, name, getAgeGroup, getRatingRemark, typ, formatTime(lang), cnt, cntActiv, status, genRange, options) 
+ *  ( 1,    2,           3,               4,   5,                6,   7         8,      9,       10,      11)
+ *@
 
 @(comps: Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)], coId: Long)(implicit ucc: UseCaseParam)
 @idCount(cnt: Long) = @{ ucc.idBase + "__Count_" + cnt }
@@ -53,7 +60,9 @@
 					}
 					<a @tit("view") data-coId='@co._1' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
 					<a @tit("delete") data-coId='@co._1' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
-					<a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
+					@if(co._9<=CS_RESET){
+					  <a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
+					}
 				</td>
 			</tr>
 		}

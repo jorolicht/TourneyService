@@ -37,6 +37,13 @@ import scalajs.usecase.dialog._
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
   with TourneySvc with ViewServices
 {
+  // genCompetitionTblData - returns Sequence of tupels with competition attributes
+  def genCompetitionTblData(lang: String)(implicit trny: Tourney) : Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
+    (for { co <- trny.comps.values.toSeq } yield {
+      val (cnt, cntActiv) = trny.getCompCnt(co)
+      (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
+    }).toSeq.sortBy(_._6)
+  }
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     val toId = AppEnv.getToId

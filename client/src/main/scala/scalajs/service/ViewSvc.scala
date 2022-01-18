@@ -23,27 +23,7 @@ import scalajs.usecase.Helper
 trait ViewServices {
 
 
- /** genCompetitionTblData
-   *  returns Sequence of Competitions
-   */
-  def genCompetitionTblData(lang: String) : Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
-    val tourney = App.tourney
-    (for {
-      co  <- tourney.comps.values.toSeq
-    } yield {
-      co.typ match {
-        case 1 | 2 => {
-          val pl2cos   = tourney.pl2co.values.filter(_.coId==co.id).toSeq
-          val cnt      = pl2cos.length
-          val cntActiv = pl2cos.filter(_.status > 0).length
-          (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
-        }
-        case _                   => {
-          (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate, 0, 0, co.status, co.genRange(), co.options)
-        }  
-      }
-    }).toSeq.sortBy(_._6)
-  }
+
 
  /** genSingleTblData
    *  returns Sequence of Single Participants (sno, lastname, firstname, clubname, birthyear, status) 

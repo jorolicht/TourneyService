@@ -7,6 +7,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.{ Error, Return }
 import shared.utils.Routines._
+import shared.utils.Constants._
 
 /*
 **
@@ -334,6 +335,26 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
       Right(comps(coIdMax))
     }
   }
+
+  /** getCompCnt - returns number of registered and active participants  
+   *
+   */ 
+  def getCompCnt(co: Competition): (Int, Int) = co.typ match {    
+    case CT_SINGLE | CT_DOUBLE => {
+      val pl2cos   = pl2co.values.filter(_.coId==co.id).toSeq
+      val cnt      = pl2cos.length
+      val cntActiv = pl2cos.filter(_.status > 0).length
+      (cnt, cntActiv)
+    }
+    case _ => (0, 0)
+  }
+
+
+
+
+
+
+
 
 
   /** setComp - sets new values of existing competitions
