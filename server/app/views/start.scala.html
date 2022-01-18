@@ -1,5 +1,5 @@
 @*
- * sb admin template based on bootstrap 4
+ * sb admin template based on bootstrap 5
  *@
 @import play.filters.csrf._
 @(ucName: String, ucParam: String, ucInfo: String, ucContext: String, langs: Seq[(String,String)], lrm:Boolean=true)(implicit request: RequestHeader, msgs: MessagesProvider, assetsFinder: AssetsFinder)
@@ -22,8 +22,13 @@
 		-->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 	  
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "fontawesome/v5.15.4/css/all.min.css")'>
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "fontawesome/v5.15.4/css/v4-shims.min.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+		
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+    <link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap/5.0.2/css/bootstrap.min.css")'>
+
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/github-markdown.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/atom-one-light.css")'>
@@ -108,8 +113,8 @@
 
 		<!-- Bootstrap core JavaScript-->
 		<script src='@routes.Assets.at("/public", "js/jquery-3.4.1.min.js")'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script src='@routes.Assets.at("/public", "bootstrap/5.0.2/js/bootstrap.bundle.min.js")'></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js" integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script>
 		
 	  <script src='@routes.Assets.at("/public", "js/sb-admin.min.js")'></script>
