@@ -541,6 +541,15 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   dlg.card.cfg.section.lbl.Winset                       = Winning Sets
   dlg.card.cfg.section.btn.draw                         = START DRAW
 
+  dlg.card.cfg.section.pants                            = Teilnehmer
+  dlg.card.cfg.section.tbl.hdr.no                       = SNo
+  dlg.card.cfg.section.tbl.hdr.name                     = Name, Vorname
+  dlg.card.cfg.section.tbl.hdr.club                     = Verein
+  dlg.card.cfg.section.tbl.hdr.pos                      = Position
+  dlg.card.cfg.section.tbl.hdr.signup                   = Check
+
+
+
 #END Organize Competition
 
 
@@ -1160,5 +1169,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0168.ajax.getJson                                = communication error: {0}
   err0169.trny.addSect                                = function call addSect, section exists already
   err0170.trny.setSectPlayer                          = function call setSectPlayer, section {0} does not exist
+  err0171.trny.setCompDraw                            = function call setCompDraw, could not add section {0}
+  err0172.trny.setCompDraw                            = function call setCompDraw, could not set section attributes
 
 #END error codes / messages

@@ -46,7 +46,7 @@
         </div>
       </div>
       <!--  END Body Competition Section Configuration -->
-      <div class="modal-footer pt-1 pb-0">
+      <div class="modal-footer pt-1 pb-1">
 
         <div @id("FormFooter") class="container-fluid">
           <div class="row">
@@ -58,10 +58,49 @@
 
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer pb-2 pt-2">
         <button @id("Cancel") class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.cancel")</button>
         <button @id("Submit") class="btn btn-outline-secondary btn-xs" type="button" disabled>@msg("btn.draw")</button>     
       </div>
+      
+      <!--  Box for participants --> 
+      <div class="card pb-0">
+        <div class="tuse-card-header">		
+          <div class="float-left mt-2">
+            <a @Html(collapse("ParticipantCard")) >
+              <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("pants")</h6>
+            </a>
+          </div>
+        </div>
+      
+        <div @id("ParticipantCard")' class="card-body pb-2 pt-0 collapse">
+          Auswahl der Spieler
+          <table @id("MainTbl") class="table table-sm small table-hover tuse-border">
+            <tbody>
+              <tr style="border-bottom:2px solid #ccc;">
+                <td class="text-left tuse-height"><strong>@msg("tbl.hdr.no")</strong></td>
+                <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
+                <td class="text-left tuse-height"><strong>@msg("tbl.hdr.club")</strong></td>
+                <td class="text-center tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
+                <td class="text-right tuse-height"></td>
+              </tr>	
+
+              <tr style="border-bottom:2px solid #ccc;">
+                <td class="text-left tuse-height">1</td>
+                <td class="text-left tuse-height">Lichtenegger, Robert</td>
+                <td class="text-left tuse-height">TTC Freising</td>
+                <td class="text-center tuse-height"></td>
+                <td class="text-right tuse-height">
+                  <input data-sno='xxxx' class="form-check-input" type="checkbox" value="" @actionEvent("CheckParticipant", "onclick") >
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

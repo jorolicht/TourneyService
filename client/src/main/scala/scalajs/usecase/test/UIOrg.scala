@@ -57,7 +57,8 @@ object UIOrg extends UseCase("UIOrg")
         App.loadRemoteTourney(toId).map {
           case Left(err)     => error("loadRemoteTourney", s"${err.encode}")
           case Right(result) => {
-            info("loadRemoteTourney", App.tourney.toString)
+            //info("loadRemoteTourney", App.tourney.toString)
+            info("loadRemoteTourney", s"${testCase} execute use case OrganizeCompetition")
             App.execUseCase("OrganizeCompetition", "", "")
           } 
         }

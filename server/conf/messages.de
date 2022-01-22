@@ -950,6 +950,14 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.cfg.section.lbl.Winset                     = Gewinnsätze
   dlg.card.cfg.section.btn.draw                       = START AUSLOSUNG
 
+  dlg.card.cfg.section.pants                          = Teilnehmer
+  dlg.card.cfg.section.tbl.hdr.no                     = SNo
+  dlg.card.cfg.section.tbl.hdr.name                   = Name, Vorname
+  dlg.card.cfg.section.tbl.hdr.club                   = Verein
+  dlg.card.cfg.section.tbl.hdr.pos                    = Position
+  dlg.card.cfg.section.tbl.hdr.signup                 = Check
+
+
 #END Dialog Cards
 
 
@@ -1160,6 +1168,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0168.ajax.getJson                                = Kommunikationsfehler: {0}
   err0169.trny.addSect                                = Funktionsaufruf addSect, neuer Abschnitt existiert bereits
   err0170.trny.setSectPlayer                          = Funktionsaufruf setSectPlayer, Abschnitt {0} existiert nicht
-
+  err0171.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt {0} kann nicht generiert werden
+  err0172.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt nicht definiert
 
 #END Error Codes/Messages

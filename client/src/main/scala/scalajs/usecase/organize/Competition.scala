@@ -1,7 +1,7 @@
 package scalajs.usecase.organize
 
 // Start TestCases
-// http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetition
+// http://localhost:9000/start?ucName=TestMain&ucParam=OrgComp
 
 import scala.concurrent._
 import scala.util.{Success, Failure }
@@ -37,11 +37,15 @@ import scalajs.usecase.dialog._
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
   with TourneySvc with ViewServices
 {
+
   // genCompetitionTblData - returns Sequence of tupels with competition attributes
-  def genCompetitionTblData(lang: String)(implicit trny: Tourney) : Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
-    (for { co <- trny.comps.values.toSeq } yield {
-      val (cnt, cntActiv) = trny.getCompCnt(co)
-      (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
+  def genCompetitionTblData(trny: Tourney, lang: String): Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
+    (for { co <- trny.comps.values.toSeq } yield co.typ match {
+      case CT_SINGLE | CT_DOUBLE => {
+        val (cnt, cntActiv) = trny.getCompCnt(co)
+        (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
+      }
+      case _ => (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate, 0, 0, co.status, co.genRange(), co.options)
     }).toSeq.sortBy(_._6)
   }
 
@@ -49,13 +53,16 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     val toId = AppEnv.getToId
     val coId = AppEnv.getCoId
     
+    debug("update", s"start coId: ${coId}")
+
     // set main card
-    setHtml("CompCard", CompCard(genCompetitionTblData(AppEnv.getLang), coId))
+    setHtml("CompCard", CompCard(genCompetitionTblData(Trny, AppEnv.getLang), coId))
  
     // set play card and select competition
     setDisabled("BtnRegParticipant", coId == 0)
     if (coId > 0) {
       val comp = App.tourney.comps(coId)
+      setVisible("BtnStartCompetition", comp.status <= CP_INIT)
       highLightComp(coId)
       comp.typ match {
         case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CP_INIT)) 
@@ -63,6 +70,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         case _         => error("update", s"competition typ not yet supported") 
       }   
     } else {
+      setVisible("BtnStartCompetition", false)
       setHtml("ParticipantCard", s"""
         <div class="alert alert-info text-center mb-0" role="alert">
           <span class="tuse-font-1">${getMsg("nocompselect")}</span>
@@ -87,7 +95,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     setMainContent(clientviews.organize.html.Competition().toString)
-    setHtml("ConfigCard", ConfigCard("xxxxxxx"))
     update()
   }
   
@@ -299,11 +306,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       case "ParticipantCard"    => {
         togCollapse("ParticipantCard")
       }
-
-      case "ConfigCard"    => {
-        togCollapse("ConfigCard")
-      }    
-
 
       case _          => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
     }

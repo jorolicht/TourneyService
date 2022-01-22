@@ -349,12 +349,27 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
     case _ => (0, 0)
   }
 
-
-
-
-
-
-
+  /** setCompDraw - returns new secId  
+   *  CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) 
+   */
+  def setCompDraw(co: Competition, nameSec: String, typSec: Int, prevSec: Int, 
+                  winners: Boolean, noWinSets: Int, 
+                  pants: Array[ParticipantEntry]): Either[Error, Int] = {
+    addSect(prevSec, co.id, nameSec, typSec, winners) match {
+      case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
+      case Right(secId) => {        
+        if (run.coSects.isDefinedAt((co.id, secId))) {
+          run.coSects((co.id, secId)).pants     = pants
+          run.coSects((co.id, secId)).noPlayer  = pants.filter(p => p.sno != SNO_BYE).size
+          run.coSects((co.id, secId)).size      = pants.size
+          run.coSects((co.id, secId)).noWinSets = noWinSets
+          Right(secId) 
+        } else {
+          Left(Error("err0172.trny.setCompDraw"))
+        }
+      }
+    }
+  }
 
 
   /** setComp - sets new values of existing competitions
@@ -411,25 +426,25 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
 
 
   //addSect - adds a competition section to a competition 
-  def addSect(prevSecId: Int, coId: Long, name: String, secTyp: Int, winSec: Boolean=true): Either[Error, Int] = { 
+  def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
     val newId = run.coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
 
     if (run.coSects.isDefinedAt((coId, newId))) {
       Left(Error("err0169.trny.addSect"))
-    } else if (prevSecId == 0) {
+    } else if (prevSec == 0) {
       // new (first) entry without previous entry
-      run.coSects((coId, newId)) = new CompSection(newId, prevSecId, coId, name, secTyp)
+      run.coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
       Right(newId)
-    } else if (!run.coSects.isDefinedAt((coId, prevSecId))) { 
+    } else if (!run.coSects.isDefinedAt((coId, prevSec))) { 
       // now previous entry
       Left(Error("err0048.trny.addSect"))
     } else {
       // new entry with previous entry
-      run.coSects((coId, newId)) = new CompSection(newId, prevSecId, coId, name, secTyp)
+      run.coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
       if (winSec) {
-        run.coSects((coId, prevSecId)).winId = newId
+        run.coSects((coId, prevSec)).winId = newId
       } else {
-        run.coSects((coId, prevSecId)).looId = newId
+        run.coSects((coId, prevSec)).looId = newId
       }
       Right(newId)
     }
