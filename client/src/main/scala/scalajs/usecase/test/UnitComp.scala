@@ -126,16 +126,16 @@ object UnitComp extends UseCase("UnitComp")
     //class CompSection(id: Int, preId: Int, coId: Long, name: String, secTyp: Int)
     val coSect1 = new CompSection(id, 0, coId, name, CST_GRPS5)
     coSect1.pants = Array(
-      ParticipantEntry("131", "Lichtenegger1, Robert1", "TTC Freising1", 1201, (0,0)),
-      ParticipantEntry("132", "Lichtenegger2, Robert2", "TTC Freising2", 1202, (0,0)),
-      ParticipantEntry("133", "Lichtenegger3, Robert3", "TTC Freising3", 1203, (0,0)),
-      ParticipantEntry("134", "Lichtenegger4, Robert4", "TTC Freising4", 1204, (0,0)),
-      ParticipantEntry("135", "Lichtenegger5, Robert5", "TTC Freising5", 1205, (0,0)),
-      ParticipantEntry("136", "Lichtenegger6, Robert6", "TTC Freising6", 1206, (0,0)),
-      ParticipantEntry("137", "Lichtenegger7, Robert7", "TTC Freising7", 1207, (0,0)),
-      ParticipantEntry("138", "Lichtenegger8, Robert8", "TTC Freising8", 1208, (0,0)),
-      ParticipantEntry("139", "Lichtenegger9, Robert9", "TTC Freising9", 1209, (0,0)),
-      ParticipantEntry(PLID_BYE.toString, "BYE", "-", 0, (0,0))
+      ParticipantEntry("131", "Lichtenegger1, Robert1", "TTC Freising1", 1201, (0,0), true),
+      ParticipantEntry("132", "Lichtenegger2, Robert2", "TTC Freising2", 1202, (0,0), true),
+      ParticipantEntry("133", "Lichtenegger3, Robert3", "TTC Freising3", 1203, (0,0), true),
+      ParticipantEntry("134", "Lichtenegger4, Robert4", "TTC Freising4", 1204, (0,0), true),
+      ParticipantEntry("135", "Lichtenegger5, Robert5", "TTC Freising5", 1205, (0,0), true),
+      ParticipantEntry("136", "Lichtenegger6, Robert6", "TTC Freising6", 1206, (0,0), true),
+      ParticipantEntry("137", "Lichtenegger7, Robert7", "TTC Freising7", 1207, (0,0), true),
+      ParticipantEntry("138", "Lichtenegger8, Robert8", "TTC Freising8", 1208, (0,0), true),
+      ParticipantEntry("139", "Lichtenegger9, Robert9", "TTC Freising9", 1209, (0,0), true),
+      ParticipantEntry(PLID_BYE.toString, "BYE", "-", 0, (0,0), true)
     )
     coSect1.noPlayer = 10
 

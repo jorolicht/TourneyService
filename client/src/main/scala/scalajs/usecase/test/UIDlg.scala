@@ -60,14 +60,40 @@ object UIDlg extends UseCase("UIDlg")
       case Left(err)     => error("testDlgCardCfgSection", s"Can't load tourney")
       case Right(result) => {
         debug("DlgCardCfgSection", App.tourney.toString) 
+
+        val pants = Array(
+          ParticipantEntry("131", "Lichtenegger1, Robert1", "TTC Freising1", 1201, (0,0), true),
+          ParticipantEntry("132", "Lichtenegger2, Robert2", "TTC Freising2", 1202, (0,0), true),
+          ParticipantEntry("133", "Lichtenegger3, Robert3", "TTC Freising3", 1203, (0,0), true),
+          ParticipantEntry("134", "Lichtenegger4, Robert4", "TTC Freising4", 1204, (0,0), true),
+          ParticipantEntry("135", "Lichtenegger5, Robert5", "TTC Freising5", 1205, (0,0), true),
+          ParticipantEntry("136", "Lichtenegger6, Robert6", "TTC Freising6", 1206, (0,0), true),
+          ParticipantEntry("137", "Lichtenegger7, Robert7", "TTC Freising7", 1207, (0,0), true),
+          ParticipantEntry("138", "Lichtenegger8, Robert8", "TTC Freising8", 1208, (0,0), true),
+          ParticipantEntry("139", "Lichtenegger9, Robert9", "TTC Freising9", 1209, (0,0), true),
+          ParticipantEntry(PLID_BYE.toString, "BYE", "-", 0, (0,0), true)
+        )
+
         //def show(coId: Long, secId: Int, size:Int, trny: Tourney,  lang: String): Future[Either[Error, Int]] = {
-        DlgCardCfgSection.show(1L, 1, size, App.tourney, "DE") map {
+        DlgCardCfgSection.show(1L, 1, size, "DE", pants)(App.tourney) map {
           case Left(err)  => println(s"testCase: ${testCase} error  -> ${err}") 
           case Right(res) => println(s"testCase: ${testCase} result: ${res}") 
         }
       } 
     }
   }  
+
+
+  // def show(coId: Long, secId: Int, size:Int, lang: String, pants: Array[ParticipantEntry])
+  //         (implicit trny: Tourney): Future[Either[Error, Int]] = {  
+
+// case class ParticipantEntry(
+//   var sno:    String,         // start number(s) concatenated string of player identifieres  
+//   val name:   String,                     
+//   val club:   String, 
+//   val rating: Int,            // eg. ttr for table tennis
+//   var place:  (Int,Int),      // position after finishing the round (group or ko)
+// ) {
 
 
 

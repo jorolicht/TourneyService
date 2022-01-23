@@ -109,7 +109,7 @@ object Placement {
         }
         case _                   => ("00000","","",0,(0,0))
       }
-      ParticipantEntry(startNo, name, club, rating, place) 
+      ParticipantEntry(startNo, name, club, rating, place, false) 
     }  
 
   }
@@ -180,16 +180,17 @@ object Placement {
   object Participant2Comps { implicit def rw: RW[Participant2Comps] = macroRW }  
 
 
-  // relevant information of an active player/participant within an competition
+// relevant information of an active player/participant within an competition
 case class ParticipantEntry(
-  var sno:    String,         // start number(s) concatenated string of player identifieres  
-  val name:   String,                     
-  val club:   String, 
-  val rating: Int,            // eg. ttr for table tennis
-  var place:  (Int,Int),      // position after finishing the round (group or ko)
+  var sno:     String,         // start number(s) concatenated string of player identifieres  
+  val name:    String,                     
+  val club:    String, 
+  val rating:  Int,            // eg. ttr for table tennis
+  var place:   (Int,Int),      // position after finishing the round (group or ko)
+  var checked: Boolean
 ) {
   //def stringify() = s"${sno}·${pos}·${plId}·${plId2}·${name}·${club}·${place._1}·${place._2}"
-  def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^_"
+  def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^${checked}^_"
 }
 
 
@@ -199,10 +200,10 @@ object ParticipantEntry {
   def obify(peStr: String): ParticipantEntry = {
     val p = peStr.split("\\^")
     try { 
-      ParticipantEntry(p(0), p(1), p(2), p(3).toInt, (p(4).toInt, p(5).toInt))
-    } catch { case _: Throwable => ParticipantEntry("0","","",0, (0,0)) }
+      ParticipantEntry(p(0), p(1), p(2), p(3).toInt, (p(4).toInt, p(5).toInt), p(6).toBoolean)
+    } catch { case _: Throwable => ParticipantEntry("0","","",0, (0,0), false) }
   }
   
-  def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0))
+  def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0), true)
 
 }

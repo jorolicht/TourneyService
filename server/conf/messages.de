@@ -951,7 +951,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.cfg.section.btn.draw                       = START AUSLOSUNG
 
   dlg.card.cfg.section.pants                          = Teilnehmer
-  dlg.card.cfg.section.tbl.hdr.no                     = SNo
+  dlg.card.cfg.section.tbl.hdr.no                     = #
   dlg.card.cfg.section.tbl.hdr.name                   = Name, Vorname
   dlg.card.cfg.section.tbl.hdr.club                   = Verein
   dlg.card.cfg.section.tbl.hdr.pos                    = Position

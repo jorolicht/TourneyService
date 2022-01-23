@@ -8,7 +8,7 @@ import shared.model.ParticipantEntry
 import shared.model.tabletennis.utility._
 
 class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
-  var players    = Array.fill[ParticipantEntry](size)  (ParticipantEntry("0", "", "", 0, (0,0))) 
+  var players    = Array.fill[ParticipantEntry](size)  (ParticipantEntry("0", "", "", 0, (0,0), false)) 
   var results    = Array.fill[ResultEntry](size)  (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
   var sno2pos    = scala.collection.mutable.Map[String, Int]()
 

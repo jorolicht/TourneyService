@@ -27,10 +27,10 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player }
+import shared.model.{ Tourney, Player, ParticipantEntry }
 import shared.utils._
 import shared.utils.Constants._
-import clientviews.dialog.html
+import clientviews.dialog.DlgCardCfgSection.html
 
 
 @JSExportTopLevel("DlgCardCfgSection")
@@ -39,8 +39,7 @@ object DlgCardCfgSection extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardCfgSection", "dlg.card.cfg.section", "DlgCardCfgSection", "dlgcardcfgsection", scalajs.AppEnv.getMessage _ )
-  implicit var tourney = Tourney.init
-  private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgCardCfgSection().toString)
+  private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
  
 
   @JSExport
@@ -64,7 +63,8 @@ object DlgCardCfgSection extends BasicHtml
   }
 
   // set possible configuration section 
-  def set(coId: Long, secId: Int, size: Int, trny: Tourney): Unit = {
+  def set(coId: Long, secId: Int, size: Int, lang: String, pants: Array[ParticipantEntry])
+         (implicit trny: Tourney): Unit = {
 
     val cfgOptions = grpOptions(size)
     val selOptions = new StringBuilder("<option value='None' selected>---</option>")
@@ -72,12 +72,14 @@ object DlgCardCfgSection extends BasicHtml
       val msg= getMsg(s"option.${cfg}")
       selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
     }
+    setHtml("PantTbl", html.Pants(pants))
     setHtml("CfgSelection", selOptions.toString) 
     setHtml("lbl.Name", getMsg("lbl.Name", size.toString)) 
   }
   
   // show dialog return result (Future) or Failure when canceled
-  def show(coId: Long, secId: Int, size:Int, trny: Tourney,  lang: String): Future[Either[Error, Int]] = {
+  def show(coId: Long, secId: Int, size:Int, lang: String, pants: Array[ParticipantEntry])
+          (implicit trny: Tourney): Future[Either[Error, Int]] = {
     val p     = Promise[Int]()
     val f     = p.future
 
@@ -99,7 +101,7 @@ object DlgCardCfgSection extends BasicHtml
     }
     
     load()
-    set(coId, secId, size, trny)
+    set(coId, secId, size, lang, pants)
 
     // register routines for cancel and submit
     $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
