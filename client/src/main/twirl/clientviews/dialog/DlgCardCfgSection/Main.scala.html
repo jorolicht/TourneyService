@@ -1,0 +1,85 @@
+@*
+ * Template for Configuration a Section Dialog
+ * 
+ * Start Test Dialog:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=20#
+ *@
+
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@()(implicit ucc: UseCaseParam)
+
+<!--  START Modal Dialog for Configuration a Section --> 
+<div class="modal fade" @id("Modal") tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" @id("Title")><i class="fa fa-user" aria-hidden="true"></i>&nbsp; @msg("Title")</h5>
+        <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>  
+      </div>
+      
+      <!--  START Body Competition Section Configuration --> 
+      <div class="modal-body">
+        <div @id("Form") class="container-fluid">
+
+          <div class="form-row mb-2">
+            <div class="form-group col-sm-9 mb-0">
+              <label class="mb-1" @forAttr("CfgSelection")><strong @id("lbl.Name")></strong></label>
+              <select @id("CfgSelection") class="form-control-sm" @actionEvent("Selection", "onchange")>
+              </select>
+            </div>
+
+            <div class="form-group col-sm-3 mb-0 text-right">
+              <label class="mb-1" @forAttr("CfgWinset")><strong>@msg("lbl.Winset")</strong></label>
+              <select @id("CfgWinset") class="form-control-sm" >
+                <option value='2'>2</option>
+                <option value='3' selected>3</option>
+                <option value='4'>4</option>
+              </select>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+      <!--  END Body Competition Section Configuration -->
+      <div class="modal-footer pt-1 pb-1">
+
+        <div @id("FormFooter") class="container-fluid">
+          <div class="row">
+            <div class="col-sm-12 pb-0" @id("CfgInfo")>              
+              Konfiguration von 3 3er-Gruppen und 5 4er-Gruppen
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer pb-2 pt-2">
+        <button @id("Cancel") class="btn btn-outline-secondary btn-xs" type="button" data-dismiss="modal">@msg_("std.btn.cancel")</button>
+        <button @id("Submit") class="btn btn-outline-secondary btn-xs" type="button" disabled>@msg("btn.draw")</button>     
+      </div>
+      
+      <!--  Box for participants --> 
+      <div class="card pb-0">
+        <div class="tuse-card-header">		
+          <div class="float-left mt-2">
+            <a @Html(collapse("PantCard")) >
+              <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("pants")</h6>
+            </a>
+          </div>
+        </div>
+      
+        <div @id("PantCard")' class="card-body pb-2 pt-0 collapse">
+          Auswahl der Spieler
+          <span @id("PantTbl")></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!--  END Modal Dialog --> 
