@@ -525,29 +525,38 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.draw.invalidSection              = Configuration for competition section not supported.
 
   dlg.card.cfg.section.Title                            = Competition Configuration 
-  dlg.card.cfg.section.lbl.Name                         = Game System Selection for {0} Participants
-  dlg.card.cfg.section.option.100                       = Preliminary Round with Groups of Size 3 to 9
-  dlg.card.cfg.section.option.101                       = Preliminary Round with Groups of Size 3
-  dlg.card.cfg.section.option.102                       = Preliminary Round with Groups of Size 3 and 4
-  dlg.card.cfg.section.option.103                       = Preliminary Round with Groups of Size 4
-  dlg.card.cfg.section.option.104                       = Preliminary Round with Groups of Size 4 and 5
-  dlg.card.cfg.section.option.105                       = Preliminary Round with Groups of Size 5
-  dlg.card.cfg.section.option.106                       = Preliminary Round with Groups of Size 5 and 6
-  dlg.card.cfg.section.option.107                       = Preliminary Round with Groups of Size 6
-  dlg.card.cfg.section.option.108                       = Round Robin
-  dlg.card.cfg.section.option.109                       = KO-System
-  dlg.card.cfg.section.option.110                       = Swiss-System
+  dlg.card.cfg.section.lbl.Selection                    = Game System Selection for {0} Participants
+  dlg.card.cfg.section.plh.Name                         = Name of Round/Gamesection 
+
+  dlg.card.cfg.section.option.info.1                    = Please select or enter name
+  dlg.card.cfg.section.option.info.2                    = Please select configuration and enter name
+  dlg.card.cfg.section.option.info.100                  = Preliminary Round with Groups of Size 3-9
+  dlg.card.cfg.section.option.info.101                  = Preliminary Round with Groups of Size 3
+  dlg.card.cfg.section.option.info.102                  = Preliminary Round with Groups of Size 3 and 4
+  dlg.card.cfg.section.option.info.103                  = Preliminary Round with Groups of Size 4
+  dlg.card.cfg.section.option.info.104                  = Preliminary Round with Groups of Size 4 and 5
+  dlg.card.cfg.section.option.info.105                  = Preliminary Round with Groups of Size 5
+  dlg.card.cfg.section.option.info.106                  = Preliminary Round with Groups of Size 5 and 6
+  dlg.card.cfg.section.option.info.107                  = Preliminary Round with Groups of Size 6
+  dlg.card.cfg.section.option.info.108                  = Round Robin
+  dlg.card.cfg.section.option.info.109                  = KO-System
+  dlg.card.cfg.section.option.info.110                  = Swiss-System
 
   dlg.card.cfg.section.lbl.Winset                       = Winning Sets
   dlg.card.cfg.section.btn.draw                         = START DRAW
 
   dlg.card.cfg.section.pants                            = Participants
+  dlg.card.cfg.section.pants.select                     = Select Participants
   dlg.card.cfg.section.tbl.hdr.no                       = #
   dlg.card.cfg.section.tbl.hdr.name                     = Name, Firstname
   dlg.card.cfg.section.tbl.hdr.club                     = Club
   dlg.card.cfg.section.tbl.hdr.pos                      = Position
   dlg.card.cfg.section.tbl.hdr.signup                   = Check
 
+  dlg.card.cfg.section.name.1                           = Preliminary Round
+  dlg.card.cfg.section.name.2                           = Intermediate Round
+  dlg.card.cfg.section.name.3                           = Main Round
+  dlg.card.cfg.section.name.4                           = Consolation Round  
 
 
 #END Organize Competition

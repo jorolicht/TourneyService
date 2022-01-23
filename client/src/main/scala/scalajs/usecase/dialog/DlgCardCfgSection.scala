@@ -6,6 +6,7 @@ package scalajs.usecase.dialog
 //                    
 //                    
 
+import scala.collection.mutable.{ ArrayBuffer }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -40,15 +41,25 @@ object DlgCardCfgSection extends BasicHtml
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardCfgSection", "dlg.card.cfg.section", "DlgCardCfgSection", "dlgcardcfgsection", scalajs.AppEnv.getMessage _ )
   private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
- 
+  var size: Int = 0
 
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {     
       case "Selection" => { 
-        debug("actionEvent", s"Selection ${elem.asInstanceOf[Input].value}") 
-        setDisabled("Submit", elem.asInstanceOf[Input].value.toIntOption == None)
+        debug("actionEvent", s"Selection ${elem.asInstanceOf[Input].value}")
+        elem.asInstanceOf[Input].value.toIntOption match {
+          case None        => { setDisabled("Submit", true);  setHtml("CfgInfo", getMsg("option.info.2")) }
+          case Some(value) => { 
+            setDisabled("Submit", false)
+            debug("actionEvent", s"Selection size: ${size} KO-Size: ${genKOSize(size)}")
+
+            setHtml("CfgInfo", options2msg(value, size)) 
+          }
+        }
+        
+
       }
       case "Close"     => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
       case _           => {}
@@ -66,19 +77,20 @@ object DlgCardCfgSection extends BasicHtml
   def set(coId: Long, secId: Int, size: Int, lang: String, pants: Array[ParticipantEntry])
          (implicit trny: Tourney): Unit = {
 
-    val cfgOptions = grpOptions(size)
+    val cfgOptions = sysOptions(size)
     val selOptions = new StringBuilder("<option value='None' selected>---</option>")
     for (cfg <- cfgOptions) {
       val msg= getMsg(s"option.${cfg}")
       selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
     }
-    setHtml("PantTbl", html.Pants(pants))
     setHtml("CfgSelection", selOptions.toString) 
-    setHtml("lbl.Name", getMsg("lbl.Name", size.toString)) 
+    setHtml("CfgInfo", getMsg("option.info.2"))
+    setHtml("PantTbl", html.Pants(pants))
+    setHtml("lbl.Selection", getMsg("lbl.Selection", size.toString)) 
   }
   
   // show dialog return result (Future) or Failure when canceled
-  def show(coId: Long, secId: Int, size:Int, lang: String, pants: Array[ParticipantEntry])
+  def show(coId: Long, secId: Int, sizeParam: Int, lang: String, pants: Array[ParticipantEntry])
           (implicit trny: Tourney): Future[Either[Error, Int]] = {
     val p     = Promise[Int]()
     val f     = p.future
@@ -101,6 +113,7 @@ object DlgCardCfgSection extends BasicHtml
     }
     
     load()
+    size = sizeParam
     set(coId, secId, size, lang, pants)
 
     // register routines for cancel and submit
@@ -110,5 +123,59 @@ object DlgCardCfgSection extends BasicHtml
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }
-  }  
+  }
+
+  // sysOptions generate all possible options for given size
+  def sysOptions(size: Int): List[Int] = {
+    def sysOptions21to128(size: Int): List[Int] = {
+      val result = ArrayBuffer[Int]()  
+      if (size % 3 == 0) result += CST_GRPS3 else result += CST_GRPS34
+      if (size % 4 == 0) result += CST_GRPS4 else result += CST_GRPS45
+      if (size % 5 == 0) result += CST_GRPS5 else result += CST_GRPS56
+      result += CST_KO
+      result += CST_SW
+      result.to(List)
+    }
+
+    size match {
+      case 3 | 4 | 5 => List(CST_KO, CST_SW, CST_JGJ)
+      case 6         => List(CST_KO, CST_SW, CST_JGJ, CST_GRPS3)
+      case 7         => List(CST_KO, CST_SW, CST_JGJ, CST_GRPS34)
+      case 8         => List(CST_KO, CST_SW, CST_JGJ, CST_GRPS4)
+      case 9         => List(CST_KO, CST_SW, CST_JGJ, CST_GRPS45)
+      case 10        => List(CST_KO, CST_SW, CST_GRPS34, CST_GRPS5)
+      case 11        => List(CST_KO, CST_SW, CST_GRPS34, CST_GRPS56)
+      case 12        => List(CST_KO, CST_SW, CST_GRPS4, CST_GRPS6)
+      case 13        => List(CST_KO, CST_SW, CST_GRPS45)
+      case 14        => List(CST_KO, CST_SW, CST_GRPS45)
+      case 15        => List(CST_KO, CST_SW, CST_GRPS3, CST_GRPS5)
+      case 16        => List(CST_KO, CST_SW, CST_GRPS4, CST_GRPS56)
+      case 17        => List(CST_KO, CST_SW, CST_GRPS45, CST_GRPS56)
+      case 18        => List(CST_KO, CST_SW, CST_GRPS3, CST_GRPS45, CST_GRPS6)
+      case 19        => List(CST_KO, CST_SW, CST_GRPS34, CST_GRPS45)
+      case 20        => List(CST_KO, CST_SW, CST_GRPS4, CST_GRPS5)
+
+      case i if (i > 21 && i <= 128) => sysOptions21to128(i)
+      case _                         => List()        
+    }
+  }
+
+  // options2msg - convert option to message
+  def options2msg(option: Int, noPlayer: Int): String = {
+    option match {
+      case CST_GRPS3  => { val size1 = noPlayer / 3; getMsg(s"option.info.${option}", size1.toString) }   
+      case CST_GRPS34 => { val (size1, size2) = genGrpSplit(noPlayer, 3); getMsg(s"option.info.${option}", size1.toString, size2.toString) }
+      case CST_GRPS4  => { val size1 = noPlayer / 4; getMsg(s"option.info.${option}", size1.toString) } 
+      case CST_GRPS45 => { val (size1, size2) = genGrpSplit(noPlayer, 4); getMsg(s"option.info.${option}", size1.toString, size2.toString) } 
+      case CST_GRPS5  => { val size1 = noPlayer / 5; getMsg(s"option.info.${option}", size1.toString) }
+      case CST_GRPS56 => { val (size1, size2) = genGrpSplit(noPlayer, 5); getMsg(s"option.info.${option}", size1.toString, size2.toString) }   
+      case CST_GRPS6  => { val size1 = noPlayer / 6; getMsg(s"option.info.${option}", size1.toString) }
+      case CST_KO     => { getMsg(s"option.info.${option}", genKOSize(noPlayer).toString) }
+      case CST_SW     => { val size1 = noPlayer+(noPlayer%2); getMsg(s"option.info.${option}", size1.toString) }
+      case CST_JGJ    => { getMsg(s"option.info.${option}", noPlayer.toString) }
+      case _          => { getMsg(s"option.info.2") }
+    }
+  }
+
+
 }

@@ -934,7 +934,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.reg.double.status.participate              = teilnehmend
 
   dlg.card.cfg.section.Title                          = Wettbewerb-Konfiguration 
-  dlg.card.cfg.section.lbl.Name                       = Spielsystemauswahl für {0} Teilnehmer
+  dlg.card.cfg.section.lbl.Selection                  = Spielsystemauswahl für {0} Teilnehmer
+  dlg.card.cfg.section.plh.Name                       = Name Spielabschnitt
   dlg.card.cfg.section.option.100                     = Vorrunde mit 3er-9er Gruppen
   dlg.card.cfg.section.option.101                     = Vorrunde mit 3er-Gruppen 
   dlg.card.cfg.section.option.102                     = Vorrunde mit 3er- und 4er-Gruppen
@@ -947,15 +948,35 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.cfg.section.option.109                     = KO-System
   dlg.card.cfg.section.option.110                     = Schweizer System
 
+  dlg.card.cfg.section.option.info.1                  = Bitte Namen auswählen oder eingeben
+  dlg.card.cfg.section.option.info.2                  = Bitte Konfiguraton und Namen auswählen/eingeben
+  dlg.card.cfg.section.option.info.100                = Konfiguration: mit {0} Gruppen
+  dlg.card.cfg.section.option.info.101                = Konfiguration: mit {0} 3er-Gruppen
+  dlg.card.cfg.section.option.info.102                = Konfiguration: mit {0} 3er-Gruppe(n) und {1} 4er-Gruppe(n)
+  dlg.card.cfg.section.option.info.103                = Konfiguration: mit {0} 4er-Gruppen
+  dlg.card.cfg.section.option.info.104                = Konfiguration: mit {0} 4er-Gruppe(n) und {1} 5er-Gruppe(n)
+  dlg.card.cfg.section.option.info.105                = Konfiguration: mit {0} 5er-Gruppen
+  dlg.card.cfg.section.option.info.106                = Konfiguration: mit {0} 5er-Gruppe(n) und {1} 6er-Gruppe(n)
+  dlg.card.cfg.section.option.info.107                = Konfiguration: mit {0} 6er-Gruppen
+  dlg.card.cfg.section.option.info.108                = Konfiguration: {0}-Feld Jeder-gegen-Jeden
+  dlg.card.cfg.section.option.info.109                = Konfiguration: {0}-Feld KO-System
+  dlg.card.cfg.section.option.info.110                = Konfiguration: {0}-Feld Schweizer System     
+
   dlg.card.cfg.section.lbl.Winset                     = Gewinnsätze
   dlg.card.cfg.section.btn.draw                       = START AUSLOSUNG
 
   dlg.card.cfg.section.pants                          = Teilnehmer
+  dlg.card.cfg.section.pants.select                   = Auswahl Teilnehmer
   dlg.card.cfg.section.tbl.hdr.no                     = #
   dlg.card.cfg.section.tbl.hdr.name                   = Name, Vorname
   dlg.card.cfg.section.tbl.hdr.club                   = Verein
   dlg.card.cfg.section.tbl.hdr.pos                    = Position
   dlg.card.cfg.section.tbl.hdr.signup                 = Check
+
+  dlg.card.cfg.section.name.1                         = Vorrunde
+  dlg.card.cfg.section.name.2                         = Zwischenrunde
+  dlg.card.cfg.section.name.3                         = Hauptrunde
+  dlg.card.cfg.section.name.4                         = Trostrunde
 
 
 #END Dialog Cards

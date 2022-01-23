@@ -27,9 +27,8 @@
 
           <div class="form-row mb-2">
             <div class="form-group col-sm-9 mb-0">
-              <label class="mb-1" @forAttr("CfgSelection")><strong @id("lbl.Name")></strong></label>
-              <select @id("CfgSelection") class="form-control-sm" @actionEvent("Selection", "onchange")>
-              </select>
+              <label class="mb-1" @forAttr("CfgSelection")><strong @id("lbl.Selection")></strong></label>
+              <select @id("CfgSelection") class="form-control-sm" @actionEvent("Selection", "onchange")></select>
             </div>
 
             <div class="form-group col-sm-3 mb-0 text-right">
@@ -40,7 +39,19 @@
                 <option value='4'>4</option>
               </select>
             </div>
+          </div>
 
+          <div class="form-row mb-2">
+            <div class="form-group col-sm-6 mb-0">
+              <input @id("CfgName") type="text" class="form-control form-control-sm" 
+                @plh("Name") list='@_name("CfgNameList")'>
+              <datalist @id("CfgNameList")>
+                @for(i <- 1 to 4) { <option data-value="@i">@msg("name."+i.toString)</option> } 
+              </datalist>	
+            </div>
+
+            <div class="form-group col-sm-6 mb-0 text-right">
+            </div>
           </div>
 
         </div>
@@ -50,9 +61,7 @@
 
         <div @id("FormFooter") class="container-fluid">
           <div class="row">
-            <div class="col-sm-12 pb-0" @id("CfgInfo")>              
-              Konfiguration von 3 3er-Gruppen und 5 4er-Gruppen
-            </div>
+            <div @id("CfgInfo") class="col-sm-12 pb-0"></div>
           </div>
         </div>
 
@@ -74,7 +83,7 @@
         </div>
       
         <div @id("PantCard")' class="card-body pb-2 pt-0 collapse">
-          Auswahl der Spieler
+          <strong>@msg("pants.select")</strong>
           <span @id("PantTbl")></span>
         </div>
       </div>
