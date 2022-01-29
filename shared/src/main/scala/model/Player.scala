@@ -58,6 +58,20 @@ case class Player(
     case _ => oneName
   }
 
+  def getDoubleName(player2: Player): String = {
+    lastname + "/" + player2.lastname 
+  }
+
+  def getDoubleClub(player2: Player): String = {
+    clubName + "/" + player2.clubName 
+  }  
+
+  def getDoubleRating(player2: Player): Int = {
+    val rating = getRating + player2.getRating
+    if (getRating == 0 | player2.getRating == 0) rating else rating / 2
+  }  
+
+
   def getOptStr(index: Int): String   = getMDStr(options, index) 
   def getOptInt(index: Int): Int      = getMDInt(options, index)
   def getOptLong(index: Int): Long    = getMDLong(options, index)
@@ -68,6 +82,7 @@ case class Player(
   def getClubNr: String      = getMDStr(options,2); def setClubNr(value:String)      = { options = setMD(options, value, 2) }
   def getClubFedNick: String = getMDStr(options,3); def setClubFedNick(value:String) = { options = setMD(options, value, 3) }
   def getTTR: String         = getMDStr(options,4); def setTTR(value:String)         = { options = setMD(options, value, 4) }
+  def getRating: Int         = getMDInt(options,4); def setRating(value: Int)        = { options = setMD(options, value, 4) } 
   def getTTRMatchCnt: String = getMDStr(options,5); def setTTRMatchCnt(value:String) = { options = setMD(options, value, 5) }
   def getNationality: String = getMDStr(options,6); def setNationality(value:String) = { options = setMD(options, value, 6) }
   def getForEqState: String  = getMDStr(options,7); def setForEqState(value:String)  = { options = setMD(options, value, 7) }
@@ -83,8 +98,6 @@ case class Player(
   def getBirthyear() = if (birthyear == 0) None else Some(birthyear)
   def stringify = s"${id}^${rid}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
   def encode()  = s"${id}^${rid}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
- 
-  def getRating(): Int = getTTR.toIntOption.getOrElse(0)
 
 }
 

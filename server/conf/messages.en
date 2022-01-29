@@ -530,14 +530,14 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
 
   dlg.card.cfg.section.option.info.1                    = Please select or enter name
   dlg.card.cfg.section.option.info.2                    = Please select configuration and enter name
-  dlg.card.cfg.section.option.info.100                  = Preliminary Round with Groups of Size 3-9
-  dlg.card.cfg.section.option.info.101                  = Preliminary Round with Groups of Size 3
-  dlg.card.cfg.section.option.info.102                  = Preliminary Round with Groups of Size 3 and 4
-  dlg.card.cfg.section.option.info.103                  = Preliminary Round with Groups of Size 4
-  dlg.card.cfg.section.option.info.104                  = Preliminary Round with Groups of Size 4 and 5
-  dlg.card.cfg.section.option.info.105                  = Preliminary Round with Groups of Size 5
-  dlg.card.cfg.section.option.info.106                  = Preliminary Round with Groups of Size 5 and 6
-  dlg.card.cfg.section.option.info.107                  = Preliminary Round with Groups of Size 6
+  dlg.card.cfg.section.option.info.100                  = Round with Groups of Size 3-9
+  dlg.card.cfg.section.option.info.101                  = Round with Groups of Size 3
+  dlg.card.cfg.section.option.info.102                  = Round with Groups of Size 3 and 4
+  dlg.card.cfg.section.option.info.103                  = Round with Groups of Size 4
+  dlg.card.cfg.section.option.info.104                  = Round with Groups of Size 4 and 5
+  dlg.card.cfg.section.option.info.105                  = Round with Groups of Size 5
+  dlg.card.cfg.section.option.info.106                  = Round with Groups of Size 5 and 6
+  dlg.card.cfg.section.option.info.107                  = Round with Groups of Size 6
   dlg.card.cfg.section.option.info.108                  = Round Robin
   dlg.card.cfg.section.option.info.109                  = KO-System
   dlg.card.cfg.section.option.info.110                  = Swiss-System
@@ -1180,5 +1180,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0170.trny.setSectPlayer                          = function call setSectPlayer, section {0} does not exist
   err0171.trny.setCompDraw                            = function call setCompDraw, could not add section {0}
   err0172.trny.setCompDraw                            = function call setCompDraw, could not set section attributes
+  err0173.trny.getSinglePlayer                        = function call getSinglePlayer, start number {0} does not exist
+  err0174.trny.getDoublePlayer                        = function call getDoublePlayer, start number {0} does not exist
 
 #END error codes / messages

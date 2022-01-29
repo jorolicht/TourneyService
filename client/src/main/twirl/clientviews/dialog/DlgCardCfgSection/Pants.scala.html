@@ -1,42 +1,40 @@
 @*
  * Template for Participants
  * 
- * Start Test Dialog:
- * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=20#
+ * Start Test Dialog: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=1#
+ *
  *@
 
-@import shared.model.ParticipantEntry
+@import shared.model.PantSelect  
 @import shared.utils.UseCaseParam   
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
 
-@(pants: Array[ParticipantEntry])(implicit ucc: UseCaseParam)
+@(pants: Array[PantSelect])(implicit ucc: UseCaseParam)
 
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
+<div style="max-height: 250px; overflow: auto;">  
 <table @id("MainTbl") class="table table-sm small table-hover tuse-border">
   <tbody>
     <tr style="border-bottom:2px solid #ccc;">
       <td class="text-left tuse-height"><strong>@msg("tbl.hdr.no")</strong></td>
       <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
-      <td class="text-left tuse-height"><strong>@msg("tbl.hdr.club")</strong></td>
       <td class="text-center tuse-height"></td>
       <td class="text-right tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
     </tr>	
 
     @for((pant, index) <- pants.view.zipWithIndex){
       <tr style="border-bottom:2px solid #ccc;">
-        <td class="text-left tuse-height">@index+1</td>
+        <td class="text-left tuse-height">@(index+1)</td>
         <td class="text-left tuse-height">@pant.name</td>
-        <td class="text-left tuse-height">@pant.club</td>
-        <td class="text-center tuse-height"></td>
+        <td class="text-left tuse-height">@pant.info</td>
         <td class="text-right tuse-height">
-          <input data-sno='@pant.sno' class="form-check-input" type="checkbox" value="" 
-          @checked(pant.checked) @actionEvent("CheckParticipant", "onclick") >
+          <input data-sno='@pant.sno.value' class='' type='checkbox' value='@index' @checked(pant.checked) @actionEvent("Check", "onclick") >
         </td>
       </tr>
     }
-    
   </tbody>
 </table>
+</div>

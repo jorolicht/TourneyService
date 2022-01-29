@@ -4,7 +4,13 @@ package scalajs.usecase.home
 // --------------------------------------------------------------------------------------------------
 // DlgCardPlayer:       http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardPlayer&ucInfo=show
 // OrganizeCompetition: http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetition
+// DlgCardCfgSection:   http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=1#
+// DlgCardRegSingle:    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegSingle&ucInfo=#
+// DlgCardRegDouble:    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegDouble&ucInfo=#
+// DlgCardPlayer:       http://localhost:9000/start?ucName=TestMain&ucParam=Player&ucInfo=#
 
+
+import scala.collection.mutable.{ ArrayBuffer }
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
@@ -13,8 +19,7 @@ import org.querki.jquery._               // from "org.querki" %%% "jquery-facade
 import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 
-import org.scalajs.dom.raw.{ Event, HTMLInputElement } // for ScalaJs bindings
-
+import org.scalajs.dom.raw.{ Event, HTMLInputElement } 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
@@ -45,58 +50,38 @@ object UIDlg extends UseCase("UIDlg")
   
   def render(testCase: String = "", testOption: String = "", reload: Boolean=false) = {} 
 
-  // Start TestCases
-  // DlgCardCfgSection:   http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=161#
-  // DlgCardRegSingle:    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegSingle&ucInfo=#
-  // DlgCardRegDouble:    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegDouble&ucInfo=#
-  // DlgCardPlayer:       http://localhost:9000/start?ucName=TestMain&ucParam=Player&ucInfo=#
-
-
   // testDlgCardCfgSection
   def testDlgCardCfgSection(testCase: String, testOption: String) = {
-    val size = testOption.toInt
-    val toId = 161L  //testOption.toLong
+    val coId = testOption.toLong
+    val toId = 161L 
     App.loadRemoteTourney(toId) map {
       case Left(err)     => error("testDlgCardCfgSection", s"Can't load tourney")
       case Right(result) => {
-        debug("DlgCardCfgSection", App.tourney.toString) 
+      
+        // case class PantSelect(val sno: SNO, val name: String, val info: String, var checked: Boolean, val winner: Boolean=true)
+        // getInfo returns tuple (SNO.value, Name, Club, TTR)
 
-        val pants = Array(
-          ParticipantEntry("131", "Lichtenegger1, Robert1", "TTC Freising1", 1201, (0,0), true),
-          ParticipantEntry("132", "Lichtenegger2, Robert2", "TTC Freising2", 1202, (0,0), true),
-          ParticipantEntry("133", "Lichtenegger3, Robert3", "TTC Freising3", 1203, (0,0), true),
-          ParticipantEntry("134", "Lichtenegger4, Robert4", "TTC Freising4", 1204, (0,0), true),
-          ParticipantEntry("135", "Lichtenegger5, Robert5", "TTC Freising5", 1205, (0,0), true),
-          ParticipantEntry("136", "Lichtenegger6, Robert6", "TTC Freising6", 1206, (0,0), true),
-          ParticipantEntry("137", "Lichtenegger7, Robert7", "TTC Freising7", 1207, (0,0), true),
-          ParticipantEntry("138", "Lichtenegger8, Robert8", "TTC Freising8", 1208, (0,0), true),
-          ParticipantEntry("139", "Lichtenegger9, Robert9", "TTC Freising9", 1209, (0,0), true),
-          ParticipantEntry(PLID_BYE.toString, "BYE", "-", 0, (0,0), true)
-        )
+        val pants = (Trny.pl2co.filterKeys(_._2 == coId).map { x =>
+          val sno = SNO(x._2.sno) 
+          val (snoValue, name, club, ttr) = sno.getInfo(Trny.comps(coId).typ)(Trny)
+          PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", x._2.status == PLS_REDY) 
+        }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
+        
+        // val pants = ArrayBuffer[PantSelect]()
+        // for (i <-1 to size) { 
+        //   val sno = SNO(i.toString)
+        //   val info = sno.getInfo(1)(Trny)
+        //   debug("DlgCardCfgSection", s"${sno}  ${info}") 
+        //   pants += PantSelect(sno, info._2, info._4.toString, true)            
+        // }
 
-        //def show(coId: Long, secId: Int, size:Int, trny: Tourney,  lang: String): Future[Either[Error, Int]] = {
-        DlgCardCfgSection.show(1L, 1, size, "DE", pants)(App.tourney) map {
-          case Left(err)  => println(s"testCase: ${testCase} error  -> ${err}") 
+        DlgCardCfgSection.show(1L, 0, pants)(Trny) map {
+          case Left(err)  => println(s"testCase: ${testCase} error -> ${err}") 
           case Right(res) => println(s"testCase: ${testCase} result: ${res}") 
         }
       } 
     }
   }  
-
-
-  // def show(coId: Long, secId: Int, size:Int, lang: String, pants: Array[ParticipantEntry])
-  //         (implicit trny: Tourney): Future[Either[Error, Int]] = {  
-
-// case class ParticipantEntry(
-//   var sno:    String,         // start number(s) concatenated string of player identifieres  
-//   val name:   String,                     
-//   val club:   String, 
-//   val rating: Int,            // eg. ttr for table tennis
-//   var place:  (Int,Int),      // position after finishing the round (group or ko)
-// ) {
-
-
-
 
   // startCardTourney - DlgCardTourney
   def testDlgCardTourney(testCase: String, testOption: String) =

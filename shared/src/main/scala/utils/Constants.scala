@@ -31,6 +31,7 @@ package object Constants {
 
   // competition section type 
   val CST_UNKN     = -99
+  val CST_UDEF     =   0
   val CST_GR3to9   = 100   // beliebige Gruppen-Spielphase 3-9er Gruppen
   val CST_GRPS3    = 101   // Gruppensystem mit 3er
   val CST_GRPS34   = 102   // Gruppensystem mit 3er und 4er

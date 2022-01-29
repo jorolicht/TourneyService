@@ -7,6 +7,38 @@ import shared.utils.{ Error, Return }
 import shared.utils.Constants._
 import shared.utils.Routines._
 
+
+case class SNO(value: String) {
+
+  def getSinglePlayer()(implicit trny: Tourney): Either[Error, Player] = {
+    try Right(trny.players(value.toLong))
+    catch { case _: Throwable => Left(Error("err0173.trny.getSinglePlayer", value)) }
+  }  
+
+  def getDoublePlayers()(implicit trny: Tourney): Either[Error, (Player, Player)] = {
+    try {
+      val ids = getMDLongArr(value)
+      Right( (trny.players(ids(0)), trny.players(ids(1))) )
+    }  
+    catch { case _: Throwable => Left(Error("err0174.trny.getDoublePlayer", value)) }
+  }
+
+  // getInfo returns tuple (SNO.value, Name, Club, TTR)
+  def getInfo(coTyp: Int)(implicit trny: Tourney): (String, String, String, Int) = {
+    coTyp match {
+       case CT_SINGLE => getSinglePlayer() match {
+         case Left(err)       => ("", "", "", 0)
+         case Right(p)        => (value, p.getName(), p.clubName, p.getRating)
+       }
+       case CT_DOUBLE => getDoublePlayers() match {
+         case Left(err)       => ("", "", "", 0)
+         case Right((p1, p2)) => (value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2))
+       }
+       case _         => ("", "", "", 0)    
+    }
+  }
+}
+
 sealed trait Placement
 case class PlacementPos(pos: Int) extends Placement
 case class PlacementRange(from: Int, to: Int) extends Placement
@@ -92,26 +124,6 @@ object Placement {
     def getPlayerId2 = getMDLong(sno, 1)
     def getSingleId  = getMDLong(sno, 0)
     def getDoubleId  = (getMDLong(sno, 0), getMDLong(sno, 1))
-
-
-    //genEntry generates ParticipantEntry from Participant2Comp entry 
-    def getEntry(players: HashMap[Long, Player], coTyp:Int): ParticipantEntry = {
-      val (startNo, name, club, rating, place) = coTyp match {
-        case CT_SINGLE           => {
-         val plId = getSingleId 
-         (sno, players(plId).getName(0), players(plId).clubName, players(plId).getRating, getPlace )
-        }
-        case CT_DOUBLE| CT_MIXED => {
-          val (plId1, plId2) = getDoubleId
-          (sno, players(plId1).lastname + "/" + players(plId2).lastname, 
-                players(plId1).clubName + "/" + players(plId2).clubName,
-                (players(plId1).getRating + players(plId2).getRating) / 2, getPlace )
-        }
-        case _                   => ("00000","","",0,(0,0))
-      }
-      ParticipantEntry(startNo, name, club, rating, place, false) 
-    }  
-
   }
 
   
@@ -186,24 +198,25 @@ case class ParticipantEntry(
   val name:    String,                     
   val club:    String, 
   val rating:  Int,            // eg. ttr for table tennis
-  var place:   (Int,Int),      // position after finishing the round (group or ko)
-  var checked: Boolean
+  var place:   (Int,Int)       // position after finishing the round (group or ko)
 ) {
   //def stringify() = s"${sno}·${pos}·${plId}·${plId2}·${name}·${club}·${place._1}·${place._2}"
-  def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^${checked}^_"
+  def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^_"
 }
 
 
 object ParticipantEntry {
-  
   implicit def rw: RW[ParticipantEntry] = macroRW
   def obify(peStr: String): ParticipantEntry = {
     val p = peStr.split("\\^")
     try { 
-      ParticipantEntry(p(0), p(1), p(2), p(3).toInt, (p(4).toInt, p(5).toInt), p(6).toBoolean)
-    } catch { case _: Throwable => ParticipantEntry("0","","",0, (0,0), false) }
+      ParticipantEntry(p(0), p(1), p(2), p(3).toInt, (p(4).toInt, p(5).toInt))
+    } catch { case _: Throwable => ParticipantEntry("0","","",0, (0,0)) }
   }
   
-  def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0), true)
+  def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0))
 
 }
+
+// PantSelect - info for participant selection for next round
+case class PantSelect(val sno: SNO, val name: String, val info: String, var checked: Boolean, val winner: Boolean=true)

@@ -23,7 +23,7 @@ class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String,
   var size      = 0
   var rounds    = 0
   var noPlayer  = 0
-  var pants     = Array[ParticipantEntry]()
+  var pants     = Array[SNO]()
   var matches   = ArrayBuffer[ArrayBuffer[MatchEntry]]()
 
   var koRound: KoRound = _
@@ -37,44 +37,19 @@ class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String,
   }
 
 
-  /** draw - generate a new competition setion
-   */ 
-  def draw(): Either[Error, Int]= {
-    
-    // sort player array ...
-    //noPlayer = playerList.size
-    //players  = playerList
-
-    secTyp match {
-      case CST_JGJ    => 
-      case CST_GRPS3  => 
-      case CST_GRPS34 => 
-      case CST_GRPS4  =>
-      case CST_GRPS45 =>
-      case CST_GRPS5  =>
-      case CST_GRPS56 =>
-      case CST_GRPS6  =>
-      case CST_KO     =>
-      case CST_SW     => 
-      case _          => 
-    }
-    Right(0)  
-  }
-
-
   def encode():String = {
     write[CompSectionTx](toTx())
   }
 
   def toTx(): CompSectionTx = {
     CompSectionTx(id, preId, winId, looId, name, coId, secTyp, noWinSets, 
-                  rounds, status, size, noPlayer, pants.toList, matches.map(_.toList).toList, "XXX")
+                  rounds, status, size, noPlayer, pants.map(_.toString).toList, matches.map(_.toList).toList, "XXX")
   }
   
   override def toString(): String = {
     def pants2Str() = {
       val str = new StringBuilder("-- PARTICIPANTS\n")
-      for { p <- pants }  yield { str ++= s"    ${p.sno}: ${p.name} [${p.club} ]\n" }; str.toString
+      for { p <- pants }  yield { str ++= s"${p.value}:" } ; str.toString
     }
     def matches2Str() = {
       val str = new StringBuilder("-- MATCHES\n")
@@ -140,7 +115,7 @@ case class CompSectionTx (
   val status:    Int,
   val size:      Int,
   val noPlayer:  Int,
-  val pants:     List[ParticipantEntry],
+  val pants:     List[String],
   val matches:   List[List[MatchEntry]],
   val system:    String
 )
@@ -148,25 +123,3 @@ case class CompSectionTx (
 object CompSectionTx {
   implicit def rw: RW[CompSectionTx] = macroRW
 }
-
-// Possible draw configurations:
-// 1 -> x
-// 2 -> x
-// 3 -> 3
-// 4 -> 4
-// 5 -> 5
-// 6 -> 3
-// 7 -> 3/4
-// 8 -> 4
-// 9 -> 3, 4/5
-// 10 -> 5
-// 11 -> 3/4 5/6
-// 12 -> 3, 4, 6
-// 13 -> 3/4
-// 14 -> 3/4 4/5
-// 15 -> 3, 5
-// 16 -> 4, 5/6
-// 17 -> 3/4, 4/5
-// 18 -> 3/4, 4/5
-// 19 -> 3/4, 4/5
-// 20 -> 4, 5 

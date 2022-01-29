@@ -1,10 +1,9 @@
 package scalajs.usecase.dialog
 
 // Start TestCases
-// DlgCardCfgSection: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=23#
-//                    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=9#
-//                    
-//                    
+// DlgCardCfgSection: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=1#
+//                    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=4#
+//                                       
 
 import scala.collection.mutable.{ ArrayBuffer }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -28,7 +27,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player, ParticipantEntry }
+import shared.model.{ Tourney, Player, PantSelect, SNO}
 import shared.utils._
 import shared.utils.Constants._
 import clientviews.dialog.DlgCardCfgSection.html
@@ -41,57 +40,14 @@ object DlgCardCfgSection extends BasicHtml
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardCfgSection", "dlg.card.cfg.section", "DlgCardCfgSection", "dlgcardcfgsection", scalajs.AppEnv.getMessage _ )
   private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
-  var size: Int = 0
-
-  @JSExport
-  def actionEvent(key: String, elem: HTMLElement, event: Event) = {
-    debug("actionEvent", s"key: ${key} event: ${event.`type`}")
-    key match {     
-      case "Selection" => { 
-        debug("actionEvent", s"Selection ${elem.asInstanceOf[Input].value}")
-        elem.asInstanceOf[Input].value.toIntOption match {
-          case None        => { setDisabled("Submit", true);  setHtml("CfgInfo", getMsg("option.info.2")) }
-          case Some(value) => { 
-            setDisabled("Submit", false)
-            debug("actionEvent", s"Selection size: ${size} KO-Size: ${genKOSize(size)}")
-
-            setHtml("CfgInfo", options2msg(value, size)) 
-          }
-        }
-        
-
-      }
-      case "Close"     => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
-      case _           => {}
-    }
-  }
-
-  /** validate input configuration input return selected option or a List of Errors
-   * 
-   */ 
-  def validate(): Either[List[Error], Int] = {
-    Right(7)
-  }
-
-  // set possible configuration section 
-  def set(coId: Long, secId: Int, size: Int, lang: String, pants: Array[ParticipantEntry])
-         (implicit trny: Tourney): Unit = {
-
-    val cfgOptions = sysOptions(size)
-    val selOptions = new StringBuilder("<option value='None' selected>---</option>")
-    for (cfg <- cfgOptions) {
-      val msg= getMsg(s"option.${cfg}")
-      selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
-    }
-    setHtml("CfgSelection", selOptions.toString) 
-    setHtml("CfgInfo", getMsg("option.info.2"))
-    setHtml("PantTbl", html.Pants(pants))
-    setHtml("lbl.Selection", getMsg("lbl.Selection", size.toString)) 
-  }
   
+  var pants          = new ArrayBuffer[PantSelect]()
+  var coId:     Long = 0L
+  var size:     Int  = 0
+  var pSectId:  Int  = 0
+
   // show dialog return result (Future) or Failure when canceled
-  def show(coId: Long, secId: Int, sizeParam: Int, lang: String, pants: Array[ParticipantEntry])
-          (implicit trny: Tourney): Future[Either[Error, Int]] = {
+  def show(coIdP: Long, pSectIdP: Int, pantsP: ArrayBuffer[PantSelect])(implicit trny: Tourney): Future[Either[Error, Int]] = {
     val p     = Promise[Int]()
     val f     = p.future
 
@@ -113,8 +69,11 @@ object DlgCardCfgSection extends BasicHtml
     }
     
     load()
-    size = sizeParam
-    set(coId, secId, size, lang, pants)
+    coId     = coIdP
+    pSectId  = pSectIdP
+    pants    = pantsP
+    size     = pants.filter(_.checked).size
+    setView()
 
     // register routines for cancel and submit
     $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
@@ -124,6 +83,73 @@ object DlgCardCfgSection extends BasicHtml
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
+
+
+  @JSExport
+  def actionEvent(key: String, elem: HTMLElement, event: Event) = {
+    debug("actionEvent", s"key: ${key} event: ${event.`type`}")
+    key match {     
+      case "Selection" => { 
+        val cst = getInput("CfgSelection", CST_UDEF)  // competition section type
+        setDisabled("Submit", cst == CST_UDEF)
+        setHtml("CfgInfo", options2msg(cst, size)) 
+        setInput("CfgName", genCfgName(cst, pSectId, (pSectId==0) || getRadioBtn("WinLoo", false)))
+      }
+
+      case "Winner" | "Looser" => {
+        val cst = getInput("CfgSelection", CST_UDEF)
+        setInput("CfgName", genCfgName(cst, pSectId, (pSectId==0) || getRadioBtn("WinLoo", false)))
+      }
+      
+      case "Check" => elem.asInstanceOf[Input].value.toIntOption match {
+        case None        => error("actionEvent", s"key: 'Check' - invalid index ")
+        case Some(index) => {
+          pants(index).checked = elem.asInstanceOf[Input].checked
+          size = pants.filter(_.checked).size
+          setViewInfoOption(size)
+          debug("actionEvent", s"value: size: ${size} ${index}  ${pants(index).checked} ")
+        }
+      }
+
+      case "Close"        => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+
+      case _              => {}
+    }
+  }
+
+
+  /** validate input configuration input return selected option or a List of Errors
+   * 
+   */ 
+  def validate(): Either[List[Error], Int] = {
+    Right(7)
+  }
+
+  // set possible configuration section 
+  def setView()(implicit trny: Tourney): Unit = {
+
+    // for now switch off looser round
+    // setVisible("BtnRadioWinLoo", pSectId != 0)
+    setVisible("BtnRadioWinLoo", false)
+    setViewInfoOption(size)
+    
+    setHtml("PantTbl", html.Pants(pants.toArray))
+  }
+  
+  // setViewInfoOption
+  def setViewInfoOption(size: Int): Unit = {
+    val cfgOptions = sysOptions(size)
+    val selOptions = new StringBuilder(s"<option value='${CST_UDEF}' selected>---</option>")
+    for (cfg <- cfgOptions) {
+      val msg= getMsg(s"option.${cfg}")
+      selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
+    }
+    setHtml("lbl.Selection", getMsg("lbl.Selection", size.toString)) 
+    setHtml("CfgSelection", selOptions.toString)
+    setInput("CfgSelection", "")
+    setHtml("CfgInfo", getMsg("option.info.2"))
+  }
+
 
   // sysOptions generate all possible options for given size
   def sysOptions(size: Int): List[Int] = {
@@ -177,5 +203,18 @@ object DlgCardCfgSection extends BasicHtml
     }
   }
 
+  // genCfgName - generate configuration name proposal
+  def genCfgName(option: Int, pSectId: Int, winner: Boolean=true): String = {
+    option match {
+      case CST_GRPS3 | CST_GRPS34 | CST_GRPS4 | CST_GRPS45 | CST_GRPS5 | CST_GRPS56 | CST_GRPS6  => {
+        if      (pSectId == 0) { getMsg(s"name.1") } 
+        else if (winner)        { getMsg(s"name.2") } 
+        else                    { getMsg(s"name.4") }
+      }
+      case CST_KO | CST_SW | CST_JGJ => if (winner) getMsg(s"name.3") else getMsg(s"name.4") 
+      case CST_UDEF                  => ""
+      case _                         => getMsg(s"name.3") 
+    }
+  }  
 
 }

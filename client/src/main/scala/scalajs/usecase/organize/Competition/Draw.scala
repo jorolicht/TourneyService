@@ -70,45 +70,6 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       setAlert(getMsg("noSelection")) 
     }
 
-
-
-    // // Example groups: Vorrunde
-    // val elem1 = getElemById("Content").querySelector("[data-navId='1']")  
-    // elem1.innerHTML = clientviews.organize.competition.draw.html.GroupCard(13L, 1,
-    //   Vector(
-    //     ("A", 1, 3, 1),
-    //     ("B", 2, 4, 4),
-    //     ("C", 3, 5, 8),
-    //     ("D", 4, 6, 13)
-    //   )
-    // ).toString  
-
-    // // Example switz system: Schweizer-Runde
-    // val elem2 = getElemById("Content").querySelector("[data-navId='2']")
-    // elem2.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(13L, 2, 4).toString
-
-    // setDrawContent(13L, 2, 4, List(
-    //     (1, "101", "Lichtenegger, Robert", "TTC Freising",   1220),
-    //     (2, "40",  "Lichtenegger, Robert2", "TTC Freising2", 1222),
-    //     (3, "99",  "Lichtenegger, Robert3", "TTC Freising3", 1223),
-    //     (4, "112", "Lichtenegger, Robert4", "TTC Freising4", 1224)
-    //   ) 
-    // )
-
-    // // Example switz system: Schweizer-Runde
-    // val elem3 = getElemById("Content").querySelector("[data-navId='3']")    
-    // elem3.innerHTML = clientviews.organize.competition.draw.html.KOCard(13L, 3, 4).toString
-  
-    // // clickNavigation("1")
-
-    // // example hide column
-    // val hideNodes = getElemById("KODraw").querySelectorAll("[data-hideColumn]")
-    // debug("hideNodes", s"length: ${hideNodes.length}")
-    // for( i <- 0 to hideNodes.length-1) {
-    //   hideNodes.item(i).asInstanceOf[HTMLElement].style.display="none"
-    // }
-
-
   }
 
 
@@ -158,7 +119,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     // first get the base element identified by coId and secId
     val elemBase = getElemById(s"Draw_${coId}_${secId}")
 
-    val pants = trny.run.coSects(coId, secId).pants  
+    val pants = trny.run.coSects(coId, secId).pants.map( _.getInfo(trny.comps(coId).typ))
     
     //.playerMap = player.map(x=> x._1 -> (x._2, x._3, x._4, x._5) ).toMap
 
@@ -167,30 +128,32 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     for( i <- 0 to inputElements.length-1) {
       val elem = inputElements.item(i).asInstanceOf[HTMLElement]
       val pos  = elem.getAttribute("data-drawPos").toInt
-      elem.setAttribute("data-sno", pants(pos-1).sno)
+      elem.setAttribute("data-sno", pants(pos-1)._1)
     }
     val nameElements = elemBase.querySelectorAll("small[data-drawName]")
     for( i <- 0 to nameElements.length-1) {
       val elem = nameElements.item(i).asInstanceOf[HTMLElement]
       val pos  = elem.getAttribute("data-drawName").toInt
-      elem.innerHTML = pants(pos-1).name
+      elem.innerHTML = pants(pos-1)._2
     }
     val clubElements = elemBase.querySelectorAll("small[data-drawClub]")
     for( i <- 0 to clubElements.length-1) {
       val elem = clubElements.item(i).asInstanceOf[HTMLElement]
       val pos  = elem.getAttribute("data-drawClub").toInt
-      elem.innerHTML = pants(pos-1).club
+      elem.innerHTML = pants(pos-1)._3
     }
 
     val ttrElements = elemBase.querySelectorAll("small[data-drawTTR]")
     for( i <- 0 to ttrElements.length-1) {
       val elem = ttrElements.item(i).asInstanceOf[HTMLElement]
       val pos  = elem.getAttribute("data-drawTTR").toInt
-      elem.innerHTML = pants(pos-1).rating.toString
+      elem.innerHTML = pants(pos-1)._4.toString
     }
 
   }
 
+
+  
   def clickNavigation(navId: String) = {
     val aNodes = getElemById("Links").getElementsByTagName("a")
     for( i <- 0 to aNodes.length-1) {

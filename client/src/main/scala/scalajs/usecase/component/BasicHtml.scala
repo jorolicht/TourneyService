@@ -638,6 +638,16 @@ class BasicHtml
     catch { case _: Throwable => error("getRadioBtn", s"name: ${ucp.idBase}__${name}"); "" }
   }
 
+  def getRadioBtn(name: String, defVal: Boolean)(implicit ucp: UseCaseParam): Boolean = {
+    try {
+      val inpNodes = document.getElementsByName(ucp.idBase + "__" + name).asInstanceOf[NodeList]
+      val node = inpNodes.filter(_.asInstanceOf[Input].checked).head
+      node.asInstanceOf[Input].value.toBooleanOption.getOrElse(defVal)
+    }
+    catch { case _: Throwable => error("getRadioBtn", s"name: ${ucp.idBase}__${name}"); defVal }
+  }
+
+
 
   def setCheckbox(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].checked = value

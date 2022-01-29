@@ -14,7 +14,6 @@ import scalajs._
 trait DrawSvc 
 {
   
-
   /** genGrpSplit - check whether the numbers of players can be
    *  configurated with groups of size and size+1
    */ 

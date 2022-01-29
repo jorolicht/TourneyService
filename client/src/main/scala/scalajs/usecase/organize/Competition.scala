@@ -150,7 +150,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         debug("StartCompetition", s"todo start competition")
       }  
 
-
       case "AddCompetition"     => {    
         AppEnv.setCoId(0L)
         DlgCardComp.show(Competition.init, App.tourney, AppEnv.getLang, DlgOption.New).map {

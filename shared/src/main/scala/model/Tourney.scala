@@ -74,7 +74,6 @@ case class TournBase(
   def setAddress(desc: String, country: String, zip: String, city: String, street: String) = {
     address = s"${desc}·${country}·${zip}·${city}·${street}"
   }
-
 }  
  
  
@@ -276,8 +275,7 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
 
   /*
    * miscellanous tourney routines
-   */  
-  
+   */
   def getParticipantName(sno: String, coId: Long, format: Int): String = {
     import shared.utils.Constants._ 
     try {
@@ -354,13 +352,13 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
    */
   def setCompDraw(co: Competition, nameSec: String, typSec: Int, prevSec: Int, 
                   winners: Boolean, noWinSets: Int, 
-                  pants: Array[ParticipantEntry]): Either[Error, Int] = {
+                  pants: Array[SNO]): Either[Error, Int] = {
     addSect(prevSec, co.id, nameSec, typSec, winners) match {
       case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
       case Right(secId) => {        
         if (run.coSects.isDefinedAt((co.id, secId))) {
           run.coSects((co.id, secId)).pants     = pants
-          run.coSects((co.id, secId)).noPlayer  = pants.filter(p => p.sno != SNO_BYE).size
+          run.coSects((co.id, secId)).noPlayer  = pants.filter(p => p.value != SNO_BYE).size
           run.coSects((co.id, secId)).size      = pants.size
           run.coSects((co.id, secId)).noWinSets = noWinSets
           Right(secId) 
@@ -370,7 +368,6 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
       }
     }
   }
-
 
   /** setComp - sets new values of existing competitions
    * 
@@ -401,7 +398,6 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
       Right(comps(co.id))
     }
   }
-
 
   /** delComp - delete competition with id
    * 
@@ -449,20 +445,6 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
       Right(newId)
     }
   }
-
-  //setSectPlayer - sets the participants to competition section
-  def setSectPlayer(coId: Long, secId: Int, pEntries: Array[ParticipantEntry]): Either[Error, Int] = { 
-    import shared.utils.Constants._
-    if (run.coSects.isDefinedAt((coId, secId))) {
-      run.coSects((coId, secId)).pants = pEntries
-      run.coSects((coId, secId)).noPlayer = pEntries.filter(p => p.sno != SNO_BYE).size
-      run.coSects((coId, secId)).size = pEntries.size
-      Right(run.coSects((coId, secId)).noPlayer) 
-    } else {
-      Left(Error("err0170.trny.setSectPlayer"))
-    }  
-  }  
-
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
@@ -535,6 +517,23 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
       Left(Error("err0027.tourney.setParticipantStatus", sno, coId.toString)) 
     }      
   }
+
+
+  /*  getParticipants - returns List/Array of participant entries, empty Array if 
+   *                    no participants or wrong/invalid coId
+   */
+  // def getParticipants(coId: Long): Array[ParticipantEntry] = {
+  //   if (comps.isDefinedAt(coId)) {
+  //     val cTyp = comps(coId).typ
+  //     pl2co.keys
+  //      .filter(x => (x._2 == coId))
+  //      .filter(x => pl2co(x).status == 1)
+  //      .map( x => pl2co(x).getEntry(players, cTyp) ).toArray
+  //   } else {
+  //     Array[ParticipantEntry]()
+  //   }
+  // }
+
 }
 
 
