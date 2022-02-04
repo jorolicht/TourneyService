@@ -1148,7 +1148,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0141.crypto.IntParam                             = Parameter {0} of type Int not found
   err0142.crypto.Boolean                              = Parameter {0} of type Boolean not found
   err0143.decode.Competitions                         = Decoding error data type Competitions: {0}
-  err0144.decode.TournBases                           = Decoding error TournBases data type: {0}
+  err0144.decode.TournBases                           = Decoding error data type TournBases: {0}
   err0145.user.download                               = Download not possible (please check authorization)
   err0146.fileaccess.config                           = Configuration files {0} or {1} could not be read
   err0147.decode.ResultEntrys                         = Decoding error data type ResultEntrys: {0}
@@ -1182,5 +1182,8 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0172.trny.setCompDraw                            = function call setCompDraw, could not set section attributes
   err0173.trny.getSinglePlayer                        = function call getSinglePlayer, start number {0} does not exist
   err0174.trny.getDoublePlayer                        = function call getDoublePlayer, start number {0} does not exist
+  err0175.DlgCardCfgSection                           = Invalid selection of game system
+  err0176.decode.CompSection                          = Decoding error data type CompSection: {0} 
+  err0177.decode.CompPhase                            = Decoding error data type CompPhase: {0}
 
 #END error codes / messages

@@ -23,8 +23,6 @@ import scalajs.usecase.Helper
 trait ViewServices {
 
 
-
-
  /** genSingleTblData
    *  returns Sequence of Single Participants (sno, lastname, firstname, clubname, birthyear, status) 
    */

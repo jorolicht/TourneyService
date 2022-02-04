@@ -47,7 +47,9 @@ object DlgCardCfgSection extends BasicHtml
   var pSectId:  Int  = 0
 
   // show dialog return result (Future) or Failure when canceled
-  def show(coIdP: Long, pSectIdP: Int, pantsP: ArrayBuffer[PantSelect])(implicit trny: Tourney): Future[Either[Error, Int]] = {
+  def show(coIdP: Long, pSectIdP: Int, pantsP: ArrayBuffer[PantSelect])
+    (implicit trny: Tourney): Future[Either[Error, (Int, ArrayBuffer[PantSelect])]] = 
+  {
     val p     = Promise[Int]()
     val f     = p.future
 
@@ -58,7 +60,7 @@ object DlgCardCfgSection extends BasicHtml
 
     def submit(e: Event): Unit = {
       validate() match {
-        case Left(eList) => DlgShowError.show(eList)
+        case Left(err) => DlgShowError.show(List(err))
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
@@ -80,7 +82,7 @@ object DlgCardCfgSection extends BasicHtml
     $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
     $(getId("Modal","#")).modal("show")
 
-    f.map(Right(_))
+    f.map(x => Right((x, pants)))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
 
@@ -121,18 +123,17 @@ object DlgCardCfgSection extends BasicHtml
   /** validate input configuration input return selected option or a List of Errors
    * 
    */ 
-  def validate(): Either[List[Error], Int] = {
-    Right(7)
+  def validate(): Either[Error, Int] = {
+    val result = getInput("CfgSelection", CST_UDEF)
+    if (result == CST_UDEF) Left(Error("err0175.DlgCardCfgSection")) else Right(result)
   }
 
   // set possible configuration section 
   def setView()(implicit trny: Tourney): Unit = {
-
     // for now switch off looser round
     // setVisible("BtnRadioWinLoo", pSectId != 0)
     setVisible("BtnRadioWinLoo", false)
     setViewInfoOption(size)
-    
     setHtml("PantTbl", html.Pants(pants.toArray))
   }
   

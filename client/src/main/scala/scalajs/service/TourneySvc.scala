@@ -29,7 +29,6 @@ trait TourneySvc extends WrapperSvc
   with AppHelperSvc
 {
   
-
   // export database
   def ping(toId: Long, msg: String): Future[Either[Error, String]] = getAction("ping", toId, s"msg=${msg}")
 
@@ -201,39 +200,39 @@ trait TourneySvc extends WrapperSvc
       case Right(res) => Return.decode2Boolean(res, "saveTourney")
     }
 
-  def getTourney(toId: Long): Future[Either[Error, Tourney]]  =  {
-    import cats.data.EitherT
-    import cats.implicits._
+  // def getTourney(toId: Long): Future[Either[Error, Tourney]]  =  {
+  //   import cats.data.EitherT
+  //   import cats.implicits._
 
-    // println(s"getResult: ${scala.scalajs.js.Date.now()}")
-    (for {
-      trny    <- EitherT(getTournCfg(toId))
-      trnyRun <- EitherT(getTournRun(toId))
-    } yield { (trny, trnyRun) }).value.map {
-      case Left(err)  => { Left(err.add("getTourney")) }
-      case Right(res) => { res._1.run = res._2; Right(res._1) }
-    }
-  } 
+  //   // println(s"getResult: ${scala.scalajs.js.Date.now()}")
+  //   (for {
+  //     trny    <- EitherT(getTournCfg(toId))
+  //     trnyRun <- EitherT(getTournRun(toId))
+  //   } yield { (trny, trnyRun) }).value.map {
+  //     case Left(err)  => { Left(err.add("getTourney")) }
+  //     case Right(res) => { res._1.run = res._2; Right(res._1) }
+  //   }
+  // } 
 
   
   // get full tourney configuration information
-  def getTournCfg(toId: Long): Future[Either[Error, Tourney]] = {
+  def getTourney(toId: Long): Future[Either[Error, Tourney]] = {
     // println(s"getSubResult1: ${scala.scalajs.js.Date.now()}")
-    getAction("getTournCfg", toId).map {
-      case Left(err)     => Left(err.add("getTournCfg"))
+    getAction("getTourney", toId).map {
+      case Left(err)     => Left(err.add("getTourney"))
       case Right(trnyTx) => Tourney.decode(trnyTx)
     }
   }
 
 
-  // get tourney run information
-  def getTournRun(toId: Long):  Future[Either[Error, TournRun]] = {
-    // println(s"getSubResult2: ${scala.scalajs.js.Date.now()}")
-    getAction("getTournRun", toId).map { 
-      case Left(err)  => Left(err.add("getTournRun"))
-      case Right(tRs) => TournRun.decode(tRs)
-    }
-  }  
+  // // get tourney run information
+  // def getTournRun(toId: Long):  Future[Either[Error, TournRun]] = {
+  //   // println(s"getSubResult2: ${scala.scalajs.js.Date.now()}")
+  //   getAction("getTournRun", toId).map { 
+  //     case Left(err)  => Left(err.add("getTournRun"))
+  //     case Right(tRs) => TournRun.decode(tRs)
+  //   }
+  // }  
 
 
   // get all players of tourney 
@@ -393,13 +392,22 @@ trait TourneySvc extends WrapperSvc
       case Right(res) => Placement.decode(res)
     }
 
-  // setParticipantStatus set the status of a player in a competition
+  // setParticipantStatus set the status of a participants in a competition
   // def setParticipantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
   def setParticipantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]] = 
     postAction("setParticipantStatus", App.tourney.id, s"coId=${coId}&sno=${sno}&status=${status.toString}","",true).map {
       case Left(err)  => Left(err.add("setParticipantStatus"))
       case Right(res) => Return.decode2Int(res, "setParticipantStatus")
     }
+
+  // setPantBulkStatus set the status of all participants in a competition
+  // returns number of updated entries
+  // def setPantBulkStatus(coId: Long, List[(String, Int)]): Future[Either[Error, Int]]
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]): Future[Either[Error, Int]] = 
+    postAction("setPantBulkStatus", App.tourney.id, s"coId=${coId}", write(pantStatus),true).map {
+      case Left(err)  => Left(err.add("setPantBulkStatus"))
+      case Right(res) => Return.decode2Int(res, "setParticipantStatus")
+    }    
 
 
   //

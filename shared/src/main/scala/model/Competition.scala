@@ -3,6 +3,7 @@ package shared.model
 import scala.util.matching
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
+
 import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
 import shared.utils.{ Error, Return }
 import shared.utils.Routines._
@@ -142,6 +143,7 @@ case class Competition(
 }                                                               
 
 object Competition {
+  implicit def rw: RW[Competition] = macroRW
   def tupled = (this.apply _).tupled
   def init             = new Competition(0L, 0, "",  CT_UNKN, "", CS_UNKN, "")
   def get()            = new Competition(0L, 0, "",  CT_UNKN, "", CS_UNKN, "")

@@ -33,7 +33,7 @@ import scalajs._
 // ***
 @JSExportTopLevel("OrganizeCompetitionDraw")
 object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")  
-  with TourneySvc with DrawSvc
+  with TourneySvc with DrawSvc with UIComponentServices
 {
   import org.scalajs.dom.raw.HTMLElement
 
@@ -44,15 +44,15 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     val coId = AppEnv.getCoId
     if (coId > 0) {
       // generate list of tuple (section name, section Id )
-      val compSects = App.tourney.run.coSects.filter(x => x._1._1 == coId).values.map(x => (x.name, x.id)).toList
+      val compSects = App.tourney.coSects.filter(x => x._1._1 == coId).values.map(x => (x.name, x.id)).toList
       if (compSects.length == 0) {
-        setAlert(getMsg("noSection"))
+        showAlert(getMsg("noSection"))
       } else {
         setMainContent(clientviews.organize.competition.html.DrawCard( compSects ).toString)
         compSects.map { case (name, secId) => 
           val elem = getElemById("Content").querySelector(s"[data-navId='${secId}']")
-          val size   = Trny.run.coSects(coId, secId).size
-          val secTyp = Trny.run.coSects(coId, secId).secTyp
+          val size   = Trny.coSects(coId, secId).size
+          val secTyp = Trny.coSects(coId, secId).secTyp
           // generate draw frame
           secTyp match {
             case CST_GRPS3 | CST_GRPS4 | CST_GRPS45 | CST_GRPS5 | CST_GRPS56 | CST_GRPS6  => {
@@ -60,14 +60,14 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
             }  
             case CST_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, secId, size).toString
             case CST_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, secId, size).toString
-            case _      => elem.innerHTML = setAlert(getMsg("invalidSection"))
+            case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
           }
           // generate draw frame
 
         }  
       }
     } else {
-      setAlert(getMsg("noSelection")) 
+      showAlert(getMsg("noSelection")) 
     }
 
   }
@@ -119,7 +119,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     // first get the base element identified by coId and secId
     val elemBase = getElemById(s"Draw_${coId}_${secId}")
 
-    val pants = trny.run.coSects(coId, secId).pants.map( _.getInfo(trny.comps(coId).typ))
+    val pants = trny.coSects(coId, secId).pants.map( _.getInfo(trny.comps(coId).typ))
     
     //.playerMap = player.map(x=> x._1 -> (x._2, x._3, x._4, x._5) ).toMap
 

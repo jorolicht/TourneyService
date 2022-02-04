@@ -46,8 +46,8 @@ object DlgCardComp extends BasicHtml
       case "NameCompose"  => { 
         if (getCheckbox("NameCompose")) {  
           val typ = getInput("typ", 0)
-          setInput("name", getTxtInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
-                               + getTxtInput("Class", getMsg("plh.Class")) + "·" 
+          setInput("name", getInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
+                               + getInput("Class", getMsg("plh.Class")) + "·" 
                                + BasicHtml.getMsg_("competition.typ."+typ) )
           setAttribute("name", "readonly", "true")                     
         } else {

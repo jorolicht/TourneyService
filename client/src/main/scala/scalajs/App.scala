@@ -158,7 +158,7 @@ object App extends BasicHtml
         } yield { 
           initTrigger()
           BasicHtml.setHtml_("PlayfieldTitle", getMsg("header.title.playfields", tourney.organizer, tourney.name))
-          setMainContent(clientviews.playfield.html.Fullscreen( tourney.run.playfields.values.toSeq , AppEnv.msgs).toString)
+          setMainContent(clientviews.playfield.html.Fullscreen( tourney.playfields.values.toSeq , AppEnv.msgs).toString)
         }
       }
     }
@@ -222,7 +222,7 @@ object App extends BasicHtml
           case "Playfield"     => {
             for {
               res     <- updatePlayfield(toId)
-              content  = clientviews.playfield.html.Fullscreen( tourney.run.playfields.values.toSeq , AppEnv.msgs).toString
+              content  = clientviews.playfield.html.Fullscreen( tourney.playfields.values.toSeq , AppEnv.msgs).toString
             } yield {
               setMainContent(content)
             }
@@ -276,7 +276,7 @@ object App extends BasicHtml
     getMatchKo(coId,coPh).map { 
       case Left(err) => error("updateMatchKo", getError(err)); false
       case Right(matches) => {
-        tourney.run.cophs((coId, coPh)).ko.setResultEntries(matches)
+        tourney.cophs((coId, coPh)).ko.setResultEntries(matches)
         saveLocalTourneyRun(tourney)
         true
       }  
@@ -288,7 +288,7 @@ object App extends BasicHtml
     getMatchGr(coId,coPh,grId).map { 
       case Left(err)      => error("updateMatchGr", getError(err)); false
       case Right(matches) => {
-        tourney.run.cophs((coId,coPh)).groups(grId-1).setResultEntries(matches)
+        tourney.cophs((coId,coPh)).groups(grId-1).setResultEntries(matches)
         saveLocalTourneyRun(tourney)
         true
       }  
@@ -296,8 +296,8 @@ object App extends BasicHtml
   }
 
   def resetMatches(coId: Long, coPh: Int): Unit = {
-    if (tourney.run.cophs.isDefinedAt((coId, coPh))) {
-      tourney.run.cophs((coId, coPh)).resetMatches
+    if (tourney.cophs.isDefinedAt((coId, coPh))) {
+      tourney.cophs((coId, coPh)).resetMatches
       saveLocalTourneyRun(tourney)
     }
   }
@@ -306,7 +306,7 @@ object App extends BasicHtml
     getPlayfields(toId).map {
       case Left(err)     => error("updatePlayfield", getError(err)); false
       case Right(pfSeq)  => {
-        tourney.run.playfields = collection.mutable.HashMap( pfSeq.map { p => { p.nr -> p }} : _*)
+        tourney.playfields = collection.mutable.HashMap( pfSeq.map { p => { p.nr -> p }} : _*)
         saveLocalTourneyRun(tourney)
         true
       }
@@ -400,9 +400,9 @@ object App extends BasicHtml
         setLocalTourney(Tourney.getDummy)
       }
       case Right(tourney) => {
-        tourney.run = 
-          try TournRun.fromTx(read[TournRunTx](AppEnv.getLocalStorage("AppEnv.TourneyRun")))
-          catch { case _: Throwable => { new TournRun(tourney.id) } }
+        // tourney.run = 
+        //   try TournRun.fromTx(read[TournRunTx](AppEnv.getLocalStorage("AppEnv.TourneyRun")))
+        //   catch { case _: Throwable => { new TournRun(tourney.id) } }
         AppEnv.setToId(tourney.id)  
       }
     } 
@@ -418,7 +418,7 @@ object App extends BasicHtml
   def saveLocalTourney(trny: Tourney): Unit = { 
     AppEnv.setToId(trny.id)
     saveLocalTourneyCfg(trny)
-    saveLocalTourneyRun(trny) 
+    //saveLocalTourneyRun(trny) 
   }
 
   def saveLocalTourneyCfg(trny: Tourney): Unit = {
@@ -427,8 +427,8 @@ object App extends BasicHtml
   }
   
   def saveLocalTourneyRun(trny: Tourney): Unit = {
-    try AppEnv.setLocalStorage("AppEnv.TourneyRun", write(trny.run.toTx((trny.id))))
-    catch { case _: Throwable => println("saveLocalTourneyRun(error)", "couldn't write to local storage") }    
+    // try AppEnv.setLocalStorage("AppEnv.TourneyRun", write(trny.run.toTx((trny.id))))
+    // catch { case _: Throwable => println("saveLocalTourneyRun(error)", "couldn't write to local storage") }    
   }
 
 

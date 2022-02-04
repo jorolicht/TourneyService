@@ -1193,6 +1193,9 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0171.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt {0} kann nicht generiert werden
   err0172.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt nicht definiert
   err0173.trny.getSinglePlayer                        = Funktionsaufruf getSinglePlayer, Startnummer {0} fehlerhaft
-  err0174.trny.getDoublePlayer                        = Funktionsaufruf getDoublePlayer, Startnummer {0} fehlerhaft 
+  err0174.trny.getDoublePlayer                        = Funktionsaufruf getDoublePlayer, Startnummer {0} fehlerhaft
+  err0175.DlgCardCfgSection                           = Ungültige Auswahl des Spielsystems
+  err0176.decode.CompSection                          = Dekodierfehler Datentyp CompSection: {0}
+  err0177.decode.CompPhase                            = Dekodierfehler Datentyp CompPhase: {0}
 
 #END Error Codes/Messages

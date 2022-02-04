@@ -100,7 +100,6 @@ class PostActionCtrl @Inject()
       // Register Action Routines (Single/Double)
       //
 
-
       // def setParticipant2Comp(coId: Long, plId: Player): Future[Either[Error, Boolean]]
       // registers a player with a competition, returns Participant2Comp entry
       case "setParticipant2Comp" => {
@@ -171,6 +170,22 @@ class PostActionCtrl @Inject()
           }
         }
       }  
+
+      // setPantBulkStatus sets the status of a participant within a competition, returns number of affected
+      // def setPantBulkStatus(coId: Long, List[(String, Int)]): Future[Either[Error, Int]]
+      case "setPantBulkStatus" => {
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantBulkStatus").encode)) else {
+          val pantStatus = read[List[(String,Int)]](reqData)
+          logger.warn(s"setPantBulkStatus => pants status: ${pantStatus}") 
+          tsv.setPantBulkStatus(getParam(pMap, "coId", 0L), pantStatus).map {
+            case Left(err)  => BadRequest(err.encode)
+            case Right(res) => Ok(Return(res).encode)
+          }
+        }
+      }  
+
+
+
       
       // setParticipantPlace sets the place of a participant within a competition, returns placement
       // setParticipantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]

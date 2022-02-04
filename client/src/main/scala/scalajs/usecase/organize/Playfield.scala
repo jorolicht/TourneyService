@@ -30,13 +30,13 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     debug("render", s"${App.getTourneyStartDate.toString}") 
     
-    if (App.tourney.run.playfields.isEmpty) {
+    if (App.tourney.playfields.isEmpty) {
       App.updatePlayfield(App.tourney.getToId()).map { _ => 
-        val pfs = App.tourney.run.playfields.values.toSeq
+        val pfs = App.tourney.playfields.values.toSeq
         setMainContent(clientviews.organize.html.Playfield(pfs).toString)      
       }
     } else {
-      val pfs = App.tourney.run.playfields.values.toSeq
+      val pfs = App.tourney.playfields.values.toSeq
       setMainContent(clientviews.organize.html.Playfield(pfs).toString)
     }
   }
@@ -53,7 +53,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
       case "ReqPlayfieldEdit" => {
         DlgPlayfield.show().map { pf => setPlayfield(pf).map { 
             case Left(err)  => debug("onclickAdd", s"error: ${getError(err)}") 
-            case Right(res) => {  App.tourney.run.playfields(pf.nr) = pf; render() }
+            case Right(res) => {  App.tourney.playfields(pf.nr) = pf; render() }
         }}
       }
       case _                  => error("actionEvent", s"unmatched key: ${key}")
@@ -65,7 +65,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
   def buttonAdd(): Unit = 
     DlgPlayfield.show().map { pf => setPlayfield(pf).map { 
         case Left(err)  => debug("onclickAdd", s"error: ${getError(err)}") 
-        case Right(res) => { App.tourney.run.playfields(pf.nr) = pf; render() }  
+        case Right(res) => { App.tourney.playfields(pf.nr) = pf; render() }  
       }}
 
 
@@ -88,7 +88,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
     delPlayfield(pfCode).map { 
       case Left(err)  => debug("onclickDelete", s"${getError(err)}") 
       case Right(no) => {
-        if (App.tourney.run.playfields.isDefinedAt(no)) App.tourney.run.playfields -= no
+        if (App.tourney.playfields.isDefinedAt(no)) App.tourney.playfields -= no
         render()
       }
     }
@@ -99,15 +99,15 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
   def onclickEdit(elem: dom.raw.HTMLInputElement, pfCode: String, pfNrStr: String) = {
     debug("onclickEdit", s"${elem.id} ${pfNrStr}") 
     val pfNo = pfNrStr.toIntOption.getOrElse(-1)
-    DlgPlayfield.show(App.tourney.run.playfields(pfNo)).map { 
+    DlgPlayfield.show(App.tourney.playfields(pfNo)).map { 
       pfdlg => setPlayfield(pfdlg).map { 
         case Left(err)  => debug("onclickEdit", s"error: ${getError(err)}") 
         case Right(res) => {
-          App.tourney.run.playfields(pfNo) = pfdlg
+          App.tourney.playfields(pfNo) = pfdlg
           if (pfNo != pfdlg.nr) {
             delPlayfield(pfCode).map {
               case Left(err)  => debug("onclickEdit", s"error: ${getError(err)}") 
-              case Right(res) => { if (App.tourney.run.playfields.isDefinedAt(pfNo)) App.tourney.run.playfields -= pfNo; render() }
+              case Right(res) => { if (App.tourney.playfields.isDefinedAt(pfNo)) App.tourney.playfields -= pfNo; render() }
             }
           }
           render()

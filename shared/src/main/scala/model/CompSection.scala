@@ -15,7 +15,7 @@ import shared.model.tabletennis._
  *  intermediate round or final round. Every competition has at least
  *  a final round. Number of players always less or equal size.
  */
-class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) {
+case class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) {
   var noWinSets = 0 
   var winId     = 0  
   var looId     = 0 
@@ -37,7 +37,7 @@ class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String,
   }
 
 
-  def encode():String = {
+  def encode(): String = {
     write[CompSectionTx](toTx())
   }
 
@@ -74,6 +74,7 @@ class CompSection(val id: Int, val preId: Int, val coId: Long, val name: String,
 
 
 object CompSection {
+  implicit def rw: RW[CompSection] = macroRW
 
   def decode(coStr: String): Either[Error, CompSection] = 
     try Right(fromTx(read[CompSectionTx](coStr)))
@@ -97,6 +98,17 @@ object CompSection {
       case _          => ()
     } 
     coSec
+  }
+
+  // decSeq - decode encoded Competition Section to sequence 
+  def decSeq(input: String): Either[Error, Seq[CompSection]] = {
+    try {
+      val coSects = read[CompSectionsTx](input)
+      (coSects.list.map{ co => CompSection.decode(co) }).partitionMap(identity) match {
+        case (Nil, rights)      => Right(rights.toSeq)
+        case (firstErr :: _, _) => Left(firstErr.add("CompSection.decSeq"))
+      }
+    } catch { case _: Throwable => Left(Error("err0176.decode.CompSection", input.take(20), "", "CompSection.deqSeq")) }
   }
 
 }  
@@ -123,3 +135,6 @@ case class CompSectionTx (
 object CompSectionTx {
   implicit def rw: RW[CompSectionTx] = macroRW
 }
+
+case class CompSectionsTx (list: Seq[String])
+object CompSectionsTx { implicit def rw: RW[CompSectionsTx] = macroRW }

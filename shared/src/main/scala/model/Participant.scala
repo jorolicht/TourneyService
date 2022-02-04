@@ -8,61 +8,6 @@ import shared.utils.Constants._
 import shared.utils.Routines._
 
 
-case class SNO(value: String) {
-
-  def getSinglePlayer()(implicit trny: Tourney): Either[Error, Player] = {
-    try Right(trny.players(value.toLong))
-    catch { case _: Throwable => Left(Error("err0173.trny.getSinglePlayer", value)) }
-  }  
-
-  def getDoublePlayers()(implicit trny: Tourney): Either[Error, (Player, Player)] = {
-    try {
-      val ids = getMDLongArr(value)
-      Right( (trny.players(ids(0)), trny.players(ids(1))) )
-    }  
-    catch { case _: Throwable => Left(Error("err0174.trny.getDoublePlayer", value)) }
-  }
-
-  // getInfo returns tuple (SNO.value, Name, Club, TTR)
-  def getInfo(coTyp: Int)(implicit trny: Tourney): (String, String, String, Int) = {
-    coTyp match {
-       case CT_SINGLE => getSinglePlayer() match {
-         case Left(err)       => ("", "", "", 0)
-         case Right(p)        => (value, p.getName(), p.clubName, p.getRating)
-       }
-       case CT_DOUBLE => getDoublePlayers() match {
-         case Left(err)       => ("", "", "", 0)
-         case Right((p1, p2)) => (value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2))
-       }
-       case _         => ("", "", "", 0)    
-    }
-  }
-}
-
-sealed trait Placement
-case class PlacementPos(pos: Int) extends Placement
-case class PlacementRange(from: Int, to: Int) extends Placement
-
-object Placement {
-  def encode(place: Placement): String = {
-    place match {
-      case PlacementPos(pos)       => pos.toString
-      case PlacementRange(from,to) => s"${from}·${to}"
-    }
-  }
-
-  def decode(placeStr: String): Either[Error, Placement] = {
-    try {
-      val placeArr = getMDIntArr(placeStr)
-      placeArr.length match {
-        case 1 => if (placeArr(0) > 0) Right(PlacementPos(placeArr(0))) else Left(Error("err0059.decode.Placement", placeStr, "", "Placement.decode"))
-        case 2 => if (placeArr(0) > 0 & placeArr(1) > 0) Right(PlacementRange(placeArr(0),placeArr(1))) else Left(Error("err0059.decode.Placement", placeStr, "", "Placement.decode"))
-        case _ => Left(Error("err0059.decode.Placement", placeStr, "", "Placement.decode"))
-      }  
-    } catch { case _: Throwable => Left(Error("err0059.decode.Placement", placeStr, "", "Placement.decode")) }  
-  }
-}  
-
  /**
   *  Single/Double/Team to Competition mapping entry
   */
@@ -128,6 +73,7 @@ object Placement {
 
   
   object Participant2Comp {
+    implicit def rw: RW[Participant2Comp] = macroRW
     def tupled = (this.apply _).tupled
     def dummy() = new Participant2Comp("", 0L, "", "", 0, "_")
     def single(plId: Long, coId: Long, status: Int) = new Participant2Comp(plId.toString, coId, "", "", status, "_") 

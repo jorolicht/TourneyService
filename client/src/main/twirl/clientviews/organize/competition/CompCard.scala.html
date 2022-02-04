@@ -40,7 +40,7 @@
 		</tr>
 	} else {			
 		@for(co <- comps) {	
-			<tr data-coId='@co._1' @id(co._1.toString) @actionEvent("SelectCompetition", "onclick")>  
+			<tr data-coId='@co._1' @id(s"${co._1}") @actionEvent("SelectCompetition", "onclick")>  
 				<td class="text-left tuse-height"><strong>@co._1</strong</td>
 				<td class="text-left tuse-height">@Competition.genName(co._2, co._3, co._4, msg_("competition.typ."+co._5))</td>
 				<td class="text-left tuse-height">@co._6</td>

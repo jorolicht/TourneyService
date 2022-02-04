@@ -45,7 +45,7 @@ object InfoResult extends UseCase("InfoResult")
     val grId = upd.grId
 
     debug("update",s"for ${coId} ${coPh} ${grId}")
-    val cphase = App.tourney.run.cophs((coId,coPh))
+    val cphase = App.tourney.cophs((coId,coPh))
     cphase.getSystem match {
       case CSY_KO => showKoResult(cphase.coId, cphase.coPh, cphase.ko) 
       case CSY_GR => showGrResult(cphase.coId, cphase.coPh, cphase.groups(grId-1))
@@ -115,7 +115,7 @@ object InfoResult extends UseCase("InfoResult")
   def showTourneyResults(tourney: Tourney) = {
     // list of all configured competition phases
     debug("showTourneyResults", s"start")
-    val coPhMapSeq = tourney.run.cophs.values.groupBy(x => x.coId).transform((key, value) => value.toList.sortBy(_.coPh).toSeq)
+    val coPhMapSeq = tourney.cophs.values.groupBy(x => x.coId).transform((key, value) => value.toList.sortBy(_.coPh).toSeq)
     val co2NaSt = (for { (key, comp) <- tourney.comps } yield {
       key -> (comp.name, getMsg_("competition.status." + comp.status))
     }).toMap

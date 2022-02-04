@@ -25,6 +25,7 @@ case class Playfield(
 }
 
 object Playfield {
+  implicit def rw: RW[Playfield] = macroRW
   def tupled = (this.apply _).tupled
 
   def decode(x: String): Either[Error, Playfield] = {

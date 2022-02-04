@@ -49,7 +49,7 @@ object DlgShowError extends BasicHtml
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
-    def submit(e: Event) {
+    def submit(e: Event):Unit = {
       if (!p.isCompleted) p success true
       $(getId("Modal","#")).off("hide.bs.modal")
       $(getId("Modal","#")).modal("hide")
@@ -68,4 +68,3 @@ object DlgShowError extends BasicHtml
      .recover { case e: Exception =>  false }
   }  
 }
-

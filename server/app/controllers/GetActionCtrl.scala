@@ -98,21 +98,21 @@ class GetActionCtrl @Inject()
         Future(Ok(s"Address: ${addr}"))
       }
 
-      case "getTournCfg" => tsv.getTournCfg(toId).map {
-        case Left(err)   => logger.error(s"getTournCfg error: ${err.toString}"); BadRequest(err.add("getTournCfg").encode)
+      case "getTourney" => tsv.getTourney(toId).map {
+        case Left(err)   => logger.error(s"getTourney error: ${err.toString}"); BadRequest(err.add("getTourney").encode)
         case Right(trny) => {
           // logger.info(s"getTournCfg -> Id: ${trny.id} Time: ${date.getTime()}")
           Ok(trny.encode())
         }  
       }
   
-      case "getTournRun" => tsv.getTournRun(toId).map {
-        case Left(err)   => logger.error(s"getTournRun error: ${err.toString}"); BadRequest(err.add("getTournRun").encode)
-        case Right(tRun) => {
-          // logger.info(s"getTournRun -> Id: ${tRun.id} Time: ${date.getTime()}")
-          Ok(tRun.encode())
-        }  
-      }
+      // case "getTournRun" => tsv.getTournRun(toId).map {
+      //   case Left(err)   => logger.error(s"getTournRun error: ${err.toString}"); BadRequest(err.add("getTournRun").encode)
+      //   case Right(tRun) => {
+      //     // logger.info(s"getTournRun -> Id: ${tRun.id} Time: ${date.getTime()}")
+      //     Ok(tRun.encode())
+      //   }  
+      // }
 
       case "findTournBases"   =>  
         tourneyDao.findByStringTypDate(getParam(pMap, "search"), getParam(pMap, "toTyp", 0), getParam(pMap, "toYear", 1970)).map { tBases => {

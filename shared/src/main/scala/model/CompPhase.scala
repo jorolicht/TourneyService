@@ -16,10 +16,18 @@ import shared.model.tabletennis._
  *  a final round. Currently only two typs are supported ("group" or "ko") 
  *  number of players always less or equal size
  */
-class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp: Int, var enabled: Boolean, 
+case class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp: Int, var enabled: Boolean, 
                 var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
-  var groups       = Vector[Group]()                                                     // groups of the competition (only gr rounds)
+  var groups       = ArrayBuffer[Group]()                                                     // groups of the competition (only gr rounds)
   var ko           = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)  // ko games of ghe competition (only ko rounds)
+
+  
+  def init() = {
+    
+  }
+  def encode(): String = {
+    write[CompPhaseTx](toTx())
+  }
 
 
   // distribute player to the groups (no,size,quali)
@@ -102,7 +110,6 @@ class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp: Int,
 
   // print readable competition phase - for debug purposes
   override def toString() = {
-
     def grPhName(coPh: Int) = {
       coPh match {
         case CP_INIT => "READY"        
@@ -141,14 +148,10 @@ class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp: Int,
 
 
 object CompPhase {
-
-  def getSystem(coPh: Int): Int = {
-    coPh match {
-      case CP_VRGR | CP_ZRGR | CP_ERGR | CP_TRGR  => CSY_GR 
-      case CP_ERKO | CP_VRKO | CP_ZRKO | CP_TRKO  => CSY_KO
-      case _                                      => CSY_UNKN
-    }
-  }
+  implicit def rw: RW[CompPhase] = macroRW 
+  def decode(coPhStr: String): Either[Error, CompPhase] = 
+    try Right(fromTx(read[CompPhaseTx](coPhStr)))
+    catch { case _: Throwable => Left(Error("err0177.decode.CompPhase", coPhStr.take(20))) }
 
   def fromTx(tx: CompPhaseTx): CompPhase = {
     val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coTyp, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
@@ -160,7 +163,17 @@ object CompPhase {
     //for (g <- tx.matches) { cop.groups = cop.groups :+ Group.fromTx(g) }
     cop
   }
+
+  def getSystem(coPh: Int): Int = {
+    coPh match {
+      case CP_VRGR | CP_ZRGR | CP_ERGR | CP_TRGR  => CSY_GR 
+      case CP_ERKO | CP_VRKO | CP_ZRKO | CP_TRKO  => CSY_KO
+      case _                                      => CSY_UNKN
+    }
+  }
+
 }
+
 
 case class CompPhaseTx(
   val name:      String, 
@@ -178,6 +191,4 @@ case class CompPhaseTx(
 
 object CompPhaseTx {
   implicit def rw: RW[CompPhaseTx] = macroRW 
-
-
 }

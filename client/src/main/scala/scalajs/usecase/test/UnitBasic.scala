@@ -82,8 +82,7 @@ object UnitBasic extends UseCase("UnitBasic")
   // testDump
   def testDump(testCase: String, testOption: String) = {
     testOption.toLowerCase match {
-      case "run"         => println(s"""${App.tourney.run.toString}""")
-      case "table"       => println(s"""${App.tourney.run.playfields.toString}""")
+      case "table"       => println(s"""${App.tourney.playfields.toString}""")
       case "competition" => println(s"""Test \n Competition""")
       case _             => println(s"""${App.tourney.toString}""")
     }

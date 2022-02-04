@@ -38,11 +38,6 @@ import scalajs.{ App, AppEnv }
  */
 object BasicHtml {
 
-  // def debug(func: => String, msg: =>String) = println(s"${func}-> ${msg}")
-  // def info(func:  => String, msg: =>String) = println(s"${func}-> ${msg}")
-  // def warn(func:  => String, msg: =>String) = println(s"${func}-> ${msg}")
-  // def error(func: => String, msg: =>String) = println(s"${func}-> ${msg}")
-
   def disProp(visible: Boolean): String = if (visible) "block" else "none"
 
   def setHtml_(id: String, content: => String): Unit = {
@@ -107,15 +102,11 @@ class BasicHtml
   // getElemById - get the html element
   def getElemById(id: String)(implicit ucp: UseCaseParam) = {
     val elem = document.getElementById(ucp.idBase + "__" + id)
-    if (elem == null) {
-      // dummy element
-      document.createElement("div")
-    } else {
-      elem
-    }
+    if (elem == null) document.createElement("div") else elem
   }  
 
   // getId - adds usecase prefix to id
+  def uc(id: String)(implicit ucp: UseCaseParam) = { s"${ucp.idBase}__${id}"}
   def getId(id: String, prefix: String = "")(implicit ucp: UseCaseParam) = { s"${prefix}${ucp.idBase}__${id}"}
   def getIdHa(id: String)(implicit ucp: UseCaseParam) = { s"#${ucp.idBase}__${id}"}
 
@@ -150,19 +141,12 @@ class BasicHtml
     catch { case _: Throwable => AppEnv.logger.error(s"insertHtml_ -> id: ${id} pos: ${pos} content: ${content.take(10)}") } 
   }
 
-
-  // def setHtml_(id: String, content: String): Unit = {
-  //   try document.getElementById(id).asInstanceOf[HTMLElement].innerHTML = content
-  //   catch { case _: Throwable => error(s"setHtml_: ${id} -> ${content}") } 
-  // }
-
   def setHtmlVisible(id: String, visible: Boolean, content: String="")(implicit ucp: UseCaseParam): Unit = {
     try {
       val elem = document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLElement]
       elem.style.setProperty("display", disProp(visible))
       if (visible) elem.innerHTML = content
-    }
-    catch { case _: Throwable => error(s"setHtmlVisible", s"id: ${ucp.idBase}__${id} visible: ${visible} content: ${content.take(10)}") } 
+    } catch { case _: Throwable => error(s"setHtmlVisible", s"id: ${ucp.idBase}__${id} visible: ${visible} content: ${content.take(10)}") } 
   }
 
   def setText(id: String, content: String)(implicit ucp: UseCaseParam): Unit = {
@@ -179,19 +163,13 @@ class BasicHtml
     try {
       val container = document.getElementsByName(ucp.idBase + "__" + name)
       container.map(_.asInstanceOf[Input].disabled = value)      
-    }  
-    catch { case _: Throwable => error(s"setDisabledByName", s"name: ${ucp.idBase}__${name} value: ${value}") } 
+    } catch { case _: Throwable => error(s"setDisabledByName", s"name: ${ucp.idBase}__${name} value: ${value}") } 
   }
 
   def setDisabled__(elem:HTMLElement, value: Boolean): Unit = {
     try elem.asInstanceOf[Input].disabled = value
     catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
   }
-
-  // def setBtnDisabled(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
-  //   try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLInputElement].disabled = value
-  //   catch { case _: Throwable => error(s"setDisabled", s"id: ${ucp.idBase}__${id} value: ${value}") } 
-  // }
 
   def showModal(id: String)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[js.Dynamic].showModal()
@@ -253,7 +231,6 @@ class BasicHtml
     } catch { case _: Throwable => Helper.error("showHelpTxt", s"id: ${id} txt: ${txt} visible: ${visible}") }
   }
 
-
   def markInput__(elem: HTMLElement, markError: Option[Boolean])= {
     try {
       elem.classList.remove("border-success")
@@ -311,8 +288,7 @@ class BasicHtml
   def getData(id: String, name: String, default: String)(implicit ucp: UseCaseParam): String = {
     try getData(document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement], name, default)
     catch { case _: Throwable => Helper.error("getData", s"id: ${id} name: ${name} as String"); default }
-  }  
-
+  }
 
   def getData(elem: HTMLElement, name: String, default: Int): Int = {
     try { elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default)}
@@ -333,23 +309,6 @@ class BasicHtml
     try document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
     catch { case _: Throwable => Helper.error("setData", s"id: ${ucp.idBase}__${id} attribute: ${attr} value: ${value}") }
   }
-  // def setData(elem: String, attr: String, value: Int): Unit = {
-  //   try document.getElementById(elem).asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
-  //   catch { case _: Throwable => Helper.error("setData", s"attribute: ${attr} value: ${value}") }
-  // }
-  // def setData(elem: String, attr: String, value: Long): Unit = {
-  //   try document.getElementById(elem).asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
-  //   catch { case _: Throwable => Helper.error("setData", s"attribute: ${attr} value: ${value}") }
-  // }
-
-
-  def setAlert(text: String)(implicit ucp: UseCaseParam): String = {
-    s"""
-      |<div class="alert alert-info" role="alert">
-      |  <span class="tuse-font-1">${text}</span>
-      |</div>
-    """.stripMargin('|')
-  }
 
   /**
     * getInput read input value from Html input element 
@@ -362,7 +321,6 @@ class BasicHtml
     try { if (name=="") "" else document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value }
     catch { case _: Throwable => defVal }
   }
-
 
   def getInput_(name: String, defVal: String = ""): String = {
     try { if (name=="") "" else document.getElementById(name).asInstanceOf[Input].value }
@@ -389,16 +347,6 @@ class BasicHtml
     try elem.asInstanceOf[Input].value
     catch { case _: Throwable =>  Helper.error("getInput", "element as string");  defVal }
   }
-
-  def getTxtInput(name: String, defVal: String = "")(implicit ucp: UseCaseParam): String = {
-    try { 
-      val x = document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value 
-      if (x == "") defVal else x
-    }
-    catch { case _: Throwable => Helper.error("getTxtInput", s"${name}"); defVal }
-  }
-
-
 
   def getBooleanOption(name: String)(implicit ucp: UseCaseParam): Option[Boolean] = {
     try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value.toBooleanOption
@@ -427,7 +375,6 @@ class BasicHtml
   }  
 
 
-
   def resetInput(name: String)(implicit ucp: UseCaseParam): Unit = {
     try {
       val divNode = document.getElementById(ucp.idBase + "__" + name)
@@ -442,26 +389,9 @@ class BasicHtml
         node.classList.remove("border-danger")
         node.classList.remove("border-success") 
       }}
-
-
     }
     catch { case _: Throwable =>  Helper.error("resetInput", s"${name}") }
   }
-
-  // function getpref(val) {
-  //   var divNode = document.getElementById(val);
-  //   var inputNodes = divNode.getElementsByTagName('INPUT');
-  //   for(var i = 0; i < inputNodes.length; ++i){
-  //       var inputNode = inputNodes[i];
-  //       if(inputNode.type == 'radio') {
-  //           //Do whatever you want
-  //           if(inputNode.checked) {
-  //               //Do whatever you want
-  //           }
-  //       }
-  //   }
-  // }
-
 
 
   /** setDateTimePicker - initialize date/time input
@@ -497,36 +427,6 @@ class BasicHtml
     $(getId(ident, "#")).datetimepicker(tParam)
     setInput(ident, curDateTime)
   }
-
-    /** setDateTimePicker - initialize date/time input
-    * 
-    * @param ident
-    * @param lang
-    * @param value   Format: "YYYY-MM-DD HH:mm" or "YYYY-MM-DD"
-    */
-  // def setDateTimePicker(ident: String, lang: String, value: String)
-  //                       (implicit ucp: UseCaseParam) = {
-  //   val withTime = hm._1!=(-1)
-  //   val sDateTime =  if (withTime) new js.Date(ymd._1, ymd._2-1, ymd._3, hm._1, hm._2) else new js.Date(ymd._1, ymd._2-1, ymd._3)
-
-  //   //debug("setDateTimePicker", s"${ymd._1}-${ymd._2}-${ymd._3} sDateTime: ${sDateTime}")
-  //   trait DateTimeParam extends js.Object {
-  //     val format: String
-  //     val locale: String
-  //     val date: js.Object
-  //   }
-  //   val tParam = new DateTimeParam {
-  //     val format = if (withTime) "YYYY-MM-DD HH:mm" else "YYYY-MM-DD"
-  //     val locale = lang
-  //     val date = sDateTime
-  //   }
-  //   val curDateTime = if (withTime) f"${ymd._1}-${ymd._2}%02d-${ymd._3}%02d ${hm._1}%02d:${hm._2}%02d" else f"${ymd._1}-${ymd._2}%02d-${ymd._3}%02d"
-    
-  //   //debug(s"setDateTimePicker", s"id: ${getId(ident, "#")}")
-  //   $(getId(ident, "#")).datetimepicker(tParam)
-  //   setInput(ident, curDateTime)
-  // }
-
 
 
   /** setInput sets value of Html input element
@@ -648,7 +548,6 @@ class BasicHtml
   }
 
 
-
   def setCheckbox(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].checked = value
     catch { case _: Throwable => error("setCheckbox", s"id: ${ucp.idBase}__${id} -> ${value}") } 
@@ -699,14 +598,6 @@ class BasicHtml
     * @param args - inserts into message
     */
   def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
-
-
-
-  // def debug(func: String, msg: String)(implicit ucp: UseCaseParam) = debug(s"${ucp.objName}.${func}: $msg")
-  // def info(func: String, msg: String)(implicit ucp: UseCaseParam) = info(s"${ucp.objName}.${func}: $msg")
-  // def warn(func: String, msg: String)(implicit ucp: UseCaseParam) = warn(s"${ucp.objName}.${func}: $msg")
-  // def error(func: String, msg: String)(implicit ucp: UseCaseParam) = error(s"${ucp.objName}.${func}: $msg")
-
 
   def setMainContent(content: String): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content
   def setMainContent(content: play.twirl.api.Html): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString

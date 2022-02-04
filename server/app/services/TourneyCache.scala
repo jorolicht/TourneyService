@@ -369,20 +369,20 @@ object TIO {
     if (tourney.isDefinedAt(toId)) {
       try {
 
-        val trnyDir = cfg.get[String]("server.tourney.dir")
-        val fNCfg  = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_TournCfg.json"
-        val fNRun  = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_TournRun.json"
+        val trnyDir      = cfg.get[String]("server.tourney.dir")
+        val fNameTourney = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_Tourney.json"
+        //val fNRun  = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_TournRun.json"
 
-        val pathToFileCfg = Paths.get(fNCfg)
-        val pathToFileRun = Paths.get(fNRun)
+        val pathToFileCfg = Paths.get(fNameTourney)
+        //val pathToFileRun = Paths.get(fNRun)
 
         Files.createDirectories(pathToFileCfg.getParent())
-        val tournCfgTx = tourney(toId).toTx()
-        val tournRunTx = tourney(toId).run.toTx(toId)
+        val tournTx = tourney(toId).toTx()
+        //val tournRunTx = tourney(toId).run.toTx(toId)
 
-        Files.write(pathToFileCfg, Json.toJson(tournCfgTx).toString.getBytes(StandardCharsets.UTF_8))
-        Files.write(pathToFileRun, Json.toJson(tournRunTx).toString.getBytes(StandardCharsets.UTF_8))
-        logger.info(s"save to disk: ${tourney(toId).name}(${toId}) -> ${fNCfg}")
+        Files.write(pathToFileCfg, Json.toJson(tournTx).toString.getBytes(StandardCharsets.UTF_8))
+        //Files.write(pathToFileRun, Json.toJson(tournRunTx).toString.getBytes(StandardCharsets.UTF_8))
+        logger.info(s"save to disk: ${tourney(toId).name}(${toId}) -> ${fNameTourney}")
         Right(true)         
       } catch { case _: Throwable => 
         logger.error(s"save to disk failed: ${tourney(toId).name}(${toId})")
@@ -444,27 +444,22 @@ object TIO {
     logger.info(s"cache -> trnyDir: ${trnyDir}")
 
     val fSep    = System.getProperty("file.separator")
-    val fNCfg   = s"${trnyDir}${fSep}${orgDir}${fSep}${startDate}_${toId}_TournCfg.json"
-    val fNRun   = s"${trnyDir}${fSep}${orgDir}${fSep}${startDate}_${toId}_TournRun.json"
+    val fNCfg   = s"${trnyDir}${fSep}${orgDir}${fSep}${startDate}_${toId}_Tourney.json"
+    //val fNRun   = s"${trnyDir}${fSep}${orgDir}${fSep}${startDate}_${toId}_TournRun.json"
 
     logger.info(s"cache -> toId: ${toId} file: ${fNCfg}")
 
     (for {
       res1 <- Using(Source.fromFile(fNCfg)) { source => source.mkString }
-      res2 <- Using(Source.fromFile(fNRun)) { source => source.mkString }
-    } yield (res1, res2)) match {
-      case Failure(f)                  => {
-        logger.error(f.toString)
-        Left(Error("err0146.fileaccess.config", fNCfg, fNRun, "cache"))
-      }   
-      case Success((cfgFile, runFile)) => Tourney.decode(cfgFile) match {
+      //res2 <- Using(Source.fromFile(fNRun)) { source => source.mkString }
+    } yield (res1)) match {
+      case Failure(f) => { logger.error(f.toString); Left(Error("err0146.fileaccess.config", fNCfg, "cache")) }   
+      case Success(cfgFile) => Tourney.decode(cfgFile) match {
         case Left(err)   => logger.error(s"cache -> decode config file: ${cfgFile.take(20)}"); Left(err.add("cache(cfg)"))
-        case Right(trny) => TournRun.decode(runFile) match {
-          case Left(err)      => Left(err.add("cache(run)")) 
-          case Right(trnyRun) => {
+        case Right(trny) => {
             try {
               // setup complete tourney
-              trny.run = trnyRun          
+              // trny.run = trnyRun          
               trny.accessTime = clock.millis()
               trny.writeTime  = clock.millis()
               trny.backupTime = clock.millis()
@@ -480,7 +475,6 @@ object TIO {
               logger.info(s"--------------------------------------------------------------------------") 
               Right(tourney(toId))
             } catch { case _: Throwable => Left(Error("err0012.trny.read", toId.toString, s"${orgDir} / ${startDate}")) }
-          }
         }  
       }
     }

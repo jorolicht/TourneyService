@@ -2,6 +2,7 @@
 * Template for displaying group results
 *@
 
+@import scala.collection.mutable.ArrayBuffer
 @import shared.utils.UseCaseParam
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._ 
@@ -9,7 +10,7 @@
 @import shared.model.tabletennis.Group
 @import shared.model.ParticipantEntry
 
-@(coId: Long, coPh: Int, groups: Vector[Group])(implicit ucc: UseCaseParam)
+@(coId: Long, coPh: Int, groups: ArrayBuffer[Group])(implicit ucc: UseCaseParam)
 @idBalls(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPh}_Balls_${grId}_${pos}" """) }
 @idSets(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPh}_Sets_${grId}_${pos}" """) }
 @idPoints(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPh}_Points_${grId}_${pos}" """) }

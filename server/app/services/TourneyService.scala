@@ -50,6 +50,7 @@ trait TourneyService {
   def getParticipantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
   def setParticipantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
   def setParticipantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   //
   // Club Interface
@@ -116,8 +117,8 @@ trait TourneyService {
   def setTournAddress(toId: Long, address: Address): Future[Either[Error, Address]]
   def setTournContact(toId: Long, contact: Contact): Future[Either[Error, Contact]]
   
-  def getTournRun(toId: Long):     Future[Either[Error, TournRun]]
-  def getTournCfg(toId: Long):     Future[Either[Error, Tourney]]
+  //def getTournRun(toId: Long):     Future[Either[Error, TournRun]]
+  def getTourney(toId: Long):     Future[Either[Error, Tourney]]
 
   def getTournPlayers(toId: Long): Future[Either[Error, Seq[Player]]]
   def getTournClubs(toId: Long):   Future[Either[Error, Seq[Club]]]

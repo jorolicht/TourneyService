@@ -58,7 +58,7 @@ lazy val server = (project in file("server")).
       "mysql"             %  "mysql-connector-java" % "8.0.18",    
       "com.vmunier"       %% "scalajs-scripts" % "1.1.4",
       "org.typelevel"     %% "cats-core" % "2.2.0",
-      "com.lihaoyi"       %% "upickle" % "1.2.0",
+      "com.lihaoyi"       %% "upickle" % "1.4.3",
       "com.chuusai"       %% "shapeless" % "2.3.3",
       "org.mindrot"       %  "jbcrypt" % "0.4",
       "com.lihaoyi"       %% "utest" % "0.7.9" % "test",

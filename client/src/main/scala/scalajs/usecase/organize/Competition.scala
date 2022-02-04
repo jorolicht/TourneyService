@@ -22,7 +22,8 @@ import shared.utils.Validation._
 import shared.utils.Routines._
 import shared.utils._
 
-import scalajs.usecase.dialog.{ DlgBox, DlgSpinner, DlgPlayfield, DlgInfo }
+import scalajs.usecase.dialog.{ DlgBox, DlgPlayfield, DlgInfo }
+import scala.collection.mutable.{ ArrayBuffer }
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs._
@@ -35,42 +36,44 @@ import scalajs.usecase.dialog._
 // ***
 @JSExportTopLevel("OrganizeCompetition")
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
-  with TourneySvc with ViewServices
+  with TourneySvc with ViewServices with UIComponentServices
 {
 
-  // genCompetitionTblData - returns Sequence of tupels with competition attributes
-  def genCompetitionTblData(trny: Tourney, lang: String): Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
-    (for { co <- trny.comps.values.toSeq } yield co.typ match {
-      case CT_SINGLE | CT_DOUBLE => {
-        val (cnt, cntActiv) = trny.getCompCnt(co)
-        (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
-      }
-      case _ => (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate, 0, 0, co.status, co.genRange(), co.options)
-    }).toSeq.sortBy(_._6)
+  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+    setMainContent(clientviews.organize.html.Competition().toString)
+    update()
   }
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     val toId = AppEnv.getToId
     val coId = AppEnv.getCoId
     
-    debug("update", s"start coId: ${coId}")
+    // genCompetitionTblData - returns Sequence of tupels with competition attributes
+    def genCompetitionTblData(trny: Tourney, lang: String): Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
+      (for { co <- trny.comps.values.toSeq } yield co.typ match {
+        case CT_SINGLE | CT_DOUBLE => {
+          val (cnt, cntActiv) = trny.getCompCnt(co)
+          (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
+        }
+        case _ => (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate, 0, 0, co.status, co.genRange(), co.options)
+      }).toSeq.sortBy(_._6)
+    }
 
     // set main card
     setHtml("CompCard", CompCard(genCompetitionTblData(Trny, AppEnv.getLang), coId))
  
     // set play card and select competition
-    setDisabled("BtnRegParticipant", coId == 0)
     if (coId > 0) {
       val comp = App.tourney.comps(coId)
-      setVisible("BtnStartCompetition", comp.status <= CP_INIT)
-      highLightComp(coId)
+      setDisabled("BtnStartCompetition", comp.status > CP_INIT)
+      selTableRow(uc(coId.toString))
       comp.typ match {
         case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CP_INIT)) 
         case CT_DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(coId), comp.status <= CP_INIT)) 
         case _         => error("update", s"competition typ not yet supported") 
       }   
     } else {
-      setVisible("BtnStartCompetition", false)
+      setDisabled("BtnStartCompetition", true)
       setHtml("ParticipantCard", s"""
         <div class="alert alert-info text-center mb-0" role="alert">
           <span class="tuse-font-1">${getMsg("nocompselect")}</span>
@@ -80,75 +83,65 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     setHeadline()
   }
 
-  // confirm dialog
-  def confirmDlg(title: String, msg: String): Future[Boolean] =
-    DlgBox.showStd(title, msg, Seq("cancel", "ok")).map { _ match {
-     case 2 => true
-     case _ => false
-    }}
-
-
-  def highLightComp(coId: Long) = {
-    $( getIdHa(coId.toString) ).addClass("bg-secondary").siblings().removeClass("bg-secondary")
-    $( getIdHa(coId.toString) ).addClass("text-white").siblings().removeClass("text-white")
-  }
-
-  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    setMainContent(clientviews.organize.html.Competition().toString)
-    update()
-  }
-  
-  def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
-    import cats.data.EitherT
-    import cats.implicits._
-    
-    (for {
-      pl1St2 <- EitherT(DlgCardRegSingle.show(coId, tourney, lang))
-      plId   <- EitherT(regSingle(coId, pl1St2._1, pl1St2._2))
-      trny   <- EitherT(getTourney(tourney.id))
-    } yield { (pl1St2, plId, trny) }).value.map {
-      case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
-      case Right(res) => { 
-        App.setLocalTourney(res._3)
-        update()      
-      }
-    }
-  }
-
-
-  /** regDouble
-   * 
-   */ 
-  def regDouble(tourney: Tourney, coId: Long, lang: String):Unit = {
-    DlgCardRegDouble.show(coId, tourney, lang).map {
-      case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
-      case Right((plId1, plId2, status)) => {
-        setParticipant2Comp(Participant2Comp.double(plId1, plId2, coId, status)) map {
-          case Left(err)  => DlgShowError.show(List(err))
-          case Right(p2c) => {
-            info("RegDouble", s"success: ${p2c}")
-            tourney.pl2co((p2c.sno, p2c.coId)) = p2c
-            App.saveLocalTourneyCfg(App.tourney)
-            update()
-          }
-        }
-      }
-    }
-  }
-
 
   @JSExport 
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
-    import shared.utils.Routines._ 
     //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     debug("actionEvent", s"key: ${key}")
     key match {
       //
       // Action with competition
       // 
-      case "StartCompetition"   => {  
-        debug("StartCompetition", s"todo start competition")
+      case "StartCompetition"   => {
+        // set coId if a new is available
+        var coId = getData(elem, "coId", 0L)
+        if (coId != 0) AppEnv.setCoId(coId) else coId = AppEnv.getCoId
+
+        debug("actionEvent", s"node id: ${elem.id} coId: ${coId}")
+
+        val pants = (Trny.pl2co.filterKeys(_._2 == coId).map { x =>
+          val sno = SNO(x._2.sno) 
+          val (snoValue, name, club, ttr) = sno.getInfo(Trny.comps(coId).typ)(Trny)
+          val status = (x._2.status == Constants.PLS_REDY)
+          PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", status, true) 
+        }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
+
+        DlgCardCfgSection.show(coId, 0, pants)(Trny) map {
+          case Left(err)           => debug("DlgCardCfgSection", s"show => cancel: ${err}")
+          case Right((cfg, pants)) => {
+            // update ALL entries, only entries with PLS_REDY or PLS_SIGN should be affected
+            val pantStatus = pants.map { p => (p.sno.value, if (p.checked) Constants.PLS_REDY else Constants.PLS_SIGN) }
+            //for (pant <- pants) Trny.pl2co((pant.sno.value, coId)).status = if (pEntry.checked) PLS_REDY else PLS_SIGN
+            setPantBulkStatus(coId, pantStatus.toList).map {
+              case Left(err)   => error("setPantBulkStatus", s"${err}")
+              case Right(res)  => {
+                for (pant <- pantStatus) Trny.pl2co((pant._1, coId)).status = pant._2
+                
+              }  
+            }
+          }
+        }        
+
+        //debug("StartCompetition", s"todo start competition")
       }  
+
+  val PLS_SIGN =  0  // signup confirmed
+  val PLS_REDY =  1  // participation confirmed      
+
+    // val sno:       String,         // mapping of player identifier to start numbers = sno1 <MD> sno2 <MD> ...
+    //                                // player/double or team gets a participant of the competition
+    //                                // participants are identified by start numbers (sno) 
+    // val coId:      Long, 
+    // var ident:     String,
+    // var placement: String,         // format <position> or <fromPosition>.<toPosition>
+    // var status:    Int,            // -1 = pending signup acknowledge
+    //                                //  0 = register/signup
+    //                                //  1 = participate
+    //                                //  2 = currently playing
+    //                                //  3 = finished
+    //  var options:   String = "_"            
+
+
 
       case "AddCompetition"     => {    
         AppEnv.setCoId(0L)
@@ -197,7 +190,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       case "EditCompetition"      => {
         val coId = getData(elem, "coId", 0L)  
         AppEnv.setCoId(coId)
-        highLightComp(coId)      
+        selTableRow(uc(coId.toString))  
         event.stopPropagation()
         DlgCardComp.show(App.tourney.comps(coId), App.tourney, AppEnv.getLang, DlgOption.Edit ).map {
           case Left(err)   =>
@@ -307,6 +300,47 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       }
 
       case _          => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
+    }
+  }
+
+/** regSingle
+ * 
+ */
+def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
+    import cats.data.EitherT
+    import cats.implicits._
+    
+    (for {
+      pl1St2 <- EitherT(DlgCardRegSingle.show(coId, tourney, lang))
+      plId   <- EitherT(regSingle(coId, pl1St2._1, pl1St2._2))
+      trny   <- EitherT(getTourney(tourney.id))
+    } yield { (pl1St2, plId, trny) }).value.map {
+      case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
+      case Right(res) => { 
+        App.setLocalTourney(res._3)
+        update()      
+      }
+    }
+  }
+
+
+  /** regDouble
+   * 
+   */ 
+  def regDouble(tourney: Tourney, coId: Long, lang: String):Unit = {
+    DlgCardRegDouble.show(coId, tourney, lang).map {
+      case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
+      case Right((plId1, plId2, status)) => {
+        setParticipant2Comp(Participant2Comp.double(plId1, plId2, coId, status)) map {
+          case Left(err)  => DlgShowError.show(List(err))
+          case Right(p2c) => {
+            info("RegDouble", s"success: ${p2c}")
+            tourney.pl2co((p2c.sno, p2c.coId)) = p2c
+            App.saveLocalTourneyCfg(App.tourney)
+            update()
+          }
+        }
+      }
     }
   }
   

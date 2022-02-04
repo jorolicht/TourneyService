@@ -141,7 +141,7 @@ object TournBases { implicit def rw: RW[TournBases] = macroRW }
 **      id:         Long            // primary key autoincrement 
 **
 */
-class Tourney(var name: String, var organizer: String, val orgDir: String, 
+case class Tourney(var name: String, var organizer: String, val orgDir: String, 
               val startDate: Int, var endDate: Int, var ident: String, var typ: Int, 
               var privat: Boolean, var contact: Contact, var address: Address, 
               val id: Long) 
@@ -180,7 +180,7 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
     nTrny.plNCY2id    = this.plNCY2id
     nTrny.plLIC2id    = this.plLIC2id
 
-    nTrny.run         = this.run
+    //nTrny.run         = this.run
     nTrny.playerIdMax = this.playerIdMax
     nTrny.clubIdMax   = this.clubIdMax
     nTrny.compIdMax   = this.compIdMax
@@ -203,14 +203,18 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
   var pl2co:       HashMap[(String, Long), Participant2Comp] = HashMap()  // key: (sno, coId)
 
   // inverse hashmaps for fast access to players and clubs
-  // club -> id
-  var clName2id:   HashMap[String, Long]                     = HashMap()
-  // competition -> id
-  var coName2id:   HashMap[String, Long]                     = HashMap()
+  var clName2id:   HashMap[String, Long]                     = HashMap()  // club -> id
+  var coName2id:   HashMap[String, Long]                     = HashMap()  // competition -> id
   var plNCY2id:    HashMap[(String,String,String,Int), Long] = HashMap()
   var plLIC2id:    HashMap[String, Long]                     = HashMap()
  
-  var run = new TournRun(0L)                                
+  //var run = new TournRun(0L)
+  /*
+   * tourney runtime data
+   */
+  var coSects:    HashMap[(Long, Int), CompSection] = HashMap() // map (coId, secId) -> Competition Section
+  var cophs:      HashMap[(Long, Int), CompPhase]   = HashMap() // map (coId, coPh)  -> Competition Phase
+  var playfields: HashMap[Int, Playfield]           = HashMap() // map (playfieldNo) -> Playfield
 
 
   /*
@@ -230,48 +234,19 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
   def encode(): String = write[TourneyTx](this.toTx)
  
   def toTx(): TourneyTx = {
-    val comps   = for ((k,v) <- this.comps) yield v.stringify
-    val clubs   = for ((k,v) <- this.clubs) yield v.stringify
-    val players = for ((k,v) <- this.players) yield v.stringify
-    val pl2co   = for ((k,v) <- this.pl2co) yield v.stringify
+    val comps      = (for ((k, elem) <- this.comps) yield elem.encode()).toSeq
+    val clubs      = (for ((k, elem) <- this.clubs) yield elem.encode()).toSeq
+    val players    = (for ((k, elem) <- this.players) yield elem.encode()).toSeq
+    val pl2co      = (for ((k, elem) <- this.pl2co) yield elem.encode()).toSeq
+
+    val coSects    = (for ((k, elem) <- this.coSects)    yield elem.encode()).toSeq
+    val cophs      = (for ((k, elem) <- this.cophs)      yield elem.encode()).toSeq
+    val playfields = (for ((k, elem) <- this.playfields) yield elem.encode()).toSeq
+
     TourneyTx(TournBase(name, organizer, orgDir, startDate, endDate, ident, typ, privat, 
                         contact.stringify, address.stringify, id).stringify,
-                        comps.toList, clubs.toList, players.toList, pl2co.toList)
+                        comps, clubs, players, pl2co, coSects, cophs, playfields)
   } 
-
-
-  // print readable tourney - for debug purposes
-  override def toString() = {
-    def compsStr() = {
-      val str = new StringBuilder("-- COMPETITIONS\n")
-      for { (k,c) <- comps }  yield { str ++= s"  ${c.toString}\n" }; str.toString
-    }
-    def playersStr() = {
-      val str = new StringBuilder("-- PLAYERS\n")
-      for { (k,p) <- players }  yield { str ++= s"  ${p.toString}\n" }; str.toString
-    }
-    def clubssStr() = {
-      val str = new StringBuilder("-- CLUBS\n")
-      for { (k,cl) <- clubs }  yield { str ++= s"  ${cl.toString}\n" }; str.toString
-    }    
-    def pl2coStr() = {
-      val str = new StringBuilder("-- PLAYERS-2-COMPETITIONS\n")
-      for { (k,p2c) <- pl2co }  yield { str ++= s"  ${p2c.toString}\n" }; str.toString
-    }
-
-    s"""\nTOURNEY[${id}]
-      |  ${name} von: ${startDate} bis: ${endDate}
-      |  ${organizer} directory: ${orgDir} typ: ${typ}
-      |  Contact: ${contact} 
-      |  Address: ${address} 
-      |  --
-      |  ${compsStr()}
-      |  ${clubssStr()}
-      |  ${playersStr()}
-      |  ${pl2coStr()}
-      |""".stripMargin('|')
-  } 
-
 
   /*
    * miscellanous tourney routines
@@ -356,11 +331,11 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
     addSect(prevSec, co.id, nameSec, typSec, winners) match {
       case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
       case Right(secId) => {        
-        if (run.coSects.isDefinedAt((co.id, secId))) {
-          run.coSects((co.id, secId)).pants     = pants
-          run.coSects((co.id, secId)).noPlayer  = pants.filter(p => p.value != SNO_BYE).size
-          run.coSects((co.id, secId)).size      = pants.size
-          run.coSects((co.id, secId)).noWinSets = noWinSets
+        if (coSects.isDefinedAt((co.id, secId))) {
+          coSects((co.id, secId)).pants     = pants
+          coSects((co.id, secId)).noPlayer  = pants.filter(p => p.value != SNO_BYE).size
+          coSects((co.id, secId)).size      = pants.size
+          coSects((co.id, secId)).noWinSets = noWinSets
           Right(secId) 
         } else {
           Left(Error("err0172.trny.setCompDraw"))
@@ -423,24 +398,24 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
 
   //addSect - adds a competition section to a competition 
   def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
-    val newId = run.coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
+    val newId = coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
 
-    if (run.coSects.isDefinedAt((coId, newId))) {
+    if (coSects.isDefinedAt((coId, newId))) {
       Left(Error("err0169.trny.addSect"))
     } else if (prevSec == 0) {
       // new (first) entry without previous entry
-      run.coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
+      coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
       Right(newId)
-    } else if (!run.coSects.isDefinedAt((coId, prevSec))) { 
+    } else if (!coSects.isDefinedAt((coId, prevSec))) { 
       // now previous entry
       Left(Error("err0048.trny.addSect"))
     } else {
       // new entry with previous entry
-      run.coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
+      coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
       if (winSec) {
-        run.coSects((coId, prevSec)).winId = newId
+        coSects((coId, prevSec)).winId = newId
       } else {
-        run.coSects((coId, prevSec)).looId = newId
+        coSects((coId, prevSec)).looId = newId
       }
       Right(newId)
     }
@@ -534,10 +509,61 @@ class Tourney(var name: String, var organizer: String, val orgDir: String,
   //   }
   // }
 
+  // print readable tourney - for debug purposes
+  override def toString() = {
+    def compsStr() = {
+      val str = new StringBuilder("-- COMPETITIONS\n")
+      for { (k,c) <- comps }  yield { str ++= s"  ${c.toString}\n" }; str.toString
+    }
+    def playersStr() = {
+      val str = new StringBuilder("-- PLAYERS\n")
+      for { (k,p) <- players }  yield { str ++= s"  ${p.toString}\n" }; str.toString
+    }
+    def clubssStr() = {
+      val str = new StringBuilder("-- CLUBS\n")
+      for { (k,cl) <- clubs }  yield { str ++= s"  ${cl.toString}\n" }; str.toString
+    }    
+    def pl2coStr() = {
+      val str = new StringBuilder("-- PLAYERS-2-COMPETITIONS\n")
+      for { (k,p2c) <- pl2co }  yield { str ++= s"  ${p2c.toString}\n" }; str.toString
+    }
+
+    def pfsStr() = {
+      val str = new StringBuilder("-- PLAYFIELDS\n")
+      for { (k,pf) <- playfields }  yield { str ++= s"  ${pf.toString}\n" }; str.toString
+    }
+    def cphsStr() = {
+      val str = new StringBuilder("-- COMPETITION PHASES\n")
+      for { (k,coph) <- cophs }  yield { str ++= s"  ${coph.toString}\n" }; str.toString
+    }
+
+    def coSecStr() = {
+      val str = new StringBuilder("-- COMPETITION SECTIONS\n")
+      for { (k, cSecs) <- coSects }  yield { str ++= s"  ${cSecs.toString}\n" }; str.toString
+    } 
+
+    s"""\nTOURNEY[${id}]
+      |  ${name} von: ${startDate} bis: ${endDate}
+      |  ${organizer} directory: ${orgDir} typ: ${typ}
+      |  Contact: ${contact} 
+      |  Address: ${address} 
+      |  --
+      |  ${compsStr()}
+      |  ${clubssStr()}
+      |  ${playersStr()}
+      |  ${pl2coStr()}
+      |  ${cphsStr()}
+      |  ${coSecStr()}
+      |  ${pfsStr()}
+      |""".stripMargin('|')
+  } 
+
 }
 
 
 object Tourney {
+  implicit def rw: RW[Tourney] = macroRW
+
   def getDummy = new Tourney("dummy", 19700101, 0L)
   def init = new Tourney("dummy", 19700101, 0L)
 
@@ -552,11 +578,15 @@ object Tourney {
 
   def fromTx(tx: TourneyTx): Either[Error, Tourney] = {
     (for {
-      tBase    <- TournBase.decode(tx.basis)
-      clubs    <- Club.decSeq(tx.clubs) 
-      players  <- Player.decSeq(tx.players) 
-      comps    <- Competition.decSeq(tx.comps) 
-      pl2co    <- Participant2Comp.decSeq(tx.pl2co) 
+      tBase      <- TournBase.decode(tx.basis)
+      clubs      <- Club.decSeq(tx.clubs) 
+      players    <- Player.decSeq(tx.players) 
+      comps      <- Competition.decSeq(tx.comps) 
+      pl2co      <- Participant2Comp.decSeq(tx.pl2co)
+
+      // coSects    <- CompSection.decSeq(tx.coSects)
+      // cophs      <- CompPhase.decSeq(tx.cophs)
+      // playfields <- Playfield.decSeq(tx.playfields)
     } yield (tBase, comps, clubs, players, pl2co)) match {  
       case Left(err)  => Left(err)
       case Right(res) => {
@@ -588,8 +618,46 @@ object Tourney {
 
 }
 
-case class TourneyTx(basis: String, comps :Seq[String], clubs :Seq[String], players :Seq[String], pl2co :Seq[String])
+
+  // var coSects:    HashMap[(Long, Int), CompSection] = HashMap() // map (coId, secId) -> Competition Section
+  // var cophs:      HashMap[(Long, Int), CompPhase]   = HashMap() // map (coId, coPh)  -> Competition Phase
+  // var playfields: HashMap[Int, Playfield]           = HashMap() // map (playfieldNo) -> Playfield
+
+
+case class TourneyTx(
+  basis:      String, 
+  comps:      Seq[String],  // competitions
+  clubs:      Seq[String],  // clubs
+  players:    Seq[String],  // players 
+  pl2co:      Seq[String],  // player/participants to competition
+  coSects:    Seq[String],  // competition sections
+  cophs:      Seq[String],  // competition phases
+  playfields: Seq[String]   // playfield data
+)
 object TourneyTx {  implicit def rw: RW[TourneyTx] = macroRW }
+
+
+case class TourneyTxx(
+  val id:         Long,
+  var name:       String, 
+  var organizer:  String, 
+  val orgDir:     String, 
+  val startDate:  Int, 
+  var endDate:    Int, 
+  var ident:      String, 
+  var typ:        Int, 
+  var privat:     Boolean, 
+  var contact:    Contact, 
+  var address:    Address, 
+  val comps:      Seq[Competition],       // competitions
+  val clubs:      Seq[Club],              // clubs
+  val players:    Seq[Player],            // players 
+  val pl2co:      Seq[Participant2Comp],  // player/participants to competition
+  val coSects:    Seq[CompSection],       // competition sections
+  val cophs:      Seq[CompPhase],         // competition phases
+  val playfields: Seq[Playfield]          // playfield data
+)
+object TourneyTxx {  implicit def rw: RW[TourneyTxx] = macroRW }
 
 
 /*
@@ -605,8 +673,8 @@ class TournRun(val id: Long)
   // map coId, secId -> Competition Section
   var coSects:    HashMap[(Long, Int), CompSection] = HashMap() 
   // map coId, coPh  -> Competition Phase
-  var cophs:      HashMap[(Long, Int), CompPhase] = HashMap() 
-  var playfields: HashMap[Int, Playfield]         = HashMap() 
+  var cophs:      HashMap[(Long, Int), CompPhase]   = HashMap() 
+  var playfields: HashMap[Int, Playfield]           = HashMap() 
   
   /*
    * methods for converting

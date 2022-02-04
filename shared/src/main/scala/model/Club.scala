@@ -71,19 +71,7 @@ object Club {
       case 1 if ((mResult == name.trim) & (mResult.length > 2)) => Right((res(0).trim, 0L))
       case _ => Left(Error("err0161.Club.parseName"))
     }
-  }  
-
-
-  // def decSeq(clStr: String): Either[Error, Seq[Club]] = {
-  //   try {
-  //     val clubs = read[Clubs](clStr)
-  //     (clubs.list.map{ cl => Club.decode(cl) }).partitionMap(identity) match {
-  //       case (Nil, rights)      => Right(rights.toSeq)
-  //       case (firstErr :: _, _) => Left(firstErr.add("Club.decSeq"))
-  //     }
-  //   } catch { case _: Throwable => Left(Error("err0056.decode.Clubs", clStr.take(20), "", "Club.decSeq")) }
-  // } 
-
+  } 
 
   def decSeq(clStr: String): Either[Error, Seq[Club]] = {
     try decSeq(read[Clubs](clStr).list)  
