@@ -7,8 +7,8 @@ greeting                                              = Welcome!
 # App Main Messages
 ###
   app.mockup                                          = false
-  app.version = 2021-07EN151
-  app.date    = 2021-07-17
+  app.version = 2022-02EN160
+  app.date    = 2022-02-04
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
