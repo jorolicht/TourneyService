@@ -89,14 +89,19 @@ object AppEnv extends BasicHtml
   def setMockup(value: Boolean) = { setLocalStorage("AppEnv.Mockup", value.toString); mockupMode=value }
   def getMockup()  = mockupMode
 
-  def initContext(context: String, csrfToken: String=""): Unit = {
+  def initContext(context: String, csrfToken: String=""): Boolean = {
     import java.nio.charset.StandardCharsets
     import org.encoding.Base64._
     val date = new js.Date
 
-    try {
-      userCtx = read[Session](new String(context.toByteArray, StandardCharsets.UTF_8)) 
-    } catch { case _: Throwable => error("initContext", "couldn't read user context"); userCtx = Session.get(true) }
+    val result = try {
+      userCtx = read[Session](new String(context.toByteArray, StandardCharsets.UTF_8))
+      true
+    } catch { case _: Throwable => {
+      error("initContext", "couldn't read user context")
+      userCtx = Session.get(true) 
+      false
+    }}
 
     callerId = CallerIdent(date.getTime.toString.takeRight(6))
     debug("initContext", s"callerId: ${callerId.toString}")
@@ -104,6 +109,7 @@ object AppEnv extends BasicHtml
     if (csrfToken != "") csrf = csrfToken
     home = dom.window.location.protocol + "//" + dom.window.location.host
     println(s"initContext home: ${home}")
+    result
   }
 
   def resetContext(): Unit = { 

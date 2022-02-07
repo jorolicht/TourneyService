@@ -91,7 +91,7 @@ lazy val client = (project in file("client")).settings(
 //  scalaJSLinkerConfig ~= (_.withESFeatures(_.withUseECMAScript2015(false))),
   libraryDependencies ++= Seq(
     "org.scala-js"      %%% "scalajs-dom" % "1.1.0",
-    "com.lihaoyi"       %%% "upickle" % "1.2.0",
+    "com.lihaoyi"       %%% "upickle" % "1.4.3",
     "com.lihaoyi"       %%% "utest" % "0.7.9" % "test",
     "org.typelevel"     %%% "cats-core" % "2.2.0",
     "com.chuusai"       %%% "shapeless" % "2.3.3",
@@ -114,7 +114,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      commonSettings, 
      name := "shared",
      libraryDependencies ++= Seq(
-       "com.lihaoyi" %%% "upickle" % "1.2.0"
+       "com.lihaoyi" %%% "upickle" % "1.4.3"
      )
    )
   .enablePlugins(ScalaJSPlugin).

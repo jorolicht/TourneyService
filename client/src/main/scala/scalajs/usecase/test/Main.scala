@@ -51,23 +51,11 @@ object TestMain extends UseCase("TestMain")
   // DlgCardPlayer:       http://localhost:9000/start?ucName=TestMain&ucParam=Player&ucInfo=#
   // OrgComp:             http://localhost:9000/start?ucName=TestMain&ucParam=OrgComp
   // OrgCompDraw:         http://localhost:9000/start?ucName=TestMain&ucParam=OrgCompDraw
+  // AddTournCTT:         http://localhost:9000/start?ucName=TestMain&ucParam=AddTournCTT
+
+
 
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = start(testCase, testOption)
-
-  @JSExport
-  def fStart(testCase: String = "", testOption: String = ""): Boolean = {
-    info(testCase, s"START")
-    val result = testCase match {
-      //UnitTourney
-      case "AddTournCTT"  | "addTournCTT" => UnitTourney.testAddTournCTT(testCase, testOption)
-      case _                              => error(testCase, s"testOption: ${testOption} - unknown testcase"); Future(false)
-    } 
-    result.map {
-      case true  => info(testCase,  s"TEST SUCCEEDED")
-      case false => error(testCase, s"TEST FAILED")
-    }
-    true
-  }  
 
   @JSExport
   def start(testCase:String = "", testOption:String = "") = {
@@ -104,15 +92,16 @@ object TestMain extends UseCase("TestMain")
       case "OrgTrny"             => UIOrg.testTrny(testCase, testOption); true
 
       //UnitManager
-      case "Login"               => UnitManager.testLogin(testCase, testOption); true
-      case "Google"              => UnitManager.testGoogleLogin(testCase, testOption); true
-      case "License"             => UnitManager.testLicense(testCase, testOption); true      
-      case "sendFullLicense"     => UnitManager.testSendFullLicense(testCase, testOption); true
-      case "Invoice"             => UnitManager.testInvoice(testCase, testOption); true
-      case "Register"            => UnitManager.testRegister(testCase, testOption); true
+      case "authBasic"  | "AuthBasic"              => UnitManager.testAuthBasic(testCase, testOption); true
+      case "authBasicContext" | "AuthBasicContext" => UnitManager.testAuthBasicContext(testCase, testOption); true  
+      case "Google"                                => UnitManager.testGoogleLogin(testCase, testOption); true
+      case "License"                               => UnitManager.testLicense(testCase, testOption); true      
+      case "sendFullLicense"                       => UnitManager.testSendFullLicense(testCase, testOption); true
+      case "Invoice"                               => UnitManager.testInvoice(testCase, testOption); true
+      case "Register"                              => UnitManager.testRegister(testCase, testOption); true
 
       //UnitTourney
-      //case "AddTournCTT"  | "addTournCTT" => UnitTourney.testAddTournCTT(testCase, testOption); true
+      case "AddTournCTT"  | "addTournCTT"          => UnitTourney.testAddTournCTT(testCase, testOption); true
 
       //UnitPlayer
       case "addPlayer"           => UnitPlayer.testAddPlayer(testCase, testOption); true
@@ -146,9 +135,6 @@ object TestMain extends UseCase("TestMain")
                     "TeSt", "TestHeadline", Info(testInfo, "Card Test Message"), "ReqHallo", "req.hallo").toString )
   } 
   
-  
-
-
 
   /** test_UserAware - check silhouette user aware handling
     * 

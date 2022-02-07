@@ -47,24 +47,56 @@ object UnitTourney extends UseCase("UnitTourney")
   def render(testCase: String = "", testOption: String = "", reload: Boolean=false) = {} 
 
   // testAddTournCTT
+  // Start with Homepage http://localhost:9000/ Test.start("addTournCTT", "20221007")
+  // def testAddTournCTT(testCase: String, testOption: String) = {
+  //   authBasic("robert.lichtengger@icloud.com", "", "Si5d4H").map {
+  //     case Left(err)  => error("authBasic", s"${err.encode}")
+  //     case Right(sessionCtx) => {
+  //       info("authBasic", s"successfull ctx: ${sessionCtx}")
+  //       AppEnv.initContext(sessionCtx)
+  //       addTournCTT(UnitCTT.getDemo(testOption.toInt), 0, 0).map {
+  //         case Left(err)     => error("addTournCTT", s"${err.encode}")
+  //         case Right(trny) => {
+  //           info("addTournCTT", s"${trny.toString}")
+  //           App.setLocalTourney(trny)
+  //           App.execUseCase("OrganizeCompetition", "", "")
+  //         }  
+  //       }
+  //     }  
+  //   }
+  // }
+
+  // testAddTournCTT
   // Start with Homepage http://localhost:9000/ Test.start("addTourneyCTT", "20220107")
-  def testAddTournCTT(testCase: String, testOption: String): Future[Boolean] = {
-    authBasic("robert.lichtengger@icloud.com", "", "Si5d4H").map {
-      case Left(err)  => error("authBasic", s"${err.encode}"); false
-      case Right(sessionCtx) => {
-        info("authBasic", s"successfull ctx: ${sessionCtx}")
-        AppEnv.initContext(sessionCtx)
-        addTournCTT(UnitCTT.getDemo(testOption.toInt), 0, 0).map {
-          case Left(err)     => error("addTournCTT", s"${err.encode}")
-          case Right(trny) => {
-            info("addTournCTT", s"${trny.toString}")
-            App.setLocalTourney(trny)
-            App.execUseCase("OrganizeCompetition", "", "")
-          }  
-        }
-        true
-      }  
-    }
-  }
+  def testAddTournCTT(testCase: String, testOption: String) = {
+    import cats.data.EitherT
+    import cats.implicits._    
+    (for {
+      result  <- EitherT(authBasicContext("robert.lichtengger@icloud.com", "", "Si5d4H"))
+      tourney <- EitherT(addTournCTT(UnitCTT.getDemo(testOption.toInt), 0, 0))
+    } yield { tourney }).value.map {
+      case Left(err)   => error("addTournCTT", s"Error: ${err.encode}")
+      case Right(trny) => {
+        info("addTournCTT", s"${trny.toString}")
+        App.setLocalTourney(trny)
+        App.execUseCase("OrganizeCompetition", "", "")      
+      }
+    }  
+  } 
+
+  // def testAddTournCTT(testCase: String, testOption: String) = {
+  //   addTournCTT(UnitCTT.getDemo(testOption.toInt), 0, 0).map {
+  //     case Left(err)   => error("addTournCTT", s"Error: ${err.encode}")
+  //     case Right(trny) => {
+  //       info("addTournCTT", s"${trny.toString}")
+  //       App.setLocalTourney(trny)
+  //       App.execUseCase("OrganizeCompetition", "", "")      
+  //     }
+  //   }  
+  // } 
+
+
+
+
 
 }

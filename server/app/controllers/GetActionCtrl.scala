@@ -105,14 +105,6 @@ class GetActionCtrl @Inject()
           Ok(trny.encode())
         }  
       }
-  
-      // case "getTournRun" => tsv.getTournRun(toId).map {
-      //   case Left(err)   => logger.error(s"getTournRun error: ${err.toString}"); BadRequest(err.add("getTournRun").encode)
-      //   case Right(tRun) => {
-      //     // logger.info(s"getTournRun -> Id: ${tRun.id} Time: ${date.getTime()}")
-      //     Ok(tRun.encode())
-      //   }  
-      // }
 
       case "findTournBases"   =>  
         tourneyDao.findByStringTypDate(getParam(pMap, "search"), getParam(pMap, "toTyp", 0), getParam(pMap, "toYear", 1970)).map { tBases => {

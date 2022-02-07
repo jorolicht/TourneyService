@@ -62,7 +62,6 @@ class TestCtrl @Inject()(
 ) extends AbstractController(cc)
   with I18nSupport with Logging {
 
-  implicit val tiFormat    = Json.format[TourneyTx]
   import shared.utils._
 
   /** trigger - triggers connected clients

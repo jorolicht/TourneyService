@@ -101,24 +101,20 @@ object UnitManager extends UseCase("UnitManager")
     }
   }
 
-  // testLogin
-  def testLogin(testCase: String, testOption: String) = {
-    val total = new StringBuilder(s"\n")
-    var result = ""
-    var name = ""
-    
-    name = "authBasic email correct password"
-    authBasic("robert2@email.com", "", "secret123").map {
-      case Left(err) => { 
-        val result = s"ERROR(${name}): ${err}\n"
-        total.append(result); info("test_Login", result)
-      }
-      case Right(res) => {
-        val result = s"OK(${name}): ${res}\n"
-        total.append(result); info("test_Login", result)
-      }
+  // authBasicContext
+  def testAuthBasicContext(testCase: String, testOption: String) = {    
+    authBasicContext("robert.lichtengger@icloud.com", "", "Si5d4H").map {
+      case Left(err)  => error("authBasicContext", s"Error: ${err}") 
+      case Right(res) => info("authBasicContext", s"Success: ${res}")
     } 
-    //setHtml_("mainContent", clientviews.home.html.Test(testInfo, result.toString).toString) 
+  }  
+
+  // authBasicContext
+  def testAuthBasic(testCase: String, testOption: String) = {    
+    authBasic("robert.lichtengger@icloud.com", "", "Si5d4H").map {
+      case Left(err)  => error("authBasic", s"Error: ${err}") 
+      case Right(res) => info("authBasic", s"Success: ${res}")
+    } 
   }  
 
   /** testLicense
@@ -148,20 +144,7 @@ object UnitManager extends UseCase("UnitManager")
   // testGoogleLogin
   def testGoogleLogin(testCase: String, testOption: String) = {
     val testInfo = s"Test ${testCase}(Option: ${testOption})"
-    dom.window.location.replace("/authenticate/google");
-
-    // does not work
-    // Ajax.get("authenticate/google").map(_.responseText).map(content => {
-    //   info(s"${testInfo} -> request result: ${content}")
-    // }).recover({
-    //   // Recover from a failed error code into a successful future
-    //   case dom.ext.AjaxException(req) => {
-    //     info(s"${testInfo} -> error result: ${req.responseText}")
-    //   }  
-    //   case _: Throwable => {
-    //     info(s"${testInfo} -> error unknown")  
-    //   }
-    // })
+    dom.window.location.replace("/authenticate/google")
   }    
 
 

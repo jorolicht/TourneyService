@@ -173,24 +173,19 @@ trait TourneySvc extends WrapperSvc
 
   // update tourney basis information
   def setTournBase(tournbase: TournBase): Future[Either[Error, Tourney]] =
-    postAction("setTournBase", App.tourney.id, "", tournbase.stringify).map {
+    postAction("setTournBase", App.tourney.id, "", tournbase.encode()).map {
       case Left(err)     => Left(err.add("setTournBase"))
       case Right(trnyTx) => Tourney.decode(trnyTx)
     }
 
   // add tourney based on with click TT configuration 
-  def addTournCTT(cttData: String, sDate: Int, eDate: Int): Future[Either[Error, Tourney]] =
+  def addTournCTT(cttData: String, sDate: Int, eDate: Int): Future[Either[Error, Tourney]] = {
+    Helper.debug("addTournCTT", s"${cttData.take(20)}")
     postAction("addTournCTT", App.tourney.id, s"sDate=${sDate}&eDate=${eDate}", cttData).map {
       case Left(err)     => Left(err.add("addTournCTT"))
       case Right(trnyTx) => Tourney.decode(trnyTx)
     }
-
-  //     def postAction(cmd: String, toId: Long, params: String, data: String="", trigger: Boolean=false,
-  //                     contType: String = "text/plain; charset=utf-8"): Future[Either[Error, String]] = {
-  //   val papas = s"toId=${toId}&cmd=${cmd}&trigger=${trigger}&caId=${AppEnv.callerId.toString}" + (if (params!="") s"&${params}" else "")
-  //   postJson("/service/postAction", papas, data, contType)
-  // }
-
+  }  
 
 
   // update tourney basis information
@@ -200,21 +195,7 @@ trait TourneySvc extends WrapperSvc
       case Right(res) => Return.decode2Boolean(res, "saveTourney")
     }
 
-  // def getTourney(toId: Long): Future[Either[Error, Tourney]]  =  {
-  //   import cats.data.EitherT
-  //   import cats.implicits._
 
-  //   // println(s"getResult: ${scala.scalajs.js.Date.now()}")
-  //   (for {
-  //     trny    <- EitherT(getTournCfg(toId))
-  //     trnyRun <- EitherT(getTournRun(toId))
-  //   } yield { (trny, trnyRun) }).value.map {
-  //     case Left(err)  => { Left(err.add("getTourney")) }
-  //     case Right(res) => { res._1.run = res._2; Right(res._1) }
-  //   }
-  // } 
-
-  
   // get full tourney configuration information
   def getTourney(toId: Long): Future[Either[Error, Tourney]] = {
     // println(s"getSubResult1: ${scala.scalajs.js.Date.now()}")
@@ -223,16 +204,6 @@ trait TourneySvc extends WrapperSvc
       case Right(trnyTx) => Tourney.decode(trnyTx)
     }
   }
-
-
-  // // get tourney run information
-  // def getTournRun(toId: Long):  Future[Either[Error, TournRun]] = {
-  //   // println(s"getSubResult2: ${scala.scalajs.js.Date.now()}")
-  //   getAction("getTournRun", toId).map { 
-  //     case Left(err)  => Left(err.add("getTournRun"))
-  //     case Right(tRs) => TournRun.decode(tRs)
-  //   }
-  // }  
 
 
   // get all players of tourney 

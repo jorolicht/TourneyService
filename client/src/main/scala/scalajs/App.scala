@@ -56,7 +56,7 @@ object App extends BasicHtml
 
   val ucMap  = new scala.collection.mutable.HashMap[String, UseCase]
   
-  var tourney      = Tourney.getDummy
+  var tourney      = Tourney.init
   
   /** main - entry point of application
    *
@@ -90,7 +90,7 @@ object App extends BasicHtml
 
     // initialize tourney if basic usecase is called
     if (ucName == "HomeMain") {
-      setLocalTourney(Tourney.getDummy)
+      setLocalTourney(Tourney.init)
     } else {
       loadLocalTourney()
     }
@@ -397,7 +397,7 @@ object App extends BasicHtml
     Tourney.decode(AppEnv.getLocalStorage("AppEnv.TourneyCfg")) match {
       case Left(err) => {
         Helper.error(s"loadLocalTourney", getErrStack(err))
-        setLocalTourney(Tourney.getDummy)
+        setLocalTourney(Tourney.init)
       }
       case Right(tourney) => {
         // tourney.run = 
@@ -422,7 +422,7 @@ object App extends BasicHtml
   }
 
   def saveLocalTourneyCfg(trny: Tourney): Unit = {
-    try AppEnv.setLocalStorage("AppEnv.TourneyCfg", write(trny.toTx()))
+    try AppEnv.setLocalStorage("AppEnv.TourneyCfg", write(trny))
     catch { case _: Throwable => println("saveLocalTourneyCfg(error)", "couldn't write to local storage") }    
   }
   
@@ -434,7 +434,7 @@ object App extends BasicHtml
 
 
 
-  def resetLocalTourney(): Unit = { tourney = Tourney.getDummy; saveLocalTourney(tourney) }
+  def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
 
   /** Tourney getter
    *

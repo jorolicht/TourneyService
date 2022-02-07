@@ -20,7 +20,7 @@ import org.scalajs.dom.ext._
 
 
 // tourney service imports
-import shared.model.{ TournBase, Tourney, TournRunTx, Competition }
+import shared.model.{ TournBase, Tourney, Competition }
 import shared.utils.UseCaseParam
 import shared.utils.Error
 

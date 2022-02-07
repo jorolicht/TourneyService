@@ -61,8 +61,7 @@ object TIO {
   implicit val grtxFormat   = Json.format[GroupTx]
   implicit val coSectFormat = Json.format[CompSectionTx]
   implicit val cophFormat   = Json.format[CompPhaseTx]
-  implicit val tCfgFormat   = Json.format[TourneyTx]
-  implicit val tRunFormat   = Json.format[TournRunTx]
+
 
   def mapDefault[X,Y](hm: HashMap[X,Y], key: X, default: Y) = if (!hm.isDefinedAt(key)) default else hm(key)
 
@@ -149,7 +148,7 @@ object TIO {
   def add(trnyBase: TournBase)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] =
     tonyDao.insertOrUpdate(trnyBase).map { tony => 
       if (tony.id > 0) {
-        val trny = new Tourney(tony)
+        val trny = Tourney.init(tony)
         if (tourney.isDefinedAt(trny.id)) tourney.remove(trny.id) 
         tourney(trny.id) = trny
         save(trny.id)
@@ -171,7 +170,7 @@ object TIO {
     tonyDao.insertOrUpdate(trny.getBase()).map { tony => 
       if (tony.id > 0) {
         if (tourney.isDefinedAt(tony.id)) tourney.remove(tony.id) 
-        tourney(tony.id) = trny.copy(tony)
+        tourney(tony.id) = Tourney.init(tony)
         save(tony.id)
         Right(tourney(tony.id))
       } else {
@@ -190,6 +189,9 @@ object TIO {
     import scala.util.Using
     import scala.io.Source
 
+    //startDate}_${toId}_Tourney.json"" +
+      
+
     for {
       tony  <- tonyDao.findByPathId(orgDir, toId)
       sDate <- tony match { case Some(to) => Future(to.startDate); case None => Future("xxxxxxxx") }
@@ -198,16 +200,13 @@ object TIO {
       if (cnt==1) {
         val trnyDir = cfg.get[String]("server.tourney.dir")
         val fSep   = System.getProperty("file.separator")
-        val fNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${toId}_TournCfg.json"
-        val fNRun  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${toId}_TournRun.json"
-        
-        val xfNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${toId}_TournCfg.json"
-        val xfNRun  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${toId}_TournRun.json"
+        val fNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${toId}_Tourney.json"        
+        val xfNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${toId}_Tourney.json"
+
 
         (for {
           res1 <- moveFile(fNCfg, xfNCfg)
-          res2 <- moveFile(fNRun, xfNRun)
-        } yield (res1, res2)) match {
+        } yield (res1)) match {
           case Left(err)  => Left(err.add("Cache.delete"))
           case Right(res) => Right(true)
         }
@@ -244,23 +243,18 @@ object TIO {
 
   /** update / insert tourney configuration from tourney transfer data
    * 
-   * @param  totx tourney transfer data
+   * @param  trny tourney data
    */    
-  def update(totx: TourneyTx)(implicit ec: ExecutionContext, env: Environment, tonyDao: TourneyDAO): Future[Either[Error, Long]] = 
+  def update(trny: Tourney)(implicit ec: ExecutionContext, env: Environment, tonyDao: TourneyDAO): Future[Either[Error, Long]] = 
   {
-    val tb = TournBase.obify(totx.basis)
+    val tb = trny.getBase()
     tonyDao.insertOrUpdate(tb).map { tony => 
       if (tony.id > 0) {
-        Tourney.fromTx(totx) match {
-          case Left(err) => Left(err)
-          case Right(tI) => {
-            logger.info(s"insert from tx: ${tony.name}(${tony.id})")
-            if (tourney.isDefinedAt(tony.id)) { tourney.remove(tony.id) }
-            tourney(tony.id) = tI
-            tourney(tony.id).writeTime  = clock.millis()
-            Right(tony.id)
-          }
-        }
+        logger.info(s"insert from tx: ${tony.name}(${tony.id})")
+        if (tourney.isDefinedAt(tony.id)) { tourney.remove(tony.id) }
+        tourney(tony.id) = trny.copy(id=tony.id)
+        tourney(tony.id).writeTime  = clock.millis()
+        Right(tony.id)
       } else {
         logger.error(s"insert: ${tb.name}/${tb.orgDir}.id})")
         Left(Error("err0083.database.insert"))
@@ -282,7 +276,7 @@ object TIO {
                        TT_TT, true, contact, address, 0)
     tonyDao.insertOrUpdate(tb).map { tony => 
       if (tony.id > 0) {
-        tourney(tony.id) = new Tourney(tony)
+        tourney(tony.id) = Tourney.init(tony)
         for((club,i) <- ctt.getClubs.zipWithIndex) {
           tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
           tourney(tony.id).clName2id(club.name) = (i+1)
@@ -368,20 +362,12 @@ object TIO {
   def save(toId: Long)(implicit ec: ExecutionContext, cfg: Configuration): Either[Error, Boolean] = {
     if (tourney.isDefinedAt(toId)) {
       try {
-
-        val trnyDir      = cfg.get[String]("server.tourney.dir")
-        val fNameTourney = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_Tourney.json"
-        //val fNRun  = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_TournRun.json"
-
+        val trnyDir       = cfg.get[String]("server.tourney.dir")
+        val fNameTourney  = s"${trnyDir}/${tourney(toId).orgDir}/${tourney(toId).startDate}_${toId}_Tourney.json"
         val pathToFileCfg = Paths.get(fNameTourney)
-        //val pathToFileRun = Paths.get(fNRun)
 
         Files.createDirectories(pathToFileCfg.getParent())
-        val tournTx = tourney(toId).toTx()
-        //val tournRunTx = tourney(toId).run.toTx(toId)
-
-        Files.write(pathToFileCfg, Json.toJson(tournTx).toString.getBytes(StandardCharsets.UTF_8))
-        //Files.write(pathToFileRun, Json.toJson(tournRunTx).toString.getBytes(StandardCharsets.UTF_8))
+        Files.write(pathToFileCfg, write[Tourney](tourney(toId)).getBytes(StandardCharsets.UTF_8))
         logger.info(s"save to disk: ${tourney(toId).name}(${toId}) -> ${fNameTourney}")
         Right(true)         
       } catch { case _: Throwable => 
@@ -451,7 +437,6 @@ object TIO {
 
     (for {
       res1 <- Using(Source.fromFile(fNCfg)) { source => source.mkString }
-      //res2 <- Using(Source.fromFile(fNRun)) { source => source.mkString }
     } yield (res1)) match {
       case Failure(f) => { logger.error(f.toString); Left(Error("err0146.fileaccess.config", fNCfg, "cache")) }   
       case Success(cfgFile) => Tourney.decode(cfgFile) match {

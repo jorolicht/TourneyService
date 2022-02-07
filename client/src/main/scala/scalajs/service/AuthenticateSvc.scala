@@ -25,6 +25,31 @@ import scalajs._
 
 trait AuthenticateSvc extends WrapperSvc {
 
+  /** authBasicContext via email or license code
+    * 
+    * @param email
+    * @param licCode
+    * @param password
+    * @return
+    */ 
+  def authBasicContext(email: String, licCode: String, password: String): Future[Either[Error, Boolean]] = {
+    import org.encoding.Base64._
+    
+    val route = "/authenticate/basic"
+    val params = s"version=${AppEnv.getVersion()}&email=${email}&licCode=${licCode}"
+    val path = s"${route}?params=${enc(params)}"
+    val authCode = "Basic " + password.getBytes.toBase64
+
+    Ajax.get(path, headers = Map("Authorization"-> authCode)).map(_.responseText).map(context => {
+      Right(AppEnv.initContext(context))
+    }).recover({
+      // Recover from a failed error code into a successful future
+      case dom.ext.AjaxException(req) => Left( Error.decode(req.responseText, s"text: ${req.responseText.take(40)} path: ${path}", "authBasic") )
+      case _: Throwable               => Left( Error("err0003.ajax.authBasic", "noRespons", "noStatus") )
+    }) 
+  }
+
+
   /** authBasic via email or license code
     * 
     * @param email
