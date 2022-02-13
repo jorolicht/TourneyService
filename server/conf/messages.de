@@ -1034,8 +1034,9 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 
 
 ###
-# Error Codes/Messages separated by "<#>"
+# Error Codes/Messages
 ###
+  err9999.test                                        = Error nicht dekodierbar, bzw. unbekannt: {0}
   err0000.communication.error                         = Kommunikationsfehler: Server nicht erreichbar
   err0001.decode.error                                = Fehlerdekodierung: {0} Hinweis: {1}
   err0002.ajax.reset                                  = Reset Authentisierung fehlgeschlagen {0} {1}
@@ -1197,5 +1198,10 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0175.DlgCardCfgSection                           = Ungültige Auswahl des Spielsystems
   err0176.decode.CompSection                          = Dekodierfehler Datentyp CompSection: {0}
   err0177.decode.CompPhase                            = Dekodierfehler Datentyp CompPhase: {0}
+  err0178.svc.regTournBase                            = Fehler in der Routine regTournBase: {0} 
+  err0179.Tourney.name                                = Fehler Turniername zu kurz (mind. 3 Zeichen)
+  err0180.Tourney.edate                               = Fehler Turnierenddatum vor Turnierstartdatum
+  err0181.Tourney.sdate                               = Fehler Turnierstartdatum ungültig
+  err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
 
 #END Error Codes/Messages

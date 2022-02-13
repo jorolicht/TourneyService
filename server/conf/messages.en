@@ -1023,6 +1023,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
 ###
 # Error Codes / Messages separated by "<#>"
 ###
+  err9999.unknown                                     = Error unknown or decoding failed: {0}
   err0000.communication.error                         = Communication error: could not connect to server
   err0001.decode.error                                = Error decoding: {0} Note: {1}
   err0002.ajax.reset                                  = Reset authentication failed {0} {1}
@@ -1185,5 +1186,11 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0175.DlgCardCfgSection                           = Invalid selection of game system
   err0176.decode.CompSection                          = Decoding error data type CompSection: {0} 
   err0177.decode.CompPhase                            = Decoding error data type CompPhase: {0}
+  err0178.svc.regTournBase                            = Error function call regTournBase: {0} 
+  err0179.Tourney.name                                = Error tourney name (length at least 3 characters)
+  err0180.Tourney.edate                               = Error tourney startdate after enddate
+  err0181.Tourney.sdate                               = Error invalid tourney startdate
+  err0182.ctrl.delTourney                             = Controller error in routine delTourney: {0}
+
 
 #END error codes / messages

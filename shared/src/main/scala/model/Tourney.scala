@@ -80,20 +80,8 @@ case class Tourney(
   /*
    * miscellanous tourney routines
    */
-  def getParticipantName(sno: String, coId: Long, format: Int): String = {
-    import shared.utils.Constants._ 
-    try {
-      comps(coId).typ match {
-        case CT_SINGLE => players(getMDLong(sno, 0)).getName(format)
-        case CT_DOUBLE => players(getMDLong(sno, 0)).lastname + "/" + players(getMDLong(sno, 1)).lastname
-        case _         => "error participant name: invalid typ"
-      }
-    } catch { case _: Throwable => "error participant name: invalid sno" }
-  }
-
-
   // get all competitions with id and name
-  def getNamesComp(): Seq[(Long,String)] = {
+  def getNamesComp(): Seq[(Long, String)] = {
     (for { (k,co)  <- comps } yield {
       (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate)
     }).toSeq.sortWith(_._5 > _._5).sortWith(_._6 < _._6).map(x => (x._1,x._2))
@@ -322,22 +310,6 @@ case class Tourney(
     }      
   }
 
-
-  /*  getParticipants - returns List/Array of participant entries, empty Array if 
-   *                    no participants or wrong/invalid coId
-   */
-  // def getParticipants(coId: Long): Array[ParticipantEntry] = {
-  //   if (comps.isDefinedAt(coId)) {
-  //     val cTyp = comps(coId).typ
-  //     pl2co.keys
-  //      .filter(x => (x._2 == coId))
-  //      .filter(x => pl2co(x).status == 1)
-  //      .map( x => pl2co(x).getEntry(players, cTyp) ).toArray
-  //   } else {
-  //     Array[ParticipantEntry]()
-  //   }
-  // }
-
   // print readable tourney - for debug purposes
   override def toString() = {
     def compsStr() = {
@@ -393,7 +365,7 @@ case class Tourney(
 object Tourney {
   implicit def rw: RW[Tourney] = macroRW
 
-  def init                   = Tourney(0L, "dummy", "", "", 19700101, 19700101, "", 0)
+  def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", 0)
   def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, tBase.typ)
 
   def decode(trnyStr: String): Either[Error, Tourney] = 
@@ -421,78 +393,3 @@ object Tourney {
     }
 
 }
-
-
-/*
-**
-**  TOURNEY RUN - Tourney Runtime Information
-**
-*/
-// class TournRun(val id: Long) 
-// {
-//   /*
-//    * tourney runtime data
-//    */
-//   // map coId, secId -> Competition Section
-//   var coSects:    HashMap[(Long, Int), CompSection] = HashMap() 
-//   // map coId, coPh  -> Competition Phase
-//   var cophs:      HashMap[(Long, Int), CompPhase]   = HashMap() 
-//   var playfields: HashMap[Int, Playfield]           = HashMap() 
-  
-//   /*
-//    * methods for converting
-//    */
-//   def encode(): String = write[TournRunTx](toTx(id))
-
-//   def toTx(id: Long): TournRunTx = {
-//     val pfs     = for ((k,v) <- this.playfields) yield v.stringify
-//     val cphs    = for ((k,v) <- this.cophs)      yield v.toTx
-//     val cSects  = for ((k,v) <- this.coSects)    yield v.toTx
-//     //val cSecs   = for (v <- this.coSects)        yield v.toTx 
-//     TournRunTx(id, cSects.toList, cphs.toList, pfs.toList) 
-//   }
-
-//   override def toString(): String = {
-//     def pfsStr() = {
-//       val str = new StringBuilder("-- PLAYFIELDSS\n")
-//       for { (k,pf) <- playfields }  yield { str ++= s"  ${pf.toString}\n" }; str.toString
-//     }
-//     def cphsStr() = {
-//       val str = new StringBuilder("-- COMPETITION PHASES\n")
-//       for { (k,coph) <- cophs }  yield { str ++= s"  ${coph.toString}\n" }; str.toString
-//     }
-
-//     def coSecStr() = {
-//       val str = new StringBuilder("-- COMPETITION SECTIONS\n")
-//       for { (k, cSecs) <- coSects }  yield { str ++= s"  ${cSecs.toString}\n" }; str.toString
-//     }    
-
-//     s"""\nTOURNEY RUN INFORMATION[${id}]
-//        |  ${pfsStr()}
-//        |  ${cphsStr()}
-//        |  ${coSecStr()}
-//        |""".stripMargin('|')
-//   }
-// }
-
-
-// object TournRun {
-
-//   def decode(trnyStr: String): Either[Error, TournRun] = 
-//     try Right(fromTx(read[TournRunTx](trnyStr)))
-//     catch { case _: Throwable => Left(Error("err0071.decode.TournRun", trnyStr.take(20))) }
-
-//   def fromTx(tx: TournRunTx): TournRun = {
-//     val tR         = new TournRun(tx.id)
-//     val plfs       = tx.playfields.map(x => Playfield.decode(x)).partitionMap(identity)._2
-//     //tR.coSects     = tx.coSects.map(x => CompSection.fromTx(x)).to(ArrayBuffer) 
-//     tR.coSects     = collection.mutable.HashMap( tx.coSects.map(c => (c.coId, c.id)-> CompSection.fromTx(c) ) : _*) 
-//     tR.cophs       = collection.mutable.HashMap( tx.cophs.map(c => (c.coId,c.coPh)-> CompPhase.fromTx(c) ) : _*) 
-//     tR.playfields  = collection.mutable.HashMap( plfs.map(p => p.nr -> p) : _*) 
-    
-//     tR
-//   }
-// }
-
-// case class TournRunTx(id: Long, coSects: Seq[CompSectionTx], cophs: Seq[CompPhaseTx], playfields: Seq[String])
-// object TournRunTx { implicit def rw: RW[TournRunTx] = macroRW }

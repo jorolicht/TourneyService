@@ -260,7 +260,8 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         if (coId > 0) {
           val comp = App.tourney.comps(coId)
           val coName = App.tourney.comps(coId).name
-          val paName = App.tourney.getParticipantName(sno, coId, 0)
+          val paName = SNO(sno).getName(comp.typ)(App.tourney)
+
           val confirm = comp.typ match {
             case CT_SINGLE => confirmDlg(getMsg("confirm.single.delete.hdr"), getMsg("confirm.single.delete.msg", paName, coName))
             case CT_DOUBLE => confirmDlg(getMsg("confirm.double.delete.hdr"), getMsg("confirm.double.delete.msg", paName, coName))

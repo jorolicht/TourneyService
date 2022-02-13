@@ -728,7 +728,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
    *  
    */
   def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = TIO.delete(toId, tse.orgDir)
-
+  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = TIO.delete(0L, tse.orgDir, sDate)
 
   /** addTournBase adds a tourney from a tournBase, returns tourney, error if a tourney with same 
     * startdate and organization already exists 
@@ -742,6 +742,30 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         case Right(trny) => Future( Left(Error("err0064.svc.addTournBase", trnyBase.orgDir, trnyBase.startDate.toString)) )
       }
     }
+
+  /** regTournBase register a tourney from a tournBase, creates new one if trnyBase.id == 0
+    * returns id of (new) tourney 
+    * returns error if existing tourney.id does not match trnyBase.id or violating access rights 
+    */    
+  def regTournBase(trnyBase: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Long]] = {
+    if (trnyBase.orgDir != tse.orgDir) {
+      Future(Left(Error("err0080.access.invalidRights")))
+    } else if (trnyBase.id != 0) {
+      TIO.load(trnyBase.orgDir, trnyBase.startDate).map { 
+        case Left(err)   => Left(Error("err0178.svc.regTournBase", s"orgDir: ${trnyBase.orgDir} startDate: ${trnyBase.startDate.toString}"))
+        case Right(trny) => if (trny.id != trnyBase.id) Left(Error("err0178.svc.regTournBase", s"invalid tourney identificator: ${trny.id} / ${trnyBase.id}")) else Right(trny.id) 
+      }
+    } else {
+      TIO.load(trnyBase.orgDir, trnyBase.startDate).flatMap { 
+        case Left(err)   => TIO.add(trnyBase).map {
+          case Left(err)   => Left(err.add("regTournBase"))
+          case Right(trny) => Right(trny.id) 
+        }                               
+        case Right(trny) => Future( Right(trny.id) )
+      }
+    }
+  } 
+
 
   /** saveTourney put tourney data to disk
     * 
@@ -805,12 +829,6 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
       case Right(trny)  => Right(trny)
     }
 
-
-  // def getTournRun(toId: Long) : Future[Either[Error, TournRun]] = 
-  //   TIO.get(toId).map {
-  //     case Left(err)    => Left(err)
-  //     case Right(trny)  => Right(trny.run)
-  //   }
 
   // getTournPlayer returns all players of the tourney
   def getTournPlayers(toId: Long): Future[Either[Error, Seq[Player]]] =

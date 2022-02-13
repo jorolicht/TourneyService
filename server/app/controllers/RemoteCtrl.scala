@@ -1,4 +1,4 @@
-package controllers
+ package controllers
 
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
@@ -118,29 +118,50 @@ class RemoteCtrl @Inject()
 
     logger.debug(s"regTournBase  ${ctx.orgId} ${ctx.orgDir}  ${ctx.organizer}  ")
 
-    if (ctx.orgId > 0 ) {
+    if (ctx.orgId <= 0 ) {
+      logger.info(s"regTournBase: not allowed to create tourney DB")
+      Future( BadRequest(Error("err0152.ctrl.regTournBase", "not allowed", "","regTournBase").encode) ) 
+    } else {
+     
       val tBase = if (tb.organizer == "") {
         tb.copy(orgDir=ctx.orgDir, organizer=ctx.organizer)
       } else {
         tb.copy(orgDir=ctx.orgDir)
       }
-
-      tourneyDao.insertOrUpdate(tBase).map { (tony: TournBase) => 
-        //logger.info(s"RemoteCtrl.regTournBase ${tony.toString}")
-        if (tony.id != 0) {
-          // create directory for files ....  
-          Files.createDirectories(Paths.get(s"${env.rootPath}/db/Tourneys/${tony.orgDir}"))
-          Ok(tony.id.toString)
-        } else {
-          logger.info(s"regTournBase: could not create tourney DB")
-          BadRequest(Error("err0152.ctrl.regTournBase", "insertOrUpdate failed", "","regTournBase").encode) 
-        }
+      implicit val tse   = TournSVCEnv(tBase.id, ctx.orgDir, true)
+      tsv.regTournBase(tBase).map {
+        case Left(err)  => {
+          logger.error(s"regTournBase:  ${err.encode}")
+          BadRequest(err.encode)
+        }  
+        case Right(id)  => Ok(id.toString)
       }
-    } else {
-      logger.info(s"regTournBase: not allowed to create tourney DB")
-      Future( BadRequest(Error("err0152.ctrl.regTournBase", "not allowed", "","regTournBase").encode) ) 
     }
-  }
+  }  
+
+
+  def delTourney(sDate: Int) = Action.async { implicit request =>
+    val msgs:  Messages  = messagesApi.preferred(request)
+    val tb  = request.body
+    val ctx =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+
+    logger.debug(s"delTourney -> orgId: ${ctx.orgId} orgDir ${ctx.orgDir} startDate: ${sDate}")
+
+    if (ctx.orgId <= 0 ) {
+      logger.info(s"delTourney: not allowed to delete tourney DB")
+      Future( BadRequest(Error("err0152.ctrl.regTourney", "not allowed", "","delTourney").encode) ) 
+    } else {
+     
+      implicit val tse   = TournSVCEnv(0L, ctx.orgDir, true)
+      tsv.delTourney(sDate).map {
+        case Left(err)  => {
+          logger.error(s"delTourney ${err.encode}")
+          BadRequest(err.encode)
+        }  
+        case Right(id)  => Ok(id.toString)
+      }
+    }
+  }  
 
   /** setComps - set competitions, returns mapping list of globalCompetitionId -> localCompetitionId
    *

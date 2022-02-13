@@ -145,18 +145,22 @@ object TIO {
    * @param  tonyDao
    * @return 
    */
-  def add(trnyBase: TournBase)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] =
-    tonyDao.insertOrUpdate(trnyBase).map { tony => 
-      if (tony.id > 0) {
-        val trny = Tourney.init(tony)
-        if (tourney.isDefinedAt(trny.id)) tourney.remove(trny.id) 
-        tourney(trny.id) = trny
-        save(trny.id)
-        Right(trny)
-      } else {
-        Left(Error("err0081.database.add"))
-      } 
+  def add(trnyBase: TournBase)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] = 
+    trnyBase.check() match {
+       case Left(err)  => Future(Left(err))
+       case Right(res) => tonyDao.insertOrUpdate(trnyBase).map { tony => 
+          if (tony.id > 0) {
+            val trny = Tourney.init(tony)
+            if (tourney.isDefinedAt(trny.id)) tourney.remove(trny.id) 
+            tourney(trny.id) = trny
+            save(trny.id)
+            Right(trny)
+          } else {
+            Left(Error("err0081.database.add"))
+          } 
+        }
     }
+
 
   /** add adds a tourney to the database if not existing yet
    * 
@@ -166,7 +170,9 @@ object TIO {
    * @param  tonyDao
    * @return 
    */
-  def add(trny: Tourney)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] =
+  def add(trny: Tourney)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] = {
+    
+  
     tonyDao.insertOrUpdate(trny.getBase()).map { tony => 
       if (tony.id > 0) {
         if (tourney.isDefinedAt(tony.id)) tourney.remove(tony.id) 
@@ -177,6 +183,7 @@ object TIO {
         Left(Error("err0081.database.add"))
       } 
     }
+  } 
 
   /** delete database  return true if tourney was found otherwise false
    *
@@ -184,16 +191,14 @@ object TIO {
    * @param orgDir   organization directory
    * @return 
    */
-  def delete(toId: Long, orgDir: String)(implicit ec: ExecutionContext, tonyDao: TourneyDAO, cfg: Configuration): Future[Either[Error, Boolean]] = {
+  def delete(toId: Long, orgDir: String, sDate: Int=0)(implicit ec: ExecutionContext, tonyDao: TourneyDAO, cfg: Configuration): 
+    Future[Either[Error, Boolean]] = {
     import scala.util.{Try, Success, Failure, Using}
     import scala.util.Using
     import scala.io.Source
 
-    //startDate}_${toId}_Tourney.json"" +
-      
-
     for {
-      tony  <- tonyDao.findByPathId(orgDir, toId)
+      tony  <- if (sDate!= 0) tonyDao.findByPathDate(orgDir, sDate) else tonyDao.findByPathId(orgDir, toId)
       sDate <- tony match { case Some(to) => Future(to.startDate); case None => Future("xxxxxxxx") }
       cnt   <- tony match { case Some(to) => tonyDao.deleteById(to.id); case None => Future(0) }
     } yield {
@@ -202,7 +207,6 @@ object TIO {
         val fSep   = System.getProperty("file.separator")
         val fNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${toId}_Tourney.json"        
         val xfNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${toId}_Tourney.json"
-
 
         (for {
           res1 <- moveFile(fNCfg, xfNCfg)
@@ -214,7 +218,8 @@ object TIO {
         Right(false)
       } 
     }
-  }     
+  }
+
 
   /** update tourney with basic information, database and file
    * 

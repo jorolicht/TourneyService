@@ -33,6 +33,17 @@ case class TournBase(
 ) extends {
    
   def encode(): String = write[TournBase](this)
+
+  def check(): Either[Error, Boolean] = {
+    val (y,m,d) = int2ymd(startDate)
+    if (name.length() <= 3 ) {
+      Left(Error("err0179.Tourney.name"))
+    } else if (startDate > endDate) {
+      Left(Error("err0180.Tourney.edate"))
+    } else if (y < 2022) {
+      Left(Error("err0181.Tourney.sdate"))
+    } else Right(true)
+  }  
   
   def getAddrDescription: String = getMDStr(address,0);    def setAddrDescription(value: String) = { address = setMD(address,value,0) }
   def getAddrCountry: String     = getMDStr(address,1);    def setAddrCountry(value: String)     = { address = setMD(address,value,1) }

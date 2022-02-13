@@ -103,6 +103,10 @@ class TestCtrl @Inject()(
     }
   }  
 
+  def errCode(code: String) = Action  { implicit request =>
+    BadRequest(Error("err9999.test", code).encode)
+  }
+    
 
   def test_cache(name: String, p1: String="", p2: String="", p3: String="") = {
     logger.info(s"Test ${name}: started") 

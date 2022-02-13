@@ -192,6 +192,18 @@ class HomeCtrl @Inject()(
     Ok(jssMsgs.allMessagesJson)
   }
   
+
+  def getErrCodes(lang: String) = Action  { implicit request =>
+    val jssMsgs = new JssMessages(messagesApi.messages)
+    val errMsgs = jssMsgs.allMessages(lang)
+
+    //logger.info(s"getErrMsg: ${errMsgs.filter(x => x._1.startsWith("err"))}")
+    Ok(Json.toJson(errMsgs.filter(x => x._1.startsWith("err")) )) 
+  }
+
+
+
+
   /** content send a file
     */
   def content(p1: String, p2: String, p3: String, p4: String, p5: String, p6: String) = Action { implicit request =>
@@ -370,7 +382,7 @@ class ActorRefManager extends Actor {
       aRefMap.remove(id)
       //println(s"unregister id: ${id} map: ${toIdMap}")
     }  
-    case SendMessage(id, message) => aRefMap(id) ! message
+    case SendMessage(id, message) => if (aRefMap.contains(id)) aRefMap(id) ! message
 
     case MessageToId(toId, msg)   => toIdMap(toId).foreach( aRefMap(_) ! msg  )
     case RegToId(id, toId)        => {

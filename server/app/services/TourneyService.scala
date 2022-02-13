@@ -105,8 +105,12 @@ trait TourneyService {
   // Tourney Inteface
   def addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
   def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+
 
   def addTournBase(trnyBase: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Tourney]]
+  def regTournBase(trnyBase: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
+
   def saveTourney(toId: Long)(implicit tse :TournSVCEnv): Either[Error, Boolean]
   
   def setTournBase(tb: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Tourney]]

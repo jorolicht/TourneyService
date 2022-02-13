@@ -37,6 +37,23 @@ case class SNO(value: String) {
        case _         => ("", "", "", 0)    
     }
   }
+
+  // getName returns name for all types of participants
+  def getName(coTyp: Int)(implicit trny: Tourney): String  = {
+    coTyp match {
+       case CT_SINGLE => getSinglePlayer() match {
+         case Left(err)       => ""
+         case Right(p)        => p.getName()
+       }
+       case CT_DOUBLE => getDoublePlayers() match {
+         case Left(err)       => ""
+         case Right((p1, p2)) => p1.getDoubleName(p2)
+       }
+       case _         => ""    
+    }
+  }
+
+
 }
 
 object SNO {
