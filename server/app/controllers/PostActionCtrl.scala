@@ -358,7 +358,7 @@ class PostActionCtrl @Inject()
       //  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
       //  def delComps()(implicit tse :TournSVCEnv): Future[Either[Error, Int]]      
 
-      /** setComp creates or updates a competition, returns either error or the competition
+      /** setComp updates a competition, returns either error or the competition
         * calls setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
         */
       case "setComp"   => {
@@ -376,6 +376,29 @@ class PostActionCtrl @Inject()
           }
         }
       }      
+
+      /** addComp creates  a competition, returns either error or the competition
+        * calls addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
+        */
+      case "addComp"   => {
+        logger.info(s"addComp: START" ) 
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+          Competition.decode(reqData) match {
+            case Left(err)   => Future(BadRequest(err.encode))
+            case Right(co)   => tsv.addComp(co)(msgs, tse).map { 
+              case Left(err)     => {
+                logger.error(s"addComp: ${err.encode}") 
+                BadRequest(err.add("addComp").encode)
+              }  
+              case Right(newCo)  => { 
+                logger.info(s"addComp: RETURN" )  
+                Ok(newCo.encode()) 
+              }
+            }
+          }
+        }
+      } 
+
 
 
       /** setCompStatus sets the competition status, returns true if status is set, otherwise false

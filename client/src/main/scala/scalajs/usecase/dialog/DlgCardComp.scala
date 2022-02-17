@@ -85,7 +85,7 @@ object DlgCardComp extends BasicHtml
   // getInput
   def getInput(): Competition = {
 
-    val comp = Competition(getData("Form","id", -1L), getData("Form","rid",-1), 
+    val comp = Competition(getData("Form","id", 0L), getData("Form","hashKey",""), 
                            getInput("name", ""), getInput("typ", 0),
                            Competition.parseStartTime(getInput("startTime", "")),
                            getInput("status", CS_UNKN), getData("Form", "options", ""))
@@ -103,7 +103,7 @@ object DlgCardComp extends BasicHtml
         
     // setting data-foo
     setData("Form", "id", comp.id)
-    setData("Form", "rid", comp.rid)
+    setData("Form", "hashKey", comp.hashKey)
     setData("Form", "name", comp.name)
     setData("Form", "typ", comp.typ) 
     setData("Form", "options", comp.options)

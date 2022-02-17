@@ -202,12 +202,90 @@ class TestCtrl @Inject()(
 
 
   /**
-   *  test base64 encoding
+   *  test getLicenseFromAuth
    */
-  def base64 = Action { implicit request =>
+  def getLicenseFromAuth = Action { implicit request =>
     val licCode = tourn.services.Crypto.getLicenseCodeFromBasicAuth(request.headers.get("Authorization"))
     Ok(s"License Code: ${licCode}")
   }  
+
+  /**
+   *  test sha1 encoding
+   */
+  def sha1 = Action { implicit request =>
+    import java.nio.charset.StandardCharsets
+    val value1 = "abcd"
+    Ok(Crypto.toSHA1(value1.getBytes(StandardCharsets.UTF_8)))
+  }  
+
+
+  /**
+   *  test base64 encoding
+   */  
+  def base64 = Action { implicit request =>
+    import java.util.Base64
+    import java.nio.charset.StandardCharsets
+
+    val value = "abcdÄÖl;,"
+    //val value1 = Crypto.toSHA1(value.getBytes(StandardCharsets.UTF_8))
+
+    // logger.info(s"SHA1:   ${value1}") 
+    val result = new String(Base64.getEncoder.encode(value.getBytes(StandardCharsets.UTF_8)))
+    // logger.info(s"Base64: ${result}") 
+    val bts = result.getBytes(StandardCharsets.UTF_8)
+    bts.map { x =>
+      val uByte = if (x < 0) {
+        x & 0xff
+      } else {
+        x.toInt
+      }
+      logger.info(s"${uByte}")  
+    }  
+    logger.info(s"TestCtrl.base64: ${result}") 
+    Ok(result)
+  }  
+
+  def jsonComps(toId: Long) = Action.async { implicit request =>
+    import upickle.default._
+    import upickle.default.{ReadWriter => RW, macroRW}
+    logger.info(s"TestCtrl.jsonComps -> START") 
+    tsv.getComps(toId).map {
+      case Left(err)    => Ok("ERROR")
+      case Right(coSeq) => Ok(write[Seq[Competition]](coSeq)) 
+    }
+  }  
+
+  def setComps() = Action { implicit request =>
+    import upickle.default._
+    import upickle.default.{ReadWriter => RW, macroRW}
+
+    def diff(s1: String, s2: String): List[String] = {
+      (s1, s2).zipped.collect {
+        case (x, y) if x != y => s"$x != $y"
+      }.toList ++
+        s1.drop(s2.length).map(x => s"$x is undefined") ++
+        s2.drop(s1.length).map(y => s"$y is missing")
+    }    
+
+    val bodyContent: String = request.body.asText.getOrElse("")
+    val x = """
+      [{"id":1,"hashKey":"HCDDDA97D","name":"Herren·A-Klasse·EINZEL","typ":1,"startDate":"20220310#1200","status":-1,"options":"Herren·A-Klasse·0·0·2"},
+       {"id":2,"hashKey":"H9E47F2F9","name":"Herren·B-Klasse·EINZEL","typ":1,"startDate":"20220310#1200","status":-1,"options":"Herren·B-Klasse·0·0·3"}]
+    """ 
+
+    logger.info(s"DIFF: ${diff(x, bodyContent)}")
+
+    try {
+      logger.info(s"BODY: ${bodyContent}")
+      logger.info(s"X   :${x}")
+      val res = read[Seq[Competition]](bodyContent)
+      Ok("OK")
+    } catch { case _: Throwable => {
+      logger.error(s"setComps -> could not decode body")
+      Ok("ERROR")
+    }}
+  }  
+
   
   /**
    *  test authentication

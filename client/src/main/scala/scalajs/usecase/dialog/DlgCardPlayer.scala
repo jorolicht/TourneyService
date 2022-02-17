@@ -76,7 +76,7 @@ object DlgCardPlayer extends BasicHtml
     var eList = ListBuffer[Error]()
 
     val id        = getData("Form", "id", 0L)
-    val rid       = getData("Form", "rid", 0)
+    val hashKey   = getData("Form", "hashKey", 0)
     val options   = getData("Form", "options", "")
     var lfid      = ("", "", 0L) //(lastname, firstname, id)-Tuppel
     var email     = ""
@@ -95,7 +95,7 @@ object DlgCardPlayer extends BasicHtml
       case Right(res) => lfid = res
     }
     
-    var inValue = Player(11l,12,33L,"xxx","Rob","Licht",1963,"xx@xx", 0," ")
+    var inValue = Player(11l,"",33L,"xxx","Rob","Licht",1963,"xx@xx", 0," ")
 
     /* read relevant input and verify it */
     if (eList.length > 0) Left(eList.toList) else Right(inValue)
@@ -116,7 +116,7 @@ object DlgCardPlayer extends BasicHtml
     // setting invisible data
     if (inVisible) {
       setData("Form", "id", player.id)
-      setData("Form", "rid", player.rid)
+      setData("Form", "hashKey", player.hashKey)
       setData("Form", "options", player.options)
     }      
     // setting visible data

@@ -54,10 +54,13 @@ case class Tourney(
 
   // inverse hashmaps for fast access to players, clubs, ...
   var clName2id:   HashMap[String, Long]                     = HashMap()  // club -> id
-  var coName2id:   HashMap[String, Long]                     = HashMap()  // competition -> id
-  var plNCY2id:    HashMap[(String,String,String,Int), Long] = HashMap()
-  var plLIC2id:    HashMap[String, Long]                     = HashMap()  
-
+  //var plNCY2id:    HashMap[(String,String,String,Int), Long] = HashMap()
+  
+  var club2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // club hash -> id
+  var player2id:   Map[String, Long]  = Map().withDefaultValue(0L)  // player hash -> id
+  var comp2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // competition hash -> id
+  
+  var plLIC2id:    HashMap[String, Long]                     = HashMap()
 
   /*
    * tourney management data
@@ -109,22 +112,53 @@ case class Tourney(
   /** addComp add a competition if it is possible, id must be 0 
    *
    */ 
-  def addComp(co: Competition): Either[Error, Competition] = {
+  def addComp(co: Competition, hKey: String): Either[Error, Competition] = {
     if (co.id != 0)  {
       Left(Error("err0153.trny.addComp", co.id.toString)) 
     } else if (!co.validateDate(startDate, endDate)) {
       Left(Error("err0015.trny.compDate", co.startDate)) 
-    } else if (coName2id.isDefinedAt(co.hash)) {
+    } else if (comp2id.isDefinedAt(hKey)) {
       Left(Error("err0016.trny.compExistsAlready"))
     } else {
       // ok add new one
       val coIdMax = compIdMax + 1
       compIdMax = coIdMax
-      comps(coIdMax) = co.copy(id = coIdMax)     
-      coName2id(co.hash) = coIdMax
+      comps(coIdMax) = co.copy(id = coIdMax, hashKey = hKey)     
+      comp2id(hKey) = coIdMax
       Right(comps(coIdMax))
     }
   }
+
+  /** setComp - sets new values of existing competitions
+   *            or adds new one
+   */
+  def setComp(co: Competition): Either[Error, Competition] = {
+    if (co.id == 0)  {
+      Left(Error("err0154.trny.setComp")) 
+    } else if (!co.validateDate(startDate, endDate)) {
+      Left(Error("err0015.trny.compDate", co.startDate)) 
+    } else if (comp2id.isDefinedAt(co.hashKey)) {   
+      // hash value exists, if it belongs to different id
+      // don't allow it
+      val coId = comp2id(co.hashKey)
+      if (coId != co.id) {
+        // do not allow to change a competition to an existing
+        Left(Error("err0016.trny.compExistsAlready"))
+      } else {
+        // set new competition and return it
+        comps(co.id) = co
+        Right(co)
+      }
+    } else {
+      // ok changes on name, type, .... which result in hash changes
+      // thats ok, caveat hash changes remove old hash and add new one!
+      comp2id = comp2id.filter(x => x._2 != co.id) 
+      comp2id(co.hashKey) = co.id
+      comps(co.id) = co
+      Right(comps(co.id))
+    }
+  }  
+
 
   /** getCompCnt - returns number of registered and active participants  
    *
@@ -138,6 +172,33 @@ case class Tourney(
     }
     case _ => (0, 0)
   }
+
+
+  /** delComp - delete competition with id
+   * 
+   */ 
+  def delComp(coId: Long):Either[Error, Boolean] = {
+    if (coId == 0) {
+      Left(Error("err0014.trny.compNotFound", coId.toString)) 
+    } else if (comps.isDefinedAt(coId)) {
+      val co = comps(coId)
+      if (comp2id.isDefinedAt(co.hash)) comp2id.remove(co.hash)
+      comps.remove(coId)        
+      Right(true)
+    } else {  
+      Left(Error("err0014.trny.compNotFound", coId.toString))
+    }
+  }
+
+  def setCompStatus(coId: Long, status: Int): Either[Error, Boolean] = {
+    if (comps.isDefinedAt(coId)) { 
+      comps(coId).status = status
+      Right(true) 
+    } else {
+      Left(Error("err0014.trny.compNotFound", coId.toString))
+    }  
+  }
+
 
   /** setCompDraw - returns new secId  
    *  CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) 
@@ -159,53 +220,8 @@ case class Tourney(
         }
       }
     }
-  }
-
-  /** setComp - sets new values of existing competitions
-   * 
-   */
-  def setComp(co: Competition): Either[Error, Competition] = {
-    if (co.id == 0)  {
-      Left(Error("err0154.trny.setComp")) 
-    } else if (!co.validateDate(startDate, endDate)) {
-      Left(Error("err0015.trny.compDate", co.startDate)) 
-    } else if (coName2id.isDefinedAt(co.hash)) {   
-      // hash value exists, if it belongs to different id
-      // don't allow it
-      val coId = coName2id(co.hash)
-      if (coId != co.id) {
-        // do not allow to change a competition to an existing
-        Left(Error("err0016.trny.compExistsAlready"))
-      } else {
-        // set new competition and return it
-        comps(co.id) = co
-        Right(comps(co.id))
-      }
-    } else {
-      // ok changes on name, type, .... which result in hash changes
-      // thats ok, caveat hash changes remove old hash and add new one!
-      coName2id -= comps(co.id).hash
-      coName2id(co.hash) = co.id
-      comps(co.id) = co
-      Right(comps(co.id))
-    }
-  }
-
-  /** delComp - delete competition with id
-   * 
-   */ 
-  def delComp(coId: Long):Either[Error, Boolean] = {
-    if (coId == 0) {
-      Left(Error("err0014.trny.compNotFound", coId.toString)) 
-    } else if (comps.isDefinedAt(coId)) {
-      val co = comps(coId)
-      if (coName2id.isDefinedAt(co.hash)) coName2id.remove(co.hash)
-      comps.remove(coId)        
-      Right(true)
-    } else {  
-      Left(Error("err0014.trny.compNotFound", coId.toString))
-    }
-  }
+  }  
+  
 
   /** getCompName - get name of competition
    * 
@@ -241,26 +257,27 @@ case class Tourney(
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
    */
-  def setPlayer(pl: Player): Either[Error, Player] =
+  def setPlayer(pl: Player, hKey: String): Either[Error, Player] =
     if (pl.id == 0) {
       Left(Error("err0157.svc.setPlayer", pl.getName()))
     } else {
-      val plId = plNCY2id.getOrElse((pl.lastname, pl.firstname, pl.clubName, pl.birthyear), 0L)
-      if (plId == 0) {
-        // add clubname (idempotent)
-        val club = addClub(pl.clubName)
-        // remove old hash entry, change require new one
-        val oPlayer = players(pl.id)
-        plNCY2id -= ((oPlayer.lastname, oPlayer.firstname, oPlayer.clubName, oPlayer.birthyear))
-        plNCY2id += ((pl.lastname, pl.firstname, pl.clubName, pl.birthyear) -> pl.id)
-        players(pl.id) = pl.copy(clubId = club.id)
-        Right(players(pl.id))
-      } else if (plId == pl.id) {
+      val plId = player2id(hKey)
+      if (plId == pl.id) {
         // change with same hash entry
         players(pl.id) = pl
         Right(players(pl.id))
+      } else if (plId == 0) {
+        // change with new hash entra
+        // add clubname (idempotent)
+        val club = addClub(pl.clubName)
+
+        // remove old hash entry, change require new one
+        player2id = player2id.filter(x => x._2 != pl.id) 
+        player2id += (hKey -> pl.id)
+        players(pl.id) = pl.copy(clubId = club.id, hashKey = hKey)
+        Right(players(pl.id))
       } else {
-        // change with hash collision - no allowed
+        // change with hash collision - not allowed
         Left(Error("err0158.svc.setPlayer", pl.getName()))
       }
     }
@@ -268,20 +285,20 @@ case class Tourney(
   
   /** addPlayer - adds new player if it does not exist already
    */
-  def addPlayer(pl: Player): Either[Error, Player] =
+  def addPlayer(pl: Player, hKey: String): Either[Error, Player] =
     if (pl.id != 0) {
       Left(Error("err0155.svc.addPlayer", pl.id.toString))
     } else {
       // check whether an other player exists with same name ....
-      if (plNCY2id.getOrElse((pl.lastname, pl.firstname, pl.clubName, pl.birthyear), 0L) > 0) {
+      if (player2id(hKey) > 0) {
         Left(Error("err0156.svc.addPlayer", pl.getName()))
       } else {
         val club = addClub(pl.clubName)
         // critical path (lock?)
         val newId = playerIdMax + 1
         playerIdMax = newId
-        plNCY2id((pl.lastname, pl.firstname, pl.clubName, pl.birthyear)) = newId
-        players(newId) = pl.copy(id = newId, clubId = club.id)
+        player2id(hKey) = newId
+        players(newId) = pl.copy(id = newId, clubId = club.id, hashKey = hKey )
         Right(players(newId))
       }
     }
@@ -378,11 +395,11 @@ object Tourney {
           if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
         }
         for(pl <- trny.players.values) {   
-          trny.plNCY2id((pl.lastname, pl.firstname,pl.clubName,pl.birthyear)) = pl.id.toInt
-          if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id.toInt
+          trny.player2id(pl.hashKey) = pl.id
+          if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
         }
         for(comp <- trny.comps.values) {   
-          trny.coName2id(comp.hash) = comp.id
+          trny.comp2id(comp.hashKey) = comp.id
           if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
         }        
         Right(trny)

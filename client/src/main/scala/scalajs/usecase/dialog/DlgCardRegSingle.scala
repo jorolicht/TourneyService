@@ -37,7 +37,7 @@ import clientviews.dialog.html
 
 @JSExportTopLevel("DlgCardRegSingle")
 object DlgCardRegSingle extends BasicHtml 
-  with TourneySvc with ViewServices
+  with TourneySvc with AuthenticateSvc with ViewServices
 {
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardRegSingle", "dlg.card.reg.single", "DlgCardRegSingle", "dlgcardregsingle", scalajs.AppEnv.getMessage _ )
@@ -100,10 +100,10 @@ object DlgCardRegSingle extends BasicHtml
     val player = if (lfid._3 > 0) {
       trny.players(lfid._3)
     } else {
-      val pl = Player(0L, 0, clubId._2, clubId._1, lfid._2, lfid._1, bYear, email, gender, "") 
+      val pl = Player(0L, "", clubId._2, clubId._1, lfid._2, lfid._1, bYear, email, gender, "") 
       pl.setTTR(getInput("TTR", "")) 
         // check if player already exists ...
-      if (trny.plNCY2id.isDefinedAt((pl.lastname, pl.firstname, pl.clubName, pl.birthyear))) eList += Error("err0162.Player.already.exists")
+      if (trny.player2id.isDefinedAt(genHashPlayer(pl))) eList += Error("err0162.Player.already.exists")
       pl 
     }
 

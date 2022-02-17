@@ -60,17 +60,17 @@ object UnitPlayer extends UseCase("UnitPlayer")
           case Right(result) => {
             info("loadRemoteTourney", s"[${toId}] ${App.tourney.toString} ")
 
-            addPlayer(Player(0L,0,0L,"TTC Lerchenfeld","Joe","Lichtenegger",1961,"joe.lichtenegger@icloud.com",2,"_")).map {
+            addPlayer(Player(0L,"",0L,"TTC Lerchenfeld","Joe","Lichtenegger",1961,"joe.lichtenegger@icloud.com",2,"_")).map {
               case Left(err)     => error("addPlayer", s"${err.encode}")
               case Right(player) => info("addPlayer", s"${player}")
             }
 
-            addPlayer(Player(0L,0,0L,"TTC Freising","Max","Lichtenegger",1964,"max.lichtenegger@icloud.com",2,"_")).map {
+            addPlayer(Player(0L,"",0L,"TTC Freising","Max","Lichtenegger",1964,"max.lichtenegger@icloud.com",2,"_")).map {
               case Left(err)     => error("addPlayer", s"${err.encode}")
               case Right(player) => info("addPlayer", s"${player}")
             }
 
-            addPlayer(Player(0L,0,0L,"TTC Allershausen","Max","Huber",1964,"max.huber@icloud.com",2,"_")).map {
+            addPlayer(Player(0L,"",0L,"TTC Allershausen","Max","Huber",1964,"max.huber@icloud.com",2,"_")).map {
               case Left(err)     => error("addPlayer", s"${err.encode}")
               case Right(player) => info("addPlayer", s"${player}")
             }

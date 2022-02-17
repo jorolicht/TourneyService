@@ -23,10 +23,9 @@ trait TourneyService {
   def addPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
   def setPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
   
-  def setPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[(Long,Int)]]]
+  def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]]
   def delPlayers(tse: TournSVCEnv): Future[Either[Error, Int]]
 
-  def resetPlayers()(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]]
   // setPlayerEMail 
   def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]]
 
@@ -77,7 +76,10 @@ trait TourneyService {
   // Competition Interface
   //
   def setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]
-  def setComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[(Long,Int)]]]
+  //def setComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[(Long,Int)]]]
+  def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[Competition]]]
+  def addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]
+
   def setCompStatus(coId: Long, status: Int)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
   def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
   def setCompRatingUpperLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
@@ -104,8 +106,8 @@ trait TourneyService {
 
   // Tourney Inteface
   def addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
-  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
+  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
 
 
   def addTournBase(trnyBase: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Tourney]]

@@ -18,7 +18,7 @@ import shared.utils.Routines._
  */
 case class Player(                                             
   var id:          Long,                    // primary key
-  var rid:         Int,                     // reference to external programs
+  var hashKey:     String,                  // hashKey to unique identify player cross environments
   var clubId:      Long,                    // plubId primary key of plub = Players Club
   var clubName:    String,                  // club-name CDATA #IMPLIED  
   val firstname:   String,             
@@ -95,20 +95,20 @@ case class Player(
     case _ => clubName 
   }
 
-  def getBirthyear() = if (birthyear == 0) None else Some(birthyear)
-  def stringify = s"${id}^${rid}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
-  def encode()  = s"${id}^${rid}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
+  def getBirthyear()    = if (birthyear == 0) None else Some(birthyear)
+  def getBYearStr() = if (birthyear == 0) "" else birthyear.toString
+  def encode()  = s"${id}^${hashKey}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
 
 }
 
 object Player {
   implicit def rw: RW[Player] = macroRW
   def tupled = (this.apply _).tupled
-  def init            = new Player(0L, 0, 0L, "","","", 0, "", 0, "_")
-  def get()           = new Player(0L, 0, 0L, "","","", 0, "", 0, "_")
-  def get(plId: Long) = new Player(plId, 0, 0L, "", "", "", 0, "", 0, "_")
+  def init            = new Player(0L, "", 0L, "","","", 0, "", 0, "_")
+  def get()           = new Player(0L, "", 0L, "","","", 0, "", 0, "_")
+  def get(plId: Long) = new Player(plId, "", 0L, "", "", "", 0, "", 0, "_")
   def get(lastname: String, firstname: String, clubName: String, birthyear: Int, email: String, sex: Int) = {
-    new Player(0L, 0, 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
+    new Player(0L, "", 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
   }
   def format(name: String, fmt: Int = 0) = {
     val na = name.split(",")
@@ -117,19 +117,6 @@ object Player {
       case _ => name
     }
   }
-
-  // def parseName(name: String): Either[Error, (String, String, Long)] = {
-  //   val mResult = "[^, ]+,[ ]*[^, ]+[ ]*\\[\\d\\d\\d\\]".r.findFirstIn(name).getOrElse(
-  //     "[^, ]+,[ ]*[^, ]+[ ]*".r.findFirstIn(name).getOrElse("")
-  //   )
-  //   try {
-  //     if (mResult != name.trim) Left(Error("err0159.Player.parseName"))
-  //     else {
-  //       val res = mResult.split("[,\\[\\]]") 
-  //       if (res.size == 3) Right((res(0).trim, res(1).trim, res(2).toLong)) else Right((res(0).trim, res(1).trim, 0L))
-  //     }    
-  //   } catch { case _: Throwable => Left(Error("err0159.Player.parseName")) }
-  // }  
   
 
   def parseName(name: String): Either[Error, (String, String, Long)] = {
@@ -144,36 +131,6 @@ object Player {
     }
   }  
 
-  // def parseName2(name: String): Either[Error, (String, String, Long)] = {
-  //   try {
-  //     "[^, ]+,[ ]*[^, ]+[ ]*\\[\\d\\d\\d\\]".r.findFirstIn(name) match {
-  //     //"\\pL+, \\pL+[ ]*\\[\\d\\d\\d\\]".r.findFirstIn(name) match {
-  //       case Some(mResult) => {
-  //         if (mResult!=name) {
-  //           Left(Error("err0159.Player.parseName"))
-  //         } else {
-  //           val result = mResult.split("[,\\[\\]]") 
-  //           Right((result(0).trim, result(1).trim, result(2).toLong))
-  //         }
-  //       }
-  //       case None => {
-  //         "[^, ]+,[ ]*[^, ]+[ ]*".r.findFirstIn(name) match {
-  //         //"\\pL+,[ ]*\\pL+".r.findFirstIn(name) match {
-  //           case Some(mResult) => {
-  //             if (mResult!=name) {
-  //               Left(Error("err0159.Player.parseName"))
-  //             } else {
-  //               val result = mResult.split(",")
-  //               Right((result(0).trim, result(1).trim, 0L))
-  //             }
-  //           }
-  //           case None     => Left(Error("err0159.Player.parseName"))
-  //         }
-  //       } 
-  //     }
-  //   } catch { case _: Throwable => Left(Error("err0159.Player.parseName")) }
-  // }  
-
 
   /** parseEmail - returns email or empty string or an error
    *  
@@ -184,34 +141,15 @@ object Player {
     else Left(Error(""))
   }
 
-
   def decode(s: String) : Either[Error, Player] = {
     val pa = s.split("\\^")
-    try Right(Player(pa(0).toLong,pa(1).toInt,pa(2).toLong, pa(3), pa(4), pa(5), pa(6).toInt, pa(7), pa(8).toInt, pa(9)))
+    try Right(Player(pa(0).toLong,pa(1),pa(2).toLong, pa(3), pa(4), pa(5), pa(6).toInt, pa(7), pa(8).toInt, pa(9)))
     catch { case _: Throwable => Left(Error("err0132.decode.Player", s, "", "Player.decode")) }
   }
-
-  def encSeq(plSeq: Seq[Player]): String = write[Players](Players(plSeq.map(_.stringify)))
  
   def decSeq(plStr: String): Either[Error, Seq[Player]] = {
-    try {
-      val players = read[Players](plStr)
-      (players.list.map{ pl => Player.decode(pl) }).partitionMap(identity) match {
-        case (Nil, rights)      => Right(rights.toSeq)
-        case (firstErr :: _, _) => Left(firstErr.add("Player.decSeq"))
-      }
-    } catch { case _: Throwable => Left(Error("err0038.decode.Players", plStr.take(20), "", "Player.decSeq")) }
+    try Right(read[Seq[Player]](plStr))
+    catch { case _: Throwable => Left(Error("err0038.decode.Players", plStr.take(20), "", "Player.decSeq")) }
   } 
 
-  def decSeq(players: Seq[String]): Either[Error, Seq[Player]] = {
-    try {
-      (players.map{ pl => Player.decode(pl) }).partitionMap(identity) match {
-        case (Nil, rights)      => Right(rights.toSeq)
-        case (firstErr :: _, _) => Left(firstErr.add("Player.decSeq"))
-      }
-    } catch { case _: Throwable => Left(Error("err0044.decode.Players", players.toString().take(20), "", "Player.decSeq")) }
-  }
 }
-
-case class Players (list: Seq[String])
-object Players { implicit def rw: RW[Players] = macroRW }

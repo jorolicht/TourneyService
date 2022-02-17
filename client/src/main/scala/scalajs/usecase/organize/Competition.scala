@@ -147,10 +147,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         AppEnv.setCoId(0L)
         DlgCardComp.show(Competition.init, App.tourney, AppEnv.getLang, DlgOption.New).map {
           case Left(err)    => debug("AddCompetition", s"dialog DlgCardComp.show failed/canceled: ${err}")
-          case Right(comp)  => setComp(comp).map { 
+          case Right(comp)  => addComp(comp).map { 
             case Left(err)  => DlgShowError.show(List(err))
             case Right(co)  => {
-              debug("setComp", s"RESULT ${co.id}")
+              debug("addComp", s"RESULT ${co.id}")
               App.tourney.comps(co.id) = co 
               App.saveLocalTourneyCfg(App.tourney)
               AppEnv.setCoId(co.id)

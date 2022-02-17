@@ -178,7 +178,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       case Array(s1,s2) => (s1.trim,s2.trim)
       case _            => ("","") 
     }
-    val pl = Player(0L,0,0L,getInput("PlayerClub",""),firstname,lastname,
+    val pl = Player(0L,"",0L,getInput("PlayerClub",""),firstname,lastname,
                     getInput("PlayerYear", 0), getInput("PlayerEmail",""),0,"_")
     pl.setTTR(getInput("PlayerTTR",""))
 
@@ -191,7 +191,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       case 1 => doRegSPlayer(coId, pl)
       case 2 => {
         val (lastname2, firstname2) = getInput("PlayerName2","").split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
-        val pl2 = Player(0L,0,0L,getInput("PlayerClub2",""),firstname2,lastname2,getInput("PlayerYear2",0),"",0,"_")
+        val pl2 = Player(0L,"",0L,getInput("PlayerClub2",""),firstname2,lastname2,getInput("PlayerYear2",0),"",0,"_")
         pl2.setTTR(getInput("PlayerTTR2",""))
         doRegDPlayer(coId, pl, pl2)
       }

@@ -59,7 +59,7 @@ class TourneyServiceImpl @Inject()()(  implicit
   def addPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => trny.addPlayer(pl)
+      case Right(trny) => trny.addPlayer(pl, Crypto.genHashPlayer(pl))
     }
 
 
@@ -69,28 +69,25 @@ class TourneyServiceImpl @Inject()()(  implicit
   def setPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => trny.setPlayer(pl)
+      case Right(trny) => trny.setPlayer(pl, Crypto.genHashPlayer(pl))
     }
 
 
-  /** setPlayers - adds all players to the tourney (and if necessary all clubs)
+  /** updPlayers - adds all players to the tourney (and if necessary all clubs)
    */ 
-  def setPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[(Long,Int)]]] =
+  def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
-        pls.foreach(player => trny.addClub(player.clubName))
-        pls.foreach(player => if (player.id == 0) trny.addPlayer(player) else trny.setPlayer(player))
-
-        val plIdSeq = for { pl <- pls } yield {
-          val plId = trny.plNCY2id.getOrElse((pl.lastname, pl.firstname, pl.clubName, pl.birthyear), 0L)
-          if (plId > 0) { (plId, trny.players(plId).rid) } else { (0L,0) }
-        }
-        Right(plIdSeq)
+        val (lefts, rights) = (for { player <- pls } yield {
+          if (player.id == 0) { trny.addPlayer(player, Crypto.genHashPlayer(player)) }
+          else { trny.setPlayer(player, Crypto.genHashPlayer(player)) }  
+        }).partitionMap(identity)
+        Right(rights)
       }
-    }  
+    }
 
-
+ 
   def delPlayers(tse: TournSVCEnv): Future[Either[Error, Int]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
@@ -98,26 +95,12 @@ class TourneyServiceImpl @Inject()()(  implicit
         val plCnt = trny.players.size
         trny.playerIdMax = playerIdStart
         trny.players     = HashMap()
-        trny.plNCY2id = HashMap()
+        trny.plLIC2id    = HashMap()
+        trny.player2id   = HashMap()
+        trny.pl2co       = HashMap()
         Right(plCnt)
       }              
     }
-
-  /** resetPlayers
-   *  deletes all single/double players and player to competition entries 
-   */
-  def resetPlayers()(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] = 
-    TIO.getTrny(tse, true).map {
-      case Left(err)   => Left(err)
-      case Right(trny) => {
-        trny.playerIdMax = playerIdStart
-        trny.players  = HashMap()
-        trny.plNCY2id = HashMap()
-        trny.plLIC2id = HashMap()
-        trny.pl2co    = HashMap()
-        Right(true)
-      }
-    }  
 
 
   def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]] =
@@ -466,36 +449,32 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   def setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Competition]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => if (co.id == 0) trny.addComp(co) else trny.setComp(co)
+      case Right(trny)  => trny.setComp(co)
     }
 
-  def setComps(comps: Seq[Competition])(implicit msgs: Messages, tse: TournSVCEnv): Future[Either[Error, Seq[(Long,Int)]]] =
+  def addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Competition]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => trny.addComp(co, Crypto.crc32Comp(co))
+    }
+
+
+
+  def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse: TournSVCEnv): Future[Either[Error, Seq[Competition]]] =
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        val mapIdRid = for {
-          comp <- comps 
-        } yield {
-          trny.setComp(comp) match {
-            case Left(err)  => (0L,0)
-            case Right(co)  => (co.id, co.rid)
-          }
-        } 
-        Right(mapIdRid)
+        val (eList, cList) = (comps.map { co => 
+          if (co.id == 0) trny.addComp(co, Crypto.crc32Comp(co)) else trny.setComp(co)
+        }).partitionMap(identity)  
+        Right(cList)
       }
     }
 
   def setCompStatus(coId: Long, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => {
-        if (trny.comps.isDefinedAt(coId)) { 
-          trny.comps(coId).status = status
-          Right(true) 
-        } else {
-          Right(false)
-        }  
-      }  
+      case Right(trny)  => trny.setCompStatus(coId, status)
     }  
 
   def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
@@ -529,15 +508,17 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         val cnt = trny.comps.size
         trny.playerIdMax = playerIdStart
         trny.players     = HashMap()
-        trny.plNCY2id = HashMap()   
-        trny.comps = HashMap()
-        trny.coName2id = HashMap()
-        trny.compIdMax = coIdStart
-        trny.clubIdMax = clubIdStart
-        trny.clubs     = HashMap()
-        trny.clName2id = HashMap()
-        trny.pl2co = HashMap()
-        trny.playfields = HashMap()
+        trny.player2id   = HashMap() 
+
+        trny.compIdMax   = coIdStart
+        trny.comps       = HashMap()
+        trny.comp2id     = HashMap()
+        
+        trny.clubIdMax   = clubIdStart
+        trny.clubs       = HashMap()
+        trny.clName2id   = HashMap()
+        trny.pl2co       = HashMap()
+        trny.playfields  = HashMap()
         Right(cnt)
       }  
     }
@@ -727,8 +708,8 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   /** delTourney deletes tourney from database 
    *  
    */
-  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = TIO.delete(toId, tse.orgDir)
-  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = TIO.delete(0L, tse.orgDir, sDate)
+  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Long]] = TIO.delete(toId, tse.orgDir)
+  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Long]] = TIO.delete(0L, tse.orgDir, sDate)
 
   /** addTournBase adds a tourney from a tournBase, returns tourney, error if a tourney with same 
     * startdate and organization already exists 

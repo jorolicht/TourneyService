@@ -57,15 +57,12 @@ class RemoteCtrl @Inject()
 {
 
   implicit val txFormat   = Json.format[shared.model.TournBase]
-  implicit val cosFormat  = Json.format[shared.model.Competitions]
   implicit val p2cFormat  = Json.format[shared.model.Participant2Comps]  
-  implicit val plsFormat  = Json.format[shared.model.Players]
   implicit val clsFormat  = Json.format[shared.model.Clubs]
   implicit val pfFormat   = Json.format[shared.model.Playfields]
   implicit val grtxFormat = Json.format[shared.model.tabletennis.GroupTx]
   implicit val kotxFormat = Json.format[shared.model.tabletennis.KoRoundTx]
   implicit val maFormat   = Json.format[shared.model.tabletennis.Matches]
-  // depending on previous implicits, so put CompPhaseTx on last position
   implicit val cptxFormat = Json.format[shared.model.CompPhaseTx]
 
 
@@ -158,33 +155,61 @@ class RemoteCtrl @Inject()
           logger.error(s"delTourney ${err.encode}")
           BadRequest(err.encode)
         }  
-        case Right(id)  => Ok(id.toString)
+        case Right(id)  => Ok(Return(id).encode)
       }
     }
   }  
 
-  /** setComps - set competitions, returns mapping list of globalCompetitionId -> localCompetitionId
+  /** updComps - update competitions, returns list of added/changed competitions (with updated id/hashKey)
    *
-   *  Service: def setComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Seq[(Long,Int)]]
+   *  Service: def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[Competition]]]
    */  
-  def setComps(toId: Long, trigger: Boolean=false) = Action(parse.json[Competitions]).async { implicit request =>
-
-    val msgs:  Messages  = messagesApi.preferred(request)
-    val comps  = request.body
+  def updComps(toId: Long, trigger: Boolean=false) = Action.async { implicit request =>
+    import upickle.default._
+    import upickle.default.{ReadWriter => RW, macroRW}
+    val coSeqText: String    = request.body.asText.getOrElse("")
+    val msgs:      Messages  = messagesApi.preferred(request)
     val ctx    =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, true)
 
-    logger.info(s"setComps toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
-    
-    comps.list.map(plStr => Competition.decode(plStr)).partitionMap(identity) match {
-      case (firstError :: _, _) => Future( BadRequest(firstError.encode) )
-      case (Nil, cos)           => tsv.setComps(cos).map {
-        case Left(err)             => BadRequest(err.encode)
-        case Right(mapList)        => Ok(mapList.map(x => s"${x._1}:${x._2}").toSet.mkString(";"))
+    logger.info(s"updComps -> toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
+
+    try {
+      val coSeq = read[Seq[Competition]](coSeqText)
+      tsv.updComps(coSeq).map {
+        case Left(err)    => { logger.error(s"updComps -> ${err}"); BadRequest(err.encode) }
+        case Right(comps) => { Ok(write[Seq[Competition]](comps)) }    
       }
-    }  
+    } catch { case _: Throwable => Future(BadRequest(Error("err0183.ctrl.decode.updComps").encode)) }
+
+    
+    // val newCompSeq = (coSeq.map { co =>
+    //    val equal = (co.hashKey == Crypto.crc32Comp(co))
+    //    logger.info(s"setComps -> HashKey: ${co.hashKey} vs. HashKey(generated): ${Crypto.crc32Comp(co)} equal: ${equal}")
+    //    if (co.id == 0) {
+    //      tsv.addComp(co).map {
+    //        case Left(err)   => { logger.error(s"addComp -> ${err}"); Left(err)  }
+    //        case Right(comp) => { logger.info(s"addComp -> Competition: ${comp}"); Right(comp)} 
+    //      }
+    //    } else {
+    //      tsv.setComp(co).map {
+    //        case Left(err)   => { logger.error(s"setComp -> ${err}"); Left(err)  }
+    //        case Right(comp) => { logger.info(s"addComp -> Competition: ${comp}"); Right(comp)} 
+    //      }
+    //    }
+    // }).toList
+
+    // val compSeq: Future[List[Either[Error,Competition]]] = Future.sequence(newCompSeq)
+
+    // compSeq.map { list =>
+    //   val (eList,cList) = list.partitionMap(identity)
+    //   Ok(write[Seq[Competition]](cList))
+    // }
+
   }
+
+
 
   /** setCompStatus - set status of competition
    * 
@@ -221,29 +246,40 @@ class RemoteCtrl @Inject()
   }
 
 
-  /** setPlayers
+  /** updPlayers
    *
    * register players (generates new player or updates player) with external reference
    * returns mapping list of globalPlayerId -> localPlayerId
    * 
-   * Service: def setPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[(Long,Int)]]]
+   * Service: def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]]
    */
-  def setPlayers(toId: Long, trigger: Boolean=false) = Action(parse.json[Players]).async { implicit request =>
-    val msgs:  Messages  = messagesApi.preferred(request)
-    val players  = request.body
-    val ctx      = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+  def updPlayers(toId: Long, trigger: Boolean=false) = Action.async { implicit request =>
+    import upickle.default._
+    import upickle.default.{ReadWriter => RW, macroRW}    
+    val msgs:  Messages       = messagesApi.preferred(request)
+    val playerSeqText: String = request.body.asText.getOrElse("")
+    val ctx                   = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)    
 
-    logger.info(s"setPlayers toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
+    logger.info(s"updPlayers -> toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
 
-    players.list.map(plStr => Player.decode(plStr)).partitionMap(identity) match {
-      case (firstError :: _, _) => Future( BadRequest(firstError.encode) )
-      case (Nil, players)       => tsv.setPlayers(players).map {
-        case Left(err)             => BadRequest(err.encode)
-        case Right(mapList)        => Ok(mapList.map(x => s"${x._1}:${x._2}").toSet.mkString(";"))
+    try {
+      val plSeq = read[Seq[Player]](playerSeqText)
+      tsv.updPlayers(plSeq).map {
+        case Left(err)      => { logger.error(s"updPlayers -> ${err}"); BadRequest(err.encode) }
+        case Right(players) => { Ok(write[Seq[Player]](players)) }    
       }
-    }  
+    } catch { case _: Throwable => Future(BadRequest(Error("err0184.ctrl.decode.updPlayers").encode)) }
+
+
+    // players.list.map(plStr => Player.decode(plStr)).partitionMap(identity) match {
+    //   case (firstError :: _, _) => Future( BadRequest(firstError.encode) )
+    //   case (Nil, players)       => tsv.setPlayers(players).map {
+    //     case Left(err)             => BadRequest(err.encode)
+    //     case Right(mapList)        => Ok(mapList.map(x => s"${x._1}:${x._2}").toSet.mkString(";"))
+    //   }
+    // }  
   }
 
   /** delPlayers

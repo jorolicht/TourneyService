@@ -4,6 +4,7 @@ import java.util
 import java.util.Date
 import java.util.Base64
 import java.util.UUID
+import java.util.zip.CRC32
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
@@ -20,7 +21,7 @@ import play.api.libs.json.Json
 
 import models.User
 import shared.utils._
-import shared.model.{ License }
+import shared.model.{ Club, Competition, Player, License }
 
 class UUIS(value : String) {
 
@@ -104,6 +105,16 @@ object Crypto {
     digest.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft("") { _ + _ }
   }
 
+  def toSHA1(convertme: Array[Byte]): String = {
+    import java.security.MessageDigest
+
+    var md: MessageDigest = null
+    try md = MessageDigest.getInstance("SHA-1")
+    catch { case _: Throwable => ""} 
+    new String(md.digest(convertme))
+  }
+
+
   /**
     * Compute the SHA-1 digest for a `String`.
     *
@@ -169,7 +180,33 @@ object Crypto {
     }
   } 
 
-  
+  /** crc32Hex - generates crc32 based hash value to unique identify 
+   *             player, clubs and competitions
+   *  return - hash value with prefix
+   */  
+  def crc32Hex(s: String, prefix: String =""): String = {
+    val crc = new CRC32()
+    val sb = new StringBuilder
+
+    crc.update(s.getBytes())
+    val bArray = BigInt(crc.getValue).toByteArray
+    
+    // take the last 4 Bytes
+    for (b <- bArray.drop(bArray.length-4)) {
+      sb.append(String.format("%02x", Byte.box(b)).toUpperCase)
+    }
+    prefix + sb.toString
+  }
+
+  def crc32Club(club: Club): String = crc32Hex(club.name,club.name.substring(0,1))
+  def genHashPlayer(player: Player): String = {
+    crc32Hex(s"${player.lastname}${player.firstname}${player.clubName}${player.birthyear}",
+             player.lastname.substring(0,0)+ player.firstname.substring(0,0))
+  }  
+  def crc32Comp(comp: Competition): String = {
+    crc32Hex(comp.name, comp.name.substring(0,1) + comp.typ.toString)
+  }  
+
   /** get License Code from basic Authentication
    *
    * return - 0 if authentication is invalid

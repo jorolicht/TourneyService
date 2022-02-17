@@ -23,7 +23,19 @@ import shared.model._
 import scalajs.usecase.Helper
 import scalajs._
 
+
+@js.native
+@js.annotation.JSGlobal
+object TrnyJS extends js.Object {
+  def crc32(message: String): String = js.native
+  def crc32hex(message: String): String = js.native
+}
+
 trait AuthenticateSvc extends WrapperSvc {
+
+  def genHashPlayer(pl: Player): String = {
+    pl.lastname.substring(0,0) + pl.firstname.substring(0,0) + TrnyJS.crc32hex(s"${pl.lastname}${pl.firstname}${pl.getBYearStr}${pl.clubName}")
+  }
 
   /** authBasicContext via email or license code
     * 

@@ -114,9 +114,10 @@ class GetActionCtrl @Inject()
             
       case "getComps"     => tsv.getComps(toId).map { 
         case Left(err)    => logger.error(s"getComps error: ${err.toString}"); BadRequest(err.add("getComps").encode)
-        case Right(comps) => Ok(Competition.encSeq(comps)) 
+        case Right(comps) => Ok(write[Seq[Competition]](comps))
       }
 
+      
 
       /** getComp
        * 
@@ -150,7 +151,7 @@ class GetActionCtrl @Inject()
        */
       case "getTournPlayers"   => tsv.getTournPlayers(toId).map {
         case Left(err)      => logger.error(s"getTournPlayers error: ${err.toString}"); BadRequest(err.add("getTournPlayers").encode) 
-        case Right(players) => Ok(Player.encSeq(players))
+        case Right(players) => Ok(write[Seq[Player]](players))
       }
 
       // 

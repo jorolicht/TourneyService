@@ -33,7 +33,7 @@ import shared.utils.Constants._
 
 case class Competition(      
   val id:           Long,        // auto increment primary key
-  val rid:          Int,         // primary key external program
+  val hashKey:      String,      // hashKey to unique identify competition (name and typ to be unique)
   val name:         String,      // if empty initialised with ageGroup, ratingRemark, compType                     
   var typ:          Int,         // 0=UNDEFINED 1=EINZEL, 2=DOPPEL, 3=MIXED, 4=TEAM 
   val startDate:    String,      // Format: yyyymmdd#hhmm
@@ -138,16 +138,15 @@ case class Competition(
   def equal(co: Competition): Boolean = hash == co.hash
   def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
 
-  def stringify = s"${id}^${rid}^${name}^${typ}^${startDate}^${status}^${options}^_"
-  def encode() = s"${id}^${rid}^${name}^${typ}^${startDate}^${status}^${options}^_"
+  def encode() = s"${id}^${hashKey}^${name}^${typ}^${startDate}^${status}^${options}^_"
 }                                                               
 
 object Competition {
   implicit def rw: RW[Competition] = macroRW
   def tupled = (this.apply _).tupled
-  def init             = new Competition(0L, 0, "",  CT_UNKN, "", CS_UNKN, "")
-  def get()            = new Competition(0L, 0, "",  CT_UNKN, "", CS_UNKN, "")
-  def get(name: String)= new Competition(0L, 0, name,  CT_UNKN, "", CS_UNKN, "")
+  def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
+  def get()            = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
+  def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
   def genName(name: String, aG: String, rR: String, cT: String): String = {
     if(name!="") { name } else { s"$aG $rR ${cT.toUpperCase}" }
   }
@@ -163,44 +162,16 @@ object Competition {
     }
   }
 
-  def obify(x: String) = objectify(x).getOrElse(Competition(0L, 0, "", 0, "", 0, "_"))
-  def objectify(s: String): Option[Competition] = {
-    val co = s.split("\\^")
-    try { 
-      Some(Competition(co(0).toLong, co(1).toInt, co(2),  co(3).toInt, co(4), co(5).toInt, co(6)))
-    } catch { case _: Throwable => None }
-  }
 
   def decode(s: String): Either[Error, Competition] = {
     val co = s.split("\\^")
-    try Right(Competition(co(0).toLong, co(1).toInt, co(2),  co(3).toInt, co(4), co(5).toInt, co(6)))
+    try Right(Competition(co(0).toLong, co(1), co(2),  co(3).toInt, co(4), co(5).toInt, co(6)))
     catch { case _: Throwable => Left(Error("err0020.decode.Competition", s, "", "Competition.decode"))} 
   }
 
-  def encSeq(comps: Seq[Competition]): String = {
-    write[Competitions](Competitions(comps.map(_.stringify)))
-  }
-
-  def decSeq(coStr: String ): Either[Error, Seq[Competition]] = {
-    try {
-      val comps = read[Competitions](coStr)
-      (comps.list.map{ co => Competition.decode(co) }).partitionMap(identity) match {
-        case (Nil, rights)      => Right(rights.toSeq)
-        case (firstErr :: _, _) => Left(firstErr.add("Competition.decSeq"))
-      }
-    } catch { case _: Throwable => Left(Error("err0143.decode.Competitions", coStr.take(20), "", "Competition.deqSeq")) }
-  } 
-
-  def decSeq(comps: Seq[String] ): Either[Error, Seq[Competition]] = {
-    try {
-      (comps.map{ co => Competition.decode(co) }).partitionMap(identity) match {
-        case (Nil, rights)      => Right(rights.toSeq)
-        case (firstErr :: _, _) => Left(firstErr.add("Competition.decSeq"))
-      }
-    } catch { case _: Throwable => Left(Error("err0061.decode.Competitions", comps.toString().take(20), "", "Competition.deqSeq")) }
+  def decSeq(comps: String): Either[Error, Seq[Competition]] = {
+    try Right( read[Seq[Competition]](comps))
+    catch { case _: Throwable => Left(Error("err0061.decode.Competitions", comps.take(20), "", "Competition.deqSeq")) }
   }
 
 }
-
-case class Competitions (list: Seq[String])
-object Competitions { implicit def rw: RW[Competitions] = macroRW }

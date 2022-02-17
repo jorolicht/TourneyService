@@ -1203,5 +1203,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0180.Tourney.edate                               = Fehler Turnierenddatum vor Turnierstartdatum
   err0181.Tourney.sdate                               = Fehler Turnierstartdatum ungültig
   err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
+  err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
+  err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
 
 #END Error Codes/Messages

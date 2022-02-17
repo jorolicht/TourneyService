@@ -170,9 +170,7 @@ object TIO {
    * @param  tonyDao
    * @return 
    */
-  def add(trny: Tourney)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] = {
-    
-  
+  def add(trny: Tourney)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] = { 
     tonyDao.insertOrUpdate(trny.getBase()).map { tony => 
       if (tony.id > 0) {
         if (tourney.isDefinedAt(tony.id)) tourney.remove(tony.id) 
@@ -192,30 +190,31 @@ object TIO {
    * @return 
    */
   def delete(toId: Long, orgDir: String, sDate: Int=0)(implicit ec: ExecutionContext, tonyDao: TourneyDAO, cfg: Configuration): 
-    Future[Either[Error, Boolean]] = {
+    Future[Either[Error, Long]] = {
     import scala.util.{Try, Success, Failure, Using}
     import scala.util.Using
     import scala.io.Source
 
     for {
-      tony  <- if (sDate!= 0) tonyDao.findByPathDate(orgDir, sDate) else tonyDao.findByPathId(orgDir, toId)
-      sDate <- tony match { case Some(to) => Future(to.startDate); case None => Future("xxxxxxxx") }
-      cnt   <- tony match { case Some(to) => tonyDao.deleteById(to.id); case None => Future(0) }
+      tony   <- if (sDate!= 0) tonyDao.findByPathDate(orgDir, sDate) else tonyDao.findByPathId(orgDir, toId)
+      sDate  <- tony match { case Some(to) => Future(to.startDate); case None => Future("xxxxxxxx") }
+      tonyId <- tony match { case Some(to) => Future(to.id); case None => Future(0L) }
+      cnt    <- tonyDao.deleteById(tonyId)
     } yield {
-      if (cnt==1) {
+      if (cnt==1 & tonyId !=0) {
         val trnyDir = cfg.get[String]("server.tourney.dir")
         val fSep   = System.getProperty("file.separator")
-        val fNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${toId}_Tourney.json"        
-        val xfNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${toId}_Tourney.json"
+        val fNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}${sDate}_${tonyId}_Tourney.json"        
+        val xfNCfg  = s"${trnyDir}${fSep}${orgDir}${fSep}x_${sDate}_${tonyId}_Tourney.json"
 
         (for {
           res1 <- moveFile(fNCfg, xfNCfg)
         } yield (res1)) match {
           case Left(err)  => Left(err.add("Cache.delete"))
-          case Right(res) => Right(true)
+          case Right(res) => Right( tony match { case Some(to) => to.id; case None => 0L} )
         }
       } else {
-        Right(false)
+        Right(0L)
       } 
     }
   }
@@ -285,12 +284,15 @@ object TIO {
         for((club,i) <- ctt.getClubs.zipWithIndex) {
           tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
           tourney(tony.id).clName2id(club.name) = (i+1)
+          // generate hash value
+          tourney(tony.id).club2id(Crypto.crc32Club(club)) = (i+1)
           tourney(tony.id).clubIdMax = i+1
         }
         for((person,i) <- ctt.getPersons.zipWithIndex) {
           val pl =  CttService.cttPers2Player(person)
           tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).clName2id(pl.clubName))
-          tourney(tony.id).plNCY2id((pl.lastname, pl.firstname,pl.clubName,pl.birthyear)) = i+1
+          // generate hash value
+          tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
           tourney(tony.id).plLIC2id(pl.getLicenceNr) = i+1
           tourney(tony.id).playerIdMax = i+1
         }
@@ -298,7 +300,9 @@ object TIO {
         for((co,i) <- ctt.competitions.zipWithIndex) { 
           val comp = CttService.cttComp2Comp(co)
           tourney(tony.id).comps(i+1) = comp.copy(id=i+1)
-          tourney(tony.id).coName2id(comp.hash) = i+1
+          //tourney(tony.id).coName2id(comp.hash) = i+1
+          // generate hash value
+          tourney(tony.id).comp2id(Crypto.crc32Comp(comp)) = i+1          
           tourney(tony.id).compIdMax = i+1
 
           // ctt players map to pl2co or do2co entries. 

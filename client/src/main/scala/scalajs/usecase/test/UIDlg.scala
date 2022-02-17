@@ -108,13 +108,13 @@ object UIDlg extends UseCase("UIDlg")
   // testDlgCardComp
   def testDlgCardComp(testCase: String, testOption: String) =
     testOption.toLowerCase() match {
-      case "view" => DlgCardComp.show(Competition(11l, 12, "Competition Name SHOW", 1, "20210731#1215", 0, ""), App.tourney, AppEnv.getLang, DlgOption.View )               
+      case "view" => DlgCardComp.show(Competition(11l, "", "Competition Name SHOW", 1, "20210731#1215", 0, ""), App.tourney, AppEnv.getLang, DlgOption.View )               
          .map     { retValue  => println(s"testCase: ${testCase} return: ${retValue}") }
          .recover { case e: Exception =>  println(s"testCase: ${testCase} error: ${e.getMessage}") }  
-      case "edit"  => DlgCardComp.show(Competition(11l, 12, "Competition Name EDIT", 1, "20210731#1215", 0, ""), App.tourney, AppEnv.getLang, DlgOption.Edit )               
+      case "edit"  => DlgCardComp.show(Competition(11l, "", "Competition Name EDIT", 1, "20210731#1215", 0, ""), App.tourney, AppEnv.getLang, DlgOption.Edit )               
          .map     { retValue  => println(s"testCase: ${testCase} return: ${retValue}") }
          .recover { case e: Exception =>  println(s"testCase: ${testCase} error: ${e.getMessage}") }  
-      case "new"  => DlgCardComp.show(Competition(0L, 0, "", 0, "", -99, ""), App.tourney, AppEnv.getLang, DlgOption.New )               
+      case "new"  => DlgCardComp.show(Competition(0L, "", "", 0, "", -99, ""), App.tourney, AppEnv.getLang, DlgOption.New )               
          .map     { retValue  => println(s"testCase: ${testCase} return: ${retValue}") }
          .recover { case e: Exception =>  println(s"testCase: ${testCase} error: ${e.getMessage}") }  
     }

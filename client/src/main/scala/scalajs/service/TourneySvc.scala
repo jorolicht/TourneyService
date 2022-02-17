@@ -261,8 +261,15 @@ trait TourneySvc extends WrapperSvc
 
   // set whole competition
   def setComp(co: Competition): Future[Either[Error, Competition]] =
-    postAction("setComp", App.tourney.id, "", co.stringify, true).map { 
+    postAction("setComp", App.tourney.id, "", co.encode(), true).map { 
       case Left(err)   => Left(err.add("setComp"))
+      case Right(coTx) => Competition.decode(coTx)
+    }
+
+  // set whole competition
+  def addComp(co: Competition): Future[Either[Error, Competition]] =
+    postAction("addComp", App.tourney.id, "", co.encode(), true).map { 
+      case Left(err)   => Left(err.add("addComp"))
       case Right(coTx) => Competition.decode(coTx)
     }
 
@@ -297,14 +304,14 @@ trait TourneySvc extends WrapperSvc
   //
   /* regSingle register single player */  
   def regSingle(coId: Long, pl: Player, status: Int): Future[Either[Error, Long]] = 
-    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status}", s"player=${enc(pl.stringify)}", true).map {
+    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status}", s"player=${enc(pl.encode())}", true).map {
       case Left(err)     => Left(err.add("regSingle"))
       case Right(result) => Return.decode2Long(result, "reqSingle")
     }
 
   /* regDouble register double player */  
   def regDouble(coId: Long, pl1: Player, pl2: Player): Future[Either[Error, (Long, Long)]] = 
-    postAction("regDouble", App.tourney.id, s"coId=${coId}", s"player1=${enc(pl1.stringify)}&player2=${enc(pl2.stringify)}", true).map {
+    postAction("regDouble", App.tourney.id, s"coId=${coId}", s"player1=${enc(pl1.encode)}&player2=${enc(pl2.encode)}", true).map {
       case Left(err)     => Left(err.add("regDouble"))
       case Right(result) => {
         try Right( read[(Long, Long)](result) )  
