@@ -45,8 +45,6 @@ class UUIS(value : String) {
     | (buffer(offset + 15) & 0xff)
     )
     
-
-  
   override def toString = this.value
   def toUUID() = fromByteArray(Base64.getUrlDecoder.decode(this.value.getBytes(StandardCharsets.UTF_8)))
 }
@@ -198,12 +196,14 @@ object Crypto {
     prefix + sb.toString
   }
 
-  def crc32Club(club: Club): String = crc32Hex(club.name,club.name.substring(0,1))
+  def genHashClub(club: Club): String = crc32Hex(club.name,club.name.substring(0,1))
+
   def genHashPlayer(player: Player): String = {
-    crc32Hex(s"${player.lastname}${player.firstname}${player.clubName}${player.birthyear}",
-             player.lastname.substring(0,0)+ player.firstname.substring(0,0))
+    crc32Hex(s"${player.lastname}${player.firstname}${player.clubName}${player.getTTR}",
+             player.lastname.substring(0,1)+ player.firstname.substring(0,1))
   }  
-  def crc32Comp(comp: Competition): String = {
+
+  def genHashComp(comp: Competition): String = {
     crc32Hex(comp.name, comp.name.substring(0,1) + comp.typ.toString)
   }  
 

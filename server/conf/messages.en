@@ -1193,5 +1193,9 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0182.ctrl.delTourney                             = Controller error in routine delTourney: {0} 
   err0183.ctrl.decode.updComps                        = Error in routine updComps, could not decode sequence of competitions
   err0184.ctrl.decode.updPlayers                      = Error in routine updPlayers, could not decode sequence of players
+  err0185.ctrl.decode.setParticipant2Comps            = Error in routine setParticipant2Comps, could not decode sequence of players to competition mapping
+  err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
+  err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
+
 
 #END error codes / messages

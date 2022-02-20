@@ -54,10 +54,9 @@ trait TourneyService {
   //
   // Club Interface
   //
-  def addClub(name: String)(implicit tcp :TournSVCEnv): Future[Either[Error, Club]]
-  def addClubs(names: Seq[String])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def setClub(club: Club)(implicit tcp :TournSVCEnv): Future[Either[Error, Club]]
-  def setClubs(club: Seq[Club])(implicit tcp :TournSVCEnv): Future[Either[Error, Seq[(Long, Int)]]]
+
+  def setClub(club: Club, merge: Boolean=false)(implicit tcp :TournSVCEnv): Future[Either[Error, Club]]
+  def setClubs(club: Seq[Club])(implicit tcp :TournSVCEnv): Future[Either[Error, Seq[Club]]]
   def delClubs()(implicit tcp :TournSVCEnv): Future[Either[Error, Int]]
   
   //

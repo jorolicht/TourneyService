@@ -164,8 +164,8 @@ class GetActionCtrl @Inject()
        */
       case "getTournClubs"   => tsv.getTournClubs(toId).map {
         case Left(err)    => BadRequest(err.add("getTournClubs").encode) 
-        case Right(clubs) => Ok(Club.encSeq(clubs))
-      }      
+        case Right(clubs) => Ok(write[Seq[Club]](clubs))
+      }
 
       case "getTournBases"   => tourneyDao.findByOrgDir(getParam(pMap, "orgDir")).map { trnys => Ok(TournBase.encSeq(trnys)) }
 
@@ -192,7 +192,7 @@ class GetActionCtrl @Inject()
       // getParticipant2Comps - returns mapping list of participants to competition
       case "getParticipant2Comps"   => tsv.getParticipant2Comps(toId).map {
         case Left(err)   => BadRequest(err.add("getParticipant2Comps").encode)
-        case Right(p2cs) => Ok( Participant2Comp.encSeq(p2cs) )
+        case Right(p2cs) => Ok(write[Seq[Participant2Comp]](p2cs))
       }
 
       // getParticipantPlace delivers placement string or error

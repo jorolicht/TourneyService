@@ -1,5 +1,8 @@
 package shared.model
 
+import upickle.default._
+import upickle.default.{ReadWriter => RW, macroRW}
+
 import java.util.UUID
 import scala.util.Try
 import upickle.default._
@@ -13,16 +16,11 @@ import shared.utils.Routines._
  */
 case class Club (
   var id:      Long,        // generate (unique) id
-  var rid:     Int,         // id/key of external program
   name:        String,      // the club name
   var options: String = "_" 
 ) 
 {
-  def this(name: String) = this(0L, 0, name, "_")
-  def this(id: Long, name: String) = this(id, 0, name, "_")
-
-  def stringify = s"${id}^${rid}^${name}^${options}^_"
-  def encode() = s"${id}^${rid}^${name}^${options}^_"
+  def this(name: String) = this(0L, name, "_")
 
   def getOptStr(index: Int): String   = getMDStr(options, index) 
   def getOptInt(index: Int): Int      = getMDInt(options, index)
@@ -44,22 +42,13 @@ object Club {
   implicit def rw: RW[Club] = macroRW
   def tupled = (this.apply _).tupled
 
-  def obify(s: String): Club = {
-    val cl = s.split("\\^")
-    try { 
-      Club(cl(0).toLong, cl(1).toInt, cl(2), cl(3))
-    } catch { case _: Throwable => Club(0L, 0, "", "_" ) }
-  }
   
-  def decode(s: String): Either[Error, Club] = {
-    val cl = s.split("\\^")
-    try Right(Club(cl(0).toLong, cl(1).toInt, cl(2), cl(3)))
-    catch { case _: Throwable => Left(Error("err0050.decode.Club", s, "", "Club.decode"))} 
-  }
+  // def decode(s: String): Either[Error, Club] = {
+  //   val cl = s.split("\\^")
+  //   try Right(Club(cl(0).toLong, cl(1).toInt, cl(2), cl(3)))
+  //   catch { case _: Throwable => Left(Error("err0050.decode.Club", s, "", "Club.decode"))} 
+  // }
   
-  def encSeq(clubSeq: Seq[Club]): String = {
-    write[Clubs](Clubs(clubSeq.map(_.stringify)))
-  }
 
   def parseName(name: String): Either[Error, (String, Long)] = {
     val mResult = "[^,;:$=?+*\"]+[ ]+\\[\\d\\d\\d\\]".r.findFirstIn(name).getOrElse(
@@ -74,20 +63,8 @@ object Club {
   } 
 
   def decSeq(clStr: String): Either[Error, Seq[Club]] = {
-    try decSeq(read[Clubs](clStr).list)  
+    try Right(read[Seq[Club]](clStr))  
     catch { case _: Throwable => Left(Error("err0056.decode.Clubs", clStr.take(20), "", "Club.decSeq")) }
-  } 
-
-  def decSeq(clubs: Seq[String]): Either[Error, Seq[Club]] = {
-    try {
-      (clubs.map{ cl => Club.decode(cl) }).partitionMap(identity) match {
-        case (Nil, rights)      => Right(rights.toSeq)
-        case (firstErr :: _, _) => Left(firstErr.add("Club.decSeq"))
-      }
-    } catch { case _: Throwable => Left(Error("err0060.decode.Clubs", clubs.toString().take(20), "", "Club.decSeq")) }
-  } 
+  }
 
 }
-
-case class Clubs (list : Seq[String])
-object Clubs { implicit def rw: RW[Clubs] = macroRW }

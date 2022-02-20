@@ -103,39 +103,33 @@ import shared.utils.Routines._
       } catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
     }
 
-    def encSeq(p2cs: Seq[Participant2Comp]) = write[Participant2Comps](Participant2Comps(p2cs.map(_.stringify)))
+    // def encSeq(p2cs: Seq[Participant2Comp]) = write[Participant2Comps](Participant2Comps(p2cs.map(_.stringify)))
 
     def decSeq(p2cStr: String): Either[Error, Seq[Participant2Comp]] = {  
       if (p2cStr== "") {
         Right(Seq())
       } else {
-        try {
-          val p2cs = read[Participant2Comps](p2cStr)
-          val p2cSeq = (for { p2c <- p2cs.list } yield { Participant2Comp.decode(p2c) }).toSeq
-          p2cSeq.partitionMap(identity)  match {
-            case (Nil, rights)       => Right(rights)
-            case (firstLeft :: _, _) => Left(firstLeft.add("Participant.deqSeq"))
-          } 
-        } catch { case _: Throwable => Left(Error("err0055.decode.Participant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
+        try Right(read[Seq[Participant2Comp]](p2cStr))
+        catch { case _: Throwable => Left(Error("err0055.decode.Participant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
       }
     }
 
-    def decSeq(p2cs: Seq[String]): Either[Error, Seq[Participant2Comp]] = {  
-      if (p2cs.size < 1 ) {
-        Right(Seq())
-      } else {
-        try {
-          (p2cs.map{ p2c => Participant2Comp.decode(p2c) }).partitionMap(identity) match {
-            case (Nil, rights)       => Right(rights)
-            case (firstLeft :: _, _) => Left(firstLeft.add("Participant.deqSeq"))
-          } 
-        } catch { case _: Throwable => Left(Error("err0045.decode.Participant2Comps", p2cs.toString().take(20),"","Participant.deqSeq")) }
-      }
-    }
+    // def decSeq(p2cs: Seq[String]): Either[Error, Seq[Participant2Comp]] = {  
+    //   if (p2cs.size < 1 ) {
+    //     Right(Seq())
+    //   } else {
+    //     try {
+    //       (p2cs.map{ p2c => Participant2Comp.decode(p2c) }).partitionMap(identity) match {
+    //         case (Nil, rights)       => Right(rights)
+    //         case (firstLeft :: _, _) => Left(firstLeft.add("Participant.deqSeq"))
+    //       } 
+    //     } catch { case _: Throwable => Left(Error("err0045.decode.Participant2Comps", p2cs.toString().take(20),"","Participant.deqSeq")) }
+    //   }
+    // }
   }
   
-  case class Participant2Comps (list: Seq[String])
-  object Participant2Comps { implicit def rw: RW[Participant2Comps] = macroRW }  
+  // case class Participant2Comps (list: Seq[String])
+  // object Participant2Comps { implicit def rw: RW[Participant2Comps] = macroRW }  
 
 
 // relevant information of an active player/participant within an competition

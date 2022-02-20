@@ -52,15 +52,11 @@ case class Tourney(
 )
 {
 
-  // inverse hashmaps for fast access to players, clubs, ...
-  var clName2id:   HashMap[String, Long]                     = HashMap()  // club -> id
-  //var plNCY2id:    HashMap[(String,String,String,Int), Long] = HashMap()
-  
+  // inverse hashmaps for fast access to players, clubs, ...  
   var club2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // club hash -> id
   var player2id:   Map[String, Long]  = Map().withDefaultValue(0L)  // player hash -> id
   var comp2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // competition hash -> id
-  
-  var plLIC2id:    HashMap[String, Long]                     = HashMap()
+  var license2id:    Map[String, Long]  = Map().withDefaultValue(0L)
 
   /*
    * tourney management data
@@ -71,7 +67,6 @@ case class Tourney(
   var accessTime:  Long = 0L
   var backupTime:  Long = 0L
   var writeTime:   Long = 0L  
-
 
   def encode(): String = write[Tourney](this)
   def isDummy() = (id == 0L)
@@ -290,8 +285,10 @@ case class Tourney(
       Left(Error("err0155.svc.addPlayer", pl.id.toString))
     } else {
       // check whether an other player exists with same name ....
-      if (player2id(hKey) > 0) {
-        Left(Error("err0156.svc.addPlayer", pl.getName()))
+      if (player2id.isDefinedAt(hKey) && player2id(hKey) > 0) {
+        // same player exists => idempotent add 
+        Right(players(player2id(hKey)))
+        //Left(Error("err0156.svc.addPlayer", pl.getName()))
       } else {
         val club = addClub(pl.clubName)
         // critical path (lock?)
@@ -303,20 +300,70 @@ case class Tourney(
       }
     }
 
-  /** addClub - adds new Club or returns existing
+  /** setClub - adds new Club or merges to existing
    */
-  def addClub(name: String): Club = {
-    val clId = clName2id.getOrElse(name, 0L)
+  def setClub(cl: Club, merge: Boolean = false): Either[Error, Club] = {
+    val clId = club2id.getOrElse(name, 0L)
     if (clId == 0) {
+      // no existing club with that name  
+      if (cl.id == 0) {
+        // new club not existing so far   
+        val nclId = clubIdMax + 1
+        clubIdMax = nclId
+        club2id(name) = nclId
+        clubs(nclId) = cl.copy(id=nclId)
+        Right(clubs(nclId))
+      } else {
+        // name changed so far not cached 
+        // keep clId, remove invalid hash value
+        club2id = club2id.filter(x=>x._2 != cl.id) 
+        club2id(cl.name) = cl.id
+        clubs(cl.id) = cl
+        Right(clubs(cl.id))       
+      }
+    } else {
+      // club with this name already exists
+      if (cl.id == 0) {
+        // add existing club again (idempotent)
+        clubs(clId) = cl.copy(id=clId)
+        Right(clubs(clId))
+      } else {
+      // update existing club
+        if (cl.id == clId) {
+          clubs(clId) = cl
+          Right(clubs(clId))
+        } else {
+          // there is an existing club with a different id
+          // a name of an existing club was changed to existing
+          // name, either error or merge
+          // cl.id != clId AND cl.id != 0 AND clId != 0
+          if (merge) {
+            club2id = club2id.filter(x=>x._2 != cl.id) 
+            clubs(clId) = cl.copy(id=clId)
+            Right(clubs(clId))
+          } else {
+            // error
+            Left(Error("err0187.trny.setClub"))
+          }
+        }
+      }
+    }
+  }  
+
+  def addClub(name: String): Club = {
+    val clId = club2id.getOrElse(name, 0L)
+    if (clId == 0) {
+      // new club not existing so far   
       val nclId = clubIdMax + 1
       clubIdMax = nclId
-      clubs(nclId) = new Club(nclId, name)
-      clName2id(name) = nclId
+      club2id(name) = nclId
+      clubs(nclId) = Club(nclId, name, "") 
       clubs(nclId)
     } else {
       clubs(clId)
-    }
+    }  
   }  
+
 
   def setParticipantStatus(coId: Long, sno: String, status: Int): Either[Error, Int] = {
     if ( pl2co.isDefinedAt((sno, coId)) ) { 
@@ -381,7 +428,6 @@ case class Tourney(
 
 object Tourney {
   implicit def rw: RW[Tourney] = macroRW
-
   def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", 0)
   def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, tBase.typ)
 
@@ -389,9 +435,12 @@ object Tourney {
     if (trnyStr.length > 0 ){
       try {
         val trny = read[Tourney](trnyStr)
+        trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
+        trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
+        trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
         // create inverse hashtables and maxId entries
         for(club <- trny.clubs.values) {   
-          trny.clName2id(club.name) = club.id.toInt
+          trny.club2id(club.name) = club.id.toInt
           if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
         }
         for(pl <- trny.players.values) {   

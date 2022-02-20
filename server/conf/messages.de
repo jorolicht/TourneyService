@@ -1205,5 +1205,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
   err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
   err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
+  err0185.ctrl.decode.setParticipant2Comps            = Fehler in Routine setParticipant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
+  err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
+  err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
 
 #END Error Codes/Messages

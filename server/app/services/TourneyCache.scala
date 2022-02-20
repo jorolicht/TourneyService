@@ -283,17 +283,17 @@ object TIO {
         tourney(tony.id) = Tourney.init(tony)
         for((club,i) <- ctt.getClubs.zipWithIndex) {
           tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
-          tourney(tony.id).clName2id(club.name) = (i+1)
+          tourney(tony.id).club2id(club.name) = (i+1)
           // generate hash value
-          tourney(tony.id).club2id(Crypto.crc32Club(club)) = (i+1)
+          tourney(tony.id).club2id(Crypto.genHashClub(club)) = (i+1)
           tourney(tony.id).clubIdMax = i+1
         }
         for((person,i) <- ctt.getPersons.zipWithIndex) {
           val pl =  CttService.cttPers2Player(person)
-          tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).clName2id(pl.clubName))
+          tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName))
           // generate hash value
           tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
-          tourney(tony.id).plLIC2id(pl.getLicenceNr) = i+1
+          tourney(tony.id).license2id(pl.getLicenceNr) = i+1
           tourney(tony.id).playerIdMax = i+1
         }
 
@@ -302,20 +302,20 @@ object TIO {
           tourney(tony.id).comps(i+1) = comp.copy(id=i+1)
           //tourney(tony.id).coName2id(comp.hash) = i+1
           // generate hash value
-          tourney(tony.id).comp2id(Crypto.crc32Comp(comp)) = i+1          
+          tourney(tony.id).comp2id(Crypto.genHashComp(comp)) = i+1          
           tourney(tony.id).compIdMax = i+1
 
           // ctt players map to pl2co or do2co entries. 
           comp.typ match {
             case 1 => 
               for(pls <- co.players) if (pls.persons.length == 1) {
-                val plId = mapDefault(tourney(tony.id).plLIC2id,pls.persons(0).licenceNr, 0L)
+                val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
                 tourney(tony.id).pl2co((plId.toString, i+1)) =  Participant2Comp(plId.toString, i+1, pls.id, "",0)
               }
             case 2 => 
               for(pls <- co.players) if (pls.persons.length == 2) {
-                val plId1 = mapDefault(tourney(tony.id).plLIC2id,pls.persons(0).licenceNr,0L)
-                val plId2 = mapDefault(tourney(tony.id).plLIC2id,pls.persons(1).licenceNr,0L)
+                val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
+                val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
                 val sno = plId1.toString + "·" + plId2.toString
                 tourney(tony.id).pl2co((sno, i+1)) =  Participant2Comp(sno, i+1, pls.id, "",0)
               }
