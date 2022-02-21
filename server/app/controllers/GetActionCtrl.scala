@@ -125,7 +125,7 @@ class GetActionCtrl @Inject()
        */
       case "getComp"   => tsv.getComp(toId, getParam(pMap, "coId", -1L) ).map { 
         case Left(err) => logger.error(s"getComp error: ${err.toString}"); BadRequest(err.add("getComp").encode)
-        case Right(co) => Ok(co.encode())
+        case Right(co) => Ok(write[Competition](co))
       }
 
 

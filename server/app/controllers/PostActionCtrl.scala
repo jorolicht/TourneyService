@@ -100,19 +100,20 @@ class PostActionCtrl @Inject()
       // Register Action Routines (Single/Double)
       //
 
-      // def setParticipant2Comp(coId: Long, plId: Player): Future[Either[Error, Boolean]]
+      // def setParticipant2Comp(coId: Long, plId: Player): Future[Either[Error, Participant2Comp]]
       // registers a player with a competition, returns Participant2Comp entry
       case "setParticipant2Comp" => {
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "setParticipant2Comp").encode)) else {
-          (for {
-            p2c    <- EitherT(Future( Participant2Comp.decode(reqData)))
-            result <- EitherT(tsv.setParticipant2Comp(p2c))
-          } yield { (p2c, result) }).value.map {
-            case Left(err)  => BadRequest(err.add("setParticipant2Comp").encode)
-            case Right((p2c,result)) => Ok(result.encode()) 
-          }
+          Participant2Comp.decode(reqData) match {
+            case Left(err)  => Future(BadRequest(err.add("setParticipant2Comp").encode))
+            case Right(p2c) => tsv.setParticipant2Comp(p2c).map {
+              case Left(err)     => BadRequest(err.add("setParticipant2Comp").encode)
+              case Right(p2cRes) => Ok(p2cRes.encode) 
+            }
+          } 
         }
-      }  
+      }   
+ 
 
       // def delParticipant2Comp(coId: Long, sno: String): Future[Either[Error, Int]]
       // removes a player from the competition
@@ -347,16 +348,7 @@ class PostActionCtrl @Inject()
 
       //
       // Competition Action Routines
-      //
-
-      //  def setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]
-      //?  def setComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Seq[(Long,Int)]]
-      //  def setCompStatus(coId: Long, status: Int)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
-      //  def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-      //  def setCompRatingUpperLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-
-      //  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-      //  def delComps()(implicit tse :TournSVCEnv): Future[Either[Error, Int]]      
+      //    
 
       /** setComp updates a competition, returns either error or the competition
         * calls setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
@@ -364,6 +356,7 @@ class PostActionCtrl @Inject()
       case "setComp"   => {
         logger.info(s"setComp: START" ) 
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+          
           Competition.decode(reqData) match {
             case Left(err)   => Future(BadRequest(err.encode))
             case Right(co)   => tsv.setComp(co)(msgs, tse).map { 
@@ -371,7 +364,7 @@ class PostActionCtrl @Inject()
                 logger.error(s"setComp: ${err.encode}" ) 
                 BadRequest(err.add("setComp").encode)
               }  
-              case Right(newCo)  => { logger.info(s"setComp: RETURN" );  Ok(newCo.encode()) }
+              case Right(newCo)  => { logger.info(s"setComp: RETURN" );  Ok(newCo.encode) }
             }
           }
         }
@@ -381,24 +374,16 @@ class PostActionCtrl @Inject()
         * calls addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
         */
       case "addComp"   => {
-        logger.info(s"addComp: START" ) 
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
           Competition.decode(reqData) match {
             case Left(err)   => Future(BadRequest(err.encode))
             case Right(co)   => tsv.addComp(co)(msgs, tse).map { 
-              case Left(err)     => {
-                logger.error(s"addComp: ${err.encode}") 
-                BadRequest(err.add("addComp").encode)
-              }  
-              case Right(newCo)  => { 
-                logger.info(s"addComp: RETURN" )  
-                Ok(newCo.encode()) 
-              }
+              case Left(err)    => { logger.error(s"addComp: ${err.encode}"); BadRequest(err.add("addComp").encode) }  
+              case Right(newCo) => { Ok(newCo.encode) }
             }
           }
         }
       } 
-
 
 
       /** setCompStatus sets the competition status, returns true if status is set, otherwise false
@@ -439,7 +424,7 @@ class PostActionCtrl @Inject()
             case Left(err)      => Future(BadRequest(err.encode))
             case Right(player)  => tsv.addPlayer(player)(tse).map {
               case Left(err)    => BadRequest(err.encode)
-              case Right(pl)    => { logger.info(s"addPlayer: RETURN" );  Ok(pl.encode()) }
+              case Right(pl)    => { logger.info(s"addPlayer: RETURN" );  Ok(pl.encode) }
             }
           }
         }  

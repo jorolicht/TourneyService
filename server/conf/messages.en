@@ -1197,5 +1197,4 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
   err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
 
-
 #END error codes / messages

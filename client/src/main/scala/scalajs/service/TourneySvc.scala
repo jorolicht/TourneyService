@@ -261,14 +261,14 @@ trait TourneySvc extends WrapperSvc
 
   // set whole competition
   def setComp(co: Competition): Future[Either[Error, Competition]] =
-    postAction("setComp", App.tourney.id, "", co.encode(), true).map { 
+    postAction("setComp", App.tourney.id, "", co.encode, true).map { 
       case Left(err)   => Left(err.add("setComp"))
       case Right(coTx) => Competition.decode(coTx)
     }
 
   // set whole competition
   def addComp(co: Competition): Future[Either[Error, Competition]] =
-    postAction("addComp", App.tourney.id, "", co.encode(), true).map { 
+    postAction("addComp", App.tourney.id, "", co.encode, true).map { 
       case Left(err)   => Left(err.add("addComp"))
       case Right(coTx) => Competition.decode(coTx)
     }
@@ -304,7 +304,7 @@ trait TourneySvc extends WrapperSvc
   //
   /* regSingle register single player */  
   def regSingle(coId: Long, pl: Player, status: Int): Future[Either[Error, Long]] = 
-    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status}", s"player=${enc(pl.encode())}", true).map {
+    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status}", s"player=${enc(pl.encode)}", true).map {
       case Left(err)     => Left(err.add("regSingle"))
       case Right(result) => Return.decode2Long(result, "reqSingle")
     }
@@ -427,11 +427,10 @@ trait TourneySvc extends WrapperSvc
 
   // addPlayer
   def addPlayer(player: Player): Future[Either[Error, Player]] = 
-    postAction("addPlayer", App.tourney.id, "", player.encode(), true).map {
-      case Left(err)  => Left(err)
-      case Right(res) => Player.decode(res)
+    postAction("addPlayer", App.tourney.id, "", player.encode, true).map {
+      case Left(err) => Left(err)
+      case Right(pl) => Player.decode(pl)
     }
-
 
 
   //

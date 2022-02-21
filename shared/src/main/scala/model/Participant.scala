@@ -1,8 +1,9 @@
 package shared.model
 
-import scala.collection.mutable.{ ArrayBuffer, HashMap }
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
+
+import scala.collection.mutable.{ ArrayBuffer, HashMap }
 import shared.utils.{ Error, Return }
 import shared.utils.Constants._
 import shared.utils.Routines._
@@ -26,8 +27,7 @@ import shared.utils.Routines._
      var options:   String = "_"                               
   
   ) {
-    def stringify = s"${sno}^${coId}^${ident}^${placement}^${status}^${options}^_"
-    def encode()    = s"${sno}^${coId}^${ident}^${placement}^${status}^${options}^_"
+    def encode = write[Participant2Comp](this)
 
     def getSignUpDate: Int   = getMDInt(options,0); def setSignUpDate(value: Int)   = { options = setMD(options,value,0) }
     def getSignUpTime: Int   = getMDInt(options,1); def setSignUpTime(value: Int)   = { options = setMD(options,value,1) }
@@ -87,50 +87,17 @@ import shared.utils.Routines._
       new Participant2Comp(sno, coId, "", "", status, "_")
     }
 
-  
-    def obifyX(x: String) = objectifyX(x).getOrElse(Participant2Comp("", 0L, "","", 0, "_"))  
-    def objectifyX(x: String) : Option[Participant2Comp] = {
-      val pa = x.split("\\^")
-      try { 
-        Some(Participant2Comp(pa(0), pa(1).toLong, pa(2), pa(3), pa(4).toInt, pa(5)))
-      } catch { case _: Throwable => None }
-    }
-
     def decode(x: String): Either[Error, Participant2Comp] = {
-      try { 
-        val pa = x.split("\\^")
-        Right(Participant2Comp(pa(0), pa(1).toLong, pa(2), pa(3), pa(4).toInt, pa(5)))
-      } catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
+      try Right(read[Participant2Comp](x)) 
+      catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
     }
-
-    // def encSeq(p2cs: Seq[Participant2Comp]) = write[Participant2Comps](Participant2Comps(p2cs.map(_.stringify)))
 
     def decSeq(p2cStr: String): Either[Error, Seq[Participant2Comp]] = {  
-      if (p2cStr== "") {
-        Right(Seq())
-      } else {
-        try Right(read[Seq[Participant2Comp]](p2cStr))
-        catch { case _: Throwable => Left(Error("err0055.decode.Participant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
-      }
+      try Right(read[Seq[Participant2Comp]](p2cStr))
+      catch { case _: Throwable => Left(Error("err0055.decode.Participant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
     }
-
-    // def decSeq(p2cs: Seq[String]): Either[Error, Seq[Participant2Comp]] = {  
-    //   if (p2cs.size < 1 ) {
-    //     Right(Seq())
-    //   } else {
-    //     try {
-    //       (p2cs.map{ p2c => Participant2Comp.decode(p2c) }).partitionMap(identity) match {
-    //         case (Nil, rights)       => Right(rights)
-    //         case (firstLeft :: _, _) => Left(firstLeft.add("Participant.deqSeq"))
-    //       } 
-    //     } catch { case _: Throwable => Left(Error("err0045.decode.Participant2Comps", p2cs.toString().take(20),"","Participant.deqSeq")) }
-    //   }
-    // }
   }
   
-  // case class Participant2Comps (list: Seq[String])
-  // object Participant2Comps { implicit def rw: RW[Participant2Comps] = macroRW }  
-
 
 // relevant information of an active player/participant within an competition
 case class ParticipantEntry(

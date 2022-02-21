@@ -5,8 +5,6 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import java.util.UUID
 import scala.util.Try
-import upickle.default._
-import upickle.default.{ReadWriter => RW, macroRW}
 import shared.utils.{ Error, Return }
 import shared.utils.Routines._
 
@@ -35,20 +33,11 @@ case class Club (
     case 1 => if (id!=0) f"$name [${id}%03d]" else  name
     case _ => name 
   }
-
 }
 
 object Club {
   implicit def rw: RW[Club] = macroRW
   def tupled = (this.apply _).tupled
-
-  
-  // def decode(s: String): Either[Error, Club] = {
-  //   val cl = s.split("\\^")
-  //   try Right(Club(cl(0).toLong, cl(1).toInt, cl(2), cl(3)))
-  //   catch { case _: Throwable => Left(Error("err0050.decode.Club", s, "", "Club.decode"))} 
-  // }
-  
 
   def parseName(name: String): Either[Error, (String, Long)] = {
     val mResult = "[^,;:$=?+*\"]+[ ]+\\[\\d\\d\\d\\]".r.findFirstIn(name).getOrElse(

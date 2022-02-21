@@ -137,15 +137,13 @@ case class Competition(
 
   def equal(co: Competition): Boolean = hash == co.hash
   def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
-
-  def encode() = s"${id}^${hashKey}^${name}^${typ}^${startDate}^${status}^${options}^_"
+  def encode = write[Competition](this)
 }                                                               
 
 object Competition {
   implicit def rw: RW[Competition] = macroRW
   def tupled = (this.apply _).tupled
   def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
-  def get()            = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
   def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
   def genName(name: String, aG: String, rR: String, cT: String): String = {
     if(name!="") { name } else { s"$aG $rR ${cT.toUpperCase}" }
@@ -162,14 +160,12 @@ object Competition {
     }
   }
 
-
-  def decode(s: String): Either[Error, Competition] = {
-    val co = s.split("\\^")
-    try Right(Competition(co(0).toLong, co(1), co(2),  co(3).toInt, co(4), co(5).toInt, co(6)))
+  def decode(s: String): Either[shared.utils.Error, Competition] = {
+    try Right(read[Competition](s))
     catch { case _: Throwable => Left(Error("err0020.decode.Competition", s, "", "Competition.decode"))} 
   }
 
-  def decSeq(comps: String): Either[Error, Seq[Competition]] = {
+  def decSeq(comps: String): Either[shared.utils.Error, Seq[Competition]] = {
     try Right( read[Seq[Competition]](comps))
     catch { case _: Throwable => Left(Error("err0061.decode.Competitions", comps.take(20), "", "Competition.deqSeq")) }
   }

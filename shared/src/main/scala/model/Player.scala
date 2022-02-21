@@ -45,7 +45,8 @@ case class Player(
 */
 
 ) {
-
+  def encode  = write[Player](this)
+   
   def oneName: String = {
     if      (lastname.trim == "") firstname
     else if (firstname.trim == "") lastname
@@ -97,8 +98,7 @@ case class Player(
 
   def getBirthyear()    = if (birthyear == 0) None else Some(birthyear)
   def getBYearStr() = if (birthyear == 0) "" else birthyear.toString
-  def encode()  = s"${id}^${hashKey}^${clubId}^${clubName}^${firstname}^${lastname}^${birthyear}^${email}^${sex}^${options}^_"
-
+  
 }
 
 object Player {
@@ -142,10 +142,10 @@ object Player {
   }
 
   def decode(s: String) : Either[Error, Player] = {
-    val pa = s.split("\\^")
-    try Right(Player(pa(0).toLong,pa(1),pa(2).toLong, pa(3), pa(4), pa(5), pa(6).toInt, pa(7), pa(8).toInt, pa(9)))
+    try Right(read[Player](s))
     catch { case _: Throwable => Left(Error("err0132.decode.Player", s, "", "Player.decode")) }
   }
+
  
   def decSeq(plStr: String): Either[Error, Seq[Player]] = {
     try Right(read[Seq[Player]](plStr))
