@@ -132,7 +132,7 @@ class GetActionCtrl @Inject()
       // getPlayfields returns encoded Playfields or Error
       case "getPlayfields"  => tsv.getPlayfields(toId).map { 
         case Left(err)      => logger.error(s"getPlayfields error: ${err.toString}"); BadRequest(err.add("getPlayfields").encode) 
-        case Right(pfields) => Ok(Playfield.encSeq(pfields))
+        case Right(pfields) => Ok(write[Seq[Playfield]](pfields))
       }
 
       /** getPlayfield returns encoded playfield or Error
@@ -141,7 +141,7 @@ class GetActionCtrl @Inject()
        */ 
       case "getPlayfield"  => tsv.getPlayfield(toId, getParam(pMap, "pfNo", -1)).map { 
         case Left(err)     => logger.error(s"getPlayfield error: ${err.toString}"); BadRequest(err.add("getPlayfield").encode) 
-        case Right(pfield) => Ok(pfield.encode())
+        case Right(pfield) => Ok(pfield.encode)
       }
   
 

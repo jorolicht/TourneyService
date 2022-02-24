@@ -111,7 +111,7 @@ object HomeRegister extends UseCase("HomeRegister")
           }
 
           case RegisterState.FreeFinish   =>  {  
-            val licReq = LicRequest(ctx("name").str, ctx("email").str, Address("","","","","").stringify,"",ctx("clubname").str, false, false )
+            val licReq = LicRequest(ctx("name").str, ctx("email").str, Address("","","","","").encode,"",ctx("clubname").str, false, false )
             
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
@@ -150,7 +150,7 @@ object HomeRegister extends UseCase("HomeRegister")
             val pw = InputCtrl.getPassword("password").getOrElse("")
             if (pw == "") error("execRequest", s"password not set")
 
-            val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.stringify, pw.getBytes.toBase64, ctx("clubname").str, false, false)
+            val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.encode, pw.getBytes.toBase64, ctx("clubname").str, false, false)
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
             setHtml("Processing", clientviews.component.html.Spinner(BasicHtml.getMsg_("msg.processing","")).toString)

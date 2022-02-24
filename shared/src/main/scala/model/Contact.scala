@@ -12,7 +12,6 @@ case class Contact(
   var phone:     String,
   var email:     String
 ) {
-  def stringify = s"${lastname}·${firstname}·${phone}·${email}·"
   def encode    = s"${lastname}·${firstname}·${phone}·${email}·"
   def getName(fmt: Int=0) = {
     fmt match {

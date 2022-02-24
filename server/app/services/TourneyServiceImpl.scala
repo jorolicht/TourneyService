@@ -816,6 +816,13 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
 
   def clean(): Unit = TIO.clean()
 
+  def dump(toId: Long):  Future[Either[Error, String]] =
+    TIO.get(toId).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => Right(trny.toJson(2))
+    }
+ 
+
   def trigger(tse: TournSVCEnv, trigCmd: String): Future[Either[Error, Boolean]] = {
     import controllers.{ EventActor, ActorRefManager }
     TIO.getTrny(tse).map {
@@ -837,5 +844,4 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     import controllers.{ EventActor, ActorRefManager }
     EventActor.manager ! ActorRefManager.SendMessage(orgDir, trigger.toString) 
   }
-
 }

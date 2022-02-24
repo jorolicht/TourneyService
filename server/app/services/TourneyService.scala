@@ -132,7 +132,7 @@ trait TourneyService {
   // Management Interface
   def isAllowed(toId: Long, orgDir: String): Future[Either[Error, Boolean]] 
   def clean(): Unit
-
+  def dump(toId: Long): Future[Either[Error, String]] 
 
   def trigger(trny: Tourney, trigger: UpdateTrigger): Unit
   def trigger(orgDir: String, trigger: UpdateTrigger): Unit

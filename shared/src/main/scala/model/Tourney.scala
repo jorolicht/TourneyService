@@ -69,9 +69,10 @@ case class Tourney(
   var writeTime:   Long = 0L  
 
   def encode(): String = write[Tourney](this)
+  def toJson(ident: Int): String = write[Tourney](this, ident)
   def isDummy() = (id == 0L)
   def getToId() = this.id
-  def getBase() = TournBase(name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact.stringify, address.stringify, id)
+  def getBase() = TournBase(name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact.encode, address.encode, id)
   def getStartDate(lang: String, fmt:Int=0): String = int2date(startDate, lang, fmt)
 
    
@@ -308,15 +309,11 @@ case class Tourney(
       // no existing club with that name  
       if (cl.id == 0) {
         // new club not existing so far   
-        val nclId = clubIdMax + 1
-        clubIdMax = nclId
-        club2id(name) = nclId
-        clubs(nclId) = cl.copy(id=nclId)
-        Right(clubs(nclId))
+        Right(addClub(cl.name))
       } else {
         // name changed so far not cached 
         // keep clId, remove invalid hash value
-        club2id = club2id.filter(x=>x._2 != cl.id) 
+        //club2id = club2id.filter(x=>x._2 != cl.id) 
         club2id(cl.name) = cl.id
         clubs(cl.id) = cl
         Right(clubs(cl.id))       

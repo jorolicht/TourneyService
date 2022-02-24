@@ -13,7 +13,6 @@ case class Address(
   var city:        String,
   var street:      String
 ) {
-  def stringify = s"${description}·${country}·${zip}·${city}·${street}·"
   def encode    = s"${description}·${country}·${zip}·${city}·${street}·"
 }
 

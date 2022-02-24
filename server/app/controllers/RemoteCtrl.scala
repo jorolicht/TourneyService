@@ -60,7 +60,6 @@ class RemoteCtrl @Inject()
 {
 
   implicit val txFormat   = Json.format[shared.model.TournBase]
-  implicit val pfFormat   = Json.format[shared.model.Playfields]
   implicit val grtxFormat = Json.format[shared.model.tabletennis.GroupTx]
   implicit val kotxFormat = Json.format[shared.model.tabletennis.KoRoundTx]
   implicit val maFormat   = Json.format[shared.model.tabletennis.Matches]
@@ -165,7 +164,7 @@ class RemoteCtrl @Inject()
    *
    *  Service: def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[Competition]]]
    */  
-  def updComps(toId: Long, trigger: Boolean=false) = Action.async { implicit request =>
+  def updComps(toId: Long, trigger: Boolean=false) = Action.async { implicit request: Request[AnyContent] =>
     val coSeqText: String    = request.body.asText.getOrElse("")
     val msgs:      Messages  = messagesApi.preferred(request)
     val ctx    =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
@@ -189,7 +188,7 @@ class RemoteCtrl @Inject()
    * 
    * Service: def setCompStatus(coId: Long, status: Int)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
    */  
-  def setCompStatus(toId: Long, coId: Long, status: Int, trigger: Boolean=false) = Action.async { implicit request: Request[AnyContent]=>
+  def setCompStatus(toId: Long, coId: Long, status: Int, trigger: Boolean=false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:  Messages  = messagesApi.preferred(request)
     val ctx    =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     //setup implicit service call environment 
@@ -280,7 +279,7 @@ class RemoteCtrl @Inject()
       val p2cSeq = read[Seq[Club]](seqClubJson)
       tsv.setClubs(p2cSeq).map {
         case Left(err)  => BadRequest(err.encode)
-        case Right(cnt) => Ok(Return(cnt).encode) 
+        case Right(res) => Ok(write[Seq[Club]](res)) 
       }
     } catch { case _: Throwable => Future(BadRequest(Error("err0186.ctrl.decode.setClubs").encode)) }
   }
@@ -357,23 +356,23 @@ class RemoteCtrl @Inject()
    * 
    * Service: def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv) : Future[Either[Error, Int]] 
    */  
-  def setPlayfields(toId: Long, trigger: Boolean = false) = Action(parse.json[Playfields]).async { implicit request =>
+  def setPlayfields(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent]  =>
     val msgs: Messages  = messagesApi.preferred(request)
-    val plfs  = request.body
-    val ctx   = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs) 
+    val reqData = request.body.asText.getOrElse("")
+    val ctx     = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs) 
 
     logger.debug(s"setPlayfields toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
 
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
     
-    plfs.list.map(x => Playfield.decode(x)).partitionMap(identity) match {    
-      case (firstErr :: _, _) => Future( BadRequest(firstErr.encode) )
-      case (Nil, pfSeq)       => tsv.setPlayfields(pfSeq).map {
-        case Left(err)           => BadRequest(err.encode)
-        case Right(cnt)          => Ok(Return(cnt).encode)
-      }  
-    }
+    Playfield.decSeq(reqData) match {
+      case Left(err)    => Future(BadRequest(err.encode))
+      case Right(pfSeq) => tsv.setPlayfields(pfSeq).map {
+        case Left(err)   => BadRequest(err.encode)
+        case Right(cnt)  => Ok(Return(cnt).encode)
+      }    
+    } 
   } 
 
   /** delPlayfields delete all playfields returns number of deleted entries

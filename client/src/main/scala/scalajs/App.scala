@@ -394,7 +394,7 @@ object App extends BasicHtml
     }
 
   def loadLocalTourney(): Unit = {
-    Tourney.decode(AppEnv.getLocalStorage("AppEnv.TourneyCfg")) match {
+    Tourney.decode(AppEnv.getLocalStorage("AppEnv.Tourney")) match {
       case Left(err) => {
         Helper.error(s"loadLocalTourney", getErrStack(err))
         setLocalTourney(Tourney.init)
@@ -430,9 +430,6 @@ object App extends BasicHtml
     // try AppEnv.setLocalStorage("AppEnv.TourneyRun", write(trny.run.toTx((trny.id))))
     // catch { case _: Throwable => println("saveLocalTourneyRun(error)", "couldn't write to local storage") }    
   }
-
-
-
 
   def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
 

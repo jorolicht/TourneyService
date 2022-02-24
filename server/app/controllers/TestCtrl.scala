@@ -295,7 +295,18 @@ class TestCtrl @Inject()(
     logger.info(s"TestCtrl.authentication (${ctx})")
     Ok(s"${ctx.orgId}<#>ClubId: ${ctx.orgId}")
   }   
-  
+
+  /**
+   *  test dump
+   */
+  def dump(toId: Long) = Action.async { implicit request =>
+    logger.info(s"TestCtrl.dump -> toId: ${toId}")
+    tsv.dump(toId).map {
+      case Left(err)     => Ok(err.toString)
+      case Right(result) => Ok(result)
+    }
+  }
+
   /**
    *  test authentication
    */

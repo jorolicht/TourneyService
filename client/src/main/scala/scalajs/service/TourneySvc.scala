@@ -394,7 +394,7 @@ trait TourneySvc extends WrapperSvc
 
   // set playfield
   def setPlayfield(playfield: Playfield): Future[Either[Error, Playfield]] = 
-    postAction("setPlayfield", App.tourney.id, "", playfield.stringify, true).map {
+    postAction("setPlayfield", App.tourney.id, "", playfield.encode, true).map {
       case Left(err)  => Left(err)
       case Right(res) => Playfield.decode(res)
     }

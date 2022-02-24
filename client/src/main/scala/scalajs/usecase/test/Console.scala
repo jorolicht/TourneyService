@@ -81,7 +81,7 @@ object TestConsole extends UseCase("TestConsole")
 
     val addr = Address("", "country", "zip", "city", "street")
     val pw = "Abc123"
-    val licReq = LicRequest("Test, User", "test.user@email.de", addr.stringify, pw.getBytes.toBase64, "Test Club 007", false, false)
+    val licReq = LicRequest("Test, User", "test.user@email.de", addr.encode, pw.getBytes.toBase64, "Test Club 007", false, false)
 
     requestLicense(licReq).map {
       case Left(err)  => HomeConsole.add(s"requestLicense error: ${err.msgCode}")
