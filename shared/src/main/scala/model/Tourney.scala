@@ -114,7 +114,8 @@ case class Tourney(
     } else if (!co.validateDate(startDate, endDate)) {
       Left(Error("err0015.trny.compDate", co.startDate)) 
     } else if (comp2id.isDefinedAt(hKey)) {
-      Left(Error("err0016.trny.compExistsAlready"))
+      // idempotent routine 
+      Right(comps(comp2id(hKey)))
     } else {
       // ok add new one
       val coIdMax = compIdMax + 1

@@ -60,7 +60,7 @@ class TourneyServiceImpl @Inject()()(  implicit
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
-        logger.info(s"addPlayer: ${pl.lastname} ${pl.firstname} ${pl.clubName}  ${pl.getTTR}")
+        //logger.info(s"addPlayer: ${pl.lastname} ${pl.firstname} ${pl.clubName}  ${pl.getTTR}")
         trny.addPlayer(pl, Crypto.genHashPlayer(pl))
       }  
     }

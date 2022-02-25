@@ -176,8 +176,11 @@ class RemoteCtrl @Inject()
     try {
       val coSeq = read[Seq[Competition]](coSeqText)
       tsv.updComps(coSeq).map {
-        case Left(err)    => { logger.error(s"updComps -> ${err}"); BadRequest(err.encode) }
-        case Right(comps) => { Ok(write[Seq[Competition]](comps)) }    
+        case Left(err)    => { logger.error(s"updComps -> Error: ${err}"); BadRequest(err.encode) }
+        case Right(comps) => { 
+          logger.info(s"updComps -> json: ${write[Seq[Competition]](comps)} result: ${comps.toString}"); 
+          Ok(write[Seq[Competition]](comps)) 
+        }    
       }
     } catch { case _: Throwable => Future(BadRequest(Error("err0183.ctrl.decode.updComps").encode)) }
 
@@ -333,7 +336,7 @@ class RemoteCtrl @Inject()
    * 
    *  Service: delParticipant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
    */
-  def delParticipant2Comps(toId: Long, coId: Long = 0, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent]=>
+  def delParticipant2Comps(toId: Long, coId: Long = 0, trigger: Boolean = false) = Action.async { implicit request =>
     val msgs: Messages  = messagesApi.preferred(request)
     val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     
@@ -366,13 +369,14 @@ class RemoteCtrl @Inject()
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
     
-    Playfield.decSeq(reqData) match {
-      case Left(err)    => Future(BadRequest(err.encode))
-      case Right(pfSeq) => tsv.setPlayfields(pfSeq).map {
-        case Left(err)   => BadRequest(err.encode)
-        case Right(cnt)  => Ok(Return(cnt).encode)
-      }    
-    } 
+    try {
+      val pfSeq = read[Seq[Playfield]](reqData)
+      tsv.setPlayfields(pfSeq).map {
+        case Left(err)  => BadRequest(err.encode)
+        case Right(cnt) => Ok(Return(cnt).encode) 
+      }
+    } catch { case _: Throwable => Future(BadRequest(Error("err0051.decode.Playfields").encode)) }
+
   } 
 
   /** delPlayfields delete all playfields returns number of deleted entries
