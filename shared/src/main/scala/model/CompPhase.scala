@@ -18,7 +18,7 @@ import shared.model.tabletennis._
  */
 case class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp: Int, var enabled: Boolean, 
                 var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
-  var groups       = ArrayBuffer[Group]()                                                     // groups of the competition (only gr rounds)
+  var groups       = ArrayBuffer[Group]()                                                // groups of the competition (only gr rounds)
   var ko           = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)  // ko games of ghe competition (only ko rounds)
 
   
@@ -123,7 +123,7 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int, val coTyp:
       }
     }
 
-    val str   = new StringBuilder(s"${name} (CoId:${coId}) ${grPhName(coPh)}(${coPh}) Typ:${coTyp}\n")
+    val str   = new StringBuilder(s"${name} (coId:${coId}) ${grPhName(coPh)}(${coPh}) Typ:${coTyp}\n")
     getSystem match {
       case CSY_GR => for (i <- 0 to groups.length-1) str.append(groups(i).toString)
       case CSY_KO => str.append(s"${ko.toString}")

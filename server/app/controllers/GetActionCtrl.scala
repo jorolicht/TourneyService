@@ -59,10 +59,6 @@ class GetActionCtrl @Inject()
   val mailService  = new MailerService(mailer)
 
   implicit val matchFormat  = Json.format[Matches]
-  implicit val kotxFormat   = Json.format[KoRoundTx]
-  implicit val grtxFormat   = Json.format[GroupTx]
-  implicit val cophFormat   = Json.format[CompPhaseTx]
-  implicit val resFormat    = Json.format[shared.model.tabletennis.ResultEntrys]
 
 
   // ---
@@ -177,15 +173,15 @@ class GetActionCtrl @Inject()
       }
 
 
-      // Service: def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, ResultEntrys]] = 
+      // Service: def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] = 
       case "getMatchKo"   => tsv.getMatchKo(toId, getParam(pMap, "coId", -1L), getParam(pMap, "coPh", -1) ).map { 
-        case Left(err)       => BadRequest(err.add("getMatchKo").encode)
-        case Right(rEntries) => Ok( Json.toJson(rEntries) ) 
+        case Left(err)          => BadRequest(err.add("getMatchKo").encode)
+        case Right(seqResEntry) => Ok( write[Seq[ResultEntry]](seqResEntry) ) 
       }  
 
       case "getMatchGr"   => tsv.getMatchGr(toId, getParam(pMap, "coId", -1L), getParam(pMap, "coPh", -1), getParam(pMap, "grId", -1)).map { 
-        case Left(err)       => BadRequest(err.add("getMatchGr").encode)
-        case Right(rEntries) => Ok( Json.toJson(rEntries) )         
+        case Left(err)          => BadRequest(err.add("getMatchGr").encode)
+        case Right(seqResEntry) => Ok( write[Seq[ResultEntry]](seqResEntry) )        
       }
 
 

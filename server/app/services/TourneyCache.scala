@@ -54,14 +54,9 @@ object TIO {
   val clock:    Clock  = Clock.systemUTC()
   val tourney:  HashMap[Long, Tourney] = HashMap()
 
-  implicit val pEntryFormat = Json.format[ParticipantEntry]  
+
   implicit val mEntryFormat = Json.format[MatchEntry]
   implicit val matchFormat  = Json.format[Matches]
-  implicit val kotxFormat   = Json.format[KoRoundTx]
-  implicit val grtxFormat   = Json.format[GroupTx]
-  implicit val coSectFormat = Json.format[CompSectionTx]
-  implicit val cophFormat   = Json.format[CompPhaseTx]
-
 
   def mapDefault[X,Y](hm: HashMap[X,Y], key: X, default: Y) = if (!hm.isDefinedAt(key)) default else hm(key)
 

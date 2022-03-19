@@ -1196,7 +1196,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0185.ctrl.decode.setParticipant2Comps            = Error in routine setParticipant2Comps, could not decode sequence of players to competition mapping
   err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
   err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
-  
-
+  err0188.decode.ParticipantEntry                     = decoding error, data type ParticipantEntry: {0}
+  err0189.ctrl.decode.TournBase                       = decoding error in controller, data type TournBase: {0}
 
 #END error codes / messages

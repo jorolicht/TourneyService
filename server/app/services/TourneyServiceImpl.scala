@@ -603,28 +603,28 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     }
 
 
-  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, ResultEntrys]] = 
+  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] = 
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
         if (trny.cophs.isDefinedAt((coId, coPh))) {
           //logger.info(s"getMatchKo: ${coId} ${coPh} /n ${ trny.cophs((coId,coPh)).ko.toString}")
-          Right(new ResultEntrys(for { re <- trny.cophs((coId,coPh)).ko.results.toSeq } yield { re.stringify() } ) )
+          Right(trny.cophs((coId,coPh)).ko.results.toSeq)
         } else {
-          Right(ResultEntrys(Seq()))   
+          Right(Seq())   
         }  
       }
     }    
 
   
-  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int):  Future[Either[Error, ResultEntrys]] = 
+  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int):  Future[Either[Error, Seq[ResultEntry]]] = 
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
         if (trny.cophs.isDefinedAt((coId, coPh))) {
           Right(trny.cophs((coId,coPh)).groups(grId-1).getResultEntrys())
         } else {
-          Right(ResultEntrys(Seq()))   
+          Right(Seq())   
         }  
       }
     }

@@ -1208,5 +1208,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0185.ctrl.decode.setParticipant2Comps            = Fehler in Routine setParticipant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
   err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
   err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
+  err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
+  err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
 
 #END Error Codes/Messages

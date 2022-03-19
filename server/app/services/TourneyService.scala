@@ -94,8 +94,8 @@ trait TourneyService {
   def setMatch(ma: MatchEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
   def setMatches(ma: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
   def delMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
-  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, ResultEntrys]] 
-  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int): Future[Either[Error, ResultEntrys]] 
+  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] 
+  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int): Future[Either[Error, Seq[ResultEntry]]] 
 
   // Competition Phase Interface
   def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]] 

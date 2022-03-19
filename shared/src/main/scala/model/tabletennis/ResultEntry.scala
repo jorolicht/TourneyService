@@ -24,17 +24,7 @@ case class ResultEntry(
 }
 
 object ResultEntry {
-  def obify(kStr: String): ResultEntry = {
-    val k = kStr.split("\\^")
-    try { 
-      if (k.length > 7) {
-        ResultEntry(k(0).toBoolean, (k(1).toInt,k(2).toInt), (k(3),k(4)), (k(5).toInt,k(6).toInt), k(7).split('·'))
-      } else {
-        ResultEntry(k(0).toBoolean, (k(1).toInt,k(2).toInt), (k(3),k(4)), (k(5).toInt,k(6).toInt), Array[String]())
-      }
-    } catch { case _: Throwable => ResultEntry(false, (0,0), ("0","0"), (0,0),Array[String]()) }
-  }
-
+  implicit def rw: RW[ResultEntry] = macroRW
 
   def decode(kStr: String): Either[Error, ResultEntry] = {
     val k = kStr.split("\\^")
@@ -59,27 +49,11 @@ object ResultEntry {
     val sets      = getSets(balls, noWinSets)
 
     ResultEntry(m.status >= 2 & pos != (0,0) & validSets(sets, noWinSets), pos, (m.stNoA,m.stNoB), sets, balls)
-    //ResultEntry(m.status >= 2 & pos != (0,0), pos, (m.stNoA,m.stNoB), sets, balls)
   }
 
-  def encSeq(reEns: Seq[ResultEntry]) = write[ResultEntrys](ResultEntrys(reEns.map(_.stringify)))
-
-  def decSeq(reStr: String): Either[Error, Seq[ResultEntry]] = {  
-    if (reStr== "") {
-      Right(Seq())
-    } else {
-      try {
-        val reEs = read[ResultEntrys](reStr)
-        val reSeq = (for { rEn <- reEs.list } yield { ResultEntry.decode(rEn) }).toSeq
-        reSeq.partitionMap(identity)  match {
-          case (Nil, rights)       => Right(rights)
-          case (firstLeft :: _, _) => Left(firstLeft.add("ResultEntry.deqSeq"))
-        } 
-      } catch { case _: Throwable => Left(Error("err0147.decode.ResultEntrys", reStr.take(20), "", "ResultEntry.deqSeq")) }
-    }
+  def decSeq(reEntStr: String): Either[Error, Seq[ResultEntry]] = {
+    try Right(read[Seq[ResultEntry]](reEntStr))  
+    catch { case _: Throwable => Left(Error("err0147.decode.ResultEntrys", reEntStr.take(20), "", "ResultEntry.decSeq")) }
   }
 
 }
-
-case class ResultEntrys (list : Seq[String])
-object ResultEntrys { implicit def rw: RW[ResultEntrys] = macroRW }  

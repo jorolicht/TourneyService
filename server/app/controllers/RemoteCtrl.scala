@@ -58,13 +58,7 @@ class RemoteCtrl @Inject()
 )    
   extends AbstractController(coco) with I18nSupport with Logging
 {
-
-  implicit val txFormat   = Json.format[shared.model.TournBase]
-  implicit val grtxFormat = Json.format[shared.model.tabletennis.GroupTx]
-  implicit val kotxFormat = Json.format[shared.model.tabletennis.KoRoundTx]
   implicit val maFormat   = Json.format[shared.model.tabletennis.Matches]
-  implicit val cptxFormat = Json.format[shared.model.CompPhaseTx]
-
 
   /** trigger - triggers update of connected clients
    * 
@@ -102,16 +96,16 @@ class RemoteCtrl @Inject()
  
     logger.debug(s"getTournBase ${ctx.orgId} ${ctx.orgDir}")
     tourneyDao.findByPathId(ctx.orgDir, toId).map { _ match {
-      case Some(tourney) => Ok(Json.toJson(tourney))
-      case None          => BadRequest(Error("err0151.ctrl.getTournBase", "" , "", "getTournBase").encode) 
+      case Some(tournBase) => Ok( write[TournBase](tournBase) )  
+      case None            => BadRequest(Error("err0151.ctrl.getTournBase", "" , "", "getTournBase").encode) 
     }}
   } 
 
 
-  def regTournBase() = Action(parse.json[TournBase]).async { implicit request =>
+  def regTournBase() = Action.async { implicit request: Request[AnyContent] =>
     val msgs:  Messages  = messagesApi.preferred(request)
-    val tb  = request.body
-    val ctx =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+    val tournBase  = request.body.asText.getOrElse("")
+    val ctx        = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
 
     logger.debug(s"regTournBase  ${ctx.orgId} ${ctx.orgDir}  ${ctx.organizer}  ")
 
@@ -119,20 +113,16 @@ class RemoteCtrl @Inject()
       logger.info(s"regTournBase: not allowed to create tourney DB")
       Future( BadRequest(Error("err0152.ctrl.regTournBase", "not allowed", "","regTournBase").encode) ) 
     } else {
-     
-      val tBase = if (tb.organizer == "") {
-        tb.copy(orgDir=ctx.orgDir, organizer=ctx.organizer)
-      } else {
-        tb.copy(orgDir=ctx.orgDir)
-      }
-      implicit val tse   = TournSVCEnv(tBase.id, ctx.orgDir, true)
-      tsv.regTournBase(tBase).map {
-        case Left(err)  => {
-          logger.error(s"regTournBase:  ${err.encode}")
-          BadRequest(err.encode)
-        }  
-        case Right(id)  => Ok(id.toString)
-      }
+      try {
+        val tb = read[TournBase](tournBase)
+        implicit val tse   = TournSVCEnv(tb.id, ctx.orgDir, true)
+        val tBase = if (tb.organizer == "") tb.copy(orgDir=ctx.orgDir, organizer=ctx.organizer) else tb.copy(orgDir=ctx.orgDir)
+
+        tsv.regTournBase(tBase).map {
+          case Left(err)  => BadRequest(err.encode)
+          case Right(id)  => Ok(id.toString)
+        }
+      } catch { case _: Throwable => Future(BadRequest(Error("err0189.ctrl.decode.TournBase", tournBase.take(10)).encode)) }
     }
   }  
 
@@ -463,22 +453,55 @@ class RemoteCtrl @Inject()
     }    
   } 
 
+
+
+  // def regTournBase() = Action.async { implicit request: Request[AnyContent] =>
+  //   val msgs:  Messages  = messagesApi.preferred(request)
+  //   val tournBase  = request.body.asText.getOrElse("")
+  //   val ctx        = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+
+  //   logger.debug(s"regTournBase  ${ctx.orgId} ${ctx.orgDir}  ${ctx.organizer}  ")
+
+  //   if (ctx.orgId <= 0 ) {
+  //     logger.info(s"regTournBase: not allowed to create tourney DB")
+  //     Future( BadRequest(Error("err0152.ctrl.regTournBase", "not allowed", "","regTournBase").encode) ) 
+  //   } else {
+  //     try {
+  //       val tb = read[TournBase](tournBase)
+
+      //   implicit val tse   = TournSVCEnv(tb.id, ctx.orgDir, true)
+      //   val tBase = if (tb.organizer == "") tb.copy(orgDir=ctx.orgDir, organizer=ctx.organizer) else tb.copy(orgDir=ctx.orgDir)
+
+      //   tsv.regTournBase(tBase).map {
+      //     case Left(err)  => BadRequest(err.encode)
+      //     case Right(id)  => Ok(id.toString)
+      //   }
+      // } catch { case _: Throwable => Future(BadRequest(Error("err0189.ctrl.decode.TournBase", tournBase.take(10)).encode)) }
+
+
+
+
+
+
   /** setCompPhase - set a competition phase
    * 
    * Service def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]] 
    */
-  def setCompPhase(toId: Long, trigger: Boolean = false) = Action(parse.json[CompPhaseTx]).async { implicit request =>
+  def setCompPhase(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:  Messages  = messagesApi.preferred(request)
-    val coph  = request.body
-    val ctx   = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+    val cophTx  = request.body.asText.getOrElse("")
+    val ctx     = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
 
     logger.debug(s"setCompPhase toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
 
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
-    tsv.setCompPhase(CompPhase.fromTx(coph)).map {
-      case Left(err)  => BadRequest(err.encode)
-      case Right(res) => Ok(Return(res).encode) 
+    CompPhase.decode(cophTx) match {
+      case Left(err)   => Future(BadRequest(err.encode))
+      case Right(coph) => tsv.setCompPhase(coph).map {
+        case Left(err)   => BadRequest(err.encode)
+        case Right(res)  => Ok(Return(res).encode)
+      }  
     }
   }
 

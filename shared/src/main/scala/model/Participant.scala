@@ -108,19 +108,19 @@ case class ParticipantEntry(
   var place:   (Int,Int)       // position after finishing the round (group or ko)
 ) {
   //def stringify() = s"${sno}·${pos}·${plId}·${plId2}·${name}·${club}·${place._1}·${place._2}"
-  def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^_"
+  //def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^_"
 }
 
 
 object ParticipantEntry {
   implicit def rw: RW[ParticipantEntry] = macroRW
-  def obify(peStr: String): ParticipantEntry = {
-    val p = peStr.split("\\^")
-    try { 
-      ParticipantEntry(p(0), p(1), p(2), p(3).toInt, (p(4).toInt, p(5).toInt))
-    } catch { case _: Throwable => ParticipantEntry("0","","",0, (0,0)) }
+
+  def decode(x: String): Either[Error, ParticipantEntry] = {
+    try Right(read[ParticipantEntry](x)) 
+    catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
   }
-  
+
+
   def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0))
 
 }

@@ -16,13 +16,7 @@ case class GroupEntry(
   var balls:    Array[String]
 ) {
   
-  def stringify(pos: (Int, Int), sno: (String, String)) = 
-    if (valid) {
-      s"true^${pos._1}^${pos._2}^${sno._1}^${sno._2}^${sets._1}^${sets._2}^${balls.mkString("·")}^"
-    } else {
-      "false^0^0^0^0^0^0^^"
-    } 
-
+  def toResultEntry(pos: (Int, Int), sno: (String, String)) =  ResultEntry(valid, pos, sno, sets, balls)
   def invert = new GroupEntry(valid,(points._2,points._1),(sets._2,sets._1),(ballDiff._2,ballDiff._1),balls.map(invBall(_)))
 }
 
@@ -93,9 +87,9 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   def toTx(): GroupTx = {
     val grtx = GroupTx(name, grId, size, quali, noWinSets)
     for (i <-0 to size-1; j <- i+1 to size-1) {
-      grtx.results = grtx.results :+ results(i)(j).stringify((i+1,j+1),(players(i).sno,players(j).sno))
+      grtx.results = grtx.results :+ results(i)(j).toResultEntry((i+1,j+1),(players(i).sno,players(j).sno))
     }
-    for (i <-0 to size-1) grtx.players = grtx.players :+ players(i).stringify
+    grtx.players.toList
     grtx
   }
 
@@ -155,12 +149,12 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     }
   }
 
-  def getResultEntrys(): ResultEntrys = {
-    var resList:   List[String] = List[String]()
+  def getResultEntrys(): Seq[ResultEntry] = {
+    var resList:   List[ResultEntry] = List[ResultEntry]()
     for (i <-0 to size-1; j <- i+1 to size-1) {
-      resList = resList :+ results(i)(j).stringify((i+1,j+1),(players(i).sno,players(j).sno))
+      resList = resList :+ results(i)(j).toResultEntry( (i+1,j+1) , (players(i).sno, players(j).sno) )
     }
-    ResultEntrys(resList)
+    resList.toSeq
   }
 
   def setResultEntries(reEntries: Seq[ResultEntry]) = {
@@ -193,12 +187,11 @@ object Group {
 
     // add players
     for ((plentry, count) <- grtx.players.zipWithIndex) {
-      if (count < grtx.players.length) gr.players(count) = ParticipantEntry.obify(plentry)
+      if (count < grtx.players.length) gr.players(count) = plentry
     }
 
     // add matches
-    for (result <- grtx.results) {
-      val resEntry = ResultEntry.obify(result)
+    for (resEntry <- grtx.results) {
       if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
         gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = GroupEntry.fromResultEntry(resEntry, grtx.noWinSets)
         gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
@@ -217,8 +210,8 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var players:   List[String] = List[String](),
-  var results:   List[String] = List[String]()
+  var players:   List[ParticipantEntry] = List[ParticipantEntry](),
+  var results:   List[ResultEntry] = List[ResultEntry]()
 ) 
 
 object GroupTx  {

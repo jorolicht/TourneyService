@@ -58,9 +58,6 @@ class PostActionCtrl @Inject()
 {
 
   implicit val matchFormat = Json.format[Matches]
-  implicit val kotxFormat  = Json.format[KoRoundTx]
-  implicit val grtxFormat  = Json.format[GroupTx]
-  implicit val cophFormat  = Json.format[CompPhaseTx]
 
   // 
   // Service based on postAction wrapper 

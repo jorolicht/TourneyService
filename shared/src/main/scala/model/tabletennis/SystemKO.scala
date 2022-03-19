@@ -98,8 +98,8 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   // toTx convert KoRound to transfer representation
   def toTx(): KoRoundTx = {
     val krtx = KoRoundTx(size, rnds, name, noWinSets)
-    for (i <-0 to size-1) { krtx.players = krtx.players :+ players(i).stringify } 
-    for (i <-0 to size-1) { if (results(i).valid) krtx.results = krtx.results :+ results(i).stringify }
+    krtx.results = results.toList
+    krtx.players = players.toList
     krtx
   }
 
@@ -189,14 +189,14 @@ object KoRound {
     // add players
     for ((plentry, count) <- tx.players.zipWithIndex) {
       if (count < tx.players.length) {
-        kr.players(count) = ParticipantEntry.obify(plentry)
+        kr.players(count) = plentry
         kr.sno2pos += (kr.players(count).sno -> count) 
       }  
     }
 
     // add matches
     for (result <- tx.results) {
-      val resEntry = ResultEntry.obify(result)
+      val resEntry = result
       val index = kr.getIndex(resEntry.pos._1, resEntry.pos._2)
 
       // calcualte position within array from the result entry
@@ -217,8 +217,8 @@ case class KoRoundTx (
   val rnds:      Int,
   val name:      String,
   val noWinSets: Int,
-  var players:   List[String] = List[String](),
-  var results:   List[String] = List[String]()
+  var players:   List[ParticipantEntry] = List[ParticipantEntry](),
+  var results:   List[ResultEntry] = List[ResultEntry]()
 )
 
 object KoRoundTx {
