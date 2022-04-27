@@ -37,6 +37,13 @@ trait LicenseSvc extends WrapperSvc {
       case Right(res) => License.decode(res) 
     }
 
+  /** getEmail - get (own) email address
+   * 
+   */ 
+  def getLicEmail(licCode: String):  Future[Either[Error, String]] = 
+    getJson("/license/getEmail", s"licCode=${licCode}")
+
+
 
   /** getAllLicense - for administrator returns all available licenses
    * 

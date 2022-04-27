@@ -7,8 +7,8 @@ greeting                                              = Herzlich Willkommen!
 # App Main Messages
 ###
   app.mockup  = false
-  app.version = 2022-02DE160
-  app.date    = 2022-02-04
+  app.version = 2022-04DE171
+  app.date    = 2022-04-27
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -1210,5 +1210,6 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
   err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
   err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
+  err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
 
 #END Error Codes/Messages

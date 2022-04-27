@@ -40,8 +40,8 @@ object ResultEntry {
 
   def fromMatchEntry(m: MatchEntry, coTyp: Int, noWinSets: Int): ResultEntry = {
     val pos = (coTyp match {
-      case CSY_GR => m.wgw
-      case CSY_KO => (m.round, m.maNo)
+      case CPT_GR => m.wgw
+      case CPT_KO => (m.round, m.maNo)
       case _      => (0,0)
     })
     

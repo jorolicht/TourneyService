@@ -46,9 +46,9 @@ object InfoResult extends UseCase("InfoResult")
 
     debug("update",s"for ${coId} ${coPh} ${grId}")
     val cphase = App.tourney.cophs((coId,coPh))
-    cphase.getSystem match {
-      case CSY_KO => showKoResult(cphase.coId, cphase.coPh, cphase.ko) 
-      case CSY_GR => showGrResult(cphase.coId, cphase.coPh, cphase.groups(grId-1))
+    cphase.coPhTyp match {
+      case CPT_KO => showKoResult(cphase.coId, cphase.coPh, cphase.ko) 
+      case CPT_GR => showGrResult(cphase.coId, cphase.coPh, cphase.groups(grId-1))
       case _      => debug("update",s"error unknown competition type")
     }
   }
@@ -93,7 +93,7 @@ object InfoResult extends UseCase("InfoResult")
         setHtml_(s"APP__KoRound_${coId}_${coPh}_Winner_${rnd}_${game}", playerName)
 
         // print result only if it's not against a dummy player 
-        if (result.sno._1 != PLID_BYE.toString & result.sno._2 != PLID_BYE.toString) {
+        if (result.sno._1 != SNO.BYE & result.sno._2 != SNO.BYE) {
           setHtml_(s"APP__KoRound_${coId}_${coPh}_SetA_${rnd}_${game}", result.sets._1.toString)
           setHtml_(s"APP__KoRound_${coId}_${coPh}_SetB_${rnd}_${game}", result.sets._2.toString)
           val balls = result.balls.mkString(",")
@@ -126,8 +126,8 @@ object InfoResult extends UseCase("InfoResult")
     debug("showTourneyResults", s"phases")
     for (coPhList <- coPhMapSeq.values; coPhase  <- coPhList) {
       // show results of every phase of every competition
-      if (coPhase.getSystem == CSY_KO) showKoResult(coPhase.coId, coPhase.coPh, coPhase.ko)
-      if (coPhase.getSystem == CSY_GR) for (grp <- coPhase.groups ) showGrResult(coPhase.coId, coPhase.coPh, grp)
+      if (coPhase.coPhTyp == CPT_KO) showKoResult(coPhase.coId, coPhase.coPh, coPhase.ko)
+      if (coPhase.coPhTyp == CPT_GR) for (grp <- coPhase.groups ) showGrResult(coPhase.coId, coPhase.coPh, grp)
     }
   } 
 }

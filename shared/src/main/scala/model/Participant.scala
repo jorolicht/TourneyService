@@ -106,11 +106,7 @@ case class ParticipantEntry(
   val club:    String, 
   val rating:  Int,            // eg. ttr for table tennis
   var place:   (Int,Int)       // position after finishing the round (group or ko)
-) {
-  //def stringify() = s"${sno}·${pos}·${plId}·${plId2}·${name}·${club}·${place._1}·${place._2}"
-  //def stringify() = s"${sno}^${name}^${club}^${rating}^${place._1}^${place._2}^_"
-}
-
+)
 
 object ParticipantEntry {
   implicit def rw: RW[ParticipantEntry] = macroRW
@@ -120,8 +116,7 @@ object ParticipantEntry {
     catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
   }
 
-
-  def bye(name: String="bye") =  ParticipantEntry(PLID_BYE.toString, name, "", 0, (0, 0))
+  def bye(name: String="bye") =  ParticipantEntry(SNO.BYE, name, "", 0, (0, 0))
 
 }
 

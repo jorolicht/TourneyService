@@ -115,7 +115,23 @@ object UnitManager extends UseCase("UnitManager")
       case Left(err)  => error("authBasic", s"Error: ${err}") 
       case Right(res) => info("authBasic", s"Success: ${res}")
     } 
-  }  
+  } 
+
+  // testAuthReset - reset password to new password
+  def testAuthReset(testCase: String, testOption: String) = {
+    authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ).map {
+      case Left(err)  => error("authReset", s"Error: ${err}") 
+      case Right(res) => info("authRest", s"Success: ${res}")
+    } 
+  }
+
+  // testGetEmaiil - get Email from License
+  def testGetEmail(testCase: String, testOption: String) = {
+    getLicEmail("ttcdemo/FED89BFA1BF899D590B5").map {
+      case Left(err)  => error("getLicEmail", s"Error: ${err}") 
+      case Right(res) => info("getLicEmail", s"Success: ${res}")
+    }  
+  }
 
   /** testLicense
    * case class LicRequest(
@@ -145,8 +161,6 @@ object UnitManager extends UseCase("UnitManager")
   def testGoogleLogin(testCase: String, testOption: String) = {
     val testInfo = s"Test ${testCase}(Option: ${testOption})"
     dom.window.location.replace("/authenticate/google")
-  }    
-
-
+  }
 
 }

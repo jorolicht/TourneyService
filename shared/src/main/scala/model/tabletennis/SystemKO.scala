@@ -8,10 +8,9 @@ import shared.model.ParticipantEntry
 import shared.model.tabletennis.utility._
 
 class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
-  var players    = Array.fill[ParticipantEntry](size)  (ParticipantEntry("0", "", "", 0, (0,0))) 
-  var results    = Array.fill[ResultEntry](size)  (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
+  var players    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
+  var results    = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
   var sno2pos    = scala.collection.mutable.Map[String, Int]()
-
 
   // calculate index of match within results
   def getIndex(pos: (Int, Int)): Int = getIndex(pos._1,pos._2)
@@ -79,28 +78,21 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   }
 
   override def toString() = {
-    val str = new StringBuilder(s"  KO-Runde(${size}/${rnds}/${noWinSets})\n")
+    val str = new StringBuilder(s"  KO-Runde size:${size} rounds:${rnds} noWinSets:${noWinSets}\n")
     
     calc
-    str.append("    Player\n")
-    for (pe <- players) {
-      str.append(s"     - SNO:${pe.sno} ${pe.name}(${pe.club}) place(${pe.place._1}/${pe.place._2}) \n")
-    }
-    str.append("    Results\n")
-    for (re <- results) {
-      if (re.valid) {
-        str.append(s"     - R:${re.pos._1} M:${re.pos._2} ${re.sno._1}-${re.sno._2}: (${re.sets._1}:${re.sets._2}) ${re.balls.mkString(",")}\n")
-      }
-    }
+    str.append(s"    Player size:${players.size}\n")
+    for (pe <- players) str.append(s"     - SNO:${pe.sno} ${pe.name}(${pe.club}) place(${pe.place._1}/${pe.place._2}) \n")
+    str.append(s"    Results size:${results.size}\n")
+    for (re <- results) str.append(s"     - R:${re.pos._1} M:${re.pos._2} ${re.sno._1}-${re.sno._2}: (${re.sets._1}:${re.sets._2}) ${re.balls.mkString(",")}\n")
     str.toString
   }
 
   // toTx convert KoRound to transfer representation
   def toTx(): KoRoundTx = {
-    val krtx = KoRoundTx(size, rnds, name, noWinSets)
-    krtx.results = results.toList
-    krtx.players = players.toList
-    krtx
+    val koResults = if (size > 0) results.toList else List[ResultEntry]()
+    val koPlayers = if (size > 0) players.toList else List[ParticipantEntry]()
+    KoRoundTx(size, rnds, name, noWinSets, koPlayers, koResults)
   }
 
   def setResultEntries(reEntries: Seq[ResultEntry]) = {
@@ -126,7 +118,7 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   }
 
   def addMatch(m: MatchEntry): Boolean = {
-    val rEntry = ResultEntry.fromMatchEntry(m, CSY_KO, noWinSets)
+    val rEntry = ResultEntry.fromMatchEntry(m, CPT_KO, noWinSets)
     if (validPos(rEntry.pos)) {
       results(getIndex(rEntry.pos)) = rEntry
       true
@@ -136,7 +128,7 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   }
 
   def addMatch(m: MatchEntry, prt: (String)=>Unit): Boolean = {
-    val rEntry = ResultEntry.fromMatchEntry(m, CSY_KO, noWinSets)
+    val rEntry = ResultEntry.fromMatchEntry(m, CPT_KO, noWinSets)
     if (validPos(rEntry.pos)) {
       prt(s"addkoMatch: index=${getIndex(rEntry.pos)} rEntry=${rEntry}")
       results(getIndex(rEntry.pos)) = rEntry
@@ -146,7 +138,6 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     }
   }
   
-
   def resetMatch(): Unit = {
     for (result <- results) result.valid = false
     calc
@@ -217,8 +208,12 @@ case class KoRoundTx (
   val rnds:      Int,
   val name:      String,
   val noWinSets: Int,
-  var players:   List[ParticipantEntry] = List[ParticipantEntry](),
-  var results:   List[ResultEntry] = List[ResultEntry]()
+  val players:   List[ParticipantEntry],
+  val results:   List[ResultEntry]
+
+
+  // var players:   List[ParticipantEntry] = List[ParticipantEntry](),
+  // var results:   List[ResultEntry] = List[ResultEntry]()
 )
 
 object KoRoundTx {

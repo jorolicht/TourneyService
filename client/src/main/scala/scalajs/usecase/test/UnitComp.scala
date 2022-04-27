@@ -47,7 +47,6 @@ object UnitComp extends UseCase("UnitComp")
   def render(testCase: String = "", testOption: String = "", reload: Boolean=false) = {} 
 
 
-
   def testCompDraw(testCase: String, testOption: String = "161") = {
     val toId = testOption.toLong
     authBasic("robert.lichtengger@icloud.com", "", "Si5d4H").map {
@@ -93,18 +92,18 @@ object UnitComp extends UseCase("UnitComp")
    *  class CompSection(var name: String, val coId: Long, val coSystem: Int, val coTyp: Int, val noWinSets: Int)
    * 
    *  competition system (competition phases types)
-   *     val CSY_UNKN     =  0  
-   *     val CSY_GR       =  1   // beliebige Gruppen-Spielphase
-   *     val CSY_KO       =  2   // KO-Spielphase
-   *     val CSY_JGJ      =  3   // Gruppe Jeder-gegen-Jeden
-   *     val CSY_GRPS3    =  4   // Gruppensystem mit 3er
-   *     val CSY_GRPS34   =  6   // Gruppensystem mit 3er und 4er
-   *     val CSY_GRPS4    =  7   // Gruppensystem
-   *     val CSY_GRPS45   =  8   // Gruppensystem
-   *     val CSY_GRPS5    =  9   // Gruppensystem
-   *     val CSY_GRPS56   = 10   // Gruppensystem
-   *     val CSY_GRPS6    = 11   // Gruppensystem
-   *     val CSY_SW       = 12   // Switzsystem
+   *     val CPT_UNKN     =  0  
+   *     val CPT_GR       =  1   // beliebige Gruppen-Spielphase
+   *     val CPT_KO       =  2   // KO-Spielphase
+   *     val CPT_JGJ      =  3   // Gruppe Jeder-gegen-Jeden
+   *     val CPT_GRPS3    =  4   // Gruppensystem mit 3er
+   *     val CPT_GRPS34   =  6   // Gruppensystem mit 3er und 4er
+   *     val CPT_GRPS4    =  7   // Gruppensystem
+   *     val CPT_GRPS45   =  8   // Gruppensystem
+   *     val CPT_GRPS5    =  9   // Gruppensystem
+   *     val CPT_GRPS56   = 10   // Gruppensystem
+   *     val CPT_GRPS6    = 11   // Gruppensystem
+   *     val CPT_SW       = 12   // Switzsystem
    * 
    *  competition typ
    *     val CT_UNKN   = 0
@@ -129,27 +128,12 @@ object UnitComp extends UseCase("UnitComp")
 
     //class CompSection(id: Int, preId: Int, coId: Long, name: String, secTyp: Int)
     val coSect1 = new CompSection(id, 0, coId, name, CST_GRPS5)
-    // coSect1.pants = Array(
-    //   ParticipantEntry("131", "Lichtenegger1, Robert1", "TTC Freising1", 1201, (0,0), true),
-    //   ParticipantEntry("132", "Lichtenegger2, Robert2", "TTC Freising2", 1202, (0,0), true),
-    //   ParticipantEntry("133", "Lichtenegger3, Robert3", "TTC Freising3", 1203, (0,0), true),
-    //   ParticipantEntry("134", "Lichtenegger4, Robert4", "TTC Freising4", 1204, (0,0), true),
-    //   ParticipantEntry("135", "Lichtenegger5, Robert5", "TTC Freising5", 1205, (0,0), true),
-    //   ParticipantEntry("136", "Lichtenegger6, Robert6", "TTC Freising6", 1206, (0,0), true),
-    //   ParticipantEntry("137", "Lichtenegger7, Robert7", "TTC Freising7", 1207, (0,0), true),
-    //   ParticipantEntry("138", "Lichtenegger8, Robert8", "TTC Freising8", 1208, (0,0), true),
-    //   ParticipantEntry("139", "Lichtenegger9, Robert9", "TTC Freising9", 1209, (0,0), true),
-    //   ParticipantEntry(PLID_BYE.toString, "BYE", "-", 0, (0,0), true)
-    // )
     coSect1.noPlayer = 10
 
     // CompSection(id, 0, coId, name, CST_GRPS5)
-    val coSect2 = new CompSection(2, id, coId, "KO-ENDRUNDE", CSY_KO)
-
-    val coSect3 = new CompSection(3, id, coId, "TROSTRUNDE", CSY_KO)
-
-    val coSect4 = new CompSection(4, 0, coId, "SCHWEIZER SYSTEM", CSY_KO)
-
+    val coSect2 = new CompSection(2, id, coId, "KO-ENDRUNDE", CPT_KO)
+    val coSect3 = new CompSection(3, id, coId, "TROSTRUNDE", CPT_KO)
+    val coSect4 = new CompSection(4, 0, coId, "SCHWEIZER SYSTEM", CPT_KO)
 
     coSect4.setMatches(1, 
       ArrayBuffer(
@@ -175,18 +159,59 @@ object UnitComp extends UseCase("UnitComp")
   // testPhase - CompPhase
   def testPhase(testCase: String, testOption: String) = {
 
-    // val coph = new CompPhase("Test Runde", 13, CP_SW, CSY_SW, true, 10, 9, 4)
-    // val result = coph.init(Array(
-    //       PlayerEntry("131", "Lichtenegger, Robert1", "TTC Freising1", (0,0)),
-    //       PlayerEntry("132", "Lichtenegger, Robert2", "TTC Freising2", (0,0)),
-    //       PlayerEntry("133", "Lichtenegger, Robert3", "TTC Freising3", (0,0)),
-    //       PlayerEntry("134", "Lichtenegger, Robert4", "TTC Freising4", (0,0)),
-    //       PlayerEntry("135", "Lichtenegger, Robert5", "TTC Freising5", (0,0)),
-    //       PlayerEntry("136", "Lichtenegger, Robert6", "TTC Freising6", (0,0)),
-    //       PlayerEntry("137", "Lichtenegger, Robert7", "TTC Freising7", (0,0)),
-    //       PlayerEntry("138", "Lichtenegger, Robert8", "TTC Freising8", (0,0)),
-    //       PlayerEntry("139", "Lichtenegger, Robert9", "TTC Freising9", (0,0))
-    // ))
+  }
+
+
+  // testCompEncode with login: ttcdemo/FED89BFA1BF899D590B5
+  def testCompEncode(testCase: String, testOption: String) = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+   
+    val toId = testOption.toLongOption.getOrElse(182L)
+    (for {
+      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      result    <- EitherT(App.loadRemoteTourney(toId))
+    } yield { (result,pw) }).value.map {
+      case Left(err)    => error("testCompEncode", s"ERROR code: ${err}") 
+      case Right(res)   => {
+        //println(s"${App.tourney}")
+
+        // var sno:     String,         // start number(s) concatenated string of player identifieres  
+        // val name:    String,                     
+        // val club:    String, 
+        // val rating:  Int,            // eg. ttr for table tennis
+        // var place:   (Int,Int)       // position after finishing the round (group or ko)
+        
+        val coPhGr = new CompPhase("TestGroup", 3L, 2, CPT_GR, true, 7, 7, 3)
+        val initGrRes  = coPhGr.init( Array(
+          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
+          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
+          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
+          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
+          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
+          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
+          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))),
+          List( (1,4,2), (1,3,2))
+        )
+        println(s"CompPhase Test Group Round encoded: ${coPhGr.encode}")
+
+        val coPhKO = new CompPhase("TestKO", 3L, 4, CPT_KO, true, 8, 7, 3)
+        val initKORes  = coPhKO.init( Array(
+          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
+          ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
+          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
+          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
+          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
+          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
+          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
+          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))))
+  
+        println(s"CompPhase Test KO Round encoded: ${coPhKO.encode}")
+
+        info("testCompEncode",  s"SUCCESS result: ${res._1} pw: ${res._2}")
+      }
+    }
   }
 
 }

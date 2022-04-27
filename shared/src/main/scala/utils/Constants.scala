@@ -3,9 +3,13 @@ package shared.utils
 package object Constants {
 
   // special player identifier
-  val PLID_BYE = 99999
-  val PLID_NN  = 99998
-  val SNO_BYE  = "99999"
+  //val SNO_BYE = "99500" // till 99999
+  //val SNO_NN  = "99000" 
+  //val SNO_MAX = "99999"
+
+  // val PLID_BYE = 99500
+  // val PLID_NN  = 99000
+  // val PLID_MAX = 99999
 
   // competition type
   val CT_UNKN   = 0
@@ -14,7 +18,7 @@ package object Constants {
   val CT_MIXED  = 3
   val CT_TEAM   = 4
 
-  // competition phases type
+  // competition phases
   val CP_UNKN = -99
   val CP_INIT =   0
   val CP_VRGR =   1
@@ -28,6 +32,13 @@ package object Constants {
   val CP_ZRKO =   7     // not yet available
   val CP_ERKO =   8     // only final KO round
   val CP_TRKO =   9     // nur Trostrunde KO
+
+ // competition phase type
+  val CPT_UNKN = -99
+  val CPT_KO   =   1
+  val CPT_GR   =   2
+  val CPT_SW   =   3
+
 
   // competition section type 
   val CST_UNKN     = -99
@@ -44,13 +55,7 @@ package object Constants {
   val CST_KO       = 109   // KO-Spielphase 
   val CST_SW       = 110   // Switzsystem
 
-  // competition system
-  val CSY_UNKN = -99
-  val CSY_KO   =   1
-  val CSY_GR   =   2
-  val CSY_SW   =   3
-
-
+ 
   // competition (section) status types
   val CSS_AUS   = 101 // Auslosung (Section)
   val CSS_EIN   = 102 // Eingabe   (Section)

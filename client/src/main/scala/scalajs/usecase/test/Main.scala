@@ -58,6 +58,9 @@ object TestMain extends UseCase("TestMain")
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = start(testCase, testOption)
 
   @JSExport
+  def exec(testCase:String = "") = start(testCase)
+
+  @JSExport
   def start(testCase:String = "", testOption:String = "") = {
     info(testCase, s"--> START")
     val result = testCase match {
@@ -83,6 +86,7 @@ object TestMain extends UseCase("TestMain")
       //UnitComp
       case "CompPhase"           => UnitComp.testPhase(testCase, testOption); true
       case "CompSection"         => UnitComp.testSection(testCase, testOption); true
+      case "CompEncode"          => UnitComp.testCompEncode(testCase, testOption); true
 
       //UIOrg
       case "OrgComp"             => UIOrg.testComp(testCase, testOption); true
@@ -93,12 +97,16 @@ object TestMain extends UseCase("TestMain")
 
       //UnitManager
       case "authBasic"  | "AuthBasic"              => UnitManager.testAuthBasic(testCase, testOption); true
+      case "authReset"                             => UnitManager.testAuthReset(testCase, testOption); true
+      case "getEmail"                              => UnitManager.testGetEmail(testCase, testOption); true
       case "authBasicContext" | "AuthBasicContext" => UnitManager.testAuthBasicContext(testCase, testOption); true  
       case "Google"                                => UnitManager.testGoogleLogin(testCase, testOption); true
       case "License"                               => UnitManager.testLicense(testCase, testOption); true      
       case "sendFullLicense"                       => UnitManager.testSendFullLicense(testCase, testOption); true
       case "Invoice"                               => UnitManager.testInvoice(testCase, testOption); true
       case "Register"                              => UnitManager.testRegister(testCase, testOption); true
+
+
 
       //UnitTourney
       case "AddTournCTT"  | "addTournCTT"          => UnitTourney.testAddTournCTT(testCase, testOption); true

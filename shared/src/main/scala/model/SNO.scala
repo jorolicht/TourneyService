@@ -10,6 +10,11 @@ import shared.utils.Routines._
 
 case class SNO(value: String) {
 
+  // special player identifier
+  //val SNO_BYE = "99500" // till 99999
+  //val SNO_NN  = "99000" 
+  //val SNO_MAX = "99999"
+
   def getSinglePlayer()(implicit trny: Tourney): Either[Error, Player] = {
     try Right(trny.players(value.toLong))
     catch { case _: Throwable => Left(Error("err0173.trny.getSinglePlayer", value)) }
@@ -53,9 +58,20 @@ case class SNO(value: String) {
     }
   }
 
+  def isBye() = SNO.isBye(value)
+  def isNN()  = SNO.isNN(value)
 
 }
 
 object SNO {
   implicit def rw: RW[SNO] = macroRW
+  
+  val BYE = "99500" 
+  val NN  = "99000" 
+
+  def isBye(value: String) = (value == SNO.BYE)
+  def isNN(value: String)  = (value == SNO.NN)
+
+  def bye() = SNO(BYE)
+  def nn()  = SNO(NN)
 }

@@ -106,13 +106,13 @@ trait AuthenticateSvc extends WrapperSvc {
     * 
     * @return either error or true/false
     */ 
-  def authReset(email: String): Future[Either[Error, Boolean]] = {
+  def authReset(email: String, licCode: String = "", withPW: Boolean = false ): Future[Either[Error, String]] = {
     val route = "/authenticate/reset"
-    val params = s"version=${AppEnv.getVersion()}&email=${email}"
+    val params = s"version=${AppEnv.getVersion()}&email=${email}&licCode=${licCode}&withPW=${withPW}"
     val path = s"${route}?params=${enc(params)}"
 
     Ajax.get(path).map(_.responseText).map(content => {
-      Return.decode2Boolean(content)
+      Return.decode2String(content)
     }).recover({
       // Recover from a failed error code into a successful future
       case dom.ext.AjaxException(req) => Left( Error.decode(req.responseText, s"text: ${req.responseText.take(40)} path: ${path}", "authReset") )

@@ -40,7 +40,7 @@ object App extends BasicHtml
   implicit val ucp = UseCase.defaultParam  //UseCaseParam("APP", "app", "App", "app", AppHelper.getMessage _ )
 
   // DEBUG Version
-  var ucList = List(HomeMain, HomeConsole, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup, TestMain,  
+  var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup, TestMain,  
                     InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
                     OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
@@ -113,13 +113,13 @@ object App extends BasicHtml
     
     try   {      
       val url = s"${AppEnv.home}/start?ucName=${ucName}&ucParam=${ucParam}&ucInfo=${ucInfo}"
-      if (ucName != "HomeConsole") {
-        if (setHistory) {
-          dom.window.history.pushState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
-        } else {
-          dom.window.history.replaceState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
-        }
-      }  
+
+      if (setHistory) {
+        dom.window.history.pushState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
+      } else {
+        dom.window.history.replaceState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
+      }
+
       setFooter()
       setHeader()
       showResult(false)

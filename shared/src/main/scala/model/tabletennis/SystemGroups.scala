@@ -89,7 +89,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     for (i <-0 to size-1; j <- i+1 to size-1) {
       grtx.results = grtx.results :+ results(i)(j).toResultEntry((i+1,j+1),(players(i).sno,players(j).sno))
     }
-    grtx.players.toList
+    grtx.players = players.toList
     grtx
   }
 

@@ -182,9 +182,11 @@ class AuthenticateCtrl @Inject()(
     val msgs: Messages  = messagesApi.preferred(request)
     val param   = Crypto.encParam(params)
     val email   = param("email")
+    val licCode = param("licCode")
+    val withPW  = param("withPW").toBoolean
 
-    // search license with email
-    val lic = licDao.findLicenseByEmail(email)
+    // search license either with email or with licCode
+    val lic = if (email.contains("@")) licDao.findLicenseByEmail(email) else licDao.findLicenseByLicCode(licCode)
 
     lic.flatMap { _ match {
       case Some(license) => {
@@ -210,7 +212,7 @@ class AuthenticateCtrl @Inject()(
                 bodyText = Some(EmailPassword(name, randPW, lang, false).toString),
                 bodyHtml = Some(EmailPassword(name, randPW, lang, true).toString)
               )
-              try   { mailer.send(mail); Ok(Return(true).encode) }  
+              try   { mailer.send(mail); if (withPW) Ok(Return(randPW).encode) else Ok(Return("ok").encode) }  
               catch { 
                 case e: EmailException => BadRequest( Error("err0092.email.password.send", e.getMessage()).encode )
                 case _: Throwable      => BadRequest( Error("err0093.email.user.notfound", email).encode )
@@ -364,5 +366,16 @@ class AuthenticateCtrl @Inject()(
       case None    => Future( BadRequest(Error("err0097.login.invalid").encode) ) 
     }}
   }
+
+
+
+
+
+
+
+
+
+
+
 
 }

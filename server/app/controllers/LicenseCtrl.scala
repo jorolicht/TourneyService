@@ -403,5 +403,27 @@ class LicenseCtrl @Inject()
     }
   }
 
+  /** getEmail
+    * 
+    * @param params
+    */
+  def getEmail(params: String="") = silhouette.UserAwareAction.async { implicit request =>
+    import shared.utils.Routines._
+
+    logger.info(s"getEmail(params=${params})")
+
+    val msgs: Messages  = messagesApi.preferred(request)
+    val param   = Crypto.encParam(params)
+    val licCode = param("licCode")
+
+    // search license with licCode
+    val lic = licDao.findLicenseByLicCode(licCode)
+
+    lic.map { _ match {
+      case Some(license) => Ok(Return(license.email).encode)
+      case None          => BadRequest(Error("err0190.ctrl.lic.notfound ", licCode).encode) 
+    }}
+  }
+
 
 }

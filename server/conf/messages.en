@@ -7,8 +7,8 @@ greeting                                              = Welcome!
 # App Main Messages
 ###
   app.mockup                                          = false
-  app.version = 2022-02EN160
-  app.date    = 2022-02-04
+  app.version = 2022-04EN171
+  app.date    = 2022-04-27
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -1197,6 +1197,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
   err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
   err0188.decode.ParticipantEntry                     = decoding error, data type ParticipantEntry: {0}
-  err0189.ctrl.decode.TournBase                       = decoding error in controller, data type TournBase: {0}
+  err0189.ctrl.decode.TournBase                       = Controller errordecoding error in controller, data type TournBase: {0}
+  err0190.ctrl.lic.notfound                           = License not found: {0}
 
 #END error codes / messages

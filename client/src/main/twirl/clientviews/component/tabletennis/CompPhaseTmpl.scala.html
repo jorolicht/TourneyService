@@ -26,10 +26,10 @@
 <div class="tab-content">
 	@for(i <- 0 to cophs.length-1) {
 		<div class="tab-pane fade @if(i==0){show active}" id="@idTab(cophs(i).coId,cophs(i).coPh)" role="tabpanel">
-			@if(cophs(i).getSystem==CSY_GR) { 
+			@if(cophs(i).coPhTyp==CPT_GR) { 
 				@clientviews.component.tabletennis.html.GroupsTmpl(cophs(i).coId, cophs(i).coPh, cophs(i).groups) 
 			}
-			@if(cophs(i).getSystem==CSY_KO) { 
+			@if(cophs(i).coPhTyp==CPT_KO) { 
 				@clientviews.component.tabletennis.html.KoRoundTmpl(cophs(i).coId, cophs(i).coPh, cophs(i).ko) 
 			}
 		</div>	

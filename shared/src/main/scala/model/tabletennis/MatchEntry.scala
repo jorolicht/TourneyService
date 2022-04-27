@@ -113,9 +113,9 @@ case class MatchEntry(
 
   def getType(): Int = {
     coPh match {
-      case CP_VRGR | CP_ZRGR | CP_ERGR | CP_TRGR => CSY_GR 
-      case CP_ERKO | CP_VRKO | CP_ZRKO | CP_TRKO => CSY_KO
-      case _                                     => CSY_UNKN
+      case CP_VRGR | CP_ZRGR | CP_ERGR | CP_TRGR => CPT_GR 
+      case CP_ERKO | CP_VRKO | CP_ZRKO | CP_TRKO => CPT_KO
+      case _                                     => CPT_UNKN
     }
   }
 

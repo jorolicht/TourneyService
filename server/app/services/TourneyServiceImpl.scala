@@ -538,8 +538,8 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         if (trny.cophs.isDefinedAt((ma.coId, ma.coPh))) {
 
           val trigCmd = ma.getType() match {
-            case CSY_GR => UpdateTrigger("MatchGr", "000000", tse.toId, ma.coId, ma.coPh, ma.grId)
-            case CSY_KO => UpdateTrigger("MatchKo", "000000", tse.toId, ma.coId, ma.coPh, 0)
+            case CPT_GR => UpdateTrigger("MatchGr", "000000", tse.toId, ma.coId, ma.coPh, ma.grId)
+            case CPT_KO => UpdateTrigger("MatchKo", "000000", tse.toId, ma.coId, ma.coPh, 0)
             case _      => UpdateTrigger("Match", tse.toId)
           }
 

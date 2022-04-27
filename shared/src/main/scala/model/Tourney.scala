@@ -56,7 +56,7 @@ case class Tourney(
   var club2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // club hash -> id
   var player2id:   Map[String, Long]  = Map().withDefaultValue(0L)  // player hash -> id
   var comp2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // competition hash -> id
-  var license2id:    Map[String, Long]  = Map().withDefaultValue(0L)
+  var license2id:  Map[String, Long]  = Map().withDefaultValue(0L)
 
   /*
    * tourney management data
@@ -208,7 +208,7 @@ case class Tourney(
       case Right(secId) => {        
         if (coSects.isDefinedAt((co.id, secId))) {
           coSects((co.id, secId)).pants     = pants
-          coSects((co.id, secId)).noPlayer  = pants.filter(p => p.value != SNO_BYE).size
+          coSects((co.id, secId)).noPlayer  = pants.filter(p => !p.isBye).size
           coSects((co.id, secId)).size      = pants.size
           coSects((co.id, secId)).noWinSets = noWinSets
           Right(secId) 
