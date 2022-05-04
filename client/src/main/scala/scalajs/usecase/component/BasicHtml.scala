@@ -40,10 +40,18 @@ object BasicHtml {
 
   def disProp(visible: Boolean): String = if (visible) "block" else "none"
 
+  def setResult(text: String) = insertHtml_("APP__Load", "afterbegin", s"""<textarea id="APP_Result" style="display:none;">${text}</textarea>""")
+
+
   def setHtml_(id: String, content: => String): Unit = {
     try document.getElementById(id).asInstanceOf[HTMLElement].innerHTML = content
     catch { case _: Throwable => Helper.error("setHtml_", s"id: ${id} -> ${content}") } 
   }
+
+  def insertHtml_(id: String, pos: String, content: String): Unit = {
+    try document.getElementById(id).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
+    catch { case _: Throwable => AppEnv.logger.error(s"insertHtml_ -> id: ${id} pos: ${pos} content: ${content.take(10)}") } 
+  }  
   
   def setVisible_(id: String, visible: Boolean): Unit = {
     try document.getElementById(id).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
@@ -136,10 +144,7 @@ class BasicHtml
     catch { case _: Throwable => error("insertHtml", s"id: ${ucp.idBase}__${elemId} pos: ${pos} content: ${content.take(10)}") } 
   }
   
-  def insertHtml_(id: String, pos: String, content: String): Unit = {
-    try document.getElementById(id).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
-    catch { case _: Throwable => AppEnv.logger.error(s"insertHtml_ -> id: ${id} pos: ${pos} content: ${content.take(10)}") } 
-  }
+
 
   def setHtmlVisible(id: String, visible: Boolean, content: String="")(implicit ucp: UseCaseParam): Unit = {
     try {

@@ -40,7 +40,7 @@ object App extends BasicHtml
   implicit val ucp = UseCase.defaultParam  //UseCaseParam("APP", "app", "App", "app", AppHelper.getMessage _ )
 
   // DEBUG Version
-  var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup, TestMain,  
+  var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
                     InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
                     OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
@@ -85,7 +85,9 @@ object App extends BasicHtml
 
     val initOk = for {
       msgsLoaded    <- AppEnv.initMessages(lastUpdate, language)
-      cookieAllowed <- AppEnv.initCookie()
+      cookieAllowed <- AppEnv.initCookie(
+                         if (msgsLoaded) AppEnv.getMessage("config.cookie.confirmation").toBooleanOption.getOrElse(true) else true
+                       ) 
     } yield cookieAllowed & msgsLoaded
 
     // initialize tourney if basic usecase is called

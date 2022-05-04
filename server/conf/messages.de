@@ -4,11 +4,12 @@
 greeting                                              = Herzlich Willkommen!
 
 ###
-# App Main Messages
+# App Main Messages / Configuration Issues
 ###
-  app.mockup  = false
-  app.version = 2022-04DE171
-  app.date    = 2022-04-27
+  config.cookie.confirmation                          = false
+  app.mockup                                          = false
+  app.version                                         = 2022-04DE171
+  app.date                                            = 2022-04-27
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/

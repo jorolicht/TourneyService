@@ -54,8 +54,10 @@ object TestMain extends UseCase("TestMain")
   // AddTournCTT:         http://localhost:9000/start?ucName=TestMain&ucParam=AddTournCTT
 
 
-
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = start(testCase, testOption)
+
+  @JSExport
+  def scalaTest() = "Hello World!"
 
   @JSExport
   def exec(testCase:String = "") = start(testCase)
@@ -68,12 +70,10 @@ object TestMain extends UseCase("TestMain")
       case "Dump" | "dump"       => UnitBasic.testDump(testCase, testOption); true
       case "Spinner" | "spinner" => UnitBasic.testSpinner(testCase, testOption); true
       case "Sidebar" | "sidebar" => UnitBasic.testSidebar(testCase, testOption); true
-      case "Save" | "save"       => UnitBasic.doSave(testCase, testOption); true
       case "Now"  | "now"        => println(s"Now: ${getNow()}"); true
       case "MainContent"         => UnitBasic.testMainContent(testCase, testOption); true
       case "EitherT"             => UnitBasic.testEitherT(testCase, testOption); true
       case "HLists"              => UnitBasic.testHLists(testCase, testOption); true
-      case "Date" | "date"       => UnitBasic.testDate(testCase, testOption); true
 
       //UIDlg
       case "DlgCardCfgSection"   => UIDlg.testDlgCardCfgSection(testCase, testOption); true
@@ -86,7 +86,6 @@ object TestMain extends UseCase("TestMain")
       //UnitComp
       case "CompPhase"           => UnitComp.testPhase(testCase, testOption); true
       case "CompSection"         => UnitComp.testSection(testCase, testOption); true
-      case "CompEncode"          => UnitComp.testCompEncode(testCase, testOption); true
 
       //UIOrg
       case "OrgComp"             => UIOrg.testComp(testCase, testOption); true
@@ -107,7 +106,6 @@ object TestMain extends UseCase("TestMain")
       case "Register"                              => UnitManager.testRegister(testCase, testOption); true
 
 
-
       //UnitTourney
       case "AddTournCTT"  | "addTournCTT"          => UnitTourney.testAddTournCTT(testCase, testOption); true
 
@@ -123,10 +121,6 @@ object TestMain extends UseCase("TestMain")
     if (result) info(testCase, s"--> TEST SUCCEEDED") else error(testCase, s"--> TEST FAILED") 
     result
   }
-
-
-
-
 
 
   /** test_Card

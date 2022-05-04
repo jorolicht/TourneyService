@@ -158,5 +158,48 @@ object UIDlg extends UseCase("UIDlg")
     }
   }  
   
-  
+/** test_dlgShowError: ${testCase} 
+   * 
+   * @param testCase
+   * @param testOption
+   */
+  def test_DlgShowError(testCase: String, testOption: String) = {
+    testOption match {
+      case _        => 
+        DlgShowError.show(List(Error("err.one"), Error("err.two")))               
+          .map     { retValue  => println(s"testCase: ${testCase} returns: ${retValue}") }
+          .recover { case e: Exception =>  println(s"testCase: ${testCase} error: ${e.getMessage}") }   
+    }
+  }  
+
+
+  /** test_dlgTournBase
+   * 
+   * @param testCase
+   * @param testOption
+   */
+  def test_DlgTournBase(testCase: String, testOption: String) = {
+    import shared.utils.Constants._
+ 
+    testOption match {
+      case "edit"  =>
+        DlgCardTourney.show("edit", TournBase("TestTourneyName", "TestClub 007"," testclub007",
+          20210801, 20210808, "Ident007", TT_TT, false, "Doe·John·089-4566689·test.user@email.com",
+                                            "Turnhalle an der Ampler·Germany·85456·Freising·Riegerauer Weg 10", 0L))                    
+          .map {
+            case Left(err)  => println(s"testCase: ${testCase} error: ${getError(err)}")
+            case Right(tB)  => println(s"testCase: ${testCase} result: ${tB}")
+          }
+
+      case ""        => 
+        DlgCardTourney.show("new", TournBase("TestTourneyName", "TestClub 007"," testclub007",
+          20210801, 20210808, "Ident007", -1, false, "Doe·John·089-4566689·test.user@email.com",
+                                            "Turnhalle an der Ampler·Germany·85456·Freising·Riegerauer Weg 10", 0L))                    
+          .map {
+            case Left(err)  => println(s"testCase: ${testCase} error: ${getError(err)}")
+            case Right(tB)  => println(s"testCase: ${testCase} result: ${tB}")
+          }
+    }
+  }
+
 }

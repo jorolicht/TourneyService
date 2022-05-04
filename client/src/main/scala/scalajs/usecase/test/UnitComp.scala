@@ -162,56 +162,6 @@ object UnitComp extends UseCase("UnitComp")
   }
 
 
-  // testCompEncode with login: ttcdemo/FED89BFA1BF899D590B5
-  def testCompEncode(testCase: String, testOption: String) = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-   
-    val toId = testOption.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result,pw) }).value.map {
-      case Left(err)    => error("testCompEncode", s"ERROR code: ${err}") 
-      case Right(res)   => {
-        //println(s"${App.tourney}")
 
-        // var sno:     String,         // start number(s) concatenated string of player identifieres  
-        // val name:    String,                     
-        // val club:    String, 
-        // val rating:  Int,            // eg. ttr for table tennis
-        // var place:   (Int,Int)       // position after finishing the round (group or ko)
-        
-        val coPhGr = new CompPhase("TestGroup", 3L, 2, CPT_GR, true, 7, 7, 3)
-        val initGrRes  = coPhGr.init( Array(
-          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
-          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
-          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
-          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
-          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
-          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
-          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))),
-          List( (1,4,2), (1,3,2))
-        )
-        println(s"CompPhase Test Group Round encoded: ${coPhGr.encode}")
-
-        val coPhKO = new CompPhase("TestKO", 3L, 4, CPT_KO, true, 8, 7, 3)
-        val initKORes  = coPhKO.init( Array(
-          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
-          ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
-          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
-          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
-          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
-          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
-          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
-          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))))
-  
-        println(s"CompPhase Test KO Round encoded: ${coPhKO.encode}")
-
-        info("testCompEncode",  s"SUCCESS result: ${res._1} pw: ${res._2}")
-      }
-    }
-  }
 
 }

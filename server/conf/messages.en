@@ -4,8 +4,9 @@
 greeting                                              = Welcome!
 
 ###
-# App Main Messages
+# App Main Messages / Configuration Issues
 ###
+  config.cookie.confirmation                          = false
   app.mockup                                          = false
   app.version = 2022-04EN171
   app.date    = 2022-04-27

@@ -251,8 +251,8 @@ object AppEnv extends BasicHtml
   /** initCookie - check settings of cookie show cookie dialog
    * 
    */
-  def initCookie(): Future[Boolean] =
-    if (!getLocalStorage("AppEnv.Cookie", false)) {
+  def initCookie(withCookie: Boolean): Future[Boolean] =
+    if (withCookie && !getLocalStorage("AppEnv.Cookie", false)) {
       DlgBox.showStd(getMessage("dlg.box.cookietitle"), getMessage("dlg.box.cookiemessage"), Seq("ok"))
         .flatMap { _ match {
           case 1 => setLocalStorage("AppEnv.Cookie", true);   Future(true)

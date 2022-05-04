@@ -46,26 +46,6 @@ object UnitBasic extends UseCase("UnitBasic")
 
   def render(testCase: String = "", testOption: String = "", reload: Boolean=false) = {} 
 
-  def testDate(testCase: String, testOption: String) = {
-
-    import java.time._
-    import java.time.format.DateTimeFormatter
-
-    val sDate = testOption.toInt
-
-    val year  = sDate / 10000
-    val month = (sDate / 100) % 100
-    val day   = sDate % 100
-
-
-    val sourceDate = LocalDate.of(year, month, day)            // Source Date
-    val newDate    = sourceDate.plusDays(10)                   // Adding 10 days to source date.
-    val formatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Setting date format
-    info("testDate", s"date: ${testOption} -> new date: ${newDate.format(formatter)} plus 10 days")
-
-  }
-
-
   // testSpinner
   def testSpinner(testCase: String, testOption: String) = {
     setHtml_("mainContent", clientviews.component.html.Spinner("Bitte warten ...").toString)
@@ -88,14 +68,7 @@ object UnitBasic extends UseCase("UnitBasic")
     }
   }
 
-  // save tourney to disc
-  def doSave(testCase: String, testOption: String) = {
-    val toId = if (testOption == "") App.tourney.id else testOption.toInt
-    saveTourney(toId) map {
-      case Left(err)  => error("save", s"toId: ${toId} failed: ${err.msgCode}")
-      case Right(res) => info("save", s"toId: ${toId} succeeded")
-    }
-  }
+
 
   // testMainContent
   def testMainContent(testCase: String, testOption: String) = {

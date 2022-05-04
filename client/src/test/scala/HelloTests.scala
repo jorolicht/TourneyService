@@ -21,10 +21,10 @@ object HelloTests extends TestSuite
       val a = List[Byte](1, 2)
       a(10)
     }
-    // test("test4"){
-    //   val x = scalajs.usecase.home.TestMain.hello("Robert")
-    //   assert(x.startsWith("H"))
-    // }
+    test("test4"){
+       val x = "Robert"
+       assert(x.startsWith("H"))
+     }
 
     test("test4"){
       // import org.scalajs.dom._
