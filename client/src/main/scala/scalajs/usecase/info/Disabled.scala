@@ -31,6 +31,13 @@ object InfoDisabled extends UseCase("InfoDisabled")
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     setMainContent(clientviews.component.html.Message(getMsg("title"), getMsg("description"), 
                                                       getMsg("alt"), getMsg("image")).toString)
-  }
-    
+  } 
+}  
+
+object InfoEnabled extends UseCase("InfoEnabled")
+{
+  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+    setMainContent(clientviews.component.html.Message(getMsg("title"), getMsg("description", App.tourney.name), 
+                                                      getMsg("alt", App.tourney.name), getMsg("image")).toString)
+  } 
 }  

@@ -11,34 +11,6 @@ package object Constants {
   // val PLID_NN  = 99000
   // val PLID_MAX = 99999
 
-  // competition type
-  val CT_UNKN   = 0
-  val CT_SINGLE = 1
-  val CT_DOUBLE = 2
-  val CT_MIXED  = 3
-  val CT_TEAM   = 4
-
-  // competition phases
-  val CP_UNKN = -99
-  val CP_INIT =   0
-  val CP_VRGR =   1
-  val CP_ZRGR =   2
-  val CP_ERGR =   3
-  val CP_TRGR =   4
-  val CP_ERBO =   3     // Endrunde: KO oder Gruppe
-  val CP_TRBO =   4     // Trostrunde: KO oder Gruppe
-  val CP_LEER =   5     // LEER
-  val CP_VRKO =   6     // not yet available
-  val CP_ZRKO =   7     // not yet available
-  val CP_ERKO =   8     // only final KO round
-  val CP_TRKO =   9     // nur Trostrunde KO
-
- // competition phase type
-  val CPT_UNKN = -99
-  val CPT_KO   =   1
-  val CPT_GR   =   2
-  val CPT_SW   =   3
-
 
   // competition section type 
   val CST_UNKN     = -99
@@ -61,23 +33,7 @@ package object Constants {
   val CSS_EIN   = 102 // Eingabe   (Section)
   val CSS_FIN   = 103 // Finished  (Section) 
 
-  val CS_UNKN  = -99 // unknown status
-  val CS_WEBRE =  -2 // Registrierung / Anmeldung via WEB
-  val CS_REGIS =  -1 // Registrierung / Anmeldung
-  val CS_RESET =   0 // RESET
-  val CS_RUN   =   1 // RUNNING  
-  
-  val CS_VRAUS = 1   // Auslosung der Vorrunde
-  val CS_VREIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_VRFIN = 3   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
 
-  val CS_ZRAUS = 4   // Auslosung der Zwischenrunde
-  val CS_ZREIN = 5   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_ZRFIN = 6   // Zwischenrunde beendet, Auslosung ER kann erfolgen
-  
-  val CS_ERAUS = 7   // Auslosung der Endrunde
-  val CS_EREIN = 8   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_ERFIN = 9   // Endrunde beendet ...
 
   // player status
   val PLS_UNKN = -99
@@ -122,15 +78,6 @@ package object Constants {
     }
   }
 
-  def ct2Name(x: Int): String = {
-    x match {
-      case CT_UNKN   => "unknown"
-      case CT_SINGLE => "EINZEL"
-      case CT_DOUBLE => "DOPPEL"
-      case CT_MIXED  => "MIXED"
-      case CT_TEAM   => "TEAM"      
-      case _         => "unknown"
-    }
-  }
+
 
 }

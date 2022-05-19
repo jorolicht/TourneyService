@@ -13,6 +13,7 @@ import play.api.{ Environment, Configuration, Logger }
 import play.api.i18n.Messages
 
 import shared.model._
+import shared.model.CompPhase._
 import shared.utils.Constants._
 import shared.utils.Routines._
 
@@ -731,6 +732,15 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     * 
     */
   def saveTourney(toId: Long)(implicit tse :TournSVCEnv): Either[Error, Boolean] = TIO.save(toId) 
+
+  /** syncTourney replace tourney with new data, put tourney data to disk
+    * 
+    */  
+  def syncTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = 
+    TIO.add(trny).map {
+      case Left(err)    => Left(err)
+      case Right(nTrny) => TIO.save(nTrny.id)       
+    }
 
 
   /** setTournBase updates tourney basic information

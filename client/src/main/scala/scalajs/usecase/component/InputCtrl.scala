@@ -91,9 +91,12 @@ object InputCtrl extends BasicHtml
         try {
           // class attribute show signal für collapsed or folded directory
           // when folded do nothing (usecase "HomeMain", "None")
-          if (!node.classList.contains("show")) {
-            node.getAttribute(s"data-sbredir-${ucName}") 
+          if (!node.classList.contains("show")) { 
+            val nAttribute = node.getAttribute(s"data-sbredir-${ucName}") 
+            Helper.info("eventSidebar", s"ucName: ${ucName} nAttribute: $nAttribute not show/hide") 
+            nAttribute
           } else{
+            Helper.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir} show")  
             ucName
           } 
         } catch  { case _: Throwable => { 
@@ -102,9 +105,9 @@ object InputCtrl extends BasicHtml
           "HomeMain"  
         }}
       } else {
+        Helper.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir}")  
         ucName
       }
-    Helper.info("eventSidebar", s"ucName: ${ucName} effUcName: ${effUcName} redirect: ${redir}")  
     App.execUseCase(effUcName, effUcParam, effUcInfo)
   }
 

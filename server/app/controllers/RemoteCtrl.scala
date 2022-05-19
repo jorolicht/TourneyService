@@ -497,7 +497,10 @@ class RemoteCtrl @Inject()
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
     CompPhase.decode(cophTx) match {
-      case Left(err)   => Future(BadRequest(err.encode))
+      case Left(err)   => { 
+        // logger.error(s"setCompPhase: ${cophTx}")
+        Future(BadRequest(err.encode))
+      }  
       case Right(coph) => tsv.setCompPhase(coph).map {
         case Left(err)   => BadRequest(err.encode)
         case Right(res)  => Ok(Return(res).encode)

@@ -19,10 +19,11 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
+import shared.model.CompPhase._
+import shared.model.Competition._
 import shared.model.{ Tourney, Competition }
 import shared.utils._
 import shared.utils.Routines._
-import shared.utils.Constants._
 import clientviews.dialog.html
 import _root_.org.w3c.dom.html.HTMLSelectElement
 

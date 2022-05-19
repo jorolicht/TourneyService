@@ -17,6 +17,8 @@ import scala.util.{Success, Failure}
 
 // tourney service client imports
 import shared.model.{ Tourney, TournBase, Player }
+import shared.model.Competition._
+
 import shared.utils.Constants._ 
 import shared.utils._
 

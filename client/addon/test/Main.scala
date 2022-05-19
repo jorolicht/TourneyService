@@ -43,6 +43,8 @@ object AddonMain extends UseCase("AddonMain")
 
   // Commands
   @JSExport def save()                            = AddonCmds.save()
+  @JSExport def sync()                            = AddonCmds.sync()
+  @JSExport def load(toId: String)                = AddonCmds.load(toId)
 
   // Basic tests
   @JSExport def testBasicHello(text: String)      = AddonBasic.testHello(text)
@@ -55,6 +57,14 @@ object AddonMain extends UseCase("AddonMain")
   // Tourney tests
   @JSExport def testTourneyLoad(toId: Long)       = AddonTourney.testLoad(toId)
 
+  // set debug Level
+  @JSExport def setDebug(level: String) = AppEnv.setDebugLevel(level)
+  
+  // get debug Level
+  @JSExport def getDebug() = println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
+  
+
 
 
 }
+

@@ -17,6 +17,8 @@ import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom
 import upickle.default._
 
 import shared.model._
+import shared.model.Competition._
+import shared.model.CompPhase._
 import shared.utils.Constants._ 
 import shared.utils.Validation._ 
 import shared.utils.Routines._

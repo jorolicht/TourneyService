@@ -40,7 +40,6 @@ object AddonCmds extends UseCase("AddonCmds")
 
   def save() = {
     val toId = App.tourney.id
-
     if (toId == 0) {
       info("save", s"ERROR: saving tourney ${toId} not possible")
     } else {
@@ -50,5 +49,40 @@ object AddonCmds extends UseCase("AddonCmds")
       }  
     }
   }
+
+  def sync() = {
+    val toId = App.tourney.id
+    if (toId == 0) {
+      info("sync", s"ERROR: sync tourney ${toId} not possible")
+    } else {
+      syncTourney(toId) map {
+        case Left(err)  => error("sync", s"sync tourney ${toId} failed with: ${err.msgCode}")
+        case Right(res) => info("save", s"SUCCESS: tourney toId: ${toId} synced")
+      }  
+    }
+  }
+
+  def load(toIdStr: String) = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+    val toId = toIdStr.toLongOption.getOrElse(0L)
+
+    if (toId == 0) {
+      error("load", s"loading tourney ${toId} not possible")
+    } else {
+      (for {
+        pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
+        coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+        result    <- EitherT(App.loadRemoteTourney(toId))
+      } yield { (result, pw) }).value.map {
+        case Left(err)    => error("load", s"error message: ${err}")
+        case Right(res)   => {
+          println(s"TOURNEY: \n ${App.tourney.toString()}")
+        } 
+      } 
+    }
+  }
+
+
 
 }

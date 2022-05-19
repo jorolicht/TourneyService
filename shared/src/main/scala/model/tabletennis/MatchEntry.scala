@@ -2,8 +2,8 @@ package shared.model.tabletennis
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
+import shared.model.CompPhase._
 import shared.utils.Routines._
-import shared.utils.Constants._
 import shared.utils.{ Error, Return }
 
 

@@ -47,7 +47,7 @@ case class Tourney(
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Participant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
   var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId) -> Competition Section
-  var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPh)  -> Competition Phase
+  var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
   var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo) -> Playfield
 )
 {
@@ -68,7 +68,22 @@ case class Tourney(
   var backupTime:  Long = 0L
   var writeTime:   Long = 0L  
 
-  def encode(): String = write[Tourney](this)
+ 
+  def encode(version: Int = Tourney.defaultEncodingVersion): String = {
+    version match {
+      case 0 => write[Tourney](this)
+      case 1 => {
+        write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Participant2Comp], List[CompPhaseTx], List[Playfield])]((
+          1, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
+          players.values.toList, comps.values.toList, clubs.values.toList,
+          pl2co.values.toList, cophs.values.map(x => x.toTx).toList,
+          playfields.values.toList        
+        ))
+      }
+      case _ => "Invalid tourney encoding"
+    }
+  }  
+
   def toJson(ident: Int): String = write[Tourney](this, ident)
   def isDummy() = (id == 0L)
   def getToId() = this.id
@@ -161,7 +176,7 @@ case class Tourney(
    *
    */ 
   def getCompCnt(co: Competition): (Int, Int) = co.typ match {    
-    case CT_SINGLE | CT_DOUBLE => {
+    case Competition.CT_SINGLE | Competition.CT_DOUBLE => {
       val pl2cos   = pl2co.values.filter(_.coId==co.id).toSeq
       val cnt      = pl2cos.length
       val cntActiv = pl2cos.filter(_.status > 0).length
@@ -429,31 +444,84 @@ object Tourney {
   def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", 0)
   def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, tBase.typ)
 
-  def decode(trnyStr: String): Either[Error, Tourney] = 
-    if (trnyStr.length > 0 ){
-      try {
-        val trny = read[Tourney](trnyStr)
-        trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
-        trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
-        trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
-        // create inverse hashtables and maxId entries
-        for(club <- trny.clubs.values) {   
-          trny.club2id(club.name) = club.id.toInt
-          if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
+  val defaultEncodingVersion: Int = 1
+  def decode(trnyStr: String): Either[Error, Tourney] = {
+    val trnyStrStart = trnyStr.take(8)
+    val start = trnyStrStart.indexOf("[")
+    val end = trnyStrStart.indexOf(",")
+    val version = if (start >=0 & end >= 2 & start<end) trnyStrStart.slice(start+1,end).trim.toIntOption.getOrElse(0) else 0
+    //println(s"Tourney.decode => version: ${version}" )
+    version match {
+      case 0 => {
+        if (trnyStr.length > 0 ){
+          try {
+            val trny = read[Tourney](trnyStr)
+            trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
+            trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
+            trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
+            // create inverse hashtables and maxId entries
+            for(club <- trny.clubs.values) {   
+              trny.club2id(club.name) = club.id.toInt
+              if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
+            }
+            for(pl <- trny.players.values) {   
+              trny.player2id(pl.hashKey) = pl.id
+              if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
+            }
+            for(comp <- trny.comps.values) {   
+              trny.comp2id(comp.hashKey) = comp.id
+              if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
+            }        
+            Right(trny)
+          }  
+          catch { case _: Throwable => Left( Error("err0070.decode.Tourney", trnyStr.take(20), "", "Tourney.decode") ) }
+        } else {
+          Left(Error("err0070.decode.Tourney", "<empty input>", "", "Tourney.decode"))
         }
-        for(pl <- trny.players.values) {   
-          trny.player2id(pl.hashKey) = pl.id
-          if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
-        }
-        for(comp <- trny.comps.values) {   
-          trny.comp2id(comp.hashKey) = comp.id
-          if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
-        }        
-        Right(trny)
-      }  
-      catch { case _: Throwable => Left( Error("err0070.decode.Tourney", trnyStr.take(20), "", "Tourney.decode") ) }
-    } else {
-      Left(Error("err0070.decode.Tourney", "<empty input>", "", "Tourney.decode"))
-    }
+      }
+      case 1 => {
+        try {
+          val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields) =
+            read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Participant2Comp], List[CompPhaseTx], List[Playfield])](trnyStr)
+          val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
+                             tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
+          trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)
+          trny.comps = collection.mutable.Map(comps.map(x => (x.id, x)): _*)
+          trny.clubs = collection.mutable.Map(clubs.map(x => (x.id, x)): _*)
+          trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*)
+          trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx(x)).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
+          trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*)
 
+          trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
+          trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
+          trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
+          // create inverse hashtables and maxId entries
+          for(club <- trny.clubs.values) {   
+            trny.club2id(club.name) = club.id.toInt
+            if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
+          }
+          for(pl <- trny.players.values) {   
+            trny.player2id(pl.hashKey) = pl.id
+            if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
+          }
+          for(comp <- trny.comps.values) {   
+            trny.comp2id(comp.hashKey) = comp.id
+            if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
+          }   
+          Right(trny)
+        }
+        catch { case _: Throwable => Left( Error("err0070.decode.Tourney", trnyStr.take(20), "", "Tourney.decode") ) }
+      }
+    }
+  }
 }
+
+case class TourneyBaseData(id: Long, name: String, organizer: String, orgDir: String, 
+                           startDate: Int, endDate: Int, ident: String, typ: Int, 
+                           privat: Boolean, contact: Contact, address: Address)
+                           
+object TourneyBaseData {
+  implicit def rw: RW[TourneyBaseData] = macroRW
+}                        
+                           
+

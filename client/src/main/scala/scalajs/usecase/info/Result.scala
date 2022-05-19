@@ -17,6 +17,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 // tourney service client imports
 import shared.model._
+import shared.model.CompPhase._
 import shared.utils._
 import shared.model.tabletennis._
 import shared.utils.Constants._ 

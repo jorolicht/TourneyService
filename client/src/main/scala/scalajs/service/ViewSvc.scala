@@ -12,8 +12,8 @@ import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 
 import shared.model._
+import shared.model.Competition._
 import shared.utils._
-import shared.utils.Constants._
 
 
 import scalajs.{ App, AppEnv }

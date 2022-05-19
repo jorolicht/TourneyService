@@ -277,42 +277,49 @@ class PostActionCtrl @Inject()
 
 
       // addTournBase adds a tourney (from a tournBase) to the database
-      case "addTournBase" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          TournBase.decode(reqData) match {
-            case Left(err)       => logger.error(s"addTournBase: ${err.msgCode}"); Future(BadRequest(err.encode))
-            case Right(trnyBase) => tsv.addTournBase(trnyBase)(tse).map {
-              case Left(err)        => logger.error(s"addTournBase: ${err.msgCode}"); BadRequest(err.add("addTournBase").encode)
-              case Right(trny)      => Ok(trny.encode())
-            }
-          }
-        }  
-      }
-
-
-      // saveTourney to disk
-      case "saveTourney" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          tsv.saveTourney(toId) match {
-            case Left(err)  => Future(BadRequest(err.encode))
-            case Right(res) => Future(Ok(Return(res).encode))
+      case "addTournBase" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+        TournBase.decode(reqData) match {
+          case Left(err)       => logger.error(s"addTournBase: ${err.msgCode}"); Future(BadRequest(err.encode))
+          case Right(trnyBase) => tsv.addTournBase(trnyBase)(tse).map {
+            case Left(err)        => logger.error(s"addTournBase: ${err.msgCode}"); BadRequest(err.add("addTournBase").encode)
+            case Right(trny)      => Ok(trny.encode())
           }
         }
-      } 
+      }  
+    
+
+      // sync (overwrite) tourney and save to disk
+      case "syncTourney" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+        Tourney.decode(reqData) match {
+          case Left(err)   => logger.error(s"syncTourney: ${err.msgCode}"); Future(BadRequest(err.encode))
+          case Right(trny) => tsv.syncTourney(trny)(tse).map {
+            case Left(err)     => logger.error(s"syncTourney: ${err.msgCode}"); BadRequest(err.add("syncTourney").encode)
+            case Right(res)    => Ok(Return(res).encode)
+          }
+        }
+      }  
+
       
+      // save tourney to disk
+      case "saveTourney" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+        tsv.saveTourney(toId) match {
+          case Left(err)  => Future(BadRequest(err.encode))
+          case Right(res) => Future(Ok(Return(res).encode))
+        }
+      }
+  
 
       // setTournBase sets a tourney (from a tournBase) to the database
-      case "setTournBase" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          TournBase.decode(reqData) match {
-            case Left(err)   => Future( BadRequest(err.encode) ) 
-            case Right(tb)   => tsv.setTournBase(tb)(tse).map {
-               case Left(err)   => BadRequest(err.add("setTournBase").encode) 
-               case Right(trny) => Ok(trny.encode())
-            }
+      case "setTournBase" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+        TournBase.decode(reqData) match {
+          case Left(err)   => Future( BadRequest(err.encode) ) 
+          case Right(tb)   => tsv.setTournBase(tb)(tse).map {
+              case Left(err)   => BadRequest(err.add("setTournBase").encode) 
+              case Right(trny) => Ok(trny.encode())
           }
         }
-      } 
+      }
+ 
 
       // addTournBase adds tourney based on click TT data
       case "addTournCTT" => {
@@ -351,7 +358,6 @@ class PostActionCtrl @Inject()
         * calls setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
         */
       case "setComp"   => {
-        logger.info(s"setComp: START" ) 
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
           
           Competition.decode(reqData) match {
@@ -387,7 +393,7 @@ class PostActionCtrl @Inject()
         * calls setCompStatus(coId: Long, status: Int)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]]        
         */
       case "setCompStatus"  => {
-        import shared.utils.Constants._
+        import shared.model.Competition._
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
           tsv.setCompStatus(getParam(pMap, "coId", -1L), getParam(pMap, "status", CS_UNKN) ).map {
             case Left(err)   => { logger.error(s"setComp: ${err.encode}" ); BadRequest(err.add("setCompStatus").encode) }

@@ -3,6 +3,7 @@ package shared.model
 import scala.collection.mutable.{ ArrayBuffer, HashMap }
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
+import shared.model.Competition._
 import shared.utils.{ Error, Return }
 import shared.utils.Constants._
 import shared.utils.Routines._
@@ -60,7 +61,6 @@ case class SNO(value: String) {
 
   def isBye() = SNO.isBye(value)
   def isNN()  = SNO.isNN(value)
-
 }
 
 object SNO {
@@ -69,9 +69,13 @@ object SNO {
   val BYE = "99500" 
   val NN  = "99000" 
 
-  def isBye(value: String) = (value == SNO.BYE)
+  def isBye(value: String) = {
+    val intVal = value.toIntOption.getOrElse(0)
+    (intVal >= 99500 & intVal <= 99999)
+  }
+
   def isNN(value: String)  = (value == SNO.NN)
 
-  def bye() = SNO(BYE)
+  def bye(no: Int=0) = SNO(s"${99500 + no}")
   def nn()  = SNO(NN)
 }

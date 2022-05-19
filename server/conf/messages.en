@@ -7,9 +7,11 @@ greeting                                              = Welcome!
 # App Main Messages / Configuration Issues
 ###
   config.cookie.confirmation                          = false
+  config.LogLevel                                     = debug
+
   app.mockup                                          = false
-  app.version = 2022-04EN171
-  app.date    = 2022-04-27
+  app.version                                         = 2022-05EN180
+  app.date                                            = 2022-05-06
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -639,6 +641,11 @@ info.disabled.image                                   = notlucky
 info.disabled.alt                                     = Tournament information not available - tournament selection required
 info.disabled.description                             = Tournament information is only available after selecting a tournament. Selection through tourney search.
 
+info.enabled.title                                    = Tourneydata
+info.enabled.image                                    = tourneydata
+info.enabled.description                              = for {0}
+info.enabled.alt                                      = Tourneydata for {0}
+
 info.player.count                                     = Number of players:
 info.player.noEntry                                   = There are no competitions with registered players
 info.player.count                                     = Number of players:
@@ -678,12 +685,12 @@ info.schedule.date                                    = Date
 info.schedule.email                                   = Email Address
 info.schedule.date.range                              = {0} - {1}
 info.schedule.selcompetition                          = Competition Selection
-info.schedule.placeholder.playerdata                  = Player Data
-info.schedule.placeholder.name                        = Lastname, First Name
-info.schedule.placeholder.club                        = Club
-info.schedule.placeholder.email                       = john.doe@domain.com
-info.schedule.placeholder.ttr                         = TTR Value
-info.schedule.placeholder.year                        = Year
+info.schedule.plh.playerdata                          = Player Data
+info.schedule.plh.name                                = Lastname, First Name
+info.schedule.plh.club                                = Club
+info.schedule.plh.email                               = john.doe@domain.com
+info.schedule.plh.ttr                                 = TTR Value
+info.schedule.plh.year                                = Year
 info.schedule.button.submit                           = SIGN UP
 info.schedule.hint                                    = Currently no further information has been provided by the organizer.
 info.schedule.comps.header.startTime                  = Start Time

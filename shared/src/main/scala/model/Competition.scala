@@ -138,10 +138,39 @@ case class Competition(
   def equal(co: Competition): Boolean = hash == co.hash
   def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
   def encode = write[Competition](this)
+
 }                                                               
 
 object Competition {
   implicit def rw: RW[Competition] = macroRW
+
+  // competition type
+  val CT_UNKN   = 0
+  val CT_SINGLE = 1
+  val CT_DOUBLE = 2
+  val CT_MIXED  = 3
+  val CT_TEAM   = 4
+
+
+  // Competition Status
+  val CS_UNKN  = -99 // unknown status
+  val CS_WEBRE =  -2 // Registrierung / Anmeldung via WEB
+  val CS_REGIS =  -1 // Registrierung / Anmeldung
+  val CS_RESET =   0 // RESET
+  val CS_RUN   =   1 // RUNNING  
+  
+  val CS_VRAUS = 1   // Auslosung der Vorrunde
+  val CS_VREIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val CS_VRFIN = 3   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
+
+  val CS_ZRAUS = 4   // Auslosung der Zwischenrunde
+  val CS_ZREIN = 5   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val CS_ZRFIN = 6   // Zwischenrunde beendet, Auslosung ER kann erfolgen
+  
+  val CS_ERAUS = 7   // Auslosung der Endrunde
+  val CS_EREIN = 8   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val CS_ERFIN = 9   // Endrunde beendet ...
+
   def tupled = (this.apply _).tupled
   def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
   def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
@@ -157,6 +186,17 @@ object Competition {
       case datim1(y,m,d,hh,mm) => s"${y}${m}${d}#${hh}${mm}"
       case datim2(d,m,y,hh,mm) => s"${y}${m}${d}#${hh}${mm}"       
       case                 _   => startDate
+    }
+  }
+
+  def ct2Name(x: Int): String = {
+    x match {
+      case CT_UNKN   => "unknown"
+      case CT_SINGLE => "EINZEL"
+      case CT_DOUBLE => "DOPPEL"
+      case CT_MIXED  => "MIXED"
+      case CT_TEAM   => "TEAM"      
+      case _         => "unknown"
     }
   }
 

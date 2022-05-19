@@ -22,6 +22,7 @@ import upickle.default._
 
 import shared.utils._
 import shared.model._
+import shared.model.Competition._
 import shared.utils.Constants._ 
 import shared.utils.Routines._
 

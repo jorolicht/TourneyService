@@ -51,18 +51,7 @@ object AppEnv extends BasicHtml
   var callerId      = CallerIdent("000000")
   var status        = AppStatus.load
   var mockupMode    = false   // enable mockup usecase execution
-  var debugMode     = false   // enable debug mode
-
-  def initDebug() =  {
-    debugMode = true
-    getLocalStorage("AppEnv.LogLevel") match {
-       case "debug" => logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Debug)
-       case "error" => logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Error)
-       case "warn"  => logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Warn)
-       case "info"  => logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Info)
-       case _       => debugMode = false
-    }
-  }  
+  var debugMode     = false   // enable debug mode 
 
   def getDebugLevel():Option[String] =  {
     getLocalStorage("AppEnv.LogLevel") match {
@@ -74,13 +63,14 @@ object AppEnv extends BasicHtml
     }
   }  
   
-  def setDebugLevel(value: String="off"): Unit=  {
+  def setDebugLevel(value: String=""): Unit=  {
+    debugMode = true
     value match {
        case "error" => setLocalStorage("AppEnv.LogLevel", "error");  logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Error)
        case "warn"  => setLocalStorage("AppEnv.LogLevel", "warn");   logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Warn)
        case "info"  => setLocalStorage("AppEnv.LogLevel", "info");   logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Info) 
        case "debug" => setLocalStorage("AppEnv.LogLevel", "debug");  logger = new org.scalajs.logging.ScalaConsoleLogger(Level.Debug)
-       case _       => setLocalStorage("AppEnv.LogLevel", "off");    logger = org.scalajs.logging.NullLogger 
+       case _       => setLocalStorage("AppEnv.LogLevel", "");       logger = org.scalajs.logging.NullLogger; debugMode = false 
     }
   } 
 
@@ -184,17 +174,17 @@ object AppEnv extends BasicHtml
     
     lang = language
 
-    if (localMessages == "" | debugMode | localUpdate != lastUpdate) {
+    if (localMessages == "" | (getLocalStorage("AppEnv.LogLevel") == "") | localUpdate != lastUpdate) {
       Ajax.get("/getMessages").map(_.responseText).map(content => {
         setLocalStorage("AppEnv.Messages", content)
         setLocalStorage("AppEnv.LastUpdate", lastUpdate)
         messages = read[ Map[String,Map[String,String]]] (content)
-        //debug("loadMessages", s"update(${localUpdate}/${lastUpdate})")
+        println(s"loadMessages => update(${localUpdate}/${lastUpdate})")
         true
       })
     } else {
       messages = read[ Map[String,Map[String,String]]] (localMessages)
-      info("loadMessages", "local loaded")
+      println("loadMessages => local messages loaded")
       Future(true)
     }
   }
@@ -256,7 +246,7 @@ object AppEnv extends BasicHtml
       DlgBox.showStd(getMessage("dlg.box.cookietitle"), getMessage("dlg.box.cookiemessage"), Seq("ok"))
         .flatMap { _ match {
           case 1 => setLocalStorage("AppEnv.Cookie", true);   Future(true)
-          case _ => info("initCookie", "cookies not wanted"); Future(false)
+          case _ => println("initCookie => cookies not wanted"); Future(false)
       }}
     } else {
       Future(true)

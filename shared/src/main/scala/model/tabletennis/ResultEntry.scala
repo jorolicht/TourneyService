@@ -5,6 +5,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Constants._
 import shared.utils.Routines._
+import shared.model.CompPhase._
 import shared.model.tabletennis.utility._
 import shared.utils.{ Error, Return }
 

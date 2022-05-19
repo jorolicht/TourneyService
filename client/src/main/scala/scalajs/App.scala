@@ -41,7 +41,7 @@ object App extends BasicHtml
 
   // DEBUG Version
   var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
-                    InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
+                    InfoEnabled, InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
                     OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
                     AdminDatabase, AdminLicense 
@@ -76,7 +76,6 @@ object App extends BasicHtml
 
     // initialize debug/mockup and logger
     AppEnv.initMockup()
-    AppEnv.initDebug()
     AppEnv.initContext(usrCtx, csrfToken)
     AppEnv.initStateHandler()
 
@@ -88,19 +87,20 @@ object App extends BasicHtml
       cookieAllowed <- AppEnv.initCookie(
                          if (msgsLoaded) AppEnv.getMessage("config.cookie.confirmation").toBooleanOption.getOrElse(true) else true
                        ) 
-    } yield cookieAllowed & msgsLoaded
+    } yield {
+      AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
+      cookieAllowed & msgsLoaded
+    }  
 
-    // initialize tourney if basic usecase is called
-    if (ucName == "HomeMain") {
-      setLocalTourney(Tourney.init)
-    } else {
-      loadLocalTourney()
-    }
-    initTrigger()
-
+    
     val result = initOk.map { _ match {
       // do the actual work and exec the usecase
-      case true  => execUseCase(ucName, ucParam, ucInfo)
+      case true  => {
+        // initialize tourney if basic usecase is called
+        if (ucName == "HomeMain") setLocalTourney(Tourney.init) else loadLocalTourney()
+        initTrigger()      
+        execUseCase(ucName, ucParam, ucInfo)
+      }  
       case false => dom.window.location.href = s"${AppEnv.home}"  
     }}
     ()
@@ -147,7 +147,7 @@ object App extends BasicHtml
    
     println(s"playfields -> toId: ${toIdStr} language: ${language}") 
 
-    AppEnv.initDebug()
+    AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
     getTourney(toId).map {
       case Left(err)    => {
         println(s"playfields(error) ${getError(err)}")

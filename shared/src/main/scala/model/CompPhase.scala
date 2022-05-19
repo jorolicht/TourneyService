@@ -16,8 +16,12 @@ import shared.model.tabletennis._
  *  a final round. Currently only two typs are supported ("group" or "ko") 
  *  number of players always less or equal size
  */
-case class CompPhase(val name: String, val coId: Long, val coPh: Int, val coPhTyp: Int, var enabled: Boolean, 
-                var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
+
+case class CompPhase(val name: String, val coId: Long, val coPh: Int, 
+                     val coPhId: Int, val coPhTyp: Int, 
+                     val status: Int, var enabled: Boolean, 
+                     var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
+  import CompPhase._
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
 
@@ -132,20 +136,55 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int, val coPhTy
   def toTx(): CompPhaseTx = {
     var grps = List[GroupTx]() 
     for (i <- 0 to groups.length-1) grps = grps :+ groups(i).toTx
-    CompPhaseTx(name, coId, coPh, coPhTyp, enabled, size, noPlayers, noWinSets, grps, ko.toTx) 
+    CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, grps, ko.toTx) 
   }
 
 }
 
 
 object CompPhase {
-  implicit def rw: RW[CompPhase] = macroRW 
+
+  // competition phase Identification
+  // 
+
+  // competition phase
+  val CP_UNKN = -99
+  val CP_INIT =   0
+  val CP_VRGR =   1
+  val CP_ZRGR =   2
+  val CP_ERGR =   3
+  val CP_TRGR =   4
+  val CP_ERBO =   3     // Endrunde: KO oder Gruppe
+  val CP_TRBO =   4     // Trostrunde: KO oder Gruppe
+  val CP_LEER =   5     // LEER
+  val CP_VRKO =   6     // not yet available
+  val CP_ZRKO =   7     // not yet available
+  val CP_ERKO =   8     // only final KO round
+  val CP_TRKO =   9     // nur Trostrunde KO
+
+  // Competition Phase Type
+  val CPT_UNKN = 0
+  val CPT_GR   = 1  // Group Phase
+  val CPT_KO   = 2  // KO Phase
+  val CPT_SW   = 3  // Switzsystem
+
+  // Competition Phase Status
+  val CPS_CFG = 0   // RESET
+  val CPS_AUS = 1   // Auslosung der Vorrunde, Zwischenrunde, Endrunde, Trostrunde
+  val CPS_EIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val CPS_FIN = 3   // Runde/Phase beendet, Auslosung ZR oder ER kann erfolgen
+
+  implicit val rw: RW[CompPhase] = upickle.default.readwriter[String].bimap[CompPhase](
+    x   => write[CompPhaseTx](x.toTx()),   //s"""{ "name", "Hugo" } """,  
+    str => fromTx(read[CompPhaseTx](str))
+  )
+
   def decode(coPhStr: String): Either[Error, CompPhase] = 
     try Right(fromTx(read[CompPhaseTx](coPhStr)))
     catch { case _: Throwable => Left(Error("err0177.decode.CompPhase", coPhStr.take(20))) }
 
   def fromTx(tx: CompPhaseTx): CompPhase = {
-    val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhTyp, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
+    val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhId, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.coPhTyp match {
       case CPT_GR  => for (g <- tx.groups) { cop.groups = cop.groups :+ Group.fromTx(g) }
       case CPT_KO  => cop.ko = KoRound.fromTx(tx.ko) 
@@ -162,7 +201,9 @@ case class CompPhaseTx(
   val name:      String, 
   val coId:      Long, 
   val coPh:      Int, 
-  val coPhTyp:   Int, 
+  val coPhId:    Int, 
+  val coPhTyp:   Int,
+  val status:    Int,
   var enabled:   Boolean, 
   var size:      Int, 
   val noPlayers: Int,

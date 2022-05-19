@@ -112,7 +112,8 @@ trait TourneyService {
   def regTournBase(trnyBase: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
 
   def saveTourney(toId: Long)(implicit tse :TournSVCEnv): Either[Error, Boolean]
-  
+  def syncTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+
   def setTournBase(tb: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Tourney]]
   def addTournCTT(ctt: CttTournament, orgDir: String, organizer: String, sDate: Int=0, eDate: Int=0,
                   contact: String = "lastname·firstname·phone·email",

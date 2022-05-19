@@ -7,9 +7,11 @@ greeting                                              = Herzlich Willkommen!
 # App Main Messages / Configuration Issues
 ###
   config.cookie.confirmation                          = false
+  config.LogLevel                                     = debug
+
   app.mockup                                          = false
-  app.version                                         = 2022-04DE171
-  app.date                                            = 2022-04-27
+  app.version                                         = 2022-05DE180
+  app.date                                            = 2022-05-06
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -603,6 +605,12 @@ info.disabled.image                                   = notlucky
 info.disabled.alt                                     = Turnierinformationen nicht verfügbar - Turnierauswahl erforderlich
 info.disabled.description                             = Turnierinformationen sind erst nach der Auswahl eines Turnieres verfügbar. Die Selektion erfolgt über die Turniersuche.
 
+info.enabled.title                                    = Turnierinformation
+info.enabled.image                                    = tourneydata
+info.enabled.description                              = für {0}
+info.enabled.alt                                      = Turnierinformationen für {0}
+
+
 info.player.count                                     = Anzahl Spieler: 
 info.player.noEntry                                   = Keine Wettbewerbe mit gemeldeten Spielern vorhanden 
 info.player.count                                     = Anzahl Spieler: 
@@ -642,12 +650,12 @@ info.schedule.date                                    = Datum
 info.schedule.email                                   = E-Mail-Adresse
 info.schedule.date.range                              = {0} - {1}
 info.schedule.selcompetition                          = Auswahl des Wettbewerb
-info.schedule.placeholder.playerdata                  = Spielerdaten
-info.schedule.placeholder.name                        = Name, Vorname
-info.schedule.placeholder.club                        = Club/Verein
-info.schedule.placeholder.email                       = max.mustermann@domain.com
-info.schedule.placeholder.ttr                         = TTR-Wert
-info.schedule.placeholder.year                        = Jahrgang
+info.schedule.plh.playerdata                          = Spielerdaten
+info.schedule.plh.name                                = Name, Vorname
+info.schedule.plh.club                                = Club/Verein
+info.schedule.plh.email                               = max.mustermann@domain.com
+info.schedule.plh.ttr                                 = TTR-Wert
+info.schedule.plh.year                                = Jahrgang
 info.schedule.button.submit                           = ANMELDEN
 info.schedule.hint                                    = Zzt. sind keine weiteren Hinweise vom Veranstalter hinterlegt.
 info.schedule.comps.header.startTime                  = Startzeit

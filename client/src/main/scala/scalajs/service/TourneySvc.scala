@@ -21,6 +21,7 @@ import shared.model.tabletennis.ResultEntry
 import shared.utils._
 import shared.utils.Routines._
 import shared.model._
+import shared.model.Competition._
 import scalajs.usecase.Helper
 import scalajs._
 import org.xml.sax.ErrorHandler
@@ -188,11 +189,18 @@ trait TourneySvc extends WrapperSvc
   }  
 
 
-  // update tourney basis information
+  // save tourney to disc on server side (no sync)
   def saveTourney(toId: Long): Future[Either[Error, Boolean]] =
     postAction("saveTourney", toId, "", "").map {
       case Left(err)  => Left(err.add("saveTourney"))
       case Right(res) => Return.decode2Boolean(res, "saveTourney")
+    }
+
+  // copy loal tourney to server and save to disc
+  def syncTourney(toId: Long): Future[Either[Error, Boolean]] =
+    postAction("syncTourney", toId, "", App.tourney.encode()).map {
+      case Left(err)  => Left(err.add("syncTourney"))
+      case Right(res) => Return.decode2Boolean(res, "syncTourney")
     }
 
 

@@ -25,6 +25,7 @@ import shared.utils._
 import shared.utils.Routines._
 
 import shared.model._
+import shared.model.CompPhase._
 import shared.utils.Constants._
 import shared.model.tabletennis._
 
@@ -45,6 +46,7 @@ object AddonComp extends UseCase("AddonComp")
     import cats.implicits._ 
    
     val toId = testOption.toLongOption.getOrElse(182L)
+    println(s"START AddonComp.testEncode => toId: ${toId}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
       coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
@@ -53,7 +55,12 @@ object AddonComp extends UseCase("AddonComp")
       case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
         
-        val coPhGr = new CompPhase("TestGroup", 3L, 2, CPT_GR, true, 7, 7, 3)
+// ase class CompPhase(val name: String, val coId: Long, val coPh: Int, 
+//                      val coPhId: Int, val coPhTyp: Int, 
+//                      val status: Int, var enabled: Boolean, 
+//                      var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
+
+        val coPhGr = new CompPhase("TestGroup", 3L, 2, 99, CPT_GR, 3, true, 7, 7, 3)
         val initGrRes  = coPhGr.init( Array(
           ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
           ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
@@ -65,7 +72,7 @@ object AddonComp extends UseCase("AddonComp")
           List( (1,4,2), (1,3,2))
         )
 
-        val coPhKO = new CompPhase("TestKO", 3L, 4, CPT_KO, true, 8, 7, 3)
+        val coPhKO = new CompPhase("TestKO", 3L, 4, 99, CPT_KO, 7, true, 8, 7, 3)
         val initKORes  = coPhKO.init( Array(
           ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
           ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
@@ -79,10 +86,30 @@ object AddonComp extends UseCase("AddonComp")
         App.tourney.cophs((3l,4))  = coPhKO
         App.tourney.cophs((3l,2))  = coPhGr
 
-        saveTourney(toId) map {
-          case Left(err)  => BasicHtml.setResult(s"ERROR: saving tourney ${toId} failed with: ${err.msgCode}")
-          case Right(res) => BasicHtml.setResult(s"SUCCESS: tourney toId: ${toId} saved")
-        }
+
+        val exa =s"""  
+        """
+        
+        // CompPhase.decode(exa) match {
+        //   case Left(err)   => println(s"testEncode => ERROR: ${err}")
+        //   case Right(res)  => println(s"testEncode => RESULT: ${res}")
+        // }
+
+        println(s"testEncode => GroupPhase: ${coPhGr.encode}")
+        println(s"testEncode => KOPhase: ${coPhKO.encode}")
+
+        val  encResult = App.tourney.encode()
+      
+        info("testEncode", s"Tourney encoded: ${encResult}")
+
+        val testTrny = Tourney.decode(encResult)
+        //val testTrny = Tourney.decode(encResult)
+        info("testEncode", s"Tourney decoded: ${testTrny.toString()}")
+
+        // saveTourney(toId) map {
+        //   case Left(err)  => BasicHtml.setResult(s"ERROR: saving tourney ${toId} failed with: ${err.msgCode}")
+        //   case Right(res) => BasicHtml.setResult(s"SUCCESS: tourney toId: ${toId} saved")
+        // }
       }
     }
   }

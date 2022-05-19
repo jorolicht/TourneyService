@@ -16,6 +16,7 @@ import scala.concurrent._
 import scala.util.{Success, Failure}
 
 import shared.model.{ TournBase, Player }
+import shared.model.Competition._
 import shared.utils.Routines._
 import shared.utils.Constants._ 
 import shared.utils._

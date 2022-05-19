@@ -160,4 +160,10 @@ package object Routines {
     sb.toString
   }
 
+
+  def getOrDefault(value: String, defValue: => String): String = if (value == "") defValue else value 
+  
+ 
+
+
 }

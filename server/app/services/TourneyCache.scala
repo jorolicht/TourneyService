@@ -32,7 +32,6 @@ import models.daos.TourneyDAO
  *             address: String = "description·country·zip·city·street")
  *             (implicit ec: ExecutionContext, env: Environment, tonyDao: TourneyDAO, msgs : Messages): Future[Either[Error, Long]]
  *  def load(toId: Long)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]]
- *  def load(toId: Long)(implicit ec: ExecutionContext, cfg: Configuration, tonyDao: TourneyDAO): Future[Either[Error, Tourney]] 
  *  def save(toId: Long)(implicit ec: ExecutionContext, env: Environment): Either[Error, Boolean]
  *  def clean()(implicit  ec: ExecutionContext, env: Environment): Unit
  * 
@@ -169,7 +168,7 @@ object TIO {
     tonyDao.insertOrUpdate(trny.getBase()).map { tony => 
       if (tony.id > 0) {
         if (tourney.isDefinedAt(tony.id)) tourney.remove(tony.id) 
-        tourney(tony.id) = Tourney.init(tony)
+        tourney(tony.id) = trny.copy(id=tony.id)        
         save(tony.id)
         Right(tourney(tony.id))
       } else {
@@ -371,8 +370,8 @@ object TIO {
         val pathToFileCfg = Paths.get(fNameTourney)
 
         Files.createDirectories(pathToFileCfg.getParent())
-        Files.write(pathToFileCfg, write[Tourney](tourney(toId)).getBytes(StandardCharsets.UTF_8))
-        logger.info(s"save to disk: ${tourney(toId).name}(${toId}) -> ${fNameTourney}")
+        Files.write(pathToFileCfg, tourney(toId).encode().getBytes(StandardCharsets.UTF_8))
+        logger.info(s"save to disk: ${tourney(toId).name}(${toId}) version: ${Tourney.defaultEncodingVersion} -> ${fNameTourney}")
         Right(true)         
       } catch { case _: Throwable => 
         logger.error(s"save to disk failed: ${tourney(toId).name}(${toId})")
