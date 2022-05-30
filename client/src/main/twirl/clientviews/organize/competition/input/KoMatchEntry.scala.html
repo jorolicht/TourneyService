@@ -1,0 +1,23 @@
+@*
+ * Template for input a KO-matches
+ *@
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(nameA: String, nameB: String, gameNo: Int, info: String, playfield: String, ballArr: Array[String], sets: String, winSets:Int)(implicit ucc: UseCaseParam)
+
+<td class="border-bottom border-left border-top pl-2 text-right"><small>@nameA</small></td>
+<td class="border-bottom border-top pl-1 pr-1 text-center">-</td>
+<td class="border-bottom border-right border-top pr-2 text-left"><small>@nameB</small></td>
+<td class="border-bottom border-right border-top pr-2 text-center"><small>@gameNo</small></td>
+<td>@info</td>
+<td>@playfield</td>
+@for(i <- 0 to (winSets-1)*2){
+  @if(i<ballArr.length) {
+    <td>@ballArr(i)</td>
+  } else {
+    <td>&nbsp;</td>
+  }
+}
+<td>@sets</td>

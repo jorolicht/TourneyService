@@ -1,7 +1,7 @@
 package scalajs.usecase.organize
 
-// Start TestCases
-// http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+// Start TestCases in Javascript Console
+// Start.testOrgCompDraw("<toId>")
 
 import scala.concurrent._
 import scala.util.{Success, Failure }
@@ -17,12 +17,11 @@ import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom
 import upickle.default._
 
 import shared.model._
-import shared.utils.Constants._ 
+import shared.model.CompPhase._ 
 import shared.utils.Validation._ 
 import shared.utils.Routines._
 import shared.utils._
 
-import scalajs.usecase.dialog.{ DlgBox, DlgSpinner, DlgInfo }
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs._
@@ -33,44 +32,56 @@ import scalajs._
 // ***
 @JSExportTopLevel("OrganizeCompetitionDraw")
 object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")  
-  with TourneySvc with DrawSvc with UIComponentServices
+  with TourneySvc with DrawSvc
 {
   import org.scalajs.dom.raw.HTMLElement
+  import scala.collection.mutable.ListBuffer
+
+  //implicit val trny = App.tourney
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     
-    //setMainContent("OrganizeCompetitionDraw")
+    // setMainContent(s"OrganizeCompetitionDraw coId: ${AppEnv.getCoId}")
     // generate cards for every competition section if a competition is selected
     val coId = AppEnv.getCoId
     if (coId > 0) {
-      // generate list of tuple (section name, section Id )
-      val compSects = App.tourney.coSects.filter(x => x._1._1 == coId).values.map(x => (x.name, x.id)).toList
-      if (compSects.length == 0) {
-        showAlert(getMsg("noSection"))
+      // old: generate list of tuple (section name, section Id )
+      // generate list of tuple (phase name, phase Id )
+      val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
+      //val compSects = App.tourney.coSects.filter(x => x._1._1 == coId).values.map(x => (x.name, x.id)).toList
+      if (coPhNameIds.length == 0) {
+        setMainContent(showAlert(getMsg("noSection"))) 
       } else {
-        setMainContent(clientviews.organize.competition.html.DrawCard( compSects ).toString)
-        compSects.map { case (name, secId) => 
-          val elem = getElemById("Content").querySelector(s"[data-navId='${secId}']")
-          val size   = Trny.coSects(coId, secId).size
-          val secTyp = Trny.coSects(coId, secId).secTyp
+        setMainContent(clientviews.organize.competition.html.DrawCard( coPhNameIds ).toString)
+        coPhNameIds.map { case (name, id) => 
+          val elem    = getElemById("Content").querySelector(s"[data-navId='${id}']")
+          val size    = Trny.cophs(coId, id).size
+          val coPhTyp = Trny.cophs(coId, id).coPhTyp
           // generate draw frame
-          secTyp match {
-            case CST_GRPS3 | CST_GRPS4 | CST_GRPS45 | CST_GRPS5 | CST_GRPS56 | CST_GRPS6  => {
-              elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, secId, genGrpConfig(secTyp, size)).toString
+          coPhTyp match {
+            case CPT_GR  => {
+             // generate group configuration list: (grName: String, grId: Int, grSize: Int, pos: Int)
+             var pos = 1
+             var grpCfg = new ListBuffer[(String,Int,Int,Int)]()
+             for (grp <- App.tourney.cophs((coId, id)).groups) {
+               grpCfg += ((grp.name, grp.grId, grp.size, pos))
+               pos = pos + grp.size 
+             }
+             elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, id, grpCfg.toList).toString
             }  
-            case CST_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, secId, size).toString
-            case CST_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, secId, size).toString
+            case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, id, size).toString
+            case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, id, size).toString
             case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
           }
-          // generate draw frame
-
+          // generate draw content
+          setDrawContent(coId, id)(App.tourney)
         }  
       }
     } else {
-      showAlert(getMsg("noSelection")) 
+      setMainContent(showAlert(getMsg("noSelection"))) 
     }
-
   }
+
 
 
   @JSExport 
@@ -86,9 +97,9 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
       case "DrawRefresh"   => {
         val coId  = elem.getAttribute("data-coId")
-        val secId = elem.getAttribute("data-secId")
+        val coPhId = elem.getAttribute("data-coPhId")
 
-        val inputNodes = getElemById(s"Draw_${coId}_${secId}").querySelectorAll("small[data-drawPos]")
+        val inputNodes = getElemById(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
         val result = for( i <- 0 to inputNodes.length-1) yield {
           val elem   = inputNodes.item(i).asInstanceOf[HTMLElement]
           val posOld = elem.getAttribute("data-drawPos").toIntOption.getOrElse(-1)
@@ -115,13 +126,13 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
 
   //set view for draw, input player list with (pos, SNO, Name, Club, TTR)
-  def setDrawContent(coId: Long, secId: Int, size: Int)(implicit trny: Tourney) = {
-    // first get the base element identified by coId and secId
-    val elemBase = getElemById(s"Draw_${coId}_${secId}")
-
-    val pants = trny.coSects(coId, secId).pants.map( _.getInfo(trny.comps(coId).typ))
+  def setDrawContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
+    // first get the base element identified by coId and coPhId
+    val elemBase = getElemById(s"Draw_${coId}_${coPhId}")
     
-    //.playerMap = player.map(x=> x._1 -> (x._2, x._3, x._4, x._5) ).toMap
+    //println(s"setDrawContent pants: ${trny.cophs(coId, coPhId).pants.toString}")
+    val pants = trny.cophs(coId, coPhId).pants.map( _.getInfo(trny.comps(coId).typ))
+    println(s"setDrawContent pants: ${pants.toString}")
 
     // first set the start numbers
     val inputElements = elemBase.querySelectorAll("small[data-drawPos]")
@@ -149,6 +160,34 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       val pos  = elem.getAttribute("data-drawTTR").toInt
       elem.innerHTML = pants(pos-1)._4.toString
     }
+
+
+    // val koRowUp = elemBase.querySelectorAll("td[data-koRowUp]")
+    // for( i <- 0 to koRowUp.length-1) {
+    //   val elem = koRowUp.item(i).asInstanceOf[HTMLElement]
+    //   val pos  = elem.getAttribute("data-koRowUp").toInt
+    //   if (pos % 2 == 0) {
+    //     elem.classList.add("border-bottom")
+    //     elem.classList.add("border-right")
+    //   }
+    //   // elem.innerHTML = i.toString
+    //   // elem.nextElementSibling.innerHTML = "x"
+    //   // elem.nextElementSibling.nextElementSibling.innerHTML = "y"
+    // }  
+
+    // val koRowDown = elemBase.querySelectorAll("td[data-koRowDown]")
+    // for( i <- 0 to koRowDown.length-1) {
+    //   val elem = koRowDown.item(i).asInstanceOf[HTMLElement]
+    //   val pos  = elem.getAttribute("data-koRowDown").toInt
+    //   if (pos % 2 == 1) {
+    //     elem.classList.add("border-top")
+    //     elem.classList.add("border-right")
+    //   } 
+    //   // elem.innerHTML = i.toString
+    //   // elem.nextElementSibling.innerHTML = "x"
+    //   // elem.nextElementSibling.nextElementSibling.innerHTML = "y"
+    // }  
+
 
   }
 

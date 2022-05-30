@@ -17,13 +17,13 @@
 @grpPos(pos:Int) = @{ Html(s"""  
   <td rowspan="2" style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">${pos}</small></td>
   <td rowspan="2" contenteditable='true' style="width:30px;" class="border-top border-bottom border-right text-center p-1">
-    <small data-drawPos='@i' data-sno='' class="font-weight-bold text-info">${pos}</small>
+    <small data-drawPos='${pos}' data-sno='' class="font-weight-bold text-info">${pos}</small>
   </td>""")  
 }
 @grpNameClubTTR(pos:Int) = @{ Html(s"""
-  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='@pos'>Lastname, Firstname</small></td>
-  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='@pos'>Club</small></td>
-  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='@pos' >TTR</small></td>""")  
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='${pos}'>Lastname, Firstname</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='${pos}'>Club</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='${pos}' >TTR</small></td>""")  
 }
 @tdrb() = @{ Html(s"""<td class="tdDrawGroup border-right border-bottom"></td>""") }
 @tdr()  = @{ Html(s"""<td class="tdDrawGroup border-right"></td>""") }

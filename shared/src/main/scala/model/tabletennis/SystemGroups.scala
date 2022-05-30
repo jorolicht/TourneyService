@@ -50,7 +50,7 @@ object GroupEntry {
  * val tup2     = """\((\d+),(\d+)\)""".r 
  */
 class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSets: Int) {
-  var players    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0)))                      
+  var pants      = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0)))                      
   val results    = Array.fill[GroupEntry](size, size) (GroupEntry(false, (0,0), (0,0), (0,0), Array("")))
   var points     = Array.ofDim[(Int, Int)](size)
   var sets       = Array.ofDim[(Int, Int)](size)
@@ -58,7 +58,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
 
   def init(pls: Array[ParticipantEntry]): Boolean = {
     if (pls.length == size) {
-      for (i <- 0 to size-1) players(i) = pls(i) 
+      for (i <- 0 to size-1) pants(i) = pls(i) 
       true
     } else {
       false
@@ -68,7 +68,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   override def toString() = {
     val str = new StringBuilder(s"  Group ${name} (Id:${grId}/Size:${size}/Quali:${quali}) WinSets: ${noWinSets}\n")
     str.append("    Player\n")
-    for (pe <- players) {
+    for (pe <- pants) {
       str.append(s"     - ${pe.sno} ${pe.name}(${pe.club}) \n")
     }
     
@@ -87,9 +87,9 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   def toTx(): GroupTx = {
     val grtx = GroupTx(name, grId, size, quali, noWinSets)
     for (i <-0 to size-1; j <- i+1 to size-1) {
-      grtx.results = grtx.results :+ results(i)(j).toResultEntry((i+1,j+1),(players(i).sno,players(j).sno))
+      grtx.results = grtx.results :+ results(i)(j).toResultEntry((i+1,j+1),(pants(i).sno,pants(j).sno))
     }
-    grtx.players = players.toList
+    grtx.pants = pants.toList
     grtx
   }
 
@@ -121,7 +121,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   }
 
 
-  // calc position of players based on points, sets and ball difference
+  // calc position of pants based on points, sets and ball difference
   def calc() = {
     def sumPoints(pos: Int): (Int,Int) = { 
       var sum = (0,0); for ( i <- 0 to size-1) if (results(pos)(i).valid) sum = sum + results(pos)(i).points; sum
@@ -142,17 +142,17 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     }
     tmpPos = tmpPos.sortBy(_._2).reverse
     var cnt = 1 
-    players(tmpPos(0)._1).place = (cnt,0)
+    pants(tmpPos(0)._1).place = (cnt,0)
     for (i <- 1 to size-1) { 
       if (tmpPos(i)._2 < tmpPos(i-1)._2) { cnt = cnt + 1 }
-      players(tmpPos(i)._1).place = (cnt,0) 
+      pants(tmpPos(i)._1).place = (cnt,0) 
     }
   }
 
   def getResultEntrys(): Seq[ResultEntry] = {
     var resList:   List[ResultEntry] = List[ResultEntry]()
     for (i <-0 to size-1; j <- i+1 to size-1) {
-      resList = resList :+ results(i)(j).toResultEntry( (i+1,j+1) , (players(i).sno, players(j).sno) )
+      resList = resList :+ results(i)(j).toResultEntry( (i+1,j+1) , (pants(i).sno, pants(j).sno) )
     }
     resList.toSeq
   }
@@ -185,9 +185,9 @@ object Group {
   def fromTx(grtx: GroupTx) = {
     val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
 
-    // add players
-    for ((plentry, count) <- grtx.players.zipWithIndex) {
-      if (count < grtx.players.length) gr.players(count) = plentry
+    // add pants
+    for ((plentry, count) <- grtx.pants.zipWithIndex) {
+      if (count < grtx.pants.length) gr.pants(count) = plentry
     }
 
     // add matches
@@ -210,7 +210,7 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var players:   List[ParticipantEntry] = List[ParticipantEntry](),
+  var pants:     List[ParticipantEntry] = List[ParticipantEntry](),
   var results:   List[ResultEntry] = List[ResultEntry]()
 ) 
 

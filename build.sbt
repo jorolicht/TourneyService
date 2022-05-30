@@ -115,6 +115,7 @@ lazy val client = (project in file("client")).settings(
       (baseDirectory.value.getParentFile / "src" / "main" / "scala"),
       sourceDirectories in (Compile, TwirlKeys.compileTemplates) +=
       (baseDirectory.value.getParentFile / "src/main/twirl")         
+      
   )
   
 lazy val shared = crossProject(JSPlatform, JVMPlatform)
@@ -133,7 +134,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
          sourceDirectories in (Compile, TwirlKeys.compileTemplates) +=
          (baseDirectory.value.getParentFile / "src" / "main" / "scala"),
          sourceDirectories in (Compile, TwirlKeys.compileTemplates) +=
-         (baseDirectory.value.getParentFile / "src/main/twirl")         
+         (baseDirectory.value.getParentFile / "src/main/twirl")   
       )
   
 lazy val sharedJvm = shared.jvm

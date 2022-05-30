@@ -16,16 +16,16 @@
  *   pos:    Int
  *@
 
-@(coId: Long, secId: Int, groups: Array[(String, Int, Int, Int)])(implicit ucc: UseCaseParam)
+@(coId: Long, coPhId: Int, groups: List[(String, Int, Int, Int)])(implicit ucc: UseCaseParam)
 
 <div class="m-1">
-  <table @id(s"Draw_${coId}_${secId}")>
+  <table @id(s"Draw_${coId}_${coPhId}")>
     <tr>
-      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.group")Gruppe</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.group")</small></th>
       <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
       <th>
         <div class="text-center ml-1 mr-1">
-          <button  data-coId='@coId' data-secId='@secId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+          <button  data-coId='@coId' data-coPhId='@coPhId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
             <i class="fa fa-refresh" aria-hidden="true"></i>
           </button>
         </div>

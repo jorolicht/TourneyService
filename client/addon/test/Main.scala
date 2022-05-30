@@ -35,12 +35,10 @@ import scalajs.{ App, AppEnv }
 
 
 @JSExportTopLevel("Start")
-object AddonMain extends UseCase("AddonMain") 
+object AddonMain extends TestUseCase("AddonMain") 
   with TourneySvc with LicenseSvc with AuthenticateSvc with WrapperSvc
 {
   
-  def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
-
   // Commands
   @JSExport def save()                            = AddonCmds.save()
   @JSExport def sync()                            = AddonCmds.sync()
@@ -50,6 +48,11 @@ object AddonMain extends UseCase("AddonMain")
   @JSExport def testBasicHello(text: String)      = AddonBasic.testHello(text)
   @JSExport def testBasicDate(testDate: String)   = AddonBasic.testDate(testDate)
   
+ // Organize Competition tests
+  @JSExport def testOrgCompDraw(param: String)    = AddonOrgComp.testDraw(TNP("testDraw", param))
+  @JSExport def testOrgCompDrawKo(param: String)  = AddonOrgComp.testDrawKo(TNP("testDrawKo", param))
+  @JSExport def testOrgCompInputKo(param: String) = AddonOrgComp.testInputKo(TNP("testInputKo", param))
+  @JSExport def testMatchEncode(param: String)    = AddonOrgComp.testMatchEncode(TNP("testMatchEncode", param))
 
   // Competition tests
   @JSExport def testCompEncode(toId: String)      = AddonComp.testEncode(toId)

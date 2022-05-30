@@ -10,8 +10,8 @@ greeting                                              = Herzlich Willkommen!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05DE180
-  app.date                                            = 2022-05-06
+  app.version                                         = 2022-05DE181
+  app.date                                            = 2022-05-30
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -323,6 +323,16 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   competition.agegroup.19                             = Senioren 70
   competition.agegroup.20                             = Senioren 75
   competition.agegroup.21                             = Senioren 80
+
+  competition.koRound.7                               = Runde 128er Feld
+  competition.koRound.6                               = Runde 64er Feld
+  competition.koRound.5                               = Runde 32er Feld
+  competition.koRound.4                               = Achtelfinale
+  competition.koRound.3                               = Viertelfinale
+  competition.koRound.2                               = Halbfinale
+  competition.koRound.1                               = Finale
+  competition.koRound.0                               = Spiel Platz 3
+
 
   competition.typ.0                                   = Typ
   competition.typ.1                                   = EINZEL

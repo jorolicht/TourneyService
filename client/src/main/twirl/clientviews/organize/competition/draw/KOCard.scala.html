@@ -2,56 +2,83 @@
  * Template for drawing a KO-system
  *
  * Start Test:
- * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
  * 
  *@
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coId: Long, secId: Int, size: Int)(implicit ucc: UseCaseParam)
+@(coId: Long, cophId: Int, size: Int)(implicit ucc: UseCaseParam)
 
-@koEntry(pos: Int) = @{ Html(s""" 
+@bTR = @{ """<td class='tdDrawGroup border-top border-right'></td>"""}
+@bBR = @{ """<td class='tdDrawGroup border-bottom border-right'></td>"""}
+@bR  = @{ """<td class='tdDrawGroup border-right'></td>"""}
+@bN  = @{ """<td class='tdDrawGroup'></td>"""}
+
+@koMatch(pos: Int) = @{  Html(s"""  
+  ${koEntry(pos,   bN  + bN + bN + bN + bN, bTR + bN + bN + bN + bN)} 
+  ${koEntry(pos+1, bBR + bN + bN + bN + bN, bN  + bN + bN + bN + bN)} 
+""") } 
+@koMatch2(pos: Int) = @{  Html(s"""  
+  ${koEntry(pos,   bN  + bN  + bN + bN + bN, bTR + bN  + bN + bN + bN)} 
+  ${koEntry(pos+1, bBR + bTR + bN + bN + bN, bN  + bR  + bN + bN + bN)} 
+  ${koEntry(pos+2, bN  + bR  + bN + bN + bN, bTR + bBR + bN + bN + bN)} 
+  ${koEntry(pos+3, bBR + bN  + bN + bN + bN, bN  + bN  + bN + bN + bN)} 
+  """) } 
+
+@koMatch4(pos: Int) = @{  Html(s"""  
+  ${koEntry(pos,   bN  + bN  + bN  + bN + bN, bTR + bN  + bN  + bN + bN)} 
+  ${koEntry(pos+1, bBR + bTR + bN  + bN + bN, bN  + bR  + bN  + bN + bN)} 
+  ${koEntry(pos+2, bN  + bR  + bTR + bN + bN, bTR + bBR + bR  + bN + bN)} 
+  ${koEntry(pos+3, bBR + bN  + bR  + bN + bN, bN  + bN  + bR  + bN + bN)}
+  ${koEntry(pos+4, bN  + bN  + bR  + bN + bN, bTR + bN  + bR  + bN + bN)} 
+  ${koEntry(pos+5, bBR + bTR + bR  + bN + bN, bN  + bR  + bTR + bN + bN)} 
+  ${koEntry(pos+6, bN  + bR  + bN  + bN + bN, bTR + bBR + bN  + bN + bN)} 
+  ${koEntry(pos+7, bBR + bN  + bN  + bN + bN, bN  + bN  + bN  + bN + bN)}   
+""") } 
+
+@koMatch8(pos: Int) = @{  Html(s"""  
+  ${koEntry(pos,    bN  + bN  + bN  + bN  + bN, bTR + bN  + bN  + bN  + bN)} 
+  ${koEntry(pos+1,  bBR + bTR + bN  + bN  + bN, bN  + bR  + bN  + bN  + bN)} 
+  ${koEntry(pos+2,  bN  + bR  + bTR + bN  + bN, bTR + bBR + bR  + bN  + bN)} 
+  ${koEntry(pos+3,  bBR + bN  + bR  + bN  + bN, bN  + bN  + bR  + bN  + bN)}
+  ${koEntry(pos+4,  bN  + bN  + bR  + bTR + bN, bTR + bN  + bR  + bR  + bN)} 
+  ${koEntry(pos+5,  bBR + bTR + bR  + bR  + bN, bN  + bR  + bBR  + bR  + bN)} 
+  ${koEntry(pos+6,  bN  + bR  + bN  + bR  + bN, bTR + bBR + bN  + bR  + bN)} 
+  ${koEntry(pos+7,  bBR + bN  + bN  + bR  + bN, bN  + bN  + bN  + bR  + bN)}
+  ${koEntry(pos+8,  bN  + bN  + bN  + bR  + bN, bTR + bN  + bN  + bR  + bN)} 
+  ${koEntry(pos+9,  bBR + bTR + bN  + bR  + bN, bN  + bR  + bN  + bR  + bN)} 
+  ${koEntry(pos+10, bN  + bR  + bTR + bR  + bN, bTR + bBR + bR  + bR  + bN)} 
+  ${koEntry(pos+11, bBR + bN  + bR  + bR  + bN, bN  + bN  + bR  + bBR + bN)}
+  ${koEntry(pos+12, bN  + bN  + bR  + bN  + bN, bTR + bN  + bR  + bN  + bN)} 
+  ${koEntry(pos+13, bBR + bTR + bR  + bN  + bN, bN  + bR  + bBR + bN  + bN)} 
+  ${koEntry(pos+14, bN  + bR  + bN  + bN  + bN, bTR + bBR + bN  + bN  + bN)} 
+  ${koEntry(pos+15, bBR + bN  + bN  + bN  + bN, bN  + bN  + bN  + bN  + bN)}   
+""") } 
+
+
+@koEntry(pos: Int, up: String, down: String ) = @{ Html(s""" 
   <tr data-drawPos=${pos}>
-    <td rowspan='2' class='border p-1 text-center'>
-      <small class='font-weight-bold'>${pos}</small>
-    </td>
+    <td rowspan='2' class='border p-1 text-center'><small class='font-weight-bold'>${pos}</small></td>
     <td rowspan='2' contenteditable='true' class='border-top border-bottom border-right p-1 text-center'>
-      <small data-drawPos='@i' data-sno='' class='font-weight-bold text-info'>${pos}</small>
+      <small data-drawPos='${pos}' data-sno='' class='font-weight-bold text-info'>${pos}</small>
     </td>    
-    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='@pos'>Lastname, Firstname</small></td>
-    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='@pos'>Club</small></td>
-    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='@pos' >TTR</small></td>
-    <td data-hideColumn="" rowspan="2" class="border-top border-bottom border-right p-1"><small id="DrawPos_Grp_${pos}">A2</small></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawName='${pos}'>Lastname, Firstname</small></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawClub='${pos}'>Club</small></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawTTR='${pos}' >TTR</small></td>
+    ${up}
   </tr>
-  <tr>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-    <td class='tdDrawGroup'></td>
-  </tr>
+  <tr>${down}</tr>
 """) }
 
 
 <div class="m-1">
-  <table @id(s"Draw_${coId}_${secId}") class="border border-primary">
+  <table @id(s"Draw_${coId}_${cophId}")>
     <tr>
       <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
       <th>
         <div class="text-center ml-1 mr-1">
-          <button data-coId='@coId' data-secId='@secId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+          <button data-coId='@coId' data-cophId='@cophId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
             <i class="fa fa-refresh" aria-hidden="true"></i>
           </button>
         </div>
@@ -59,11 +86,26 @@
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr") </small></th>
-      <th data-hideColumn=''><small class="font-weight-bold ml-1 mr-1 hidden">@msg("table.ttr")</small></th>
-      <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th>
+      <th></th>
+      <th></th> 
+      <th></th> 
+      <th></th> 
+      <th></th> 
+      <th></th> 
+      <th></th>
     </tr>
-    @for(i<-1 to size){
-      @koEntry(i)
-    }
+    @size match {
+      case 2  =>  { @koMatch(1)  }				
+      case 4  =>  { @koMatch2(1) }
+      case 8  =>  { @koMatch4(1) }
+      case 16 =>  { @koMatch8(1) }
+      case 32 =>  { @koMatch8(1) @koMatch8(17)}
+      case 64 =>  { @koMatch8(1) @koMatch8(17) @koMatch8(33) @koMatch8(49)}
+      case 128 => { 
+        @koMatch8(1)  @koMatch8(17) @koMatch8(33) @koMatch8(49) 
+        @koMatch8(65) @koMatch8(81) @koMatch8(97) @koMatch8(113)
+      }
+    }    
+
   </table>
 </div>

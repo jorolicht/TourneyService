@@ -71,7 +71,7 @@ object InfoResult extends UseCase("InfoResult")
       setHtml_(s"APP__GrRound_${coId}_${coPh}_Balls_${group.grId}_${i}", balls)
       setHtml_(s"APP__GrRound_${coId}_${coPh}_Sets_${group.grId}_${i}", sets)
       setHtml_(s"APP__GrRound_${coId}_${coPh}_Points_${group.grId}_${i}", points)
-      setHtml_(s"APP__GrRound_${coId}_${coPh}_Places_${group.grId}_${i}", group.players(i).place._1.toString)
+      setHtml_(s"APP__GrRound_${coId}_${coPh}_Places_${group.grId}_${i}", group.pants(i).place._1.toString)
     } 
   } 
 

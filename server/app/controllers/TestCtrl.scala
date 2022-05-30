@@ -260,7 +260,7 @@ class TestCtrl @Inject()(
     import upickle.default.{ReadWriter => RW, macroRW}
 
     def diff(s1: String, s2: String): List[String] = {
-      (s1, s2).zipped.collect {
+      s1.lazyZip(s2).collect {
         case (x, y) if x != y => s"$x != $y"
       }.toList ++
         s1.drop(s2.length).map(x => s"$x is undefined") ++

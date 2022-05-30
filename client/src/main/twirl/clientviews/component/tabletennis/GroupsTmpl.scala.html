@@ -36,7 +36,7 @@
 				@for(i <- 0 to group.size-1) {
 					<tr>
 						<td class="playernumber">@{i+1}</td>
-						<td><p class="playername">@{group.players(i).name}</p><p class="playerclub"><small>@{group.players(i).club}</small></p></td>
+						<td><p class="playername">@{group.pants(i).name}</p><p class="playerclub"><small>@{group.pants(i).club}</small></p></td>
 						@for(j <- 0 to group.size-1) {
 							@if(i==j){ <td class="noresult"></td> }else{ <td @idSet(group.grId,i+1,j+1) class="result"></td> }
 						}	 			

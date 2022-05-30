@@ -14,8 +14,12 @@ import org.querki.jquery._               // from "org.querki" %%% "jquery-facade
 // for scalajs dom routines
 import org.scalajs.dom.document
 import org.scalajs.dom.html.Input
+import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.NodeListOf
 import org.scalajs.dom.raw.NodeList
+import org.scalajs.dom.raw.DOMList
+import org.scalajs.dom.raw.Node
 import org.scalajs.dom.ext._
 
 
@@ -94,10 +98,27 @@ object BasicHtml {
 
 class BasicHtml
 {
+
+  implicit class NodeListSeq[T <: Node](nodes: DOMList[T]) extends IndexedSeq[T] {
+    override def foreach[U](f: T => U): Unit = {
+      for (i <- 0 until nodes.length) {
+        f(nodes(i))
+      }
+    }
+    override def length: Int = nodes.length
+    override def apply(idx: Int): T = nodes(idx)
+  }
+
   def debug(func: => String, msg: =>String)(implicit ucp: UseCaseParam)  = AppEnv.logger.debug(s"${ucp.idBase}.${func}-> ${msg}")
   def info(func:  => String, msg: =>String)(implicit ucp: UseCaseParam)  = AppEnv.logger.info(s"${ucp.idBase}.${func}-> ${msg}")
   def warn(func:  => String, msg: =>String)(implicit ucp: UseCaseParam)  = AppEnv.logger.warn(s"${ucp.idBase}.${func}-> ${msg}")
   def error(func: => String, msg: =>String)(implicit ucp: UseCaseParam)  = AppEnv.logger.error(s"${ucp.idBase}.${func}-> ${msg}")
+  def errLog(text: String): Unit = {
+    import org.scalajs.dom
+    dom.console.log(s"%c ERROR: ${text}", "color: #B22222")
+  }  
+
+
 
   /* ScalaJs: getElementById does not know what kind of element nodeValue is. 
    * It does not have access to the .html to figure that out, and hence it returns a very 
@@ -595,6 +616,20 @@ class BasicHtml
     } catch { case _: Throwable => Helper.error("collapse", s"name: ${ucp.idBase}__${name} value: ${hide}") }
   }
 
+  // setTableRow
+  def selTableRow(id: String, classText: String="text-white", classBg: String="bg-secondary") = {
+    val elems2rem = document.getElementById(id).parentNode.asInstanceOf[HTMLElement].getElementsByTagName("tr").asInstanceOf[NodeListOf[HTMLElement]]
+    val selElem   = document.getElementById(id)
+    elems2rem.map { elem => elem.classList.remove(classText); elem.classList.remove(classBg) }  
+    selElem.classList.add(classText)
+    selElem.classList.add(classBg)
+  }  
+
+
+  def innerText(id: String, content: String): Unit = {
+    try document.getElementById(id).asInstanceOf[HTMLElement].innerText = content
+    catch { case _: Throwable => errLog(s"innerText => id: ${id} content: ${content.take(10)}") } 
+  }
 
 
   /** getMsg/getError
@@ -607,4 +642,23 @@ class BasicHtml
   def setMainContent(content: String): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content
   def setMainContent(content: play.twirl.api.Html): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString
   def disProp(visible: Boolean): String = if (visible) "block" else "none"
+
+
+    // showAlert  
+  def showAlert(text: String): String = {
+    s"""
+      |<div class="alert alert-info" role="alert">
+      |  <span class="tuse-font-1">${text}</span>
+      |</div>
+    """.stripMargin('|')
+  }
+
+   // confirm dialog
+  def confirmDlg(title: String, msg: String): Future[Boolean] =
+    scalajs.usecase.dialog.DlgBox.showStd(title, msg, Seq("cancel", "ok")).map { _ match {
+     case 2 => true
+     case _ => false
+    }}
+
+
 }

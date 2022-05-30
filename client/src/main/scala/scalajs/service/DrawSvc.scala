@@ -97,4 +97,16 @@ trait DrawSvc
     case _                          =>   0
   }
 
+  // genKORnds - generates KO-Rounds for number of players
+  def genKORnds(cntPlayer: Int): Int = cntPlayer match {
+    case 2                          =>   1
+    case x if (3  <= x && x <= 4)   =>   2
+    case x if (5  <= x && x <= 8)   =>   3
+    case x if (9  <= x && x <= 16)  =>   4
+    case x if (17 <= x && x <= 32)  =>   5
+    case x if (33 <= x && x <= 64)  =>   6
+    case x if (65 <= x && x <= 128) =>   7
+    case _                          =>  -1
+  }
+
 }  

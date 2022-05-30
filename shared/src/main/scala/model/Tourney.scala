@@ -46,9 +46,9 @@ case class Tourney(
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Participant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
-  var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId) -> Competition Section
+  var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId)   -> Competition Section
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
-  var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo) -> Playfield
+  var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo)   -> Playfield
 )
 {
 
@@ -415,10 +415,10 @@ case class Tourney(
       for { (k,coph) <- cophs }  yield { str ++= s"  ${coph.toString}\n" }; str.toString
     }
 
-    def coSecStr() = {
-      val str = new StringBuilder("-- COMPETITION SECTIONS\n")
-      for { (k, cSecs) <- coSects }  yield { str ++= s"  ${cSecs.toString}\n" }; str.toString
-    } 
+    // def coSecStr() = {
+    //   val str = new StringBuilder("-- COMPETITION SECTIONS\n")
+    //   for { (k, cSecs) <- coSects }  yield { str ++= s"  ${cSecs.toString}\n" }; str.toString
+    // } 
 
     s"""\nTOURNEY[${id}]
       |  ${name} von: ${startDate} bis: ${endDate}
@@ -431,7 +431,6 @@ case class Tourney(
       |  ${playersStr()}
       |  ${pl2coStr()}
       |  ${cphsStr()}
-      |  ${coSecStr()}
       |  ${pfsStr()}
       |""".stripMargin('|')
   } 

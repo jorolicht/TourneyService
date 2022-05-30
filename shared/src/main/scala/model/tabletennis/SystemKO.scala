@@ -9,9 +9,9 @@ import shared.model.ParticipantEntry
 import shared.model.tabletennis.utility._
 
 class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
-  var players    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
-  var results    = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
-  var sno2pos    = scala.collection.mutable.Map[String, Int]()
+  var pants    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
+  var results  = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
+  var sno2pos  = scala.collection.mutable.Map[String, Int]()
 
   // calculate index of match within results
   def getIndex(pos: (Int, Int)): Int = getIndex(pos._1,pos._2)
@@ -43,13 +43,13 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   // name of player in ko tree view
   def getPlayerKoViewName(sno: String) = {
     try {
-      val plArrName = players(sno2pos(sno)).name.split("/")
+      val plArrName = pants(sno2pos(sno)).name.split("/")
       if (plArrName.length == 2) {
         s"${plArrName(0).split(",")(0).trim} / ${plArrName(1).split(",")(0).trim}"
       } else if (plArrName.length == 1) {
         s"${plArrName(0).split(",")(0).trim}"
       } else {
-        players(sno2pos(sno)).name
+        pants(sno2pos(sno)).name
       }
     } catch { case _: Throwable => "?" } 
   }
@@ -63,7 +63,7 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   def init(pls: Array[ParticipantEntry]): Boolean = {
     if (pls.length == size) {
       for (i <- 0 to size-1) {
-        players(i) = pls(i)
+        pants(i) = pls(i)
         sno2pos += (pls(i).sno -> i) 
       }
       /* init results with positions
@@ -82,8 +82,8 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     val str = new StringBuilder(s"  KO-Runde size:${size} rounds:${rnds} noWinSets:${noWinSets}\n")
     
     calc
-    str.append(s"    Player size:${players.size}\n")
-    for (pe <- players) str.append(s"     - SNO:${pe.sno} ${pe.name}(${pe.club}) place(${pe.place._1}/${pe.place._2}) \n")
+    str.append(s"    Player size:${pants.size}\n")
+    for (pe <- pants) str.append(s"     - SNO:${pe.sno} ${pe.name}(${pe.club}) place(${pe.place._1}/${pe.place._2}) \n")
     str.append(s"    Results size:${results.size}\n")
     for (re <- results) str.append(s"     - R:${re.pos._1} M:${re.pos._2} ${re.sno._1}-${re.sno._2}: (${re.sets._1}:${re.sets._2}) ${re.balls.mkString(",")}\n")
     str.toString
@@ -92,8 +92,8 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
   // toTx convert KoRound to transfer representation
   def toTx(): KoRoundTx = {
     val koResults = if (size > 0) results.toList else List[ResultEntry]()
-    val koPlayers = if (size > 0) players.toList else List[ParticipantEntry]()
-    KoRoundTx(size, rnds, name, noWinSets, koPlayers, koResults)
+    val koPants = if (size > 0) pants.toList else List[ParticipantEntry]()
+    KoRoundTx(size, rnds, name, noWinSets, koPants, koResults)
   }
 
   def setResultEntries(reEntries: Seq[ResultEntry]) = {
@@ -109,11 +109,11 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
 
 
   def calc() = {
-    for (i <- 0 to size-1) players(i).place = KoRound.getPlace(rnds, false)
+    for (i <- 0 to size-1) pants(i).place = KoRound.getPlace(rnds, false)
     for (res <- results) {
       if (res.valid & validSets(res.sets, noWinSets) & sno2pos.isDefinedAt(res.sno._1) & sno2pos.isDefinedAt(res.sno._2)) {
-        players(sno2pos(res.sno._1)).place = KoRound.getPlace(res.pos._1, res.sets._1 == noWinSets)
-        players(sno2pos(res.sno._2)).place = KoRound.getPlace(res.pos._1, res.sets._2 == noWinSets)
+        pants(sno2pos(res.sno._1)).place = KoRound.getPlace(res.pos._1, res.sets._1 == noWinSets)
+        pants(sno2pos(res.sno._2)).place = KoRound.getPlace(res.pos._1, res.sets._2 == noWinSets)
       }
     }
   }
@@ -179,10 +179,10 @@ object KoRound {
     val kr = new KoRound(tx.size, tx.rnds, tx.name, tx.noWinSets)
 
     // add players
-    for ((plentry, count) <- tx.players.zipWithIndex) {
-      if (count < tx.players.length) {
-        kr.players(count) = plentry
-        kr.sno2pos += (kr.players(count).sno -> count) 
+    for ((plentry, count) <- tx.pants.zipWithIndex) {
+      if (count < tx.pants.length) {
+        kr.pants(count) = plentry
+        kr.sno2pos += (kr.pants(count).sno -> count) 
       }  
     }
 
@@ -209,7 +209,7 @@ case class KoRoundTx (
   val rnds:      Int,
   val name:      String,
   val noWinSets: Int,
-  val players:   List[ParticipantEntry],
+  val pants:     List[ParticipantEntry],
   val results:   List[ResultEntry]
 
 

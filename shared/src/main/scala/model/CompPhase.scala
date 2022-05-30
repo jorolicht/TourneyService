@@ -18,10 +18,13 @@ import shared.model.tabletennis._
  */
 
 case class CompPhase(val name: String, val coId: Long, val coPh: Int, 
-                     val coPhId: Int, val coPhTyp: Int, 
-                     val status: Int, var enabled: Boolean, 
-                     var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
+                     val coPhId: Int,  val coPhTyp: Int,
+                     val status: Int,  var enabled: Boolean, 
+                     var size: Int,    var noPlayers: Int, noWinSets: Int = 3) {
   import CompPhase._
+  
+  var pants        = ArrayBuffer[SNO]()        // participant list (start numbers)
+  var matches      = ArrayBuffer[MatchEntry]()
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
 
@@ -71,6 +74,12 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
     }
   } 
 
+
+  // def setMatches(round: Int, matchList: ArrayBuffer[MatchEntry]) = {
+  //   for (rnd <- matches.size to round) matches += ArrayBuffer[MatchEntry]()
+  //   matches(round) = matchList
+  // }
+
   def resetMatches(): Unit = {
     coPhTyp match {
       case CPT_GR => for (i <- 0 to groups.size-1) groups(i).resetMatch
@@ -111,6 +120,8 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
   // print readable competition phase - for debug purposes
   override def toString() = {
+
+
     def grPhName(coPh: Int) = {
       coPh match {
         case CP_INIT => "READY"        
@@ -124,7 +135,23 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
       }
     }
 
+    def pants2Str() = {
+      val str = new StringBuilder("-- PARTICIPANTS\n")
+      for { p <- pants }  yield { str ++= s"${p.value}:" } 
+      str.toString
+    }
+    def matches2Str() = {
+      val str = new StringBuilder("-- MATCHES\n")
+      for { m <- matches }  yield { 
+        str ++= m.toString + "\n"
+      } 
+      str.toString
+    }
+
     val str   = new StringBuilder(s"${name} (coId:${coId}) ${grPhName(coPh)}(${coPh}) Typ:${coPhTyp}\n")
+    str.append(s"${pants2Str()}\n")   
+    str.append(s"${matches2Str()}\n") 
+
     coPhTyp match {
       case CPT_GR => for (i <- 0 to groups.length-1) str.append(groups(i).toString)
       case CPT_KO => str.append(s"${ko.toString}")
@@ -134,9 +161,8 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
   }  
 
   def toTx(): CompPhaseTx = {
-    var grps = List[GroupTx]() 
-    for (i <- 0 to groups.length-1) grps = grps :+ groups(i).toTx
-    CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, grps, ko.toTx) 
+    CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
+                pants.map(x=>x.value), matches.map(x=>x.encode), groups.map(g=>g.toTx), ko.toTx) 
   }
 
 }
@@ -144,10 +170,7 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
 object CompPhase {
 
-  // competition phase Identification
-  // 
-
-  // competition phase
+  // Competition Phase
   val CP_UNKN = -99
   val CP_INIT =   0
   val CP_VRGR =   1
@@ -185,9 +208,16 @@ object CompPhase {
 
   def fromTx(tx: CompPhaseTx): CompPhase = {
     val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhId, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
+    cop.pants   = tx.pants.map(x=>SNO(x))
+    cop.matches = tx.matches.map(x=>MatchEntry.obify(x))
+
     cop.coPhTyp match {
-      case CPT_GR  => for (g <- tx.groups) { cop.groups = cop.groups :+ Group.fromTx(g) }
-      case CPT_KO  => cop.ko = KoRound.fromTx(tx.ko) 
+      case CPT_GR  => {
+        for (g <- tx.groups) { cop.groups = cop.groups :+ Group.fromTx(g) }
+      }  
+      case CPT_KO  => {
+        cop.ko = KoRound.fromTx(tx.ko)
+      }   
       case _       => // invalid competition phase
     }
     //for (g <- tx.matches) { cop.groups = cop.groups :+ Group.fromTx(g) }
@@ -208,7 +238,9 @@ case class CompPhaseTx(
   var size:      Int, 
   val noPlayers: Int,
   val noWinSets: Int,
-  val groups:    List[GroupTx],
+  val pants:      ArrayBuffer[String],
+  val matches:   ArrayBuffer[String], 
+  val groups:    ArrayBuffer[GroupTx],
   val ko:        KoRoundTx
 )
 

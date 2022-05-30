@@ -83,10 +83,6 @@ object TestMain extends UseCase("TestMain")
       case "DlgCardTourney"      => UIDlg.testDlgCardTourney(testCase, testOption); true
       case "Dlg"                 => UIDlg.testDlg(testCase, testOption); true
 
-      //UnitComp
-      case "CompPhase"           => UnitComp.testPhase(testCase, testOption); true
-      case "CompSection"         => UnitComp.testSection(testCase, testOption); true
-
       //UIOrg
       case "OrgComp"             => UIOrg.testComp(testCase, testOption); true
       case "OrgCompDraw"         => UIOrg.testCompDraw(testCase, testOption); true

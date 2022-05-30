@@ -64,12 +64,6 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
     OrganizePlayer.setBadge()
   }
 
-  // confirm dialog
-  def confirmDlg(title: String, msg: String): Future[Boolean] =
-    DlgBox.showStd(title, msg, Seq("cancel", "ok")).map { _ match {
-     case 2 => true
-     case _ => throw new Exception("not confirmed")
-    }}
 
   @JSExport
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {

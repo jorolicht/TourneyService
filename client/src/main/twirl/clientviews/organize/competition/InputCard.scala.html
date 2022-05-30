@@ -1,0 +1,34 @@
+@*
+ * Template Organize Competition Input Card
+ * Show result input pages of competition phases
+ * allow user to enter results
+ * configuration phases (e.g. Preliminary Round, KO-Round, ...)
+ *
+ * Start Test in Javascript Console:
+ * 
+ * 
+ *@
+@import shared.model.Competition
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(navList:List[(String, Int)])(implicit ucc: UseCaseParam)
+
+<div @id("Links")>
+  <ul  class="nav nav-tabs">
+    @for(navElem<-navList){
+      <li class="nav-item">
+        <a data-navId='@navElem._2' class="nav-link" href="#" @actionEvent("ClickNavElement", "onclick")>@navElem._1</a>
+      </li>
+    }
+  </ul>
+</div>  
+
+<div @id("Content")>
+  @for(navElem<-navList){
+    <section style="display:none;" data-navId='@navElem._2' >
+      Section:&nbsp; @navElem._1 - @navElem._2
+    </section>
+  }
+</div>

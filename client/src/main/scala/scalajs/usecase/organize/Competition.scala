@@ -38,7 +38,7 @@ import scalajs.usecase.dialog._
 // ***
 @JSExportTopLevel("OrganizeCompetition")
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
-  with TourneySvc with ViewServices with UIComponentServices
+  with TourneySvc with ViewServices
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {

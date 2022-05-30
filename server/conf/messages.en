@@ -10,8 +10,8 @@ greeting                                              = Welcome!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05EN180
-  app.date                                            = 2022-05-06
+  app.version                                         = 2022-05EN181
+  app.date                                            = 2022-05-30
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -323,6 +323,15 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   competition.agegroup.19                             = Seniors 70
   competition.agegroup.20                             = Seniors 75
   competition.agegroup.21                             = Seniors 80
+
+  competition.koRound.7                               = Round of 128
+  competition.koRound.6                               = Round of 64
+  competition.koRound.5                               = Round of 32
+  competition.koRound.4                               = Round of 16
+  competition.koRound.3                               = Quarterfinals
+  competition.koRound.2                               = Semifinals
+  competition.koRound.1                               = Final
+  competition.koRound.0                               = Match 3rd Place
 
   competition.typ.0                                   = Typ
   competition.typ.1                                   = SINGLE
