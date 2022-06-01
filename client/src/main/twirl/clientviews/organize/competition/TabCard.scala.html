@@ -1,0 +1,41 @@
+@*
+ * Template Organize Competition Card for Draw, Input, View
+ * Show result input pages of competition phases
+ * allow user to enter results
+ * configuration phases (e.g. Preliminary Round, KO-Round, ...)
+ * 
+ *@
+@import shared.model.Competition
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coId: Long, coPhNameIdList:List[(String, Int)])(implicit ucc: UseCaseParam)
+
+<div @id("Links")>
+  <ul class="nav nav-tabs">
+    @for(coPhNameIdElem<-coPhNameIdList){
+      <li class="nav-item">
+        <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
+      </li>
+    }
+  </ul>
+</div>  
+
+<div @id("Content")>
+  <div id='DrawContent_@{coId}'>
+    @for(coPhNameIdElem<-coPhNameIdList){
+      <section style="display:none;" data-tabMode='Draw'  data-coPhId='@coPhNameIdElem._2'></section>
+    }
+  </div>
+  <div id='InputContent_@{coId}' ("InputContent")>
+    @for(coPhNameIdElem<-coPhNameIdList){ 
+      <section style="display:none;" data-tabMode='Input' data-coPhId='@coPhNameIdElem._2'></section>
+    }
+  </div>
+  <div id='ViewContent_@{coId}'>
+    @for(coPhNameIdElem<-coPhNameIdList){
+      <section style="display:none;" data-tabMode='View'  data-coPhId='@coPhNameIdElem._2'></section>
+    }
+  </div>
+</div>

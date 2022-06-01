@@ -101,6 +101,7 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
       case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
         AppEnv.setCoId(1)
+        AppEnv.coPhIdMap(1) = 3
         App.execUseCase("OrganizeCompetitionInput", "", "")
         SUCCESS(tnp)
       }

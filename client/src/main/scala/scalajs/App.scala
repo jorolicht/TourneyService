@@ -279,7 +279,7 @@ object App extends BasicHtml
       case Left(err) => error("updateMatchKo", getError(err)); false
       case Right(matches) => {
         tourney.cophs((coId, coPh)).ko.setResultEntries(matches)
-        saveLocalTourneyRun(tourney)
+        saveLocalTourney(tourney)
         true
       }  
     }
@@ -291,7 +291,7 @@ object App extends BasicHtml
       case Left(err)      => error("updateMatchGr", getError(err)); false
       case Right(matches) => {
         tourney.cophs((coId,coPh)).groups(grId-1).setResultEntries(matches)
-        saveLocalTourneyRun(tourney)
+        saveLocalTourney(tourney)
         true
       }  
     }
@@ -300,7 +300,7 @@ object App extends BasicHtml
   def resetMatches(coId: Long, coPh: Int): Unit = {
     if (tourney.cophs.isDefinedAt((coId, coPh))) {
       tourney.cophs((coId, coPh)).resetMatches
-      saveLocalTourneyRun(tourney)
+      saveLocalTourney(tourney)
     }
   }
 
@@ -309,7 +309,7 @@ object App extends BasicHtml
       case Left(err)     => error("updatePlayfield", getError(err)); false
       case Right(pfSeq)  => {
         tourney.playfields = collection.mutable.HashMap( pfSeq.map { p => { p.nr -> p }} : _*)
-        saveLocalTourneyRun(tourney)
+        saveLocalTourney(tourney)
         true
       }
     }
@@ -321,7 +321,7 @@ object App extends BasicHtml
       case Left(err)     => error("updateParticipant2Comp", getError(err)); false
       case Right(p2cSeq) => { 
         tourney.pl2co   = collection.mutable.HashMap( p2cSeq.map { p2c => (p2c.sno, p2c.coId) -> p2c } :_*)
-        saveLocalTourneyRun(tourney)
+        saveLocalTourney(tourney)
         true
       }
     }
@@ -333,7 +333,7 @@ object App extends BasicHtml
       case Left(err)    => error("updateCompetition", getError(err)); false
       case Right(comps) => {
         tourney.comps = collection.mutable.HashMap( comps.map { co => co.id -> co } :_* )
-        saveLocalTourneyCfg(tourney)
+        saveLocalTourney(tourney)
         true
       }
     }
@@ -345,7 +345,7 @@ object App extends BasicHtml
       case Left(err)     => error("updateClub", getError(err)); false
       case Right(clubs) => {
         tourney.clubs   = collection.mutable.HashMap( clubs.map { cl => cl.id -> cl } :_* ) 
-        saveLocalTourneyCfg(tourney)
+        saveLocalTourney(tourney)
         true
       }
     }   
@@ -358,7 +358,7 @@ object App extends BasicHtml
       case Left(err)       => error("updatePlayer", getError(err)); false
       case Right(players) => {
         tourney.players   = collection.mutable.HashMap( players.map { pl => pl.id -> pl } :_* )
-        saveLocalTourneyCfg(tourney)
+        saveLocalTourney(tourney)
         true
       }
     }
@@ -417,21 +417,13 @@ object App extends BasicHtml
     saveLocalTourney(trny)
   }
 
-  def saveLocalTourney(trny: Tourney): Unit = { 
-    AppEnv.setToId(trny.id)
-    saveLocalTourneyCfg(trny)
-    //saveLocalTourneyRun(trny) 
-  }
 
-  def saveLocalTourneyCfg(trny: Tourney): Unit = {
-    try AppEnv.setLocalStorage("AppEnv.TourneyCfg", write(trny))
-    catch { case _: Throwable => println("saveLocalTourneyCfg(error)", "couldn't write to local storage") }    
+  def saveLocalTourney(trny: Tourney): Unit = {
+    AppEnv.setToId(trny.id)
+    try AppEnv.setLocalStorage("AppEnv.Tourney", write(trny))
+    catch { case _: Throwable => println("saveLocalTourney(error)", "couldn't write to local storage") }    
   }
   
-  def saveLocalTourneyRun(trny: Tourney): Unit = {
-    // try AppEnv.setLocalStorage("AppEnv.TourneyRun", write(trny.run.toTx((trny.id))))
-    // catch { case _: Throwable => println("saveLocalTourneyRun(error)", "couldn't write to local storage") }    
-  }
 
   def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
 

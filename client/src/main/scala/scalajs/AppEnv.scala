@@ -42,7 +42,8 @@ object AppEnv extends BasicHtml
   implicit val ucp=UseCaseParam("APP", "app", "App", "app", getMessage _ ) 
 
   var logger:Logger = org.scalajs.logging.NullLogger
-  var messages      = Map[String,Map[String,String]]()  
+  var messages      = Map[String,Map[String,String]]()
+  val coPhIdMap     = scala.collection.mutable.Map[Long, Int]()
   var lang          = "de"
   def msgs          = messages(lang)
   var userCtx       = Session.get(true)
@@ -127,6 +128,10 @@ object AppEnv extends BasicHtml
       setHeadline()
     }
   }  
+
+  def setCoPhId(coId: Long, cophId: Int) = coPhIdMap(coId) = cophId
+
+
   
   def setStatus(name: String, param: String, info: String) = { status.ucName = name; status.ucParam = param; status.ucInfo = info }
   def getStatus  = status

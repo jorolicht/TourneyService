@@ -154,7 +154,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             case Right(co)  => {
               debug("addComp", s"RESULT ${co.id}")
               App.tourney.comps(co.id) = co 
-              App.saveLocalTourneyCfg(App.tourney)
+              App.saveLocalTourney(App.tourney)
               AppEnv.setCoId(co.id)
               update() 
             }
@@ -172,7 +172,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             case Left(err)  => DlgInfo.show("FEHLER", getError(err), "danger")
             case Right(res) => {  
               App.tourney.delComp(coId)
-              App.saveLocalTourneyCfg(App.tourney)
+              App.saveLocalTourney(App.tourney)
               AppEnv.setCoId(0) 
               update()               
             }
@@ -201,7 +201,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             case Right(co) => { 
                 debug("setComp", s"RESULT ${co.id}")
                 App.tourney.comps(co.id) = co 
-                App.saveLocalTourneyCfg(App.tourney)
+                App.saveLocalTourney(App.tourney)
                 AppEnv.setCoId(co.id); 
                 update() 
             }
@@ -219,7 +219,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           case Right(res) => {
             if (!res) error("setCompStatus", s"failed for coId: ${coId}")
             App.tourney.comps(coId).status = status 
-            App.saveLocalTourneyCfg(App.tourney)
+            App.saveLocalTourney(App.tourney)
             AppEnv.setCoId(coId)
             update()
           }
@@ -248,7 +248,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               // set statistic/numbers
               val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
               val (total, activ) = (p2c.length, p2c.filter(_.status > PLS_SIGN).length )
-              App.saveLocalTourneyCfg(App.tourney)
+              App.saveLocalTourney(App.tourney)
               setHtml(s"Count_${coId}", s"${total}/${activ}") 
             }
           }
@@ -274,7 +274,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               case Left(err)  => DlgShowError.show(List(err)) 
               case Right(res) => {
                 if ( App.tourney.pl2co.isDefinedAt((sno, coId)) ) App.tourney.pl2co -= ((sno,coId))
-                App.saveLocalTourneyCfg(App.tourney)
+                App.saveLocalTourney(App.tourney)
                 update()
               }
             }
@@ -339,7 +339,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
           case Right(p2c) => {
             info("RegDouble", s"success: ${p2c}")
             tourney.pl2co((p2c.sno, p2c.coId)) = p2c
-            App.saveLocalTourneyCfg(App.tourney)
+            App.saveLocalTourney(App.tourney)
             update()
           }
         }

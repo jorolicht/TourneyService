@@ -134,6 +134,12 @@ class BasicHtml
     if (elem == null) document.createElement("div") else elem
   }  
 
+  // getElemById_ - get the html element
+  def getElemById_(id: String) = {
+    val elem = document.getElementById(id)
+    if (elem == null) document.createElement("div") else elem
+  }  
+
   // getId - adds usecase prefix to id
   def uc(id: String)(implicit ucp: UseCaseParam) = { s"${ucp.idBase}__${id}"}
   def getId(id: String, prefix: String = "")(implicit ucp: UseCaseParam) = { s"${prefix}${ucp.idBase}__${id}"}

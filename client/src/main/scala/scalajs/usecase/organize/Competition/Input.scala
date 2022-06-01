@@ -41,93 +41,60 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+    OrganizeCompetitionTab.render("Input")
+  }
 
-    // generate cards for every competition phase if possible,
-    // e.g. a competition is selected and it has competition phases/sections
-    val coId = AppEnv.getCoId
-    if (coId > 0) {
-      // generate list of tuple (phase name, phase Id )
-      val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
-      if (coPhNameIds.length == 0) {
-        setMainContent(showAlert(getMsg("noSection"))) 
-      } else {
-        setMainContent(clientviews.organize.competition.html.InputCard( coPhNameIds ).toString)
-        coPhNameIds.map { case (name, id) => 
-          val elem    = getElemById("Content").querySelector(s"[data-navId='${id}']")
-          val size    = Trny.cophs(coId, id).size
-          val coPhTyp = Trny.cophs(coId, id).coPhTyp
-          // generate input frame
-          coPhTyp match {
-            case CPT_GR  => {
-             elem.innerHTML = "input for groups"
-            }  
-            case CPT_KO => {
-              val maxRnd = genKORnds(size)
-              elem.innerHTML = clientviews.organize.competition.input.html.KoCard(coId, id, size, maxRnd).toString
-              setInputContent(coId, id, maxRnd)(App.tourney)
-            }  
-            case CPT_SW => elem.innerHTML = "input for switz-system"
-            case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
-          }
-          // generate draw input
-          // setDrawContent(coId, id)(App.tourney)
+
+  // setInputFrame for a competition, coId != 0
+  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
+    debug("setFrame", s"coId: ${coId} coPhId: ${coPhId}")
+    if (!exists(s"Input_${coId}_${coPhId}") | reload) {
+      val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+      val size    = trny.cophs(coId, coPhId).size
+      val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
+      debug("setFrame", s"step 1")
+      coPhTyp match {
+        case CPT_GR  => {
+          elem.innerHTML = "input for groups"
         }  
+        case CPT_KO => {
+          
+          val maxRnd = genKORnds(size)
+          debug("setFrame", s"step 2")
+          elem.innerHTML = clientviews.organize.competition.input.html.KoCard(coId, coPhId, size, maxRnd).toString
+        }  
+        case CPT_SW => elem.innerHTML = "input for switz-system"
+        case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
       }
-    } else {
-      setMainContent(showAlert(getMsg("noSelection"))) 
     }
   }
 
 
-@JSExport 
-  override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
-    debug("actionEvent", s"key: ${key}")
-    key match {
-
-      case "ClickNavElement" => clickNavigation(elem.getAttribute("data-navId"))
-
-      case _                 => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
+  def setContent(coId: Long, coPhId: Int) (implicit trny: Tourney) = {
+    debug("setContent", s"coId: ${coId} coPhId: ${coPhId}")
+    val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+    trny.cophs(coId, coPhId).coPhTyp match {
+      case CPT_GR => elem.innerHTML = "input for Group-System"
+      case CPT_KO => {
+        val maxRnd = genKORnds(trny.cophs(coId, coPhId).size)  
+        val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
+        for (rnd <- maxRnd to 0 by -1) {
+          val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}" 
+          val matches = matchMap(rnd).sortBy(mEntry => mEntry.gameNo)
+          for (m <- matches) {
+            val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+            rowElem.innerHTML = clientviews.organize.competition.input.html.KoMatchEntry(
+              SNO(m.stNoA).getName(trny.comps(coId).typ, getMsg("bye")), 
+              SNO(m.stNoB).getName(trny.comps(coId).typ, getMsg("bye")), 
+              m.gameNo, m.info, m.getPlayfield, m.getBallArr, 
+              m.printSets, trny.cophs(coId,coPhId).noWinSets).toString
+          }
+        }
+      }
+      case CPT_SW => elem.innerHTML = "input for Switz-System"
+      case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
     }
   }
-
-  
-  // control register 
-  def clickNavigation(navId: String) = {
-    val aNodes = getElemById("Links").getElementsByTagName("a")
-    for( i <- 0 to aNodes.length-1) {
-      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-navId") == navId) {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
-      } else {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.remove("active")
-      }
-    }  
-
-    val contentNodes = getElemById("Content").getElementsByTagName("section")
-    for( i <- 0 to contentNodes.length-1) {
-      val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
-      elem.style.display = if (elem.getAttribute("data-navId") == navId) "block" else "none"
-    }
-  }
-
-  //set view for draw, input player list with (pos, SNO, Name, Club, TTR)
-  def setInputContent(coId: Long, coPhId: Int, maxRnd: Int)(implicit trny: Tourney) = {
-    val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
-    for (rnd <- maxRnd to 0 by -1) {
-      val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}" 
-      val matches = matchMap(rnd).sortBy(mEntry => mEntry.gameNo)
-      for (m <- matches) {
-        val pantA = SNO(m.stNoA).getInfo(trny.comps(coId).typ)
-        val pantB = SNO(m.stNoB).getInfo(trny.comps(coId).typ)
-        val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
-        rowElem.innerHTML = clientviews.organize.competition.input.html.KoMatchEntry(
-          pantA._2, pantB._2, m.gameNo, m.info, m.playfield, m.getBallArr, m.printSets, 3).toString
-        // rowElem.innerHTML = clientviews.organize.competition.input.html.KoMatchEntry(
-        //   "SpielerA", "SpielerB", 3, "", "X", Array("3","4","5"), "3:0", 3).toString
-        //rowElem.innerHTML = "xxx"
-
-      }
-    }
-  }  
 
   
 }

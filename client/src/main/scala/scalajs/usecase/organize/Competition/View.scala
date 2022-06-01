@@ -37,7 +37,15 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    setMainContent("OrganizeCompetitionView")
+    OrganizeCompetitionTab.render("View")
   }
+
+  // setFrame for a competition, coId != 0 and coPhId != 0
+  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
+  }
+
+  // set content for competition phase for competition
+  def setContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
+  }  
   
 }

@@ -10,14 +10,14 @@
 <td class="border-bottom border-left border-top pl-2 text-right"><small>@nameA</small></td>
 <td class="border-bottom border-top pl-1 pr-1 text-center">-</td>
 <td class="border-bottom border-right border-top pr-2 text-left"><small>@nameB</small></td>
-<td class="border-bottom border-right border-top pr-2 text-center"><small>@gameNo</small></td>
-<td>@info</td>
-<td>@playfield</td>
+<td class="border-bottom border-right border-top text-center"><small>@gameNo</small></td>
+<td class="border text-center"><small>@info</small></td>
+<td class="border text-center"><small>@playfield</small></td>
 @for(i <- 0 to (winSets-1)*2){
   @if(i<ballArr.length) {
-    <td>@ballArr(i)</td>
+    <td width='30px' class="border text-center" contenteditable='true' style='font-size:small;'>@ballArr(i)</td>
   } else {
-    <td>&nbsp;</td>
+    <td width='30px' class="border text-center" contenteditable='true' style='font-size:small;'>&nbsp;</td>
   }
 }
-<td>@sets</td>
+<td class="border text-center" contenteditable='true'>@sets</td>

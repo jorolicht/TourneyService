@@ -107,6 +107,13 @@ case class MatchEntry(
     }}
   }
 
+  def getPlayfield = {
+    try { 
+      val pfCode = playfield.split("·")
+      pfCode(pfCode.size-1) 
+    } catch  { case _: Throwable => "" }
+  }
+
   def getType(): Int = {
     coPh match {
       case CP_VRGR | CP_ZRGR | CP_ERGR | CP_TRGR => CPT_GR 

@@ -37,102 +37,19 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   import org.scalajs.dom.raw.HTMLElement
   import scala.collection.mutable.ListBuffer
 
-  //implicit val trny = App.tourney
-
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    
-    // setMainContent(s"OrganizeCompetitionDraw coId: ${AppEnv.getCoId}")
-    // generate cards for every competition section if a competition is selected
-    val coId = AppEnv.getCoId
-    if (coId > 0) {
-      // old: generate list of tuple (section name, section Id )
-      // generate list of tuple (phase name, phase Id )
-      val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
-      //val compSects = App.tourney.coSects.filter(x => x._1._1 == coId).values.map(x => (x.name, x.id)).toList
-      if (coPhNameIds.length == 0) {
-        setMainContent(showAlert(getMsg("noSection"))) 
-      } else {
-        setMainContent(clientviews.organize.competition.html.DrawCard( coPhNameIds ).toString)
-        coPhNameIds.map { case (name, id) => 
-          val elem    = getElemById("Content").querySelector(s"[data-navId='${id}']")
-          val size    = Trny.cophs(coId, id).size
-          val coPhTyp = Trny.cophs(coId, id).coPhTyp
-          // generate draw frame
-          coPhTyp match {
-            case CPT_GR  => {
-             // generate group configuration list: (grName: String, grId: Int, grSize: Int, pos: Int)
-             var pos = 1
-             var grpCfg = new ListBuffer[(String,Int,Int,Int)]()
-             for (grp <- App.tourney.cophs((coId, id)).groups) {
-               grpCfg += ((grp.name, grp.grId, grp.size, pos))
-               pos = pos + grp.size 
-             }
-             elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, id, grpCfg.toList).toString
-            }  
-            case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, id, size).toString
-            case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, id, size).toString
-            case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
-          }
-          // generate draw content
-          setDrawContent(coId, id)(App.tourney)
-        }  
-      }
-    } else {
-      setMainContent(showAlert(getMsg("noSelection"))) 
-    }
+    OrganizeCompetitionTab.render("Draw")
   }
-
-
-
-  @JSExport 
-  override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
-    import shared.utils.Routines._ 
-    import org.scalajs.dom.document
-    
-    // import org.scalajs.dom.raw.HTMLCollection
-    // import org.scalajs.dom.raw.NodeList
-    //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
-    debug("actionEvent", s"key: ${key}")
-    key match {
-
-      case "DrawRefresh"   => {
-        val coId  = elem.getAttribute("data-coId")
-        val coPhId = elem.getAttribute("data-coPhId")
-
-        val inputNodes = getElemById(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
-        val result = for( i <- 0 to inputNodes.length-1) yield {
-          val elem   = inputNodes.item(i).asInstanceOf[HTMLElement]
-          val posOld = elem.getAttribute("data-drawPos").toIntOption.getOrElse(-1)
-          val sno    = elem.getAttribute("data-sno")
-          val posNew = elem.innerHTML.toIntOption.getOrElse(-2)
-          debug("actionEvent", s"DrawRefresh: posOld: ${posOld} posNew: ${posNew}  sno: ${sno}  ")
-          (posOld, posNew, (posOld -> posNew))
-        } 
-        val orgList = result.map(_._1)
-        val newList = result.map(_._2)
-        val reassign = result.map(_._3).toMap
-
-        val xx = orgList.filterNot(newList.contains)
-        if (xx.length > 0) error("DrawRefresh", s"keine Zuordnung: ${xx}")
-        debug("DrawRefresh", s"orgList: ${orgList}  newList: ${newList} reassign: ${reassign}")
-      } 
-
-      case "ClickRegister"  => clickNavigation(elem.getAttribute("data-navId"))
-
-      case _                => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
-    }
-  }
-
 
 
   //set view for draw, input player list with (pos, SNO, Name, Club, TTR)
-  def setDrawContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
+  def setContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
     // first get the base element identified by coId and coPhId
     val elemBase = getElemById(s"Draw_${coId}_${coPhId}")
     
     //println(s"setDrawContent pants: ${trny.cophs(coId, coPhId).pants.toString}")
     val pants = trny.cophs(coId, coPhId).pants.map( _.getInfo(trny.comps(coId).typ))
-    println(s"setDrawContent pants: ${pants.toString}")
+    //println(s"setDrawContent pants: ${pants.toString}")
 
     // first set the start numbers
     val inputElements = elemBase.querySelectorAll("small[data-drawPos]")
@@ -160,21 +77,6 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       val pos  = elem.getAttribute("data-drawTTR").toInt
       elem.innerHTML = pants(pos-1)._4.toString
     }
-
-
-    // val koRowUp = elemBase.querySelectorAll("td[data-koRowUp]")
-    // for( i <- 0 to koRowUp.length-1) {
-    //   val elem = koRowUp.item(i).asInstanceOf[HTMLElement]
-    //   val pos  = elem.getAttribute("data-koRowUp").toInt
-    //   if (pos % 2 == 0) {
-    //     elem.classList.add("border-bottom")
-    //     elem.classList.add("border-right")
-    //   }
-    //   // elem.innerHTML = i.toString
-    //   // elem.nextElementSibling.innerHTML = "x"
-    //   // elem.nextElementSibling.nextElementSibling.innerHTML = "y"
-    // }  
-
     // val koRowDown = elemBase.querySelectorAll("td[data-koRowDown]")
     // for( i <- 0 to koRowDown.length-1) {
     //   val elem = koRowDown.item(i).asInstanceOf[HTMLElement]
@@ -186,28 +88,32 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     //   // elem.innerHTML = i.toString
     //   // elem.nextElementSibling.innerHTML = "x"
     //   // elem.nextElementSibling.nextElementSibling.innerHTML = "y"
-    // }  
-
-
+    // } 
   }
 
-
-  
-  def clickNavigation(navId: String) = {
-    val aNodes = getElemById("Links").getElementsByTagName("a")
-    for( i <- 0 to aNodes.length-1) {
-      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-navId") == navId) {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
-      } else {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.remove("active")
+  // setFrame for a competition, coId != 0 and coPhId != 0
+  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
+    if (!exists(s"Draw_${coId}_${coPhId}") | reload) {
+      val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+      val size    = trny.cophs(coId, coPhId).size
+      val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
+      // generate draw frame
+      coPhTyp match {
+        case CPT_GR  => {
+          // generate group configuration list: (grName: String, grId: Int, grSize: Int, pos: Int)
+          var pos = 1
+          var grpCfg = new ListBuffer[(String,Int,Int,Int)]()
+          for (grp <- trny.cophs((coId, coPhId)).groups) {
+            grpCfg += ((grp.name, grp.grId, grp.size, pos))
+            pos = pos + grp.size 
+          }
+          elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, grpCfg.toList).toString
+        }  
+        case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, coPhId, size).toString
+        case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size).toString
+        case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
       }
-    }  
-
-    val contentNodes = getElemById("Content").getElementsByTagName("section")
-    for( i <- 0 to contentNodes.length-1) {
-      val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
-      elem.style.display = if (elem.getAttribute("data-navId") == navId) "block" else "none"
     }
-  }
+  }  
   
 }

@@ -10,7 +10,7 @@ greeting                                              = Herzlich Willkommen!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05DE181
+  app.version                                         = 2022-05DE182
   app.date                                            = 2022-05-30
 
   app.url.home                                        = https://www.turnier-service.info
@@ -478,7 +478,15 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.card.hdr.new                     = Wettbewerb neu anlagen
   organize.competition.card.hdr.edit                    = Wettbewerb({0}) editieren
   organize.competition.card.form.btn.submit             = SPEICHERN
-              
+
+  organize.competition.input.who_a_who                  = Spielpaarung
+  organize.competition.input.gameNumber                 = Spiel
+  organize.competition.input.info                       = Info
+  organize.competition.input.table                      = Tisch
+  organize.competition.input.balls                      = Bälle
+  organize.competition.input.sets                       = Sätze
+  organize.competition.input.bye                        = [FREILOS] 
+ 
   dlg.card.comp.Title                                   = Wettbewerb
   dlg.card.comp.plh.name                                = Name des Wettbewerbs
   dlg.card.comp.plh.startTime                           = Startzeit &#128197;

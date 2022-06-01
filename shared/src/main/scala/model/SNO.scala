@@ -45,19 +45,25 @@ case class SNO(value: String) {
   }
 
   // getName returns name for all types of participants
-  def getName(coTyp: Int)(implicit trny: Tourney): String  = {
-    coTyp match {
-       case CT_SINGLE => getSinglePlayer() match {
-         case Left(err)       => ""
-         case Right(p)        => p.getName()
-       }
-       case CT_DOUBLE => getDoublePlayers() match {
-         case Left(err)       => ""
-         case Right((p1, p2)) => p1.getDoubleName(p2)
-       }
-       case _         => ""    
+  def getName(coTyp: Int, byeName: String="")(implicit trny: Tourney): String  = {
+    if (byeName != "" & isBye()) { 
+      byeName
+    } else {
+      coTyp match {
+        case CT_SINGLE => getSinglePlayer() match {
+          case Left(err)       => ""
+          case Right(p)        => p.getName()
+        }
+        case CT_DOUBLE => getDoublePlayers() match {
+          case Left(err)       => ""
+          case Right((p1, p2)) => p1.getDoubleName(p2)
+        }
+        case _         => ""    
+      }
     }
   }
+
+
 
   def isBye() = SNO.isBye(value)
   def isNN()  = SNO.isNN(value)

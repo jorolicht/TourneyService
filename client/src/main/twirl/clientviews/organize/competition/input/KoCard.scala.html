@@ -10,13 +10,13 @@
 <div class="m-1">
   <table @id(s"Input_${coId}_${cophId}")>
     <tbody>
-      <tr>
-        <th colspan='3' class="font-weight-bold text-center ml-1 mr-1">Spielpaarung</th>
-        <th><small class="font-weight-bold ml-1 mr-1">Spiel</small></th>
-        <th><small class="font-weight-bold ml-1 mr-1">Info</small></th>
-        <th><small class="font-weight-bold ml-1 mr-1">Tisch</small></th>
-        <th colspan='5'><small class="font-weight-bold ml-1 mr-1">Bälle</small></th>
-        <th><small class="font-weight-bold ml-1 mr-1">Sätze</small></th>
+      <tr class='border-bottom'>
+        <th colspan='3' class="border-left border-right font-weight-bold text-center">@msg("who_a_who")</th>
+        <th class="border-left border-right font-weight-bold"><small>@msg("gameNumber")</small></th>
+        <th class="border-left border-right font-weight-bold"><small>@msg("info")</small></th>
+        <th class="border-left border-right font-weight-bold"><small>@msg("table")</small></th>
+        <th colspan='5' class="border-left border-right text-center"><small>@msg("balls")</small></th>
+        <th class="border-left border-right font-weight-bold"><small>@msg("sets")</small></th>
       </tr>      
     </tbody>
 
