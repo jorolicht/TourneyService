@@ -52,17 +52,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
       val size    = trny.cophs(coId, coPhId).size
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
+      val maxRnd  = trny.cophs(coId, coPhId).getMaxRnds
       debug("setFrame", s"step 1")
       coPhTyp match {
-        case CPT_GR  => {
-          elem.innerHTML = "input for groups"
-        }  
-        case CPT_KO => {
-          
-          val maxRnd = genKORnds(size)
-          debug("setFrame", s"step 2")
-          elem.innerHTML = clientviews.organize.competition.input.html.KoCard(coId, coPhId, size, maxRnd).toString
-        }  
+        case CPT_GR => elem.innerHTML = clientviews.organize.competition.input.html.GroupCard(coId, coPhId, maxRnd).toString
+        case CPT_KO => elem.innerHTML = clientviews.organize.competition.input.html.KoCard(coId, coPhId, maxRnd).toString
         case CPT_SW => elem.innerHTML = "input for switz-system"
         case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
       }
@@ -72,18 +66,34 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 
   def setContent(coId: Long, coPhId: Int) (implicit trny: Tourney) = {
     debug("setContent", s"coId: ${coId} coPhId: ${coPhId}")
-    val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+    val elem   = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+    val maxRnd = trny.cophs(coId, coPhId).getMaxRnds 
     trny.cophs(coId, coPhId).coPhTyp match {
-      case CPT_GR => elem.innerHTML = "input for Group-System"
+      case CPT_GR => {
+        val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
+        for (rnd <- 1 to maxRnd) {
+          val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}" 
+          val matches = matchMap(rnd).sortBy(mEntry => mEntry.gameNo)
+          for (m <- matches) {
+            val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+            rowElem.innerHTML = clientviews.organize.competition.input.html.MatchEntry(
+              getGroupName(m.grId), s"${m.wgw._1}-${m.wgw._2}",
+              SNO(m.stNoA).getName(trny.comps(coId).typ, getMsg("bye")), 
+              SNO(m.stNoB).getName(trny.comps(coId).typ, getMsg("bye")), 
+              m.gameNo, m.info, m.getPlayfield, m.getBallArr, 
+              m.printSets, trny.cophs(coId,coPhId).noWinSets).toString
+          }
+        }
+      }
       case CPT_KO => {
-        val maxRnd = genKORnds(trny.cophs(coId, coPhId).size)  
         val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
         for (rnd <- maxRnd to 0 by -1) {
           val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}" 
           val matches = matchMap(rnd).sortBy(mEntry => mEntry.gameNo)
           for (m <- matches) {
             val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
-            rowElem.innerHTML = clientviews.organize.competition.input.html.KoMatchEntry(
+            rowElem.innerHTML = clientviews.organize.competition.input.html.MatchEntry(
+              "","",
               SNO(m.stNoA).getName(trny.comps(coId).typ, getMsg("bye")), 
               SNO(m.stNoB).getName(trny.comps(coId).typ, getMsg("bye")), 
               m.gameNo, m.info, m.getPlayfield, m.getBallArr, 

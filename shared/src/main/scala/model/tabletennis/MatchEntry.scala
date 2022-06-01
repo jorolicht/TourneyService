@@ -21,7 +21,7 @@ case class MatchEntry(
   val gameNo:      Int,                   // (5) game number unique within phase/section
   
   // KO-System specific entries
-  val round:       Int,                   // (6) round
+  val round:       Int,                   // (6) round / intRound for Group-System
   val maNo:        Int,                   // (7) match number within round
 
   // Group-System specific entries
@@ -50,8 +50,8 @@ case class MatchEntry(
 ) extends {
   def stringify = s"${stNoA}^${stNoB}^${coId}^${coPh}^${coPhId}^${gameNo}^${round}^${maNo}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_"
   def encode    = s"${stNoA}^${stNoB}^${coId}^${coPh}^${coPhId}^${gameNo}^${round}^${maNo}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_"
-  //Example                8^       4^     1^      8^       3^       2^     0^        0^        0^           0^       ^0           ^0         ^0        ^         ^
-
+  //Example                8^       4^     1^      8^       3^          2^     0^        0^      0^        0^      ^0           ^0         ^0        ^             ^
+  //                   00025^   00018^     1^      1^       1^          1^     0^        0^      1^        1^       5^        1·1·1^       ^         ^20220207170409^       2^ 3^2^                  8·-4·4·-11·0^_",
  
  def getPoints: (Int,Int) = {
     val nowisets = getMDInt(result,0)

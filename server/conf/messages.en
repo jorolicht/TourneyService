@@ -10,8 +10,8 @@ greeting                                              = Welcome!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05EN182
-  app.date                                            = 2022-05-30
+  app.version                                         = 2022-05EN183
+  app.date                                            = 2022-06-01
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -332,6 +332,8 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   competition.koRound.2                               = Semifinals
   competition.koRound.1                               = Final
   competition.koRound.0                               = Match 3rd Place
+
+  competition.GrRound                                 = Round {0}
 
   competition.typ.0                                   = Typ
   competition.typ.1                                   = SINGLE

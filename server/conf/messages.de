@@ -10,8 +10,8 @@ greeting                                              = Herzlich Willkommen!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05DE182
-  app.date                                            = 2022-05-30
+  app.version                                         = 2022-05DE183
+  app.date                                            = 2022-06-01
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -332,6 +332,8 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   competition.koRound.2                               = Halbfinale
   competition.koRound.1                               = Finale
   competition.koRound.0                               = Spiel Platz 3
+
+  competition.GrRound                                 = Runde {0}
 
 
   competition.typ.0                                   = Typ
