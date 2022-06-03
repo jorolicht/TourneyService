@@ -166,6 +166,16 @@ class BasicHtml
     catch { case _: Throwable => error("setHtml", s"id: ${ucp.idBase}__${elemId} content: ${content.toString.take(10)}") } 
   }
 
+  def setHtml(elem: HTMLElement, content: play.twirl.api.Html)(implicit ucp: UseCaseParam): Unit = {
+    try elem.innerHTML = content.toString
+    catch { case _: Throwable => error("setHtml", s"content: ${content.toString.take(10)}") } 
+  }  
+  
+  def setHtml(elem: HTMLElement, content: String)(implicit ucp: UseCaseParam): Unit = {
+    try elem.innerHTML = content
+    catch { case _: Throwable => error("setHtml", s"content: ${content.toString.take(10)}") } 
+  }  
+
   def insertHtml(elemId: String, pos: String, content: String)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(ucp.idBase + "__" + elemId).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
     catch { case _: Throwable => error("insertHtml", s"id: ${ucp.idBase}__${elemId} pos: ${pos} content: ${content.take(10)}") } 

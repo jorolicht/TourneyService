@@ -21,8 +21,10 @@
     </tbody>
 
     @for(i <- maxRound to 0 by -1) {
-      <tbody @id(s"InputRound_${coId}_${cophId}_${i}")>
+      <tbody>
         <tr><th colspan='12'><small class="font-weight-bold">@msg_(s"competition.koRound.${i}")</small></th></tr>
+      </tbody>
+      <tbody @id(s"InputRound_${coId}_${cophId}_${i}")>
       </tbody>
     } 
   </table>
