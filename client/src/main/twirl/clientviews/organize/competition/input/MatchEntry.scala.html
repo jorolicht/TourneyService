@@ -5,25 +5,31 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(group: String, wgw: String, nameA: String, nameB: String, gameNo: Int, info: String, playfield: String, ballArr: Array[String], sets: String, winSets:Int)(implicit ucc: UseCaseParam)
+@(group: String, wgw: String, nameA: String, nameB: String, gameNo: Int, info: String, playfield: String, ballArr: Array[String], sets: (Int,Int), winSets:Int)(implicit ucc: UseCaseParam)
 
-@if(group != "") {
-  <td class="border text-center"><small>@group</small></td>
-}  
-@if(wgw != "") {
-  <td class="border text-center"><small>@wgw</small></td>
-}  
-<td class="border-bottom border-left border-top pl-2 text-right"><small>@nameA</small></td>
+@if(group != "") { <td class="border text-center"><small data-game_@gameNo='group'>@group</small></td> }  
+@if(wgw != "")   { <td class="border text-center"><small data-game_@gameNo='wgw'>@wgw</small></td>   }  
+<td class="border-bottom border-left border-top pl-2 text-right"><small data-game_@gameNo='nameA'>@nameA</small></td>
 <td class="border-bottom border-top pl-1 pr-1 text-center">-</td>
-<td class="border-bottom border-right border-top pr-2 text-left"><small>@nameB</small></td>
+<td class="border-bottom border-right border-top pr-2 text-left"><small data-game_@gameNo='nameB'>@nameB</small></td>
 <td class="border-bottom border-right border-top text-center"><small>@gameNo</small></td>
-<td class="border text-center"><small>@info</small></td>
-<td class="border text-center"><small>@playfield</small></td>
+<td class="border text-center"><small data-game_@gameNo='info'>@info</small></td>
+<td class="border text-center"><small data-game_@gameNo='playfield'>@playfield</small></td>
 @for(i <- 0 to (winSets-1)*2){
-  @if(i<ballArr.length) {
-    <td width='30px' class="border text-center" contenteditable='true' style='font-size:small;'>@ballArr(i)</td>
+  @if(i<ballArr.length){
+    <td width='30px' data-game_@gameNo='ball_@(i+1)' class="border text-center" contenteditable='true' style='font-size:small;'>@ballArr(i)</td>
   } else {
-    <td width='30px' class="border text-center" contenteditable='true' style='font-size:small;'>&nbsp;</td>
+    <td width='30px' data-game_@gameNo='ball_@(i+1)' class="border text-center" contenteditable='true' style='font-size:small;'>&nbsp;</td>
   }
 }
-<td class="border text-center" contenteditable='true'>@sets</td>
+<td class="border text-center" data-game_@gameNo='set' contenteditable='true'>
+  @if(sets!=(0,0)) {
+    @{sets._1}:@sets._2
+  }
+</td>
+<td class="text-center ml-1 mr-1" data-game_@gameNo='save'>
+  <button data-game_@gameNo='save' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
+</td>
+<td class="text-center">
+  <button data-game_@gameNo='delete' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("DeleteMatchResult", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 
+</td>

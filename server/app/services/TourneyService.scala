@@ -91,8 +91,8 @@ trait TourneyService {
   def getCompName(toId: Long, coId: Long): Future[Either[Error, String]]
 
   // Match Interface
-  def setMatch(ma: MatchEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-  def setMatches(ma: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
+  def setMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def setMatches(ma: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
   def delMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
   def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] 
   def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int): Future[Either[Error, Seq[ResultEntry]]] 

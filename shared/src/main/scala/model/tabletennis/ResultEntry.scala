@@ -5,6 +5,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Constants._
 import shared.utils.Routines._
+import shared.model.{ MEntry, MEntryGr, MEntryKo, MEntryBase }
 import shared.model.CompPhase._
 import shared.model.tabletennis.utility._
 import shared.utils.{ Error, Return }
@@ -39,17 +40,18 @@ object ResultEntry {
   }
 
 
-  def fromMatchEntry(m: MatchEntry, coTyp: Int, noWinSets: Int): ResultEntry = {
-    val pos = (coTyp match {
-      case CPT_GR => m.wgw
-      case CPT_KO => (m.round, m.maNo)
-      case _      => (0,0)
-    })
-    
-    val balls     = m.result.split('·')
-    val sets      = getSets(balls, noWinSets)
-
-    ResultEntry(m.status >= 2 & pos != (0,0) & validSets(sets, noWinSets), pos, (m.stNoA,m.stNoB), sets, balls)
+  def fromMatchEntry(mEntry: MEntry, coTyp: Int, noWinSets: Int): ResultEntry = {
+    mEntry.asInstanceOf[MEntryBase].coPhTyp match {
+      case CPT_GR => {
+        val m = mEntry.asInstanceOf[MEntryGr]
+        ResultEntry(m.status >= 2 & validSets(m.sets, noWinSets), m.wgw, (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
+      }  
+      case CPT_KO => {
+        val m = mEntry.asInstanceOf[MEntryKo]
+        ResultEntry(m.status >= 2 & validSets(m.sets, noWinSets), (m.round, m.maNo), (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
+      }  
+      case _      => ResultEntry(false, (0,0), ("",""), (0,0), Array(""))
+    }
   }
 
   def decSeq(reEntStr: String): Either[Error, Seq[ResultEntry]] = {

@@ -10,8 +10,8 @@ greeting                                              = Welcome!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05EN183
-  app.date                                            = 2022-06-01
+  app.version                                         = 2022-05EN184
+  app.date                                            = 2022-06-03
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -486,7 +486,10 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.input.table                      = Table
   organize.competition.input.balls                      = Balls
   organize.competition.input.sets                       = Sets
-  organize.competition.input.bye                        = [BYE] 
+  organize.competition.input.bye                        = [BYE]
+  organize.competition.input.order                      = Order
+  organize.competition.input.group                      = Group
+  organize.competition.input.tit.delete                 = Delete match result
   
   dlg.card.comp.Title                                   = Competition
   dlg.card.comp.plh.name                                = Name of Competition
@@ -1224,7 +1227,8 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
   err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
   err0188.decode.ParticipantEntry                     = decoding error, data type ParticipantEntry: {0}
-  err0189.ctrl.decode.TournBase                       = Controller errordecoding error in controller, data type TournBase: {0}
+  err0189.ctrl.decode.TournBase                       = Controller decoding error, data type TournBase: {0}
   err0190.ctrl.lic.notfound                           = License not found: {0}
+  err0191.ctrl.decode.MEntry                          = Controller decoding error, data type MEntry: {0}
 
 #END error codes / messages

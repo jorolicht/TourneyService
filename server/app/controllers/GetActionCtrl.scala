@@ -58,9 +58,6 @@ class GetActionCtrl @Inject()
 
   val mailService  = new MailerService(mailer)
 
-  implicit val matchFormat  = Json.format[Matches]
-
-
   // ---
   // Service based on getAction wrapper 
   // ---

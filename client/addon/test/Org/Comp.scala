@@ -28,6 +28,7 @@ import shared.utils.Routines._
 
 import shared.model._
 import shared.model.CompPhase._
+import shared.model.Competition._
 import shared.utils.Constants._
 import shared.model.tabletennis._
 
@@ -107,46 +108,67 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
       }
     }
   }
-
-
-
   def testMatchEncode(tnp: TNP) = {
     START(tnp)
     
-    val rnd1M = ArrayBuffer(
-      //         stNoA,  stNoB,   coId, coPh,  coPhId,  gameNo, round, maNo, grId, wgw,   playfield, info, startTime, endTime, status, sets,result 
-      MatchEntry("", "", 0L, 0, 0, 0, 0, 0, 0, (0,0), "", "", "", "", 0, (0,0), ""),
-      MatchEntry("00131","00132", 13L,  CST_SW, 1,      1,      1,     1,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·2·3·4"),
-      MatchEntry("00133","00134", 13L,  CST_SW, 1,      2,      1,     2,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "4·2·-2·3·4"),
-      MatchEntry("00135","00136", 13L,  CST_SW, 1,      3,      1,     3,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·9·3·4"),
-      MatchEntry("00137","00138", 13L,  CST_SW, 1,      4,      1,     4,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "5·2·-8·-12·3·4"),
-      MatchEntry("00132","00133", 13L,  CST_SW, 1,      5,      2,     1,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·1·5·4"),
-      MatchEntry("00134","00135", 13L,  CST_SW, 1,      6,      2,     2,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "4·2·-7·3·4"),
-      MatchEntry("00136","00137", 13L,  CST_SW, 1,      7,      2,     3,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·7·3·4"),
-      MatchEntry("00131","00138", 13L,  CST_SW, 1,      8,      2,     4,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "5·2·-4·-11·3·8")
-    )
+    // val rnd1M = ArrayBuffer(
+    //   //         stNoA,  stNoB,   coId, coPh,  coPhId,  gameNo, round, maNo, grId, wgw,   playfield, info, startTime, endTime, status, sets,result 
+    //   MatchEntry("", "", 0L, 0, 0, 0, 0, 0, 0, (0,0), "", "", "", "", 0, (0,0), ""),
+    //   MatchEntry("00131","00132", 13L,  CST_SW, 1,      1,      1,     1,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·2·3·4"),
+    //   MatchEntry("00133","00134", 13L,  CST_SW, 1,      2,      1,     2,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "4·2·-2·3·4"),
+    //   MatchEntry("00135","00136", 13L,  CST_SW, 1,      3,      1,     3,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·9·3·4"),
+    //   MatchEntry("00137","00138", 13L,  CST_SW, 1,      4,      1,     4,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "5·2·-8·-12·3·4"),
+    //   MatchEntry("00132","00133", 13L,  CST_SW, 1,      5,      2,     1,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·1·5·4"),
+    //   MatchEntry("00134","00135", 13L,  CST_SW, 1,      6,      2,     2,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "4·2·-7·3·4"),
+    //   MatchEntry("00136","00137", 13L,  CST_SW, 1,      7,      2,     3,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "3·7·3·4"),
+    //   MatchEntry("00131","00138", 13L,  CST_SW, 1,      8,      2,     4,    0,    (0,0), "",        "",   "",        "",      0,   (0,0),   "5·2·-4·-11·3·8")
+    // )
 
-    val m = MatchTest(rnd1M) 
-    val mEnc = write[MatchTest](m)
-    println(s"Encode Match: ${mEnc}")
+    // val m = MatchTest(rnd1M) 
+    // val mEnc = write[MatchTest](m)
+    // println(s"Encode Match: ${mEnc}")
 
-    val testMatch = MatchEntry.objectify("00025^99505^1^8^3^1^4^1^0^0^0^1·8·1^^^20220207170505^2^3^0^^_")
-    println(s"Test MatchEntry.objectify ${testMatch}")
+    // val testMatch = MatchEntry.objectify("00025^99505^1^8^3^1^4^1^0^0^0^1·8·1^^^20220207170505^2^3^0^^_")
+    // println(s"Test MatchEntry.objectify ${testMatch}")
+
+    println(s"Start Test Encode MEntry")
+
+    val aBufMEntry = ArrayBuffer[MEntry]()
+
+    aBufMEntry += MEntryKo(1, CT_SINGLE, 3, CPT_KO, 31,"00021","00022", 7, 2, "game3#1","game4#2", "1·3·3", "Halbfinale", "20220207170409", "20220207171019", 2, (3,2), "8·-4·4·-11·0")
+    aBufMEntry += MEntryGr(1, CT_DOUBLE, 1, CPT_GR, 77,"00019","00020", 3, 4, (1,5), "1·3·3", "2.Runde", "20220207170409", "20220207171019", 3, (0,3), "11·-4·-0")
+
+    println(aBufMEntry(0))
+    println(aBufMEntry(1))
+
+    val x = aBufMEntry(0).encode
+    val y = aBufMEntry(1).encode
+    val yy = write[MEntryTx](aBufMEntry(1).toTx)
+    val z = write[ArrayBuffer[MEntryTx]](aBufMEntry.map(_.toTx))
+
+    println(s"Encoded y: ${y}")
+    println(s"Encoded y: ${yy}")
+
+    val ed = (read[MEntryTx](y)).decode
+    println(s"Encoded&Decode: ${ed}")
+
+    println(s"Encoded: ${x}")
+    println(s"Encoded: ${y}")
+    println(s"Encoded: ${z}")
+
+    val xxx = read[ArrayBuffer[MEntryTx]](z).map(_.decode)
+
+    println(s"Decoded xxx: ${xxx(0)}")
+    println(s"Decoded xxx: ${xxx(1)}")
+
     SUCCESS(tnp)
   }
+} 
 
+// case class MatchTest(
+//   val matches:   ArrayBuffer[MatchEntry]
+// )
 
-
-
-
-}
-
-
-
-case class MatchTest(
-  val matches:   ArrayBuffer[MatchEntry]
-)
-
-object MatchTest {
-  implicit def rw: RW[MatchTest] = macroRW 
-}
+// object MatchTest {
+//   implicit def rw: RW[MatchTest] = macroRW 
+// }

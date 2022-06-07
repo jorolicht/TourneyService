@@ -46,7 +46,7 @@ case class Tourney(
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Participant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
-  var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId)   -> Competition Section
+  //var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId)   -> Competition Section
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
   var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo)   -> Playfield
 )
@@ -215,24 +215,24 @@ case class Tourney(
   /** setCompDraw - returns new secId  
    *  CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) 
    */
-  def setCompDraw(co: Competition, nameSec: String, typSec: Int, prevSec: Int, 
-                  winners: Boolean, noWinSets: Int, 
-                  pants: Array[SNO]): Either[Error, Int] = {
-    addSect(prevSec, co.id, nameSec, typSec, winners) match {
-      case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
-      case Right(secId) => {        
-        if (coSects.isDefinedAt((co.id, secId))) {
-          coSects((co.id, secId)).pants     = pants
-          coSects((co.id, secId)).noPlayer  = pants.filter(p => !p.isBye).size
-          coSects((co.id, secId)).size      = pants.size
-          coSects((co.id, secId)).noWinSets = noWinSets
-          Right(secId) 
-        } else {
-          Left(Error("err0172.trny.setCompDraw"))
-        }
-      }
-    }
-  }  
+  // def setCompDraw(co: Competition, nameSec: String, typSec: Int, prevSec: Int, 
+  //                 winners: Boolean, noWinSets: Int, 
+  //                 pants: Array[SNO]): Either[Error, Int] = {
+  //   addSect(prevSec, co.id, nameSec, typSec, winners) match {
+  //     case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
+  //     case Right(secId) => {        
+  //       if (coSects.isDefinedAt((co.id, secId))) {
+  //         coSects((co.id, secId)).pants     = pants
+  //         coSects((co.id, secId)).noPlayer  = pants.filter(p => !p.isBye).size
+  //         coSects((co.id, secId)).size      = pants.size
+  //         coSects((co.id, secId)).noWinSets = noWinSets
+  //         Right(secId) 
+  //       } else {
+  //         Left(Error("err0172.trny.setCompDraw"))
+  //       }
+  //     }
+  //   }
+  // }  
   
 
   /** getCompName - get name of competition
@@ -242,29 +242,29 @@ case class Tourney(
 
 
   //addSect - adds a competition section to a competition 
-  def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
-    val newId = coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
+  // def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
+  //   val newId = coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
 
-    if (coSects.isDefinedAt((coId, newId))) {
-      Left(Error("err0169.trny.addSect"))
-    } else if (prevSec == 0) {
-      // new (first) entry without previous entry
-      coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
-      Right(newId)
-    } else if (!coSects.isDefinedAt((coId, prevSec))) { 
-      // now previous entry
-      Left(Error("err0048.trny.addSect"))
-    } else {
-      // new entry with previous entry
-      coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
-      if (winSec) {
-        coSects((coId, prevSec)).winId = newId
-      } else {
-        coSects((coId, prevSec)).looId = newId
-      }
-      Right(newId)
-    }
-  }
+  //   if (coSects.isDefinedAt((coId, newId))) {
+  //     Left(Error("err0169.trny.addSect"))
+  //   } else if (prevSec == 0) {
+  //     // new (first) entry without previous entry
+  //     coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
+  //     Right(newId)
+  //   } else if (!coSects.isDefinedAt((coId, prevSec))) { 
+  //     // now previous entry
+  //     Left(Error("err0048.trny.addSect"))
+  //   } else {
+  //     // new entry with previous entry
+  //     coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
+  //     if (winSec) {
+  //       coSects((coId, prevSec)).winId = newId
+  //     } else {
+  //       coSects((coId, prevSec)).looId = newId
+  //     }
+  //     Right(newId)
+  //   }
+  // }
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry

@@ -58,7 +58,6 @@ class RemoteCtrl @Inject()
 )    
   extends AbstractController(coco) with I18nSupport with Logging
 {
-  implicit val maFormat   = Json.format[shared.model.tabletennis.Matches]
 
   /** trigger - triggers update of connected clients
    * 
@@ -395,19 +394,22 @@ class RemoteCtrl @Inject()
    * 
    *  Serivce: def setMatches(ma: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
    */ 
-  def setMatches(toId: Long, trigger: Boolean = false) = Action(parse.json[Matches]).async { implicit request =>
+  def setMatches(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:    Messages  = messagesApi.preferred(request)
-    val matches  = request.body
+    val content  = request.body.asText.getOrElse("")
     val ctx      = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
 
     logger.debug(s"setMatches toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
 
-    tsv.setMatches(matches.list.map(x => MatchEntry.obify(x))).map {
-      case Left(err)   => BadRequest(err.encode)
-      case Right(cnt)  => Ok(Return(cnt).encode)  
-    }
+    try {
+      val matches = read[Seq[MEntryTx]](content).map(_.decode)
+      tsv.setMatches(matches).map {
+        case Left(err)   => BadRequest(err.encode)
+        case Right(cnt)  => Ok(Return(cnt).encode)  
+      }
+    } catch { case _: Throwable => Future(BadRequest(Error("err0191.ctrl.decode.MEntry", content.take(10)).encode)) }
   } 
 
   /** setMatch 
@@ -416,17 +418,18 @@ class RemoteCtrl @Inject()
    */ 
   def setMatch(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:  Messages  = messagesApi.preferred(request)
+    val content  = request.body.asText.getOrElse("")
+    val ctx      = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)  
+    implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)  //setup implicit tourney service call environment 
 
-    val mEntry = request.body.asText.getOrElse("")
-    val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
-    //setup implicit service call environment 
-    implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
-    logger.debug(s"setMatch toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir} body:${mEntry}")
-
-    tsv.setMatch(MatchEntry.obify(mEntry)).map {
-      case Left(err)      => BadRequest(err.encode)
-      case Right(result)  => Ok(Return(result).encode)       
-    } 
+    //logger.debug(s"setMatch toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir} body:${content}")
+    try {
+      val mEntry = read[MEntryTx](content).decode
+      tsv.setMatch(mEntry).map {
+        case Left(err)      => BadRequest(err.encode)
+        case Right(result)  => Ok(Return(result).encode)       
+      } 
+    } catch { case _: Throwable => Future(BadRequest(Error("err0191.ctrl.decode.MEntry", content.take(10)).encode)) }
   } 
 
 
@@ -452,35 +455,6 @@ class RemoteCtrl @Inject()
       case Right(cnt)  => Ok(Return(cnt).encode)       
     }    
   } 
-
-
-
-  // def regTournBase() = Action.async { implicit request: Request[AnyContent] =>
-  //   val msgs:  Messages  = messagesApi.preferred(request)
-  //   val tournBase  = request.body.asText.getOrElse("")
-  //   val ctx        = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
-
-  //   logger.debug(s"regTournBase  ${ctx.orgId} ${ctx.orgDir}  ${ctx.organizer}  ")
-
-  //   if (ctx.orgId <= 0 ) {
-  //     logger.info(s"regTournBase: not allowed to create tourney DB")
-  //     Future( BadRequest(Error("err0152.ctrl.regTournBase", "not allowed", "","regTournBase").encode) ) 
-  //   } else {
-  //     try {
-  //       val tb = read[TournBase](tournBase)
-
-      //   implicit val tse   = TournSVCEnv(tb.id, ctx.orgDir, true)
-      //   val tBase = if (tb.organizer == "") tb.copy(orgDir=ctx.orgDir, organizer=ctx.organizer) else tb.copy(orgDir=ctx.orgDir)
-
-      //   tsv.regTournBase(tBase).map {
-      //     case Left(err)  => BadRequest(err.encode)
-      //     case Right(id)  => Ok(id.toString)
-      //   }
-      // } catch { case _: Throwable => Future(BadRequest(Error("err0189.ctrl.decode.TournBase", tournBase.take(10)).encode)) }
-
-
-
-
 
 
   /** setCompPhase - set a competition phase

@@ -4,6 +4,7 @@ import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Routines._
+import shared.model.MEntryGr
 import shared.model.ParticipantEntry
 import shared.model.tabletennis.utility._
 
@@ -94,7 +95,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   }
 
 
-  def addMatch(m: MatchEntry): Boolean = { 
+  def addMatch(m: MEntryGr): Boolean = { 
     val balls     = m.result.split('·')
     val sets      = getSets(balls, noWinSets)
 

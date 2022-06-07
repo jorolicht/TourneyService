@@ -24,7 +24,7 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
   import CompPhase._
   
   var pants        = ArrayBuffer[SNO]()        // participant list (start numbers)
-  var matches      = ArrayBuffer[MatchEntry]()
+  var matches      = ArrayBuffer[MEntry]()
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
 
@@ -77,22 +77,28 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
 
   //addMatch with debug print
-  def addMatch(m: MatchEntry, prt: (String)=>Unit ): Boolean = {
-    coPhTyp match {
-      case CPT_GR => if (m.grId > 0 & m.grId <= groups.length) groups(m.grId-1).addMatch(m) else false
-      case CPT_KO => ko.addMatch(m, prt); prt(s"addMatch ko.results: ${ko.toString}"); true
+  def addMatch(m: MEntry, prt:(String)=>Unit = _=>() ): Boolean = {
+    m match {
+      case MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, playfield, info, startTime, endTime, status, sets, result) => { 
+        if (grId > 0 & grId <= groups.length) {
+          groups(grId-1).addMatch(m.asInstanceOf[MEntryGr])
+        } else false
+      }  
+      case MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, sets, result) => { 
+        ko.addMatch(m.asInstanceOf[MEntryKo], prt); prt(s"addMatch ko.results: ${ko.toString}"); true
+      }  
       case _      => false
     }
   } 
 
-  //addMatch
-  def addMatch(m: MatchEntry): Boolean = {
-    coPhTyp match {
-      case CPT_GR => if (m.grId > 0 & m.grId <= groups.length) groups(m.grId-1).addMatch(m) else false
-      case CPT_KO => ko.addMatch(m) 
-      case _      => false
-    }
-  } 
+  // //addMatch
+  // def addMatch(m: MEntry): Boolean = {
+  //   coPhTyp match {
+  //     case CPT_GR => if (m.grId > 0 & m.grId <= groups.length) groups(m.grId-1).addMatch(m) else false
+  //     case CPT_KO => ko.addMatch(m) 
+  //     case _      => false
+  //   }
+  // } 
 
 
   // def setMatches(round: Int, matchList: ArrayBuffer[MatchEntry]) = {
@@ -182,7 +188,7 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
   def toTx(): CompPhaseTx = {
     CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
-                pants.map(x=>x.value), matches.map(x=>x.encode), groups.map(g=>g.toTx), ko.toTx) 
+                pants.map(x=>x.value), matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
   }
 
 }
@@ -229,7 +235,7 @@ object CompPhase {
   def fromTx(tx: CompPhaseTx): CompPhase = {
     val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhId, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.pants   = tx.pants.map(x=>SNO(x))
-    cop.matches = tx.matches.map(x=>MatchEntry.obify(x))
+    cop.matches = tx.matches.map(x=>x.decode)
 
     cop.coPhTyp match {
       case CPT_GR  => {
@@ -258,8 +264,8 @@ case class CompPhaseTx(
   var size:      Int, 
   val noPlayers: Int,
   val noWinSets: Int,
-  val pants:      ArrayBuffer[String],
-  val matches:   ArrayBuffer[String], 
+  val pants:     ArrayBuffer[String],
+  val matches:   ArrayBuffer[MEntryTx], 
   val groups:    ArrayBuffer[GroupTx],
   val ko:        KoRoundTx
 )

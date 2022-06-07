@@ -531,16 +531,19 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   // 
   // Match Routines
   // 
-  def setMatch(ma: MatchEntry)(implicit tse :TournSVCEnv): Future[Either[Error,Boolean]] = 
+  def setMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error,Boolean]] = 
     //def prt(msg: String) = logger.info(s"setMatch: ${msg}")
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if (trny.cophs.isDefinedAt((ma.coId, ma.coPh))) {
+        if (trny.cophs.isDefinedAt((ma.coId, ma.coPhId))) {
 
-          val trigCmd = ma.getType() match {
-            case CPT_GR => UpdateTrigger("MatchGr", "000000", tse.toId, ma.coId, ma.coPh, ma.grId)
-            case CPT_KO => UpdateTrigger("MatchKo", "000000", tse.toId, ma.coId, ma.coPh, 0)
+          val trigCmd = ma.coPhTyp match {
+            case CPT_GR => {
+              val maGr = ma.asInstanceOf[MEntryGr]
+              UpdateTrigger("MatchGr", "000000", tse.toId, maGr.coId, maGr.coPhId, maGr.grId)
+            }  
+            case CPT_KO => UpdateTrigger("MatchKo", "000000", tse.toId, ma.coId, ma.coPhId, 0)
             case _      => UpdateTrigger("Match", tse.toId)
           }
 
@@ -550,7 +553,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           
           // delete playfield, ma.playfield contains playfield code
           trny.playfields = trny.playfields.filter( _._2.code != ma.playfield)
-          trny.cophs((ma.coId, ma.coPh)).addMatch(ma)
+          trny.cophs((ma.coId, ma.coPhId)).addMatch(ma)
           //logger.info(s"setMatch after: ${trny.cophs}")
           trigger(trny, trigCmd)
           Right(true)
@@ -561,7 +564,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     }  
 
 
-  def setMatches(mas: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = {
+  def setMatches(mas: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = {
     //def prt(msg: String) = logger.info(s"setMatch: ${msg}")
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
@@ -569,8 +572,8 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         val cnt = for {
           ma <- mas
         } yield {
-          if (trny.cophs.isDefinedAt((ma.coId, ma.coPh))) {
-            trny.cophs((ma.coId, ma.coPh)).addMatch(ma)
+          if (trny.cophs.isDefinedAt((ma.coId, ma.coPhId))) {
+            trny.cophs((ma.coId, ma.coPhId)).addMatch(ma)
             //trny.cophs((ma.coId, ma.coPh)).addMatch(ma, prt)
             1
           }  

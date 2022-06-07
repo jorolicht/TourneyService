@@ -57,8 +57,6 @@ class PostActionCtrl @Inject()
   extends AbstractController(coco) with I18nSupport with Logging
 {
 
-  implicit val matchFormat = Json.format[Matches]
-
   // 
   // Service based on postAction wrapper 
   // 

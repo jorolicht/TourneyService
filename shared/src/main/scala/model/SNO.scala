@@ -46,7 +46,9 @@ case class SNO(value: String) {
 
   // getName returns name for all types of participants
   def getName(coTyp: Int, byeName: String="")(implicit trny: Tourney): String  = {
-    if (byeName != "" & isBye()) { 
+    if (value == "") {
+      ""
+    } else if (byeName != "" & isBye()) { 
       byeName
     } else {
       coTyp match {

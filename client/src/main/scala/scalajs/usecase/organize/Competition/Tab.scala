@@ -141,7 +141,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
 
     for( i <- 0 to aNodes.length-1) {
-      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-coPhId") == coPhId.toString) {
+      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("coPhId") == coPhId.toString) {
         AppEnv.coPhIdMap(coId) = coPhId
         aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
       } else {

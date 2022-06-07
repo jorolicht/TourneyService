@@ -10,8 +10,8 @@ greeting                                              = Herzlich Willkommen!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05DE183
-  app.date                                            = 2022-06-01
+  app.version                                         = 2022-05DE184
+  app.date                                            = 2022-06-03
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -487,7 +487,11 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.input.table                      = Tisch
   organize.competition.input.balls                      = Bälle
   organize.competition.input.sets                       = Sätze
-  organize.competition.input.bye                        = [FREILOS] 
+  organize.competition.input.bye                        = [FREILOS]
+  organize.competition.input.order                      = Spielfolge
+  organize.competition.input.group                      = Gruppe
+  organize.competition.input.tit.delete                 = Ergebniseingabe löschen
+
  
   dlg.card.comp.Title                                   = Wettbewerb
   dlg.card.comp.plh.name                                = Name des Wettbewerbs
@@ -1240,5 +1244,6 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
   err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
   err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
+  err0191.ctrl.decode.MEntry                          = Dekodierfehler im Controller Datentyp MEntry: {0}
 
 #END Error Codes/Messages

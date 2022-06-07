@@ -11,12 +11,14 @@
   <table @id(s"Input_${coId}_${cophId}")>
     <tbody>
       <tr class='border-bottom'>
-        <th colspan='3' class="border-left border-right font-weight-bold text-center">@msg("who_a_who")</th>
-        <th class="border-left border-right font-weight-bold"><small>@msg("gameNumber")</small></th>
-        <th class="border-left border-right font-weight-bold"><small>@msg("info")</small></th>
-        <th class="border-left border-right font-weight-bold"><small>@msg("table")</small></th>
-        <th colspan='5' class="border-left border-right text-center"><small>@msg("balls")</small></th>
-        <th class="border-left border-right font-weight-bold"><small>@msg("sets")</small></th>
+        <th colspan='3' class="border-left border-right font-weight-bold text-center ml-1 mr-1">@msg("who_a_who")</th>
+        <th class="border-left border-right font-weight-bold"><small class='ml-1 mr-1'>@msg("gameNumber")</small></th>
+        <th class="border-left border-right font-weight-bold"><small class='ml-1 mr-1'>@msg("info")</small></th>
+        <th class="border-left border-right font-weight-bold"><small class='ml-1 mr-1'>@msg("table")</small></th>
+        <th colspan='5' class="border-left border-right text-center"><small class='ml-1 mr-1'>@msg("balls")</small></th>
+        <th class="border-left border-right font-weight-bold"><small class='ml-1 mr-1'>@msg("sets")</small></th>
+        <th></th>
+        <th></th>
       </tr>      
     </tbody>
 
@@ -25,6 +27,7 @@
         <tr><th colspan='12'><small class="font-weight-bold">@msg_(s"competition.koRound.${i}")</small></th></tr>
       </tbody>
       <tbody @id(s"InputRound_${coId}_${cophId}_${i}")>
+        
       </tbody>
     } 
   </table>

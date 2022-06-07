@@ -53,10 +53,6 @@ object TIO {
   val clock:    Clock  = Clock.systemUTC()
   val tourney:  HashMap[Long, Tourney] = HashMap()
 
-
-  implicit val mEntryFormat = Json.format[MatchEntry]
-  implicit val matchFormat  = Json.format[Matches]
-
   def mapDefault[X,Y](hm: HashMap[X,Y], key: X, default: Y) = if (!hm.isDefinedAt(key)) default else hm(key)
 
   def moveFile(source: String, destination: String): Either[Error, Boolean] = {

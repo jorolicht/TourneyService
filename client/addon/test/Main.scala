@@ -57,6 +57,9 @@ object AddonMain extends TestUseCase("AddonMain")
   // Competition tests
   @JSExport def testCompEncode(toId: String)      = AddonComp.testEncode(toId)
   
+  // Match tests
+  //@JSExport def testMatchEncode(param: String="") = AddonMatch.testEncode(TNP("testEncode", param))
+
   // Tourney tests
   @JSExport def testTourneyLoad(toId: Long)       = AddonTourney.testLoad(toId)
 
