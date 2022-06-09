@@ -1230,5 +1230,6 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0189.ctrl.decode.TournBase                       = Controller decoding error, data type TournBase: {0}
   err0190.ctrl.lic.notfound                           = License not found: {0}
   err0191.ctrl.decode.MEntry                          = Controller decoding error, data type MEntry: {0}
+  err0192.input.invalid.sets                          = Invalid input format for sets
 
 #END error codes / messages

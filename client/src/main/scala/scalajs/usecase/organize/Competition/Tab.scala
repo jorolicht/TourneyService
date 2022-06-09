@@ -123,6 +123,16 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
   def selectCoPh(coId: Long, coPhId: Int, tabMode: String, reload:Boolean=false) = {
     val aNodes = getElemById("Links").getElementsByTagName("a")
     
+    // set register/tab active
+    for( i <- 0 to aNodes.length-1) {
+      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-coPhId") == coPhId.toString) {
+        aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
+      } else {
+        aNodes.item(i).asInstanceOf[HTMLElement].classList.remove("active")
+      }
+    }  
+
+    // remember selection
     AppEnv.coPhIdMap(coId) = coPhId
     tabMode match {
       case "Draw"  => {
@@ -139,16 +149,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
       }
     }  
 
-
-    for( i <- 0 to aNodes.length-1) {
-      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("coPhId") == coPhId.toString) {
-        AppEnv.coPhIdMap(coId) = coPhId
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
-      } else {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.remove("active")
-      }
-    }  
-
+    // set relevant section visible
     val contentNodes = getElemById("Content").getElementsByTagName("section")
     for( i <- 0 to contentNodes.length-1) {
       val elem = contentNodes.item(i).asInstanceOf[HTMLElement]

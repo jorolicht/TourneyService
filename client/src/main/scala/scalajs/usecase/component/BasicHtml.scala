@@ -208,7 +208,7 @@ class BasicHtml
     } catch { case _: Throwable => error(s"setDisabledByName", s"name: ${ucp.idBase}__${name} value: ${value}") } 
   }
 
-  def setDisabled__(elem:HTMLElement, value: Boolean): Unit = {
+  def setDisabled(elem:HTMLElement, value: Boolean): Unit = {
     try elem.asInstanceOf[Input].disabled = value
     catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
   }

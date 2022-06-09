@@ -11,12 +11,25 @@ trait MEntry {
   def coTyp: Int 
   def coPhId: Int
   def coPhTyp: Int
+  def stNoA: String
+  def stNoB: String
   def round: Int
   def gameNo: Int
+  def status: Int
   def playfield: String
+  def sets: (Int,Int)
+  def info: String
+  def result: String
+  def winSets: Int
   def encode: String
   def toString: String
   def toTx: MEntryTx
+
+  def setSets(value:(Int,Int)):Unit
+  def setResult(value:String):Unit
+  def setPlayfield(value:String):Unit
+  def setInfo(value:String):Unit
+  def setStatus(value:Int):Unit
 
   def getPlayfield = {
     try { 
@@ -25,14 +38,25 @@ trait MEntry {
     } catch  { case _: Throwable => "" }
   }
 
+  def finished = (status >= 2)
+
 }
 
-case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, gameNo: Int=0, round: Int=0, playfield:String="") 
+case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, 
+                      gameNo: Int=0, round: Int=0, var playfield:String="", var status:Int=0,
+                      var info: String="", var sets: (Int,Int) =(0,0), var result:String="",
+                      val winSets: Int=0, val stNoA: String="", val stNoB: String=""  ) 
   extends MEntry { 
 
   def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, "")
-  def encode: String = s"""{  "coId"=${coId}, "coTyp"=${coTyp}, "coPhId"=${coPhId}, "coPhTyp"=${coPhTyp}, "content"="^_" } """
+  def encode: String = s"""{  "coId":${coId}, "coTyp":${coTyp}, "coPhId":${coPhId}, "coPhTyp":${coPhTyp}, "content"="^_" } """
   override def toString(): String = s"""  Base-Match"""
+  def setSets(value:(Int,Int)) = { sets = value }
+  def setResult(value:String)  = { result = value } 
+  def setPlayfield(value: String) = { playfield = value }
+  def setInfo(value: String)  = { info = value } 
+  def setStatus(value:Int)    = { status = value } 
+
 }
 
 case class MEntryKo(
@@ -63,22 +87,30 @@ case class MEntryKo(
                                           //       3 = finished playerB won
                                           //       4 = finished noWinner
 
-  var sets:       (Int,Int),              //(12)(13) sets e.g. (3,1)                                         
-  var result:     String                  //(14) result details, depending on kind of sport
+  var sets:       (Int,Int),              //(12)(13) sets e.g. (3,1)
+  val winSets:    Int,                    //(14) number of sets to win the match or 0 for draw             
+  var result:     String                  //(15) result details, depending on kind of sport
                                           //     TT MATCH: <ball1> . <ball2> . <3> . <set4> ...
 
 ) extends MEntry {
 
-  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_")
+  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
 
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_"}"""
+  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
-    |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info}
+    |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
     |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
-    |    playfield: ${playfield} status: ${status} sets: ${sets._1}:${sets._2} result: ${result}
+    |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: ${result}
     """.stripMargin('|')
+
+  def setSets(value:(Int,Int)) = { sets = value }
+  def setResult(value:String)  = { result = value } 
+  def setPlayfield(value: String) = { playfield = value }
+  def setInfo(value:String)  = { info = value }  
+  def setStatus(value:Int)   = { status = value } 
+
 }
 
 
@@ -102,29 +134,36 @@ case class MEntryGr(
   var startTime:   String,                //(9) Format: yyyymmddhhmmss
   var endTime:     String,                //(10)  
 
-  var status:      Int,                   //(11)   -1 = not finished (blocked)
+  var status:      Int,                   //(11)  -2 = not finished (player missing)
+                                          //      -1 = not finished (blocked)
                                           //       0 = not finished (runnable),
                                           //       1 = running
-                                          //       2 = finished playerA won
-                                          //       3 = finished playerB won
+                                          //       2 = finished with winner
+                                          //       3 = finished with fixed winner
                                           //       4 = finished noWinner
 
-  var sets:       (Int,Int),              //(12)(13) sets e.g. (3,1)                                         
-  var result:     String                  //(14) result details, depending on kind of sport
+  var sets:       (Int,Int),              //(12)(13) sets e.g. (3,1)
+  val winSets:    Int,                    //(14) number of sets to win the match or 0 for draw                                         
+  var result:     String                  //(15) result details, depending on kind of sport
                                           //     TT MATCH: <ball1> . <ball2> . <3> . <set4> ...
 
 ) extends MEntry {
 
-  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_")
+  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
 
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${result}^_"}"""
+  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
 
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
-      |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info}
+      |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
       |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
-      |    playfield: ${playfield} status: ${status} sets: ${sets._1}:${sets._2} result: ${result}
+      |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: ${result}
   """.stripMargin('|')
+  def setSets(value:(Int,Int)) = { sets = value }
+  def setResult(value:String)  = { result = value } 
+  def setPlayfield(value: String) = { playfield = value }
+  def setInfo(value:String)  = { info = value } 
+  def setStatus(value:Int)   = { status = value } 
 }
 
 
@@ -134,21 +173,21 @@ case class MEntryTx(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, content: 
       case CPT_GR => {
       try { 
           val m = content.split("\\^")
-          val (gameNo,     stNoA, stNoB, round,      grId,       wgw1,       wgw2,       playfield, info, startTime, endTime, status,      sets1,       sets2,       result) =
-              (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5).toInt, m(6).toInt, m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14))
-          MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, (wgw1,wgw2), playfield, info, startTime, endTime, status, (sets1,sets2), result)
-        } catch { case _: Throwable => MEntryGr(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,(0,0),"","","","", 0,(0,0),"") }
+          val (gameNo,     stNoA, stNoB, round,      grId,       wgw1,       wgw2,       playfield, info, startTime, endTime, status,      sets1,       sets2,   winSets,     result) =
+              (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5).toInt, m(6).toInt, m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14).toInt, m(15))
+          MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, (wgw1,wgw2), playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
+        } catch { case _: Throwable => MEntryGr(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,(0,0),"","","","", 0,(0,0),0, "") }
       }
       case CPT_KO => {
         try { 
           val m = content.split("\\^")
-          val (gameNo,     stNoA, stNoB, round,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       result) =
-              (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5),   m(6),   m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14))
+          val (gameNo,     stNoA, stNoB, round,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
+              (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5),   m(6),   m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14).toInt, m(15))
           MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, 
-                   startTime, endTime, status, (sets1,sets2), result)
-        } catch { case _: Throwable => MEntryKo(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,"","","","","","",0,(0,0),"") }
+                   startTime, endTime, status, (sets1,sets2), winSets, result)
+        } catch { case _: Throwable => MEntryKo(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,"","","","","","",0,(0,0),0,"") }
       }   
-      case _      => MEntryBase(coId, coTyp, coPhId, coPhTyp,0,0)
+      case _      => MEntryBase(coId, coTyp, coPhId, coPhTyp)
     }
   }
 }
@@ -156,3 +195,25 @@ case class MEntryTx(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, content: 
 object MEntryTx {
   implicit def rw: RW[MEntryTx] = macroRW
 }  
+
+object MEntry {
+  // Match Status Values
+  val MS_MISS  = -2   // not finished (player missing)
+  val MS_BLOCK = -1   // not finished (blocked)
+  val MS_READY =  0   // not finished (runnable/ready)
+  val MS_RUN   =  1   // running
+  val MS_FIN   =  2   // finished with winner
+  val MS_FIX   =  3   // finished with fixed winner (bye ...)
+  val MS_DRAW  =  4   // finished with no winner
+  val MS_UNKN  = 99   // finished with no winner
+
+  def statusInfo(value: Int) = value match {
+    case MS_MISS  => "MISS"
+    case MS_BLOCK => "BLOCK"
+    case MS_READY => "READY"
+    case MS_RUN   => "RUN"
+    case MS_FIN   => "FIN"
+    case MS_DRAW  => "DRAW"
+    case MS_UNKN  => "UNKN"
+  }
+}

@@ -1245,5 +1245,6 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
   err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
   err0191.ctrl.decode.MEntry                          = Dekodierfehler im Controller Datentyp MEntry: {0}
+  err0192.input.invalid.sets                          = Ungültiges Eingabeformat für Sätze
 
 #END Error Codes/Messages

@@ -154,7 +154,7 @@ object DlgCardComp extends BasicHtml
   def setInputFields(disabled: Boolean): Unit = {
     val container = document.querySelector(getIdHa("Form"))
     container.querySelectorAll("input, select").map { elem => 
-      setDisabled__(elem.asInstanceOf[HTMLInputElement], disabled)
+      setDisabled(elem.asInstanceOf[HTMLInputElement], disabled)
       markInput__(elem.asInstanceOf[HTMLInputElement], None)
     }
   }

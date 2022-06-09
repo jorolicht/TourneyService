@@ -82,7 +82,7 @@ object SNO {
     (intVal >= 99500 & intVal <= 99999)
   }
 
-  def isNN(value: String)  = (value == SNO.NN)
+  def isNN(value: String)  = (value == "" | value == SNO.NN )
 
   def bye(no: Int=0) = SNO(s"${99500 + no}")
   def nn()  = SNO(NN)

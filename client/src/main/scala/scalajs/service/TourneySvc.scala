@@ -61,7 +61,7 @@ trait TourneySvc extends WrapperSvc
       .map(content => Right(content))
       .recover({
         case dom.ext.AjaxException(req) => Left( 
-          Error(" err0034.ajax.getRequest ", s"response: ${req.responseText.take(20)} status: ${req.statusText}", path, "getCfgFile") 
+          Error("err0034.ajax.getRequest", s"response: ${req.responseText.take(20)} status: ${req.statusText}", path, "getCfgFile") 
         )
         case _: Throwable               => Left(Error("err0035.svc.getCfgFile", path, "", "getCfgFile")) 
     })

@@ -79,12 +79,12 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
   //addMatch with debug print
   def addMatch(m: MEntry, prt:(String)=>Unit = _=>() ): Boolean = {
     m match {
-      case MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, playfield, info, startTime, endTime, status, sets, result) => { 
+      case MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, playfield, info, startTime, endTime, status, sets, winsets, result) => { 
         if (grId > 0 & grId <= groups.length) {
           groups(grId-1).addMatch(m.asInstanceOf[MEntryGr])
         } else false
       }  
-      case MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, sets, result) => { 
+      case MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, sets, winSets, result) => { 
         ko.addMatch(m.asInstanceOf[MEntryKo], prt); prt(s"addMatch ko.results: ${ko.toString}"); true
       }  
       case _      => false
@@ -121,6 +121,19 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
       case _      => // do some error handling?
     }
   }
+
+  def setMatch(m: MEntry): Unit = {  matches(m.gameNo-1) = m }
+
+  def getMatch(game: Int): MEntry = {
+    coPhTyp match {
+      case CPT_GR => matches(game-1).asInstanceOf[MEntryGr]
+      case CPT_KO => matches(game-1).asInstanceOf[MEntryKo]
+      case _      => matches(game-1).asInstanceOf[MEntryBase]
+    }    
+  }
+
+  def getKoMatch(game: Int): MEntryKo = matches(game-1).asInstanceOf[MEntryKo]
+  def getGrMatch(game: Int): MEntryGr = matches(game-1).asInstanceOf[MEntryGr]
 
 
   // calculate players position within competition phase
@@ -246,9 +259,10 @@ object CompPhase {
       }   
       case _       => // invalid competition phase
     }
-    //for (g <- tx.matches) { cop.groups = cop.groups :+ Group.fromTx(g) }
     cop
   }
+
+
 
 }
 
