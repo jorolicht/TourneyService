@@ -58,18 +58,6 @@ trait MatchSvc
     var sets = (0,0)
     for (i <- 0 to balls.length-1 ) { sets = sets |+| getSetFromShort(balls(i)) }    
     validSets(sets, noSets)
-  }   
-
-  def calcStatus(snoA: SNO, snoB: SNO, playfield: Boolean, sets: (Int,Int), setsValid: Boolean, pBlocked: Boolean) = {
-    import shared.model.MEntry._
-    if      (setsValid & (snoA.isBye | snoB.isBye)) { MS_FIX   }
-    else if (setsValid)                             { MS_FIN   } 
-    else if (snoA.isNN | snoB.isNN)                 { MS_MISS  } 
-    else if (pBlocked)                              { MS_BLOCK }
-    else if (sets==(0,0) & playfield)               { MS_RUN   }
-    else if (sets==(0,0) & !playfield)              { MS_READY }        
-    else if (sets._1 == sets._2 & sets._1 != 0)     { MS_DRAW  }      
-    else                                            { MS_UNKN  }
-  }
+  } 
 
 }  

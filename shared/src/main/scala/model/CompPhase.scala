@@ -76,53 +76,41 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
   }
 
 
-  //addMatch with debug print
-  def addMatch(m: MEntry, prt:(String)=>Unit = _=>() ): Boolean = {
-    m match {
-      case MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, playfield, info, startTime, endTime, status, sets, winsets, result) => { 
-        if (grId > 0 & grId <= groups.length) {
-          groups(grId-1).addMatch(m.asInstanceOf[MEntryGr])
-        } else false
-      }  
-      case MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, startTime, endTime, status, sets, winSets, result) => { 
-        ko.addMatch(m.asInstanceOf[MEntryKo], prt); prt(s"addMatch ko.results: ${ko.toString}"); true
-      }  
-      case _      => false
+  //setMatchModel
+  def setMatchModel(mtch: MEntry): Unit = {
+    coPhTyp match {
+      case CPT_GR => if (mtch.asInstanceOf[MEntryGr].grId > 0 & mtch.asInstanceOf[MEntryGr].grId <= groups.length) {
+        groups(mtch.asInstanceOf[MEntryGr].grId-1).setMatch(mtch.asInstanceOf[MEntryGr])
+      }
+      case CPT_KO => ko.setMatch(mtch.asInstanceOf[MEntryKo])
+ 
+      case _      => ()
     }
-  } 
+  }
 
-  // //addMatch
-  // def addMatch(m: MEntry): Boolean = {
-  //   coPhTyp match {
-  //     case CPT_GR => if (m.grId > 0 & m.grId <= groups.length) groups(m.grId-1).addMatch(m) else false
-  //     case CPT_KO => ko.addMatch(m) 
-  //     case _      => false
-  //   }
-  // } 
-
-
-  // def setMatches(round: Int, matchList: ArrayBuffer[MatchEntry]) = {
-  //   for (rnd <- matches.size to round) matches += ArrayBuffer[MatchEntry]()
-  //   matches(round) = matchList
-  // }
 
   def resetMatches(): Unit = {
+    for (i<-0 to matches.length-1) matches(i).reset(false)
     coPhTyp match {
       case CPT_GR => for (i <- 0 to groups.size-1) groups(i).resetMatch
       case CPT_KO => ko.resetMatch()
       case _      => // do some error handling?
     }
-  } 
-
-  def initMatches(round: Int) = {
-    coPhTyp match {
-      case CPT_GR => // todo
-      case CPT_KO => // todo
-      case _      => // do some error handling?
-    }
   }
 
-  def setMatch(m: MEntry): Unit = {  matches(m.gameNo-1) = m }
+  def setMatch(m: MEntry): Unit = {  
+    matches(m.gameNo-1) = m
+    setMatchModel(m)
+  }
+  
+  def setMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, pBlocked: Boolean): Unit = {  
+    matches(gameNo-1).setSets(sets)
+    matches(gameNo-1).setResult(result)
+    matches(gameNo-1).setInfo(info)
+    matches(gameNo-1).setPlayfield(playfield)
+    matches(gameNo-1).setStatus(pBlocked)
+    setMatchModel(matches(gameNo-1))
+  }
 
   def getMatch(game: Int): MEntry = {
     coPhTyp match {
@@ -131,13 +119,18 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
       case _      => matches(game-1).asInstanceOf[MEntryBase]
     }    
   }
+  
+  def resetMatch(gameNo: Int, pBlocked: Boolean): Unit = {
+    matches(gameNo-1).reset(pBlocked)
+    setMatchModel(matches(gameNo-1))
+  }
 
-  def getKoMatch(game: Int): MEntryKo = matches(game-1).asInstanceOf[MEntryKo]
-  def getGrMatch(game: Int): MEntryGr = matches(game-1).asInstanceOf[MEntryGr]
+  // def getKoMatch(game: Int): MEntryKo = matches(game-1).asInstanceOf[MEntryKo]
+  // def getGrMatch(game: Int): MEntryGr = matches(game-1).asInstanceOf[MEntryGr]
 
 
   // calculate players position within competition phase
-  def calc(grId: Int = -1): Boolean = {
+  def calcModel(grId: Int = -1): Boolean = {
     coPhTyp match {
       case CPT_GR => 
         if (-1 == grId) {
@@ -159,8 +152,6 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
   // print readable competition phase - for debug purposes
   override def toString() = {
-
-
     def grPhName(coPh: Int) = {
       coPh match {
         case CP_INIT => "READY"        
@@ -199,6 +190,8 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
     str.toString
   }  
 
+  def getWinPhId(): Int = ???
+  def getLooPhId(): Int = ???
   def toTx(): CompPhaseTx = {
     CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
                 pants.map(x=>x.value), matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
@@ -231,10 +224,11 @@ object CompPhase {
   val CPT_SW   = 3  // Switzsystem
 
   // Competition Phase Status
-  val CPS_CFG = 0   // RESET
-  val CPS_AUS = 1   // Auslosung der Vorrunde, Zwischenrunde, Endrunde, Trostrunde
-  val CPS_EIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CPS_FIN = 3   // Runde/Phase beendet, Auslosung ZR oder ER kann erfolgen
+  val CPS_UNKN = -1  // Unknown - eg. competition phase does yet not exist
+  val CPS_CFG  = 0   // RESET
+  val CPS_AUS  = 1   // Auslosung der Vorrunde, Zwischenrunde, Endrunde, Trostrunde
+  val CPS_EIN  = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val CPS_FIN  = 3   // Runde/Phase beendet, Auslosung ZR oder ER kann erfolgen
 
   implicit val rw: RW[CompPhase] = upickle.default.readwriter[String].bimap[CompPhase](
     x   => write[CompPhaseTx](x.toTx()),   //s"""{ "name", "Hugo" } """,  
@@ -261,9 +255,6 @@ object CompPhase {
     }
     cop
   }
-
-
-
 }
 
 

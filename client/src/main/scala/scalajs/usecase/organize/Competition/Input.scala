@@ -51,28 +51,29 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 
 @JSExport 
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
-    import shared.utils.Routines._ 
+    //import shared.utils.Routines._ 
     import org.scalajs.dom.document
+
+    def getRow(coId: Long, coPhId: Int, game: Int):HTMLElement = {
+      val rowBase = getElemById(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+      rowBase.querySelector(s"[data-game_${game}='row']").asInstanceOf[HTMLElement]    
+    }  
     
-    // import org.scalajs.dom.raw.HTMLCollection
-    // import org.scalajs.dom.raw.NodeList
+    val trny = App.tourney
+    
     //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     debug("actionEvent", s"key: ${key}")
     key match {
 
       case "SaveMatchResult"   => { 
-        val coId   = getData(elem, "coId", 0L)
-        val coPhId = getData(elem, "coPhId", 0)
-        val game   = getData(elem, "game", 0)
-
-        val tableElem = getElemById(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]
-        val row       = tableElem.querySelector(s"[data-game_${game}='row']").asInstanceOf[HTMLElement]
+        val (coId, coPhId, game)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0), getData(elem, "game", 0))
+        val row                   = getRow(coId, coPhId, game)
         
         // get balls and/or sets
-        // check values and if ok 
-        // save input to local match (and server)
-        val bInput = getInputBalls(row, 3, game)
-        val sInput = getInputSets(row, 3, game)
+        // check values and if ok save input to local match (and server)
+        val winSets = trny.cophs((coId, coPhId)).noWinSets
+        val bInput  = getInputBalls(row, winSets, game)
+        val sInput  = getInputSets(row, winSets, game)
         
         val (inputOk, balls, sets, err) = bInput match {
           case Left(err)  => (false, "", (0,0), err)
@@ -84,39 +85,23 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             }
         }
         if (inputOk) {
-          val m = App.tourney.cophs((coId,coPhId)).getMatch(game)
-          val running = false
-          m.setSets(sets)
-          m.setResult(balls)
-          m.setInfo(getInputInfo(row, game))
-          m.setPlayfield(getInputPlayfield(row, game))
-          m.setStatus(calcStatus( SNO(m.stNoA), SNO(m.stNoB), m.playfield!="", m.sets, validSets(m.sets, m.winSets), running))
+          trny.cophs((coId, coPhId)).setMatch(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game), false)  
+          setMatchView(row, coId, coPhId, game)(trny)
 
-          App.tourney.cophs((coId,coPhId)).setMatch(m)
-          setKoMatchStatus(row, m.asInstanceOf[MEntryKo])
-
-          debug("actionEvent", s"input OK: status: ${m.toString}")
+          debug("actionEvent", s"input OK: status: ${trny.cophs((coId,coPhId)).getMatch(game).toString}")
         } else {
+          // show error
           error("actionEvent", s"input not OK: ${err}")
         }
       }
       
       case "DeleteMatchResult"   => {
-        val coId      = getData(elem, "coId", 0L)
-        val coPhId    = getData(elem, "coPhId", 0)
-        val game      = getData(elem, "game", 0)
-        val tableElem = getElemById(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]
-        val row       = tableElem.querySelector(s"[data-game_${game}='row']").asInstanceOf[HTMLElement]        
+        val (coId, coPhId, game)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0), getData(elem, "game", 0))
+        val row                   = getRow(coId, coPhId, game)    
 
-        val m = App.tourney.cophs((coId,coPhId)).getMatch(game)
-        val running = false
-        m.setSets((0,0))
-        m.setResult("")
-        m.setPlayfield("")
-        m.setStatus(calcStatus( SNO(m.stNoA), SNO(m.stNoB), m.playfield!="", m.sets, validSets(m.sets, m.winSets), running))
-        App.tourney.cophs((coId,coPhId)).setMatch(m)
-        setKoMatchStatus(row, m.asInstanceOf[MEntryKo])
-        debug("actionEvent", s"delete: ${game}")      
+        trny.cophs((coId, coPhId)).resetMatch(game, false)
+        setMatchView(row, coId, coPhId, game)(trny)
+        debug("actionEvent", s"delete: ${game}") 
       }
 
       case _                     => { 
@@ -130,7 +115,6 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //
   //  READ INPUT FIELDS
   //
-
   // getInputPlayfield returns playfield info
   def getInputPlayfield(row: HTMLElement, gameNo: Int): String = {
     val setElem = row.querySelector(s"[data-game_${gameNo}='playfield']").asInstanceOf[HTMLElement]
@@ -201,14 +185,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       }
     } 
   }
- 
-
 
 
   //
   //  COMMON-SECTION
   //
-    
   // setInputFrame for a competition, coId != 0
   def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
     //debug("setFrame", s"coId: ${coId} coPhId: ${coPhId}")
@@ -256,7 +237,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           }
         } 
       }  
-      case CPT_KO => for (m <- trny.cophs(coId, coPhId).matches) setKoMatch(m.asInstanceOf[MEntryKo])(trny)
+      case CPT_KO => for (m <- trny.cophs(coId, coPhId).matches) setKoMatchView(getMatchRow(m), m.asInstanceOf[MEntryKo])(trny)
 
       case _ =>  {
         setHtml(getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
@@ -266,11 +247,21 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   }
 
 
+  /** setMatchStatus set status for different kind of matches
+   *  currently only group- and ko-matches
+   */ 
+  def setMatchView(row: HTMLElement, coId: Long, coPhId: Int, game: Int)(implicit trny: Tourney) = {
+    val m = trny.cophs((coId, coPhId)).getMatch(game)    
+    m.coPhTyp match {
+      case CPT_GR => setGrMatchView(row, m.asInstanceOf[MEntryGr])
+      case CPT_KO => setKoMatchView(row, m.asInstanceOf[MEntryKo])
+    }
+  }        
+
 
   //
   //  GROUP-SECTION
   //
-
   def setGrMatch(coId: Long, coPhId: Int, elem: HTMLElement, m: MEntryGr)(implicit trny: Tourney) = {
     val (grpName, wgw) = (getGroupName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
     elem.innerHTML = clientviews.organize.competition.input.html.MatchEntry(
@@ -282,34 +273,45 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   }
 
 
+  // mark row according to status
+  def setGrMatchView(row: HTMLElement, m: MEntryGr)(implicit trny: Tourney) = {
+    import shared.model.MEntry._
+  }  
+
+
   //
   //  KO-SECTION
   //
-
-  def setKoMatch(m: MEntryKo)(implicit trny: Tourney)  = {
-    val row = getKoMatchRow(m)
-    setKoMatchElem(row, m.gameNo, "nameA", SNO(m.stNoA).getName(m.coTyp, getMsg("bye")))
-    setKoMatchElem(row, m.gameNo, "nameB", SNO(m.stNoB).getName(m.coTyp, getMsg("bye")))
-    setKoMatchElem(row, m.gameNo, "info", m.info)
-    // setKoMatchElem(row, m.gameNo, "playfield", m.getPlayfield)
-    // setKoMatchElem(row, m.gameNo, "sets", if (m.sets!=(0,0)) s"${m.sets._1}:${m.sets._2}" else "")
-    // setKoMatchBalls(row, m.gameNo, m.winSets, m.result.split('·'))
-    setKoMatchStatus(row, m)
-  }
-
-  // set balls in result fields
-  def setKoMatchBalls(row: HTMLElement, gameNo: Int, noWinSets: Int, balls:Array[String]) = {
-    for (i <- 0 to (noWinSets-1)*2) {
-      val elem = row.querySelector(s"[data-game_${gameNo}='ball_${i+1}']").asInstanceOf[HTMLElement]
-      if (i<balls.length) setHtml(elem, balls(i)) else setHtml(elem, "")
-    }
-  }
-
-  // mark row according to status
-  def setKoMatchStatus(row: HTMLElement, m: MEntryKo) = {
+  def setKoMatchView(row: HTMLElement, m: MEntryKo)(implicit trny: Tourney)  = {
     import shared.model.MEntry._
-    
-    val gameNo = row.querySelector(s"[data-game_${m.gameNo}='gameNo']").asInstanceOf[HTMLElement]
+
+    //val row        = getKoMatchRow(m)
+    // get the view elements
+    val nameA      = row.querySelector(s"[data-game_${m.gameNo}='nameA']").asInstanceOf[HTMLElement]
+    val nameB      = row.querySelector(s"[data-game_${m.gameNo}='nameB']").asInstanceOf[HTMLElement]
+    val info       = row.querySelector(s"[data-game_${m.gameNo}='info']").asInstanceOf[HTMLElement]
+    val sets       = row.querySelector(s"[data-game_${m.gameNo}='sets']").asInstanceOf[HTMLElement]
+    val playfield  = row.querySelector(s"[data-game_${m.gameNo}='playfield']").asInstanceOf[HTMLElement]
+
+    val gameNo     = row.querySelector(s"[data-game_${m.gameNo}='gameNo']").asInstanceOf[HTMLElement]    
+    val saveBtn    = row.querySelector(s"[data-game_${m.gameNo}='save']").asInstanceOf[HTMLElement]
+    val deleteBtn  = row.querySelector(s"[data-game_${m.gameNo}='delete']").asInstanceOf[HTMLElement]
+    val resultElts = row.querySelectorAll(s"[data-result_${m.gameNo}='result']")
+
+    setHtml(nameA, SNO(m.stNoA).getName(m.coTyp, getMsg("bye")))
+    setHtml(nameB, SNO(m.stNoB).getName(m.coTyp, getMsg("bye")))
+    setHtml(info, m.info)
+    setHtml(sets, if (m.sets!=(0,0)) s"${m.sets._1}:${m.sets._2}" else "")
+    setHtml(playfield, m.getPlayfield)
+
+    // set ball view
+    val balls = m.result.split('·')
+    for (i <- 0 to (m.winSets-1)*2) {
+      val elem = row.querySelector(s"[data-game_${m.gameNo}='ball_${i+1}']").asInstanceOf[HTMLElement]
+      if (i<balls.length) setHtml(elem, balls(i)) else setHtml(elem, "")
+    }    
+
+    // set editible, color and buttons    
     gameNo.classList.remove("text-success")
     gameNo.classList.remove("text-danger")
     gameNo.classList.remove("text-dark")
@@ -319,82 +321,56 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     row.classList.remove("bg-secondary")
     row.classList.remove("text-white")
 
-    setKoMatchElem(row, m.gameNo, "sets", if (m.sets!=(0,0)) s"${m.sets._1}:${m.sets._2}" else "")
-    setKoMatchBalls(row, m.gameNo, m.winSets, m.result.split('·'))
-    setKoMatchElem(row, m.gameNo, "playfield", m.getPlayfield)
-
     m.status match {
       case MS_MISS  => {
         gameNo.classList.add("text-danger")
-        setKoMatchEditable(row, m.gameNo, false)
-        setKoMatchBtn(row, m.gameNo, "save", true)
-        setKoMatchBtn(row, m.gameNo, "delete", true)
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        setDisabled(saveBtn, true); setDisabled(deleteBtn, true)
       }
       case MS_BLOCK => {
         gameNo.classList.add("text-danger")
-        setKoMatchEditable(row, m.gameNo, false)
-        setKoMatchBtn(row, m.gameNo, "save", true)
-        setKoMatchBtn(row, m.gameNo, "delete", true)      
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        setDisabled(saveBtn, true); setDisabled(deleteBtn, true)
       } 
       case MS_READY => {
         gameNo.classList.add("text-success")
-        setKoMatchEditable(row, m.gameNo, true)
-        setKoMatchBtn(row, m.gameNo, "save", false)
-        setKoMatchBtn(row, m.gameNo, "delete", true)            
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"true"))
+        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)         
       } 
       case MS_RUN   => {
         gameNo.classList.add("text-primary")
-        setKoMatchEditable(row, m.gameNo, true)
-        setKoMatchBtn(row, m.gameNo, "save", false)
-        setKoMatchBtn(row, m.gameNo, "delete", true)       
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"true"))
+        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)     
       } 
       case MS_FIN   => {
         gameNo.classList.add("text-dark")
-        setKoMatchEditable(row, m.gameNo, false)
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
         row.classList.add("bg-light")
-        setKoMatchBtn(row, m.gameNo, "save", true)
-        setKoMatchBtn(row, m.gameNo, "delete", false)         
+        setDisabled(saveBtn, true); setDisabled(deleteBtn, false)        
       } 
       case MS_FIX   => {
-        setKoMatchEditable(row, m.gameNo, false)
+        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
         row.classList.add("bg-secondary")
         row.classList.add("text-white")
-        setKoMatchBtn(row, m.gameNo, "save", true)
-        setKoMatchBtn(row, m.gameNo, "delete", true)        
+        setDisabled(saveBtn, true); setDisabled(deleteBtn, true)      
       }
       case _        => {}
     }
   }
 
-  // set input fields e.g. balls and sets (not) editable
-  def setKoMatchEditable(row: HTMLElement, gameNo: Int, editable: Boolean) = {
-    val resultElts =  row.querySelectorAll(s"[data-result_${gameNo}='result']")
-    for( i <- 0 to resultElts.length-1) {
-      val elem = resultElts.item(i).asInstanceOf[HTMLElement]
-      elem.setAttribute("contenteditable", s"${editable}")
-    }
-  }
-
-  // set buttons for save and delete match
-  def setKoMatchBtn(row: HTMLElement, gameNo: Int, name: String, disabled: Boolean) = {
-    setDisabled(row.querySelector(s"[data-game_${gameNo}='${name}']").asInstanceOf[HTMLElement], disabled)
-  }  
-
-  // set a Ko match element like name, table, info, ...
-  def setKoMatchElem(row: HTMLElement, gameNo: Int, name: String, value: String) = {
-    setHtml(row.querySelector(s"[data-game_${gameNo}='${name}']").asInstanceOf[HTMLElement], value)
-  }
-
   // return corresponding row element of ko match
-  def getKoMatchRow(m: MEntryKo): HTMLElement = {
+  def getMatchRow(m: MEntry): HTMLElement = { 
     try {
-      val tableElem = getElemById(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+      val tableElem = m.coPhTyp match {
+        case CPT_KO  => getElemById(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CPT_GR  => getElemById(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case _       => dom.document.createElement("div").asInstanceOf[HTMLElement] 
+      }
       tableElem.querySelector(s"[data-game_${m.gameNo}='row']").asInstanceOf[HTMLElement]
     } catch { case _: Throwable => {
-      error("getKoRow", s"coId: ${m.coId} coPhId: ${m.coPhId} round: ${m.round} gameNo: ${m.gameNo}")
+      error("getMatchRow", s"coId: ${m.coId} coPhId: ${m.coPhId} round: ${m.round} gameNo: ${m.gameNo}")
       dom.document.createElement("div").asInstanceOf[HTMLElement] 
     }}
   }
-
 
 }

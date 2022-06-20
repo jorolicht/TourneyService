@@ -553,7 +553,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           
           // delete playfield, ma.playfield contains playfield code
           trny.playfields = trny.playfields.filter( _._2.code != ma.playfield)
-          trny.cophs((ma.coId, ma.coPhId)).addMatch(ma)
+          trny.cophs((ma.coId, ma.coPhId)).setMatch(ma)
           //logger.info(s"setMatch after: ${trny.cophs}")
           trigger(trny, trigCmd)
           Right(true)
@@ -573,8 +573,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           ma <- mas
         } yield {
           if (trny.cophs.isDefinedAt((ma.coId, ma.coPhId))) {
-            trny.cophs((ma.coId, ma.coPhId)).addMatch(ma)
-            //trny.cophs((ma.coId, ma.coPh)).addMatch(ma, prt)
+            trny.cophs((ma.coId, ma.coPhId)).setMatch(ma)
             1
           }  
         }  

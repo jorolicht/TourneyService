@@ -95,7 +95,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   }
 
 
-  def addMatch(m: MEntryGr): Boolean = { 
+  def setMatch(m: MEntryGr): Boolean = { 
     val balls     = m.result.split('·')
     val sets      = getSets(balls, noWinSets)
 

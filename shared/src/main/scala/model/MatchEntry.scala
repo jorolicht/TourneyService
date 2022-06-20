@@ -31,6 +31,25 @@ trait MEntry {
   def setInfo(value:String):Unit
   def setStatus(value:Int):Unit
 
+  def setStatus(pBlocked: Boolean):Unit = {
+    MEntry.setRunning(this, false) 
+    val blocked = MEntry.isPlayerRunning(stNoA, stNoB, coTyp)
+    // block group matches
+
+    if      (stNoA=="" & stNoB=="")                             { setStatus(MEntry.MS_RESET) }
+    else if (validSets & (SNO(stNoA).isBye | SNO(stNoB).isBye)) { setStatus(MEntry.MS_FIX)   }
+    else if (validSets)                                         { setStatus(MEntry.MS_FIN)   } 
+    else if (SNO(stNoA).isNN | SNO(stNoB).isNN)                 { setStatus(MEntry.MS_MISS)  } 
+    else if (blocked)                                           { setStatus(MEntry.MS_BLOCK) }
+    else if (sets==(0,0) & playfield!="")                       { 
+                                                                  MEntry.setRunning(this, true) 
+                                                                  setStatus(MEntry.MS_RUN)   
+                                                                }
+    else if (sets==(0,0) & playfield=="")                       { setStatus(MEntry.MS_READY) }        
+    else if (sets._1 == sets._2 & sets._1 != 0)                 { setStatus(MEntry.MS_DRAW)  }      
+    else                                                        { setStatus(MEntry.MS_UNKN)  }
+  }
+
   def getPlayfield = {
     try { 
       val pfCode = playfield.split("·")
@@ -38,9 +57,18 @@ trait MEntry {
     } catch  { case _: Throwable => "" }
   }
 
-  def finished = (status >= 2)
+  def finished = ((status == MEntry.MS_FIN) || (status == MEntry.MS_DRAW))
+  def validSets(): Boolean = ((sets._1 == winSets & sets._2 < winSets) | (sets._1 < winSets & sets._2 == winSets))
 
+  def reset(pBlocked: Boolean):Unit = { 
+    setPlayfield("") 
+    setInfo("") 
+    setSets((0,0)) 
+    setResult("") 
+    setStatus(pBlocked)
+  } 
 }
+
 
 case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, 
                       gameNo: Int=0, round: Int=0, var playfield:String="", var status:Int=0,
@@ -55,9 +83,9 @@ case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int,
   def setResult(value:String)  = { result = value } 
   def setPlayfield(value: String) = { playfield = value }
   def setInfo(value: String)  = { info = value } 
-  def setStatus(value:Int)    = { status = value } 
-
+  def setStatus(value:Int)    = { status = value }
 }
+
 
 case class MEntryKo(
   val coId: Long,                         // competition identifier
@@ -93,11 +121,8 @@ case class MEntryKo(
                                           //     TT MATCH: <ball1> . <ball2> . <3> . <set4> ...
 
 ) extends MEntry {
-
   def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-
   def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
-  
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
@@ -110,7 +135,6 @@ case class MEntryKo(
   def setPlayfield(value: String) = { playfield = value }
   def setInfo(value:String)  = { info = value }  
   def setStatus(value:Int)   = { status = value } 
-
 }
 
 
@@ -146,24 +170,21 @@ case class MEntryGr(
   val winSets:    Int,                    //(14) number of sets to win the match or 0 for draw                                         
   var result:     String                  //(15) result details, depending on kind of sport
                                           //     TT MATCH: <ball1> . <ball2> . <3> . <set4> ...
-
 ) extends MEntry {
 
   def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-
   def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
-
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
       |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
       |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: ${result}
   """.stripMargin('|')
-  def setSets(value:(Int,Int)) = { sets = value }
-  def setResult(value:String)  = { result = value } 
+  def setSets(value:(Int,Int))    = { sets = value }
+  def setResult(value:String)     = { result = value } 
   def setPlayfield(value: String) = { playfield = value }
-  def setInfo(value:String)  = { info = value } 
-  def setStatus(value:Int)   = { status = value } 
+  def setInfo(value:String)       = { info = value } 
+  def setStatus(value:Int)        = { status = value } 
 }
 
 
@@ -197,7 +218,11 @@ object MEntryTx {
 }  
 
 object MEntry {
+  import scala.collection.mutable.HashSet
+  import scala.collection.mutable.Map
+
   // Match Status Values
+  val MS_RESET = -3   // match not yet configured
   val MS_MISS  = -2   // not finished (player missing)
   val MS_BLOCK = -1   // not finished (blocked)
   val MS_READY =  0   // not finished (runnable/ready)
@@ -207,13 +232,71 @@ object MEntry {
   val MS_DRAW  =  4   // finished with no winner
   val MS_UNKN  = 99   // finished with no winner
 
+  // list of player currently playing in (coId, coIdPh, gameNo)
+  val playing: Map[Long, HashSet[(Long,Int,Int)]] = Map().withDefaultValue(HashSet())
+
   def statusInfo(value: Int) = value match {
-    case MS_MISS  => "MISS"
-    case MS_BLOCK => "BLOCK"
-    case MS_READY => "READY"
-    case MS_RUN   => "RUN"
-    case MS_FIN   => "FIN"
-    case MS_DRAW  => "DRAW"
-    case MS_UNKN  => "UNKN"
+    case MS_RESET  => "RESET"
+    case MS_MISS   => "MISS"
+    case MS_BLOCK  => "BLOCK"
+    case MS_READY  => "READY"
+    case MS_RUN    => "RUN"
+    case MS_FIN    => "FIN"
+    case MS_DRAW   => "DRAW"
+    case MS_UNKN   => "UNKN"
   }
+
+  /** addRunning(plId: Long, gaId: (Long,Int,Int))
+   *  game identifier = tripple (competition identifier, competition phase identifier, game number)
+   */
+  def addPlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
+    if (plId != 0) playing(plId) = playing(plId) + (gaId)
+  }  
+  def removePlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
+    if (plId != 0) playing(plId) = playing(plId) - (gaId) 
+  }  
+  def getPlayerRunning(plId1: Long, plId2: Long=0 ): Boolean = {
+    if (plId2 == 0) { playing(plId1).size > 0 } else { (playing(plId1).size > 0) | (playing(plId2).size > 0) }
+  } 
+
+  def isPlayerRunning(snoA: String, snoB: String, coTyp: Int): Boolean = {
+    import shared.model.Competition._
+    coTyp match {
+      case CT_SINGLE => getPlayerRunning(SNO.plId(snoA), SNO.plId(snoB))
+
+      case CT_DOUBLE => {
+        val idAs = getMDLongArr(snoA)
+        val idBs = getMDLongArr(snoB)
+        getPlayerRunning(idAs(0), idAs(1)) | getPlayerRunning(idBs(0), idBs(1))
+      }
+    }
+  }
+
+
+
+  def setRunning(m: MEntry, run: Boolean) = {
+    import shared.model.Competition._
+    import shared.utils.Routines._
+    val gaId = (m.coId, m.coPhId, m.gameNo)
+    m.coTyp match {
+      case CT_SINGLE => {
+        if (run) addPlayerRunning(SNO.plId(m.stNoA), gaId) else removePlayerRunning(SNO.plId(m.stNoA), gaId)
+        if (run) addPlayerRunning(SNO.plId(m.stNoB), gaId) else removePlayerRunning(SNO.plId(m.stNoB), gaId)
+      }
+      case CT_DOUBLE => {
+        val idAs = getMDLongArr(m.stNoA)
+        val idBs = getMDLongArr(m.stNoB)
+        if (run) addPlayerRunning(idAs(0), gaId) else removePlayerRunning(idAs(0), gaId)
+        if (run) addPlayerRunning(idAs(1), gaId) else removePlayerRunning(idAs(1), gaId)
+        if (run) addPlayerRunning(idBs(0), gaId) else removePlayerRunning(idBs(0), gaId)
+        if (run) addPlayerRunning(idBs(1), gaId) else removePlayerRunning(idBs(1), gaId)
+      }
+    }
+  }
+
+
+
+
 }
+
+

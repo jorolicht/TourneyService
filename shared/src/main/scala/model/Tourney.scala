@@ -1,7 +1,7 @@
 package shared.model
 
 //import shared.model.gamesystem.Match
-import scala.collection.mutable.{ ArrayBuffer, Map, HashMap }
+import scala.collection.mutable.{ ArrayBuffer, ListBuffer, Map, HashMap }
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
@@ -58,6 +58,8 @@ case class Tourney(
   var comp2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // competition hash -> id
   var license2id:  Map[String, Long]  = Map().withDefaultValue(0L)
 
+
+
   /*
    * tourney management data
    */
@@ -75,8 +77,11 @@ case class Tourney(
       case 1 => {
         write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Participant2Comp], List[CompPhaseTx], List[Playfield])]((
           1, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
-          players.values.toList, comps.values.toList, clubs.values.toList,
-          pl2co.values.toList, cophs.values.map(x => x.toTx).toList,
+          players.values.toList, 
+          comps.values.toList, 
+          clubs.values.toList,
+          pl2co.values.toList, 
+          cophs.values.map(x => x.toTx).toList,
           playfields.values.toList        
         ))
       }
@@ -119,6 +124,7 @@ case class Tourney(
     }  
     res.filter(_._2 != "").toSeq.sortWith(_._2 < _._2)
   }
+
 
   /** addComp add a competition if it is possible, id must be 0 
    *
@@ -210,6 +216,12 @@ case class Tourney(
       Left(Error("err0014.trny.compNotFound", coId.toString))
     }  
   }
+
+  /** getCompPhaseStatus returns status of the competition phase 
+   *  otherwise undefined status
+   */ 
+  def getCompPhaseStatus(coId: Long, coPhId: Int): Int = 
+    if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhase.CPS_UNKN } 
 
 
   /** setCompDraw - returns new secId  
