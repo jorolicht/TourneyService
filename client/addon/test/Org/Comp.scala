@@ -136,7 +136,7 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
     val aBufMEntry = ArrayBuffer[MEntry]()
 
     aBufMEntry += MEntryKo(1, CT_SINGLE, 3, CPT_KO, 31,"00021","00022", 7, 2, "game3#1","game4#2", "1·3·3", "Halbfinale", "20220207170409", "20220207171019", 2, (3,2), 3, "8·-4·4·-11·0")
-    aBufMEntry += MEntryGr(1, CT_DOUBLE, 1, CPT_GR, 77,"00019","00020", 3, 4, (1,5), "1·3·3", "2.Runde", "20220207170409", "20220207171019", 3, (0,3), 3, "11·-4·-0")
+    aBufMEntry += MEntryGr(1, CT_DOUBLE, 1, CPT_GR, 77,"00019","00020", 3, 4, (1,5), "", "", "1·3·3", "2.Runde", "20220207170409", "20220207171019", 3, (0,3), 3, "11·-4·-0")
 
     println(aBufMEntry(0))
     println(aBufMEntry(1))
@@ -163,7 +163,24 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
 
     SUCCESS(tnp)
   }
+
+  def testMatchList(name: String, coId: Long, coPhId: Int) = {
+    val tnp = TNP(name, s"coId: ${coId} coPhId: ${coPhId}")
+    START(tnp)
+
+    val trny = App.tourney
+    for (i<-0 to trny.cophs((coId,coPhId)).matches.length-1) {
+      println(s"${trny.cophs((coId,coPhId)).matches(i).toString}")        
+    }
+
+    SUCCESS(tnp)
+  }  
+
 } 
+
+
+
+
 
 // case class MatchTest(
 //   val matches:   ArrayBuffer[MatchEntry]

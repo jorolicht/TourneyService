@@ -11,7 +11,7 @@ greeting                                              = Herzlich Willkommen!
 
   app.mockup                                          = false
   app.version                                         = 2022-05DE184
-  app.date                                            = 2022-06-03
+  app.date                                            = 2022-07-01
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -467,6 +467,7 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.certificate.btn.print                        = URKUNDE
   organize.competition.config.card                      = Konfiguration
   
+
   organize.competition.CompCard                         = Wettbewerbe
   organize.competition.btn.new                          = NEUEN WETTBEWERB ANLEGEN
   organize.competition.confirm.delete.hdr               = Löschbestätigung 
@@ -491,6 +492,7 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.input.order                      = Spielfolge
   organize.competition.input.group                      = Gruppe
   organize.competition.input.tit.delete                 = Ergebniseingabe löschen
+  organize.competition.input.btn.deleteAll              = LÖSCHEN
 
  
   dlg.card.comp.Title                                   = Wettbewerb

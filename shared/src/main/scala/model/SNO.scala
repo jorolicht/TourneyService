@@ -87,8 +87,18 @@ object SNO {
   def bye(no: Int=0) = SNO(s"${99500 + no}")
   def nn()  = SNO(NN)
 
-  def plId(value: String): Long = {
-    val longVal = value.toLongOption.getOrElse(0L)
-    if (longVal >= 99500) 0L else longVal
+  def plId(inValue: String): Long = {
+    val value = getMDLongArrDef(inValue)
+    if (value(0) >= 99500) 0L else value(0)
   }
+  
+  def valid(inValue: String): Boolean = {
+    val value = getMDLongArrDef(inValue)
+    (value(0) > 0) && (value(0) < 99500)
+  }
+
+  def valid(value: Long): Boolean = {
+    (value > 0) && (value < 99500)
+  }  
+
 }

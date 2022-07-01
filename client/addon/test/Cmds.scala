@@ -83,6 +83,15 @@ object AddonCmds extends UseCase("AddonCmds")
     }
   }
 
+  def showTourney() = {
+    println(App.tourney.toString)
+  }
+
+
+  def showCompPhase(coId:Int, coPhId:Int) = {
+    println(App.tourney.cophs((coId.asInstanceOf[Long], coPhId)).toString)
+  }
+
 
 
 }

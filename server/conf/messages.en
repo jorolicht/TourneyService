@@ -11,7 +11,7 @@ greeting                                              = Welcome!
 
   app.mockup                                          = false
   app.version                                         = 2022-05EN184
-  app.date                                            = 2022-06-03
+  app.date                                            = 2022-07-01
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -465,6 +465,7 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
 ###
   organize.certificate.btn.print                        = CERTIFICATE
   organize.competition.config.card                      = Configuration
+
       
   organize.competition.hdr                              = Competitions
   organize.competition.btn.new                          = CREATE NEW COMPETITION
@@ -490,6 +491,7 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.input.order                      = Order
   organize.competition.input.group                      = Group
   organize.competition.input.tit.delete                 = Delete match result
+  organize.competition.input.btn.deleteAll              = DELETE
   
   dlg.card.comp.Title                                   = Competition
   dlg.card.comp.plh.name                                = Name of Competition

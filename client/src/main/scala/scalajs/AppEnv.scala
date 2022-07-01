@@ -189,7 +189,7 @@ object AppEnv extends BasicHtml
       })
     } else {
       messages = read[ Map[String,Map[String,String]]] (localMessages)
-      println("loadMessages => local messages loaded")
+      println(s"loadMessages => local messages loaded (${localUpdate}/${lastUpdate})")
       Future(true)
     }
   }

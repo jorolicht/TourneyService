@@ -5,8 +5,10 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coId: Long, coPhId: Int, gameNo: Int, winSets:Int)(implicit ucc: UseCaseParam)
+@(coId: Long, coPhId: Int, group: String, wgw: String, gameNo: Int, winSets:Int)(implicit ucc: UseCaseParam)
 
+@if(group != "") { <td class="border text-center"><small data-game_@gameNo='group'>@group</small></td> }  
+@if(wgw != "")   { <td class="border text-center"><small data-game_@gameNo='wgw'>@wgw</small></td>   }  
 <td class="border-bottom border-left border-top pl-2 text-right"><small data-game_@gameNo='nameA'></small></td>
 <td class="border-bottom border-top pl-1 pr-1 text-center">-</td>
 <td class="border-bottom border-right border-top pr-2 text-left"><small data-game_@gameNo='nameB'></small></td>
@@ -16,11 +18,11 @@
 <td class="border text-center" contenteditable='true' data-game_@gameNo='playfield'></td>
 <td class="border text-center"></td>
 @for(i <- 0 to (winSets-1)*2){
-  <td width='30px' class="border text-center" data-result_@gameNo='result' data-game_@gameNo='ball_@(i+1)'  contenteditable='true' style='font-size:small;'></td>
+    <td width='30px' data-game_@gameNo='ball_@(i+1)' class="border text-center" contenteditable='true' style='font-size:small;'></td>
 }
-<td class="border text-center" data-result_@gameNo='result' data-game_@gameNo='sets' contenteditable='true'></td>
+<td class="border text-center" data-game_@gameNo='sets' contenteditable='true'></td>
 <td class="text-center ml-1 mr-1">
-  <button data-game_@gameNo='save'  data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
+  <button data-game_@gameNo='save' data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
 </td>
 <td class="text-center">
   <button data-game_@gameNo='delete' data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("DeleteMatchResult", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 

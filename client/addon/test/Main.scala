@@ -43,6 +43,8 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport def save()                            = AddonCmds.save()
   @JSExport def sync()                            = AddonCmds.sync()
   @JSExport def load(toId: String)                = AddonCmds.load(toId)
+  @JSExport def showCompPhase(coId: Int, coPhId: Int) = AddonCmds.showCompPhase(coId, coPhId)
+  @JSExport def showTourney                           = AddonCmds.showTourney()
 
   // Basic tests
   @JSExport def testBasicHello(text: String)      = AddonBasic.testHello(text)
@@ -53,6 +55,9 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport def testOrgCompDrawKo(param: String)  = AddonOrgComp.testDrawKo(TNP("testDrawKo", param))
   @JSExport def testOrgCompInputKo(param: String) = AddonOrgComp.testInputKo(TNP("testInputKo", param))
   @JSExport def testMatchEncode(param: String)    = AddonOrgComp.testMatchEncode(TNP("testMatchEncode", param))
+
+  // Organize Competition Match tests
+  @JSExport def testMatchList(coId: String, coPhId: String) = AddonOrgComp.testMatchList("testMatchList", coId.toLong, coPhId.toInt)
 
   // Competition tests
   @JSExport def testCompEncode(toId: String)      = AddonComp.testEncode(toId)
@@ -68,9 +73,6 @@ object AddonMain extends TestUseCase("AddonMain")
   
   // get debug Level
   @JSExport def getDebug() = println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
-  
-
-
 
 }
 

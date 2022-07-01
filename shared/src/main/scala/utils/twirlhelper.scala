@@ -126,11 +126,12 @@ package object twirlhelper {
   }
 
 
-  def _actionButton(key: String, caption: String, _class: String, dataAttr:String, dataValue: String)(implicit ucp: UseCaseParam): String = {
+  def _actionButton(key: String, caption: String, _class: String, dAttr1:String, dValue1: String, dAttr2:String, dValue2: String)(implicit ucp: UseCaseParam): String = {
     val bName  = if (caption.startsWith("std.btn.")) msg_(caption) else msg("btn." + caption)
-    val bClass = if (_class == "close") _class else s"btn btn-outline-secondary ${_class}"
-    val data   = if (dataAttr != "") s"data-${dataAttr}='${dataValue}'" else ""
-    s"""<button id='${ucp.idBase + "__Btn" + key}' ${data} type='button' class='${bClass}'  ${_actionEvent(key, "onclick")}>${bName}</button> """   
+    val bClass = if (_class == "close") _class else s"btn ${_class}"
+    val d1     = if (dAttr1 != "") s"data-${dAttr1}='${dValue1}'" else ""
+    val d2     = if (dAttr2 != "") s"data-${dAttr2}='${dValue2}'" else ""
+    s"""<button id='${ucp.idBase + "__Btn" + key}' ${d1} ${d2}  type='button' class='${bClass}' ${_actionEvent(key, "onclick")}>${bName}</button> """   
   }
 
   /*

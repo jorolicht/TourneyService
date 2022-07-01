@@ -76,21 +76,23 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
   }
 
 
-  //setMatchModel
-  def setMatchModel(mtch: MEntry): Unit = {
+  def gameNoExists(gameNo: Int): Boolean =  (gameNo>0) && (gameNo <= matches.size)
+
+  def depFinished(gameNo: Int, coPhTyp: Int): Boolean = {
     coPhTyp match {
-      case CPT_GR => if (mtch.asInstanceOf[MEntryGr].grId > 0 & mtch.asInstanceOf[MEntryGr].grId <= groups.length) {
-        groups(mtch.asInstanceOf[MEntryGr].grId-1).setMatch(mtch.asInstanceOf[MEntryGr])
+      case CPT_GR => {
+        val depend = matches(gameNo-1).asInstanceOf[MEntryGr].getDepend 
+        // check if any dependend match is not yet finished
+        // set new status based on dependend matches are finished
+        val depFinished = depend.map(g => if (gameNoExists(g)) matches(g-1).finished else true) 
+        !depFinished.contains(false)
       }
-      case CPT_KO => ko.setMatch(mtch.asInstanceOf[MEntryKo])
- 
-      case _      => ()
-    }
+      case _     => true
+    }      
   }
 
-
   def resetMatches(): Unit = {
-    for (i<-0 to matches.length-1) matches(i).reset(false)
+    for (i<-0 to matches.length-1) matches(i).reset()
     coPhTyp match {
       case CPT_GR => for (i <- 0 to groups.size-1) groups(i).resetMatch
       case CPT_KO => ko.resetMatch()
@@ -98,19 +100,63 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
     }
   }
 
+
+  // setMatch 
   def setMatch(m: MEntry): Unit = {  
     matches(m.gameNo-1) = m
-    setMatchModel(m)
+    m.coPhTyp match {
+      case CPT_GR => if (m.asInstanceOf[MEntryGr].grId > 0 & m.asInstanceOf[MEntryGr].grId <= groups.length) {
+        groups(m.asInstanceOf[MEntryGr].grId-1).setMatch(m.asInstanceOf[MEntryGr])
+      }
+      case CPT_KO => ko.setMatch(m.asInstanceOf[MEntryKo])
+ 
+      case _      => ()
+    }
   }
   
-  def setMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, pBlocked: Boolean): Unit = {  
-    matches(gameNo-1).setSets(sets)
-    matches(gameNo-1).setResult(result)
-    matches(gameNo-1).setInfo(info)
-    matches(gameNo-1).setPlayfield(playfield)
-    matches(gameNo-1).setStatus(pBlocked)
-    setMatchModel(matches(gameNo-1))
+  def setMatchPropagate(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): List[Int] = { 
+    import scala.collection.mutable.ListBuffer
+    
+    val triggerList = ListBuffer[Int](gameNo)
+    val m = getMatch(gameNo)
+    m.setSets(sets)
+    m.setResult(result)
+    m.setInfo(info)
+    m.setPlayfield(playfield)
+    m.setStatus(depFinished(gameNo, m.coPhTyp))
+    setMatch(m)
+
+    // propagate changes to dependend matches
+    // set trigger list for relevant matches
+    m.coPhTyp match {
+
+      case CPT_GR => {
+        // set status for every match to be triggered
+        val trigger = m.asInstanceOf[MEntryGr].getTrigger
+        for (g <- trigger) { 
+          setMatch(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
+          triggerList.append(g) 
+        }
+      }
+
+      case CPT_KO => {
+        val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
+        // propagate winner
+        if (gameNoExists(gWin) && m.finished) { 
+          setMatch(getMatch(gWin).setPant(pWin, m.getWinner).setStatus(true))
+          triggerList.append(gWin)
+        }  
+        // propagate looser i.e. 3rd place match
+        val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
+        if (gameNoExists(gLoo) && m.finished) {
+          setMatch(getMatch(gLoo).setPant(pLoo, m.getLooser).setStatus(true))
+          triggerList.append(gLoo)
+        }
+      }
+    }
+    triggerList.toList
   }
+
 
   def getMatch(game: Int): MEntry = {
     coPhTyp match {
@@ -120,30 +166,81 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
     }    
   }
   
-  def resetMatch(gameNo: Int, pBlocked: Boolean): Unit = {
-    matches(gameNo-1).reset(pBlocked)
-    setMatchModel(matches(gameNo-1))
+  def resetMatch(gameNo: Int): Unit = {
+    matches(gameNo-1).reset()
+    setMatch(matches(gameNo-1))
   }
 
-  // def getKoMatch(game: Int): MEntryKo = matches(game-1).asInstanceOf[MEntryKo]
-  // def getGrMatch(game: Int): MEntryGr = matches(game-1).asInstanceOf[MEntryGr]
+  def resetAllMatches(): List[Int] = {
+    val triggerList = scala.collection.mutable.ListBuffer[Int]()
+    val maxRnd = getMaxRnds()
+
+    coPhTyp match {
+      case CPT_KO => {
+        // val mList = (for (m <- matches) yield { if (m.status == MEntry.MS_FIN && (m.round == maxRnd || m.round == (maxRnd-1))) m.gameNo else 0 }).filter(_ != 0)
+        // mList.distinct.sorted foreach { g => triggerList ++= resetMatchPropagate(g) } 
+        for (i<-0 to matches.length-1) {
+          if (matches(i).status == MEntry.MS_FIN) {
+            triggerList ++= resetMatchPropagate(matches(i).gameNo)
+          }          
+        }
+      }
+      case CPT_GR => {
+
+      }
+    }
+    triggerList.distinct.sorted.toList
+  }
+
+
+  def resetMatchPropagate(gameNo: Int, resetPantA: Boolean=false, resetPantB: Boolean=false): List[Int] = {
+    import scala.collection.mutable.ListBuffer
+
+    val triggerList = ListBuffer[Int](gameNo)
+    val m = getMatch(gameNo)
+    m.reset(resetPantA, resetPantB)
+    
+    m.coPhTyp match {
+      case CPT_GR => {
+        println(s"Match 1: ${m}")
+
+        setMatch(m.setStatus(depFinished(gameNo, m.coPhTyp)))
+        println(s"Match 2: ${matches(m.gameNo-1)}")
+        // set status for every match to be triggered
+        val trigger = m.asInstanceOf[MEntryGr].getTrigger
+        for (g <- trigger) { 
+          setMatch(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
+          triggerList.append(g)
+        }  
+      }
+
+      case CPT_KO => {
+        setMatch(m.setStatus(true))      
+        // propagate deletion of that position
+        val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
+        println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
+        if (gameNoExists(gWin)) { triggerList ++= resetMatchPropagate(gWin, pWin==0, pWin==1 ) }  
+
+        // propagate looser i.e. 3rd place match
+        val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
+        println(s"propagate looser gameNo: ${gLoo} position: ${pWin}")
+        if (gameNoExists(gLoo)) { triggerList ++= resetMatchPropagate(gLoo, pLoo==0, pLoo==1 ) } 
+      }
+    }
+    triggerList.toList
+  } 
 
 
   // calculate players position within competition phase
   def calcModel(grId: Int = -1): Boolean = {
     coPhTyp match {
-      case CPT_GR => 
-        if (-1 == grId) {
-          for (g <- 0 to groups.length-1) { groups(g).calc }
-          true 
-        } else {
-          if (grId > 0 & grId <= groups.length) {
-            groups(grId-1).calc
-            true
-          } else {
-            false
-          }
-        }  
+      case CPT_GR => grId match {
+         case -1 =>  for (g <- 0 to groups.length-1) { groups(g).calc }; true 
+         case g if (g > 0 && g <= groups.length) =>  groups(grId-1).calc; true
+         case _ => false
+      }
+        // if (-1 == grId) { for (g <- 0 to groups.length-1) { groups(g).calc }; true } 
+        // else { if (grId > 0 & grId <= groups.length) { groups(grId-1).calc; true } else { false } }  
       case CPT_KO => ko.calc; true
       case _      => false
     } 
@@ -201,7 +298,6 @@ case class CompPhase(val name: String, val coId: Long, val coPh: Int,
 
 
 object CompPhase {
-
   // Competition Phase
   val CP_UNKN = -99
   val CP_INIT =   0
@@ -240,6 +336,10 @@ object CompPhase {
     catch { case _: Throwable => Left(Error("err0177.decode.CompPhase", coPhStr.take(20))) }
 
   def fromTx(tx: CompPhaseTx): CompPhase = {
+    import scala.collection.mutable.ListBuffer
+    import scala.collection.mutable.HashSet
+    import shared.model.Competition._
+
     val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhId, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.pants   = tx.pants.map(x=>SNO(x))
     cop.matches = tx.matches.map(x=>x.decode)
@@ -247,6 +347,55 @@ object CompPhase {
     cop.coPhTyp match {
       case CPT_GR  => {
         for (g <- tx.groups) { cop.groups = cop.groups :+ Group.fromTx(g) }
+        // hook for calculation trigger and depend, if not present
+        if (cop.matches.size > 0 && !cop.matches(0).asInstanceOf[MEntryGr].hasDepend) {
+          // calculate depend and trigger
+          val depMap = Map[Long, ListBuffer[Int]]()
+          // init map with default value
+          for (p <- cop.pants) if (SNO.valid(p.value)) { depMap(SNO.plId(p.value)) = ListBuffer() }
+
+          // setup list player -> games
+          for (m <- cop.matches) {
+            m.coTyp match {
+              case CT_SINGLE => {
+                if (SNO.valid(m.stNoA)) { (depMap(SNO.plId(m.stNoA))) += m.gameNo }
+                if (SNO.valid(m.stNoB)) { (depMap(SNO.plId(m.stNoB))) += m.gameNo }
+              }
+              case CT_DOUBLE => {
+                val idAs = getMDLongArr(m.stNoA)
+                val idBs = getMDLongArr(m.stNoB)
+                if (idAs.size>=1 && SNO.valid(idAs(0))) { (depMap(idAs(0))) += m.gameNo }
+                if (idAs.size>=2 && SNO.valid(idAs(1))) { (depMap(idAs(1))) += m.gameNo }                   
+                if (idBs.size>=1 && SNO.valid(idBs(0))) { (depMap(idBs(0))) += m.gameNo }
+                if (idBs.size>=2 && SNO.valid(idBs(1))) { (depMap(idBs(1))) += m.gameNo }    
+              }
+            }   
+          }
+
+          // calculate depend, split depend on gameNo
+          for (m <- cop.matches) {
+            val plA:(ListBuffer[Int], ListBuffer[Int])  = if (SNO.valid(m.stNoA)) {
+              depMap(SNO.plId(m.stNoA)).partition(_ <= m.gameNo)
+            } else { (ListBuffer(), ListBuffer()) }
+            val plB:(ListBuffer[Int], ListBuffer[Int])  = if (SNO.valid(m.stNoB)) {
+              depMap(SNO.plId(m.stNoB)).partition(_ <= m.gameNo)
+            } else { (ListBuffer(), ListBuffer()) }
+            val depend = HashSet[Int]()
+            val trigger = HashSet[Int]()
+          
+            if (plA._2.size > 0) trigger += (plA._2).sorted.head
+            if (plB._2.size > 0) trigger += (plB._2).sorted.head
+            if (plA._1.size > 1) depend += plA._1.sorted.reverse(1)
+            if (plB._1.size > 1) depend += plB._1.sorted.reverse(1)
+            cop.matches(m.gameNo-1).asInstanceOf[MEntryGr].depend  = depend.mkString("·")
+            cop.matches(m.gameNo-1).asInstanceOf[MEntryGr].trigger = trigger.mkString("·")
+            // println(s"GAME NUMBER: ${m.gameNo}")
+            // println(s"dependA: ${depMap(SNO.plId(m.stNoA)).toString} plA: ${plA._1.toString}  ${plA._2.toString}")
+            // println(s"dependB: ${depMap(SNO.plId(m.stNoB)).toString} plB: ${plB._1.toString}  ${plB._2.toString}")
+            // println(s"DEPEND: ${depend}")
+            // println(s"TRIGGER: ${trigger}")            
+          }
+        }
       }  
       case CPT_KO  => {
         cop.ko = KoRound.fromTx(tx.ko)
@@ -257,7 +406,9 @@ object CompPhase {
   }
 }
 
-
+//
+// Transfer representation of a competition phase
+//
 case class CompPhaseTx(
   val name:      String, 
   val coId:      Long, 

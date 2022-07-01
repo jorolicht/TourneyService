@@ -19,6 +19,8 @@ package object Routines {
   def ite[A](cond: Boolean, value1: A, value2: A): A = if (cond) value1 else value2
 
   def getMDLongArr(s: String): Array[Long] = try { s.split('·').map(_.toLong) } catch { case _: Throwable => Array() } 
+  def getMDLongArrDef(s: String, default: Long=0L): Array[Long] = try { s.split('·').map(_.toLong) } catch { case _: Throwable => Array(default) } 
+
   def getMDIntArr(s: String) : Array[Int]  = try { s.split('·').map(_.toInt)  } catch { case _: Throwable => Array() } 
 
   // get middle dot String/Int

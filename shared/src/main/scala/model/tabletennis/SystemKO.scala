@@ -5,7 +5,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Constants._
 import shared.model.CompPhase._
-import shared.model.MEntryKo
+import shared.model.MEntry
 import shared.model.ParticipantEntry
 import shared.model.tabletennis.utility._
 
@@ -119,18 +119,13 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     }
   }
 
-  def setMatch(m: MEntryKo): Boolean = {
-    val rEntry = ResultEntry.fromMatchEntry(m, CPT_KO, noWinSets)
-    if (validPos(rEntry.pos)) {
-      results(getIndex(rEntry.pos)) = rEntry
-      true
-    } else {
-      false
-    }
+  def setMatch(m: MEntry): Boolean = {
+    val rEntry = ResultEntry.fromMatchEntry(m)
+    if (validPos(rEntry.pos)) { results(getIndex(rEntry.pos)) = rEntry; true } else false
   }
 
-  def setMatch(m: MEntryKo, prt: (String)=>Unit): Boolean = {
-    val rEntry = ResultEntry.fromMatchEntry(m, CPT_KO, noWinSets)
+  def setMatch(m: MEntry, prt: (String)=>Unit): Boolean = {
+    val rEntry = ResultEntry.fromMatchEntry(m)
     if (validPos(rEntry.pos)) {
       prt(s"addkoMatch: index=${getIndex(rEntry.pos)} rEntry=${rEntry}")
       results(getIndex(rEntry.pos)) = rEntry
