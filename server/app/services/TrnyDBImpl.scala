@@ -31,7 +31,6 @@
 // class  TrnyDBImpl @Inject()(
 //   implicit ec:  ExecutionContext, cfg: Configuration, tdao: TourneyDAO
 // ) extends TrnyDBIntf with Logging {
-//   import shared.model.tabletennis._
 
 //   val clock:    Clock  = Clock.systemUTC()
 //   val tourney:  HashMap[Long, Tourney] = HashMap()

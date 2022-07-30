@@ -31,7 +31,6 @@ import play.api.i18n._
 import models.daos.{ TourneyDAO, LicenseDAO }
 import models.User
 import shared.model._
-import shared.model.tabletennis._
 import shared.utils.Routines._
 import shared.utils._
 import tourn.services._
@@ -296,44 +295,44 @@ class RemoteCtrl @Inject()
   }
 
 
-  /** setParticipant2Comps
+  /** setPant2Comps
    *
    * set/register participants to one or more competitions returns number of mapped entries
    */
-  def setParticipant2Comps(toId: Long, trigger: Boolean = false) = Action.async { implicit request =>    
+  def setPant2Comps(toId: Long, trigger: Boolean = false) = Action.async { implicit request =>    
     val msgs      : Messages  = messagesApi.preferred(request)
     val p2cSeqText: String    = request.body.asText.getOrElse("")
     val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
 
-    logger.debug(s"setParticipant2Comps toId:${toId} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
+    logger.debug(s"setPant2Comps toId:${toId} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
     //setup implicit service call environment 
-    //def setParticipant2Comps(p2cs: Seq[Participant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+    //def setPant2Comps(p2cs: Seq[Pant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
     implicit val tse = TournSVCEnv(toId, ctx.orgDir, true)
 
     try {
-      val p2cSeq = read[Seq[Participant2Comp]](p2cSeqText)
-      tsv.setParticipant2Comps(p2cSeq).map {
+      val p2cSeq = read[Seq[Pant2Comp]](p2cSeqText)
+      tsv.setPant2Comps(p2cSeq).map {
         case Left(err)  => BadRequest(err.encode)
         case Right(cnt) => Ok(Return(cnt).encode) 
       }
-    } catch { case _: Throwable => Future(BadRequest(Error("err0185.ctrl.decode.setParticipant2Comps").encode)) }
+    } catch { case _: Throwable => Future(BadRequest(Error("err0185.ctrl.decode.setPant2Comps").encode)) }
   }
 
 
-  /** delParticipant2Comps - del all participants from a competiton returns number of deleted entries
+  /** delPant2Comps - del all participants from a competiton returns number of deleted entries
    *                         if coId=0 all entries will be deleted 
    * 
-   *  Service: delParticipant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+   *  Service: delPant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
    */
-  def delParticipant2Comps(toId: Long, coId: Long = 0, trigger: Boolean = false) = Action.async { implicit request =>
+  def delPant2Comps(toId: Long, coId: Long = 0, trigger: Boolean = false) = Action.async { implicit request =>
     val msgs: Messages  = messagesApi.preferred(request)
     val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     
-    logger.debug(s"delParticipant2Comps toId:${toId} coId:${coId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
+    logger.debug(s"delPant2Comps toId:${toId} coId:${coId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
     //setup implicit service call environment 
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, trigger)
 
-    tsv.delParticipant2Comps(coId).map {
+    tsv.delPant2Comps(coId).map {
       case Left(err)  => BadRequest(err.encode)
       case Right(cnt) => Ok(Return(cnt).encode)
     }

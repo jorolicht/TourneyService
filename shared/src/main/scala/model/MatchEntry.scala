@@ -44,8 +44,9 @@ trait MEntry {
 
   def setStatus(depFinished: Boolean=true): MEntry = {
     MEntry.setRunning(this, false) 
-    val blocked = MEntry.isPlayerRunning(stNoA, stNoB, coTyp) || !depFinished
 
+    val blocked = MEntry.isPlayerRunning(stNoA, stNoB, coTyp) || !depFinished
+    //println(s"setStatus: ${gameNo}  PlayerA: ${stNoA} PlayerB: ${stNoB} running: ${MEntry.isPlayerRunning(stNoA, stNoB, coTyp)} depFinished: ${depFinished}")
     if      (validSets & (SNO(stNoA).isBye | SNO(stNoB).isBye)) { setStatus(MEntry.MS_FIX)   }
     else if (validSets)                                         { setStatus(MEntry.MS_FIN)   } 
     else if (SNO(stNoA).isNN | SNO(stNoB).isNN)                 { setStatus(MEntry.MS_MISS)  } 
@@ -273,7 +274,7 @@ object MEntry {
   val MS_UNKN  = 99   // finished with no winner
 
   // list of player currently playing in (coId, coIdPh, gameNo)
-  val playing: Map[Long, HashSet[(Long,Int,Int)]] = Map().withDefaultValue(HashSet())
+  val playing: Map[Long, HashSet[(Long,Int,Int)]] = Map()
 
   def statusInfo(value: Int) = value match {
     case MS_RESET  => "RESET"
@@ -293,13 +294,24 @@ object MEntry {
    *  game identifier = tripple (competition identifier, competition phase identifier, game number)
    */
   def addPlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
-    if (plId != 0) (playing(plId)) += (gaId)
+    println(s"addPlayerRunning: ${plId} game: ${gaId._3}")
+    if (plId != 0) { if (playing.contains(plId)) { playing(plId) += gaId } else { playing(plId) = HashSet(gaId) } }  
   }  
   def removePlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
-    if (plId != 0) (playing(plId)) -= (gaId) 
+    if (plId != 0 && playing.contains(plId)) { playing(plId) -= (gaId) }
   }  
-  def getPlayerRunning(plId1: Long, plId2: Long=0 ): Boolean = {
-    if (plId2 == 0) { playing(plId1).size > 0 } else { (playing(plId1).size > 0) | (playing(plId2).size > 0) }
+
+  def getPlayerRunning(plId1: Long, plId2: Long=0 ): Boolean = {  
+    if (playing.contains(plId1) && playing.contains(plId2)) {
+      println(s"getPlayerRunning plId1: ${plId1} plId2: ${plId2} Map1: ${playing(plId1).toString} Map2: ${playing(plId2).toString}")
+      (playing(plId1).size > 0) | (playing(plId2).size > 0) 
+    } else if (playing.contains(plId1)){
+      println(s"getPlayerRunning plId1: ${plId1} Map1: ${playing(plId1).toString}")
+      playing(plId1).size > 0
+    } else {
+      println(s"getPlayerRunning false (no entry)")
+      false
+    }
   } 
 
 

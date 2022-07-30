@@ -1,4 +1,4 @@
-package shared.model.tabletennis
+package shared.model
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
@@ -7,7 +7,7 @@ import shared.utils.Constants._
 import shared.model.CompPhase._
 import shared.model.MEntry
 import shared.model.ParticipantEntry
-import shared.model.tabletennis.utility._
+import shared.model.Utility._
 
 class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
   var pants    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 

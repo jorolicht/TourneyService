@@ -153,7 +153,7 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
     def setPlayerStatusUpdate(coId: Long, sno: String, status: Int): Unit = {
       App.tourney.pl2co(sno, coId).status = status
-      setParticipantStatus(coId, sno, status).map { _ => update() }
+      setPantStatus(coId, sno, status).map { _ => update() }
     }
 
     val coId = coIdStr.toLongOption.getOrElse(0L)

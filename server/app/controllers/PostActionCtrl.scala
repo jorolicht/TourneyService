@@ -29,7 +29,6 @@ import play.api.i18n._
 import models.daos.{ TourneyDAO, LicenseDAO }
 import models.User
 import shared.model._
-import shared.model.tabletennis._
 import shared.utils.Routines._
 import shared.utils._
 import tourn.services._
@@ -95,14 +94,14 @@ class PostActionCtrl @Inject()
       // Register Action Routines (Single/Double)
       //
 
-      // def setParticipant2Comp(coId: Long, plId: Player): Future[Either[Error, Participant2Comp]]
-      // registers a player with a competition, returns Participant2Comp entry
-      case "setParticipant2Comp" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "setParticipant2Comp").encode)) else {
-          Participant2Comp.decode(reqData) match {
-            case Left(err)  => Future(BadRequest(err.add("setParticipant2Comp").encode))
-            case Right(p2c) => tsv.setParticipant2Comp(p2c).map {
-              case Left(err)     => BadRequest(err.add("setParticipant2Comp").encode)
+      // def setPant2Comp(coId: Long, plId: Player): Future[Either[Error, Pant2Comp]]
+      // registers a player with a competition, returns Pant2Comp entry
+      case "setPant2Comp" => {
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "setPant2Comp").encode)) else {
+          Pant2Comp.decode(reqData) match {
+            case Left(err)  => Future(BadRequest(err.add("setPant2Comp").encode))
+            case Right(p2c) => tsv.setPant2Comp(p2c).map {
+              case Left(err)     => BadRequest(err.add("setPant2Comp").encode)
               case Right(p2cRes) => Ok(p2cRes.encode) 
             }
           } 
@@ -110,12 +109,12 @@ class PostActionCtrl @Inject()
       }   
  
 
-      // def delParticipant2Comp(coId: Long, sno: String): Future[Either[Error, Int]]
+      // def delPant2Comp(coId: Long, sno: String): Future[Either[Error, Int]]
       // removes a player from the competition
-      case "delParticipant2Comp" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "delParticipant2Comp").encode)) else {
-          tsv.delParticipant2Comp(getParam(pMap, "coId", -1L), getParam(pMap, "sno", "XXXXX")).map {
-            case Left(err)     => BadRequest(err.add("delParticipant2Comp").encode)
+      case "delPant2Comp" => {
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "delPant2Comp").encode)) else {
+          tsv.delPant2Comp(getParam(pMap, "coId", -1L), getParam(pMap, "sno", "XXXXX")).map {
+            case Left(err)     => BadRequest(err.add("delPant2Comp").encode)
             case Right(result) => Ok(Return(result).encode) 
           }
         }
@@ -129,7 +128,7 @@ class PostActionCtrl @Inject()
           data    <- EitherT(Future( encEParam(reqData)))
           player  <- EitherT(Future( Player.decode(data("player")) ))
           pl      <- EitherT(tsv.addPlayer(player))
-          result  <- EitherT(tsv.setParticipant2Comp(Participant2Comp.single(pl.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))))
+          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))))
         } yield { (pl, result) }).value.map {
           case Left(err)  => BadRequest(err.add("regSingle").encode)
           case Right(res) => Ok(Return(res._1.id).encode) 
@@ -144,7 +143,7 @@ class PostActionCtrl @Inject()
           pl2  <- EitherT(Future( Player.decode(data("player2")) ))
           p1   <- EitherT(tsv.setPlayer(pl1))
           p2   <- EitherT(tsv.setPlayer(pl2))
-          res  <- EitherT(tsv.setParticipant2Comp(Participant2Comp.double(p1.id, p2.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))) )
+          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))) )
         } yield { (p1.id, p2.id) }).value.map { 
           case Left(err)  => BadRequest(err.add("regDouble").encode)
           case Right(res) => Ok(write(res)) 
@@ -153,14 +152,14 @@ class PostActionCtrl @Inject()
 
 
       //
-      // Participant Action Routines (participant could be Single,Double or Team (future) 
+      // Pant Action Routines (Pant could be Single,Double or Team (future) 
       // 
 
-      // setParticipantStatus sets the status of a participant within a competition, returns status
-      // def setParticipantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
-      case "setParticipantStatus" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setParticipantStatus").encode)) else {
-          tsv.setParticipantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "status", 0)).map {
+      // setPantStatus sets the status of a Pant within a competition, returns status
+      // def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
+      case "setPantStatus" => {
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantStatus").encode)) else {
+          tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "status", 0)).map {
             case Left(err)  => BadRequest(err.encode)
             case Right(res) => Ok(Return(res).encode)
           }
@@ -183,11 +182,11 @@ class PostActionCtrl @Inject()
 
 
       
-      // setParticipantPlace sets the place of a participant within a competition, returns placement
-      // setParticipantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]
-      case "setParticipantPlace" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setParticipantPlace").encode)) else {
-          tsv.setParticipantPlace(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "place")).map {
+      // setPantPlace sets the place of a participant within a competition, returns placement
+      // setPantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]
+      case "setPantPlace" => {
+        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantPlace").encode)) else {
+          tsv.setPantPlace(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "place")).map {
             case Left(err)     => BadRequest(err.encode)
             case Right(result) => Ok(Placement.encode(result))          
           }  

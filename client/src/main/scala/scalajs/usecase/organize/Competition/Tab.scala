@@ -43,36 +43,17 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     tabMode = param
     
-    val coId = AppEnv.getCoId    
-    debug("render", s"coId: ${coId} param: ${param}")
-
+    val coId = AppEnv.getCoId
     val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
+    debug("render", s"coId: ${coId} param: ${param}")
 
     // generate cards for competition phase if a competition is selected
     // and competition phases are available
     if (coId > 0 & coPhNameIds.length > 0) { 
-
       if (!exists(s"Content") | reload) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
-      
       // at least one competition phase is configured
       var coPhId = AppEnv.coPhIdMap.getOrElse(coId, coPhNameIds.head._2)
-      selectCoPh(coId, coPhId, tabMode, reload) 
-
-      // tabMode match {
-      //   case "Draw"  => {
-      //     OrganizeCompetitionDraw.setFrame(coId, coPhId, reload)(App.tourney)
-      //     OrganizeCompetitionDraw.setContent(coId, coPhId)(App.tourney)
-      //   }  
-      //   case "Input" => {
-      //     OrganizeCompetitionInput.setFrame(coId, coPhId, reload)(App.tourney)
-      //     OrganizeCompetitionInput.setContent(coId, coPhId)(App.tourney)
-      //   }
-      //   case "View"  => {
-      //     OrganizeCompetitionView.setFrame(coId, coPhId, reload)(App.tourney)
-      //     OrganizeCompetitionView.setContent(coId, coPhId)(App.tourney)           
-      //   }
-      // }
-
+      selectCoPh(coId, coPhId, tabMode, reload)
     } else {
       setMainContent(showAlert(getMsg("noSelection"))) 
     }

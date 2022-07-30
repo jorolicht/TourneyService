@@ -11,7 +11,7 @@ greeting                                              = Herzlich Willkommen!
 
   app.mockup                                          = false
   app.version                                         = 2022-05DE184
-  app.date                                            = 2022-07-01
+  app.date                                            = 2022-07-14
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -968,51 +968,51 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.reg.double.status.register                 = (vor-)angemeldet
   dlg.card.reg.double.status.participate              = teilnehmend
 
-  dlg.card.cfg.section.Title                          = Wettbewerb-Konfiguration 
-  dlg.card.cfg.section.lbl.Selection                  = Spielsystemauswahl für {0} Teilnehmer
-  dlg.card.cfg.section.plh.Name                       = Name Spielabschnitt
-  dlg.card.cfg.section.option.100                     = Spielrunde mit 3er-9er Gruppen
-  dlg.card.cfg.section.option.101                     = Spielrunde mit 3er-Gruppen 
-  dlg.card.cfg.section.option.102                     = Spielrunde mit 3er- und 4er-Gruppen
-  dlg.card.cfg.section.option.103                     = Spielrunde mit 4er-Gruppen
-  dlg.card.cfg.section.option.104                     = Spielrunde mit 4er- und 5er-Gruppen
-  dlg.card.cfg.section.option.105                     = Spielrunde mit 5er-Gruppen
-  dlg.card.cfg.section.option.106                     = Spielrunde mit 5er- und 6er-Gruppen
-  dlg.card.cfg.section.option.107                     = Spielrunde mit 6er-Gruppen
-  dlg.card.cfg.section.option.108                     = Gruppe jeder-gegen-jeden
-  dlg.card.cfg.section.option.109                     = KO-System
-  dlg.card.cfg.section.option.110                     = Schweizer System
+  dlg.card.cfg.compphase.Title                          = Wettbewerb-Konfiguration 
+  dlg.card.cfg.compphase.lbl.Selection                  = Spielsystemauswahl für {0} Teilnehmer
+  dlg.card.cfg.compphase.plh.Name                       = Name Spielabschnitt
+  dlg.card.cfg.compphase.option.100                     = Spielrunde mit 3er-9er Gruppen
+  dlg.card.cfg.compphase.option.101                     = Spielrunde mit 3er-Gruppen 
+  dlg.card.cfg.compphase.option.102                     = Spielrunde mit 3er- und 4er-Gruppen
+  dlg.card.cfg.compphase.option.103                     = Spielrunde mit 4er-Gruppen
+  dlg.card.cfg.compphase.option.104                     = Spielrunde mit 4er- und 5er-Gruppen
+  dlg.card.cfg.compphase.option.105                     = Spielrunde mit 5er-Gruppen
+  dlg.card.cfg.compphase.option.106                     = Spielrunde mit 5er- und 6er-Gruppen
+  dlg.card.cfg.compphase.option.107                     = Spielrunde mit 6er-Gruppen
+  dlg.card.cfg.compphase.option.108                     = Gruppe jeder-gegen-jeden
+  dlg.card.cfg.compphase.option.109                     = KO-System
+  dlg.card.cfg.compphase.option.110                     = Schweizer System
 
-  dlg.card.cfg.section.option.info.1                  = Bitte Namen auswählen oder eingeben
-  dlg.card.cfg.section.option.info.2                  = Bitte Konfiguraton und Namen auswählen/eingeben
-  dlg.card.cfg.section.option.info.100                = Konfiguration: mit {0} Gruppen
+  dlg.card.cfg.compphase.option.info.1                  = Bitte Namen auswählen oder eingeben
+  dlg.card.cfg.compphase.option.info.2                  = Bitte Konfiguraton und Namen auswählen/eingeben
+  dlg.card.cfg.compphase.option.info.100                = Konfiguration: mit {0} Gruppen
 
-  dlg.card.cfg.section.option.info.101                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppen
-  dlg.card.cfg.section.option.info.102                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
-  dlg.card.cfg.section.option.info.103                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppen
-  dlg.card.cfg.section.option.info.104                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
-  dlg.card.cfg.section.option.info.105                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppen
-  dlg.card.cfg.section.option.info.106                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
-  dlg.card.cfg.section.option.info.107                = Konfiguration: mit {0} <span class="h5">&#x2685;</span>-Gruppen
-  dlg.card.cfg.section.option.info.108                = Konfiguration: {0}-Feld Jeder-gegen-Jeden
-  dlg.card.cfg.section.option.info.109                = Konfiguration: {0}-Feld KO-System
-  dlg.card.cfg.section.option.info.110                = Konfiguration: {0}-Feld Schweizer System     
+  dlg.card.cfg.compphase.option.info.101                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.102                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.103                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.104                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.105                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.106                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.107                = Konfiguration: mit {0} <span class="h5">&#x2685;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.108                = Konfiguration: {0}-Feld Jeder-gegen-Jeden
+  dlg.card.cfg.compphase.option.info.109                = Konfiguration: {0}-Feld KO-System
+  dlg.card.cfg.compphase.option.info.110                = Konfiguration: {0}-Feld Schweizer System     
 
-  dlg.card.cfg.section.lbl.Winset                     = Gewinnsätze
-  dlg.card.cfg.section.btn.draw                       = START AUSLOSUNG
+  dlg.card.cfg.compphase.lbl.Winset                     = Gewinnsätze
+  dlg.card.cfg.compphase.btn.draw                       = START AUSLOSUNG
 
-  dlg.card.cfg.section.pants                          = Teilnehmer
-  dlg.card.cfg.section.pants.select                   = Auswahl Teilnehmer
-  dlg.card.cfg.section.tbl.hdr.no                     = #
-  dlg.card.cfg.section.tbl.hdr.name                   = Name, Vorname
-  dlg.card.cfg.section.tbl.hdr.club                   = Verein
-  dlg.card.cfg.section.tbl.hdr.pos                    = Position
-  dlg.card.cfg.section.tbl.hdr.signup                 = Check
+  dlg.card.cfg.compphase.pants                          = Teilnehmer
+  dlg.card.cfg.compphase.pants.select                   = Auswahl Teilnehmer
+  dlg.card.cfg.compphase.tbl.hdr.no                     = #
+  dlg.card.cfg.compphase.tbl.hdr.name                   = Name, Vorname
+  dlg.card.cfg.compphase.tbl.hdr.club                   = Verein
+  dlg.card.cfg.compphase.tbl.hdr.pos                    = Position
+  dlg.card.cfg.compphase.tbl.hdr.signup                 = Check
 
-  dlg.card.cfg.section.name.1                         = Vorrunde
-  dlg.card.cfg.section.name.2                         = Zwischenrunde
-  dlg.card.cfg.section.name.3                         = Hauptrunde
-  dlg.card.cfg.section.name.4                         = Trostrunde
+  dlg.card.cfg.compphase.name.1                         = Vorrunde
+  dlg.card.cfg.compphase.name.2                         = Zwischenrunde
+  dlg.card.cfg.compphase.name.3                         = Hauptrunde
+  dlg.card.cfg.compphase.name.4                         = Trostrunde
 
 
 #END Dialog Cards
@@ -1112,11 +1112,11 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0038.decode.Players                              = Dekodierfehler Datentyp Players: {0}
   err0039.call.getTournPlayers                        = Funktionsaufruf getTournPlayers Dekodierungsfehler: {0}
   err0040.call.getTournClubs                          = Funktionsaufruf getTournClubs Dekodierungsfehler: {0}
-  err0041.call.getParticipant2Comps                   = Funktionsaufruf getParticipant2Comps Dekodierungsfehler: {0}
+  err0041.call.getPant2Comps                   = Funktionsaufruf getPant2Comps Dekodierungsfehler: {0}
   err0042.decode.Contact                              = Dekodierfehler Datentyp Contact: {0}
   err0043.decode.Address                              = Dekodierfehler Datentyp Address: {0}
   err0044.decode.Players                              = Dekodierfehler Datentyp Players (aus Seq[String]): {0}
-  err0045.decode.Participant2Comps                    = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen (aus Seq[String]): {0}
+  err0045.decode.Pant2Comps                    = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen (aus Seq[String]): {0}
   err0046.internal.server                             = Interner Server Fehler: {0}
   err0047.post.addTournCTT                            = Funktionsaufruf addTournCTT, fehlerhafte/fehlende Parameter
   err0048.trny.addSect                                = Funktionsaufruf addSect, Vorgänger nicht definiert
@@ -1125,8 +1125,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0051.decode.Playfields                           = Fehler beim Dekodieren der Liste von Spielfeldinformation: {0}
   err0052.get.unkown                                  = Funktionsaufruf {0} nicht verfügbar
   err0053.get.fileExists                              = GET-Aktion fileExists gescheitert: {0}
-  err0054.decode.Participant2Comp                     = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnung: {0}
-  err0055.decode.Participant2Comps                    = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen: {0}
+  err0054.decode.Pant2Comp                     = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnung: {0}
+  err0055.decode.Pant2Comps                    = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen: {0}
   err0056.decode.Clubs                                = Dekodierfehler Datentyp Clubs: {0}
   err0057.call.regDouble                              = Dekodierfehler reqDouble-Funktionsaufruf: {0}
   err0058.post.regDouble                              = POST-Aktion reqDouble gescheitert: {0}
@@ -1240,7 +1240,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
   err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
   err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
-  err0185.ctrl.decode.setParticipant2Comps            = Fehler in Routine setParticipant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
+  err0185.ctrl.decode.setPant2Comps            = Fehler in Routine setPant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
   err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
   err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
   err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}

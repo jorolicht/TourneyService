@@ -23,7 +23,6 @@ import org.scalajs.dom.raw.NodeList
 
 import shared.model._
 import shared.model.CompPhase._
-import shared.model.tabletennis._
 
 import shared.utils._
 
@@ -272,7 +271,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //  GROUP-SECTION
   //
   def setGrMatch(coId: Long, coPhId: Int, elem: HTMLElement, m: MEntryGr)(implicit trny: Tourney) = {
-    val (grpName, wgw) = (getGroupName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
+    val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
     elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
       coId, coPhId, grpName, wgw, m.gameNo, trny.cophs(coId,coPhId).noWinSets).toString
     setMatchViewContent(elem, m) 
@@ -310,7 +309,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       if (i<balls.length) setHtml(elem, balls(i)) else setHtml(elem, "")
     }    
 
-
+    println(s"Set match view: ${m.gameNo} ${MEntry.statusInfo(m.status)}")
     // set editible, color and buttons    
     gameNo.classList.remove("text-success")
     gameNo.classList.remove("text-danger")
@@ -330,7 +329,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       case MS_BLOCK => {
         gameNo.classList.add("text-danger")
         resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
-        setDisabled(saveBtn, true); setDisabled(deleteBtn, true)
+        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)
       } 
       case MS_READY => {
         gameNo.classList.add("text-success")

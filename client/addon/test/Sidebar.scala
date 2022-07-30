@@ -9,6 +9,8 @@ import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 
 import org.scalajs.dom.raw.{ Event, HTMLInputElement } // for ScalaJs bindings
+import org.scalajs.dom.document
+import org.scalajs.dom.raw.HTMLElement
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
@@ -25,35 +27,27 @@ import shared.utils._
 import shared.utils.Routines._
 
 import shared.model._
-import shared.utils.Constants._
 
 import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 
-object AddonBasic extends UseCase("AddonBasic") 
+
+object AddonSidebar extends TestUseCase("AddonSidebar") 
   with TourneySvc with LicenseSvc with AuthenticateSvc with WrapperSvc
 {
   
-  def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
+  def testShowSubMenu(name: String, menu: String) = {
+    val tnp = TNP(name, s"menu: ${menu}")
+    START(tnp)
+    val liElem = document.querySelector(s"[data-sbentry='OrganizeCompetition']").asInstanceOf[HTMLElement]
+    val anchorElem = liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement]
 
-  def testHello(text: String) = s"Hello ${text}!"
+    val ulElem = getElemById_("APP__Sidebar__OrganizeCompetition")
 
-  def testDate(testDate: String): String = {
-    import java.time._
-    import java.time.format.DateTimeFormatter
-
-    val sDate = testDate.toInt
-
-    val year  = sDate / 10000
-    val month = (sDate / 100) % 100
-    val day   = sDate % 100
-
-    val sourceDate = LocalDate.of(year, month, day)            // Source Date
-    val newDate    = sourceDate.plusDays(10)                   // Adding 10 days to source date.
-    val formatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Setting date format
-    newDate.format(formatter)
+    ulElem.classList.add("show")
+    anchorElem.classList.remove("collapsed")
   }
 
 }

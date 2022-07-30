@@ -45,7 +45,7 @@ case class Tourney(
   var players:    Map[Long, Player]                     = Map(),
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
-  var pl2co:      Map[(String, Long), Participant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
+  var pl2co:      Map[(String, Long), Pant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
   //var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId)   -> Competition Section
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
   var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo)   -> Playfield
@@ -75,7 +75,7 @@ case class Tourney(
     version match {
       case 0 => write[Tourney](this)
       case 1 => {
-        write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Participant2Comp], List[CompPhaseTx], List[Playfield])]((
+        write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield])]((
           1, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
           players.values.toList, 
           comps.values.toList, 
@@ -217,11 +217,7 @@ case class Tourney(
     }  
   }
 
-  /** getCompPhaseStatus returns status of the competition phase 
-   *  otherwise undefined status
-   */ 
-  def getCompPhaseStatus(coId: Long, coPhId: Int): Int = 
-    if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhase.CPS_UNKN } 
+
 
 
   /** setCompDraw - returns new secId  
@@ -251,7 +247,6 @@ case class Tourney(
    * 
    */ 
   def getCompName(coId: Long): String = if (comps.isDefinedAt(coId)) comps(coId).name else ""
-
 
   //addSect - adds a competition section to a competition 
   // def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
@@ -389,8 +384,11 @@ case class Tourney(
     }  
   }  
 
+  //
+  // PARTICIPANT ROUTINES
+  //
 
-  def setParticipantStatus(coId: Long, sno: String, status: Int): Either[Error, Int] = {
+  def setPantStatus(coId: Long, sno: String, status: Int): Either[Error, Int] = {
     if ( pl2co.isDefinedAt((sno, coId)) ) { 
       pl2co((sno,coId)).status = status
       Right(status)
@@ -399,7 +397,70 @@ case class Tourney(
     }      
   }
 
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]):Either[Error, Int] = 
+    seqEither(for (p <- pantStatus) yield setPantStatus(coId, p._1, p._2)) match {
+      case Left(err)  => Left(err)
+      case Right(res) => Right(pantStatus.filter(_._2>=PLS_REDY).length)
+    }
+
+  def getPant(coId: Long, sno: SNO): ParticipantEntry = sno.getPantEntry(comps(coId).typ)(this)
+
+  //
+  // Competition Phase Routines
+  //
+
+  /** getCompPhaseStatus returns status of the competition phase 
+   *  otherwise undefined status
+   */ 
+  def getCompPhaseStatus(coId: Long, coPhId: Int): Int = 
+    if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhase.CPS_UNKN } 
+
+  /** add a competition phase to a competition (Category_Start) 
+   *  or an existing competition phase (Category_Winner/Looser)
+   *  The newly generated competition phase identifier (coPhId) 
+   *  is based on the previous coPhId. If the newly generated
+   *  competition phase is "based" on the looser of the previous round
+   *  then the new id is build with adding a "0" to the previous otherwise a "1"
+   *  Example:
+   *    1   => start competition phase
+   *    10  => looser of start phase
+   *    11  => winner of start phase
+   *    101 => winner of looser of start phase
+   *    111 => winner of winner of start phase 
+   *    ...
+   */
+  def addCompPhase(coId: Long, cophId: Int, config: Int, category: Int, name: String, noWinSets: Int, pants: ArrayBuffer[SNO]): Either[Error, Int] = {  
+    import shared.model.CompPhase._
+    
+    val noPlayers = pants.size
+    CompPhase.get(coId, cophId, config, category, name, noWinSets, pants) match {
+      case Left(err)   => Left(err)
+      case Right(coph) => {
+        if ((coph.coPhId == 0) || cophs.isDefinedAt((coId, coph.coPhId))) {
+          Left(Error("???")) 
+        } else {
+          config match {
+            case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
+              coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this)), Group.genGrpConfig(config, noPlayers).toList)
+            }
+            case CPC_KO | CPC_SW  => { 
+              coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this))) 
+            }  
+            case _          => {}             
+          }
+          cophs((coId, coph.coPhId)) = coph
+          Right(coph.coPhId)
+        }
+      }
+    }
+
+  }
+  
+
+
+  //
   // print readable tourney - for debug purposes
+  //
   override def toString() = {
     def compsStr() = {
       val str = new StringBuilder("-- COMPETITIONS\n")
@@ -426,11 +487,6 @@ case class Tourney(
       val str = new StringBuilder("-- COMPETITION PHASES\n")
       for { (k,coph) <- cophs }  yield { str ++= s"  ${coph.toString}\n" }; str.toString
     }
-
-    // def coSecStr() = {
-    //   val str = new StringBuilder("-- COMPETITION SECTIONS\n")
-    //   for { (k, cSecs) <- coSects }  yield { str ++= s"  ${cSecs.toString}\n" }; str.toString
-    // } 
 
     s"""\nTOURNEY[${id}]
       |  ${name} von: ${startDate} bis: ${endDate}
@@ -493,7 +549,7 @@ object Tourney {
       case 1 => {
         try {
           val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields) =
-            read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Participant2Comp], List[CompPhaseTx], List[Playfield])](trnyStr)
+            read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield])](trnyStr)
           val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
                              tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
           trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)

@@ -44,6 +44,23 @@ case class SNO(value: String) {
     }
   }
 
+  // getPantEntry returns Participant Entry
+  def getPantEntry(coTyp: Int, place: (Int,Int) = (0,0))(implicit trny: Tourney): ParticipantEntry = {
+    coTyp match {
+       case CT_SINGLE => getSinglePlayer() match {
+         case Left(err)       => ParticipantEntry(value, "", "", 0, (0,0)) 
+         case Right(p)        => ParticipantEntry(value, p.getName(), p.clubName, p.getRating, place)
+       }
+       case CT_DOUBLE => getDoublePlayers() match {
+         case Left(err)       => ParticipantEntry(value, "", "", 0, (0,0)) 
+         case Right((p1, p2)) => ParticipantEntry(value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2), place)
+       }
+       case _         => ParticipantEntry(value, "", "", 0, (0,0))    
+    }
+  }  
+
+
+
   // getName returns name for all types of participants
   def getName(coTyp: Int, byeName: String="")(implicit trny: Tourney): String  = {
     if (value == "") {

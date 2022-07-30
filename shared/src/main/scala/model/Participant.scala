@@ -12,7 +12,7 @@ import shared.utils.Routines._
  /**
   *  Single/Double/Team to Competition mapping entry
   */
-  case class Participant2Comp (
+  case class Pant2Comp (
     val sno:       String,         // mapping of player identifier to start numbers = sno1 <MD> sno2 <MD> ...
                                    // player/double or team gets a participant of the competition
                                    // participants are identified by start numbers (sno) 
@@ -27,7 +27,7 @@ import shared.utils.Routines._
      var options:   String = "_"                               
   
   ) {
-    def encode = write[Participant2Comp](this)
+    def encode = write[Pant2Comp](this)
 
     def getSignUpDate: Int   = getMDInt(options,0); def setSignUpDate(value: Int)   = { options = setMD(options,value,0) }
     def getSignUpTime: Int   = getMDInt(options,1); def setSignUpTime(value: Int)   = { options = setMD(options,value,1) }
@@ -72,11 +72,11 @@ import shared.utils.Routines._
   }
 
   
-  object Participant2Comp {
-    implicit def rw: RW[Participant2Comp] = macroRW
+  object Pant2Comp {
+    implicit def rw: RW[Pant2Comp] = macroRW
     def tupled = (this.apply _).tupled
-    def dummy() = new Participant2Comp("", 0L, "", "", 0, "_")
-    def single(plId: Long, coId: Long, status: Int) = new Participant2Comp(plId.toString, coId, "", "", status, "_") 
+    def dummy() = new Pant2Comp("", 0L, "", "", 0, "_")
+    def single(plId: Long, coId: Long, status: Int) = new Pant2Comp(plId.toString, coId, "", "", status, "_") 
     def double(id1: Long, id2: Long, coId: Long, status :Int) = {
       val sno = (id1, id2) match {
         case (x,y) if (x<=0 | y<=0) => ""
@@ -84,36 +84,39 @@ import shared.utils.Routines._
         case (x,y) if (x>y)         => y.toString + "·" + x.toString
         case (x,y)                  => x.toString + "·" + y.toString 
       }
-      new Participant2Comp(sno, coId, "", "", status, "_")
+      new Pant2Comp(sno, coId, "", "", status, "_")
     }
 
-    def decode(x: String): Either[Error, Participant2Comp] = {
-      try Right(read[Participant2Comp](x)) 
-      catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
+    def decode(x: String): Either[Error, Pant2Comp] = {
+      try Right(read[Pant2Comp](x)) 
+      catch { case _: Throwable => Left(Error("err0054.decode.Pant2Comp", x.take(10), "", "Participant.decode")) }
     }
 
-    def decSeq(p2cStr: String): Either[Error, Seq[Participant2Comp]] = {  
-      try Right(read[Seq[Participant2Comp]](p2cStr))
-      catch { case _: Throwable => Left(Error("err0055.decode.Participant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
+    def decSeq(p2cStr: String): Either[Error, Seq[Pant2Comp]] = {  
+      try Right(read[Seq[Pant2Comp]](p2cStr))
+      catch { case _: Throwable => Left(Error("err0055.decode.Pant2Comps", p2cStr.take(20),"","Participant.deqSeq")) }
     }
   }
   
 
 // relevant information of an active player/participant within an competition
 case class ParticipantEntry(
-  var sno:     String,         // start number(s) concatenated string of player identifieres  
-  val name:    String,                     
-  val club:    String, 
-  val rating:  Int,            // eg. ttr for table tennis
-  var place:   (Int,Int)       // position after finishing the round (group or ko)
-)
+  var sno:       String,         // start number(s) concatenated string of player identifieres  
+  val name:      String,                     
+  val club:      String, 
+  val rating:    Int,            // eg. ttr for table tennis
+  var place:     (Int,Int),      // position after finishing the round (group or ko)
+  var occu:      Int = 0,
+  var effRating: Int = 0        
+)  
+
 
 object ParticipantEntry {
   implicit def rw: RW[ParticipantEntry] = macroRW
 
   def decode(x: String): Either[Error, ParticipantEntry] = {
     try Right(read[ParticipantEntry](x)) 
-    catch { case _: Throwable => Left(Error("err0054.decode.Participant2Comp", x.take(10), "", "Participant.decode")) }
+    catch { case _: Throwable => Left(Error("err0054.decode.Pant2Comp", x.take(10), "", "Participant.decode")) }
   }
 
   def bye(name: String="bye") =  ParticipantEntry(SNO.BYE, name, "", 0, (0, 0))

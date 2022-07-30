@@ -1,8 +1,8 @@
-package shared.model.tabletennis
+package shared.model
 
 import shared.utils.Routines._
 
-package object utility {
+package object Utility {
 
   val abc = 'A' to 'Z'
 

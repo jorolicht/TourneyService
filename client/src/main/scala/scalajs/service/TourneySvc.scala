@@ -17,7 +17,6 @@ import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 import upickle.default._
 
-import shared.model.tabletennis.ResultEntry
 import shared.utils._
 import shared.utils.Routines._
 import shared.model._
@@ -331,59 +330,60 @@ trait TourneySvc extends WrapperSvc
   //
   // Participant Interface (participant could be Single,Double or Team (future) 
   // 
-  //? def setParticipant2Comp(p2c: Participant2Comp)(implicit tse :TournSVCEnv):Future[Either[Error, Participant2Comp]]
-  //? def setParticipant2Comps(p2cs: Seq[Participant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  //? def delParticipant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  // def getParticipant2Comps(toId: Long): Future[Either[Error, Participant2Comps]]
-  // def getParticipantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
-  // def setParticipantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
-  // def setParticipantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  //? def setPant2Comp(p2c: Pant2Comp)(implicit tse :TournSVCEnv):Future[Either[Error, Pant2Comp]]
+  //? def setPant2Comps(p2cs: Seq[Pant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  //? def delPant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  // def getPant2Comps(toId: Long): Future[Either[Error, Pant2Comps]]
+  // def getPantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
+  // def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
+  // def setPantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   // get tourney player 2 comp 
-  def getParticipant2Comps(toId: Long):  Future[Either[Error, Seq[Participant2Comp]]] =
-    getAction("getParticipant2Comps", toId).map { 
-      case Left(err)     => Left(err.add("getParticipant2Comps"))
-      case Right(pa2cos) => Participant2Comp.decSeq(pa2cos)
+  def getPant2Comps(toId: Long):  Future[Either[Error, Seq[Pant2Comp]]] =
+    getAction("getPant2Comps", toId).map { 
+      case Left(err)     => Left(err.add("getPant2Comps"))
+      case Right(pa2cos) => Pant2Comp.decSeq(pa2cos)
     }
 
   // get the player placement
   def getParticipantPlace(coId: Long, sno: String): Future[Either[Error, Placement]] =
-    getAction("getParticipantPlace", App.tourney.id, s"coId=${coId}&sno=${sno}").map {
-      case Left(err)    => Left(err.add("getParticipantPlace"))
+    getAction("getPantPlace", App.tourney.id, s"coId=${coId}&sno=${sno}").map {
+      case Left(err)    => Left(err.add("getPantPlace"))
       case Right(place) => Placement.decode(place)
     }
 
   // set participant to competition
-  // setParticipant2Comp(p2c: Participant2Comp): Future[Either[Error, Participant2Comp]]
-  def setParticipant2Comp(p2c: Participant2Comp): Future[Either[Error, Participant2Comp]] = {
-    postAction("setParticipant2Comp", App.tourney.id, "", p2c.encode, true).map {
-      case Left(err)  => Left(err.add("setParticipant2Comp"))
-      case Right(res) => Participant2Comp.decode(res)
+  // setPant2Comp(p2c: Pant2Comp): Future[Either[Error, Pant2Comp]]
+  def setPant2Comp(p2c: Pant2Comp): Future[Either[Error, Pant2Comp]] = {
+    postAction("setPant2Comp", App.tourney.id, "", p2c.encode, true).map {
+      case Left(err)  => Left(err.add("setPant2Comp"))
+      case Right(res) => Pant2Comp.decode(res)
     } 
   }   
 
   // delete participant entry
-  def delParticipant2Comp(coId: Long, sno: String): Future[Either[Error, Int]] = {
-    postAction("delParticipant2Comp", App.tourney.id, s"coId=${coId}&sno=${sno}", "", true) map {
-      case Left(err)  => Left(err.add("delParticipant2Comp"))
-      case Right(res) => Return.decode2Int(res, "delParticipant2Comp")
+  def delPant2Comp(coId: Long, sno: String): Future[Either[Error, Int]] = {
+    postAction("delPant2Comp", App.tourney.id, s"coId=${coId}&sno=${sno}", "", true) map {
+      case Left(err)  => Left(err.add("delPant2Comp"))
+      case Right(res) => Return.decode2Int(res, "delPant2Comp")
     } 
   }     
 
-  // set the player placement
-  // setParticipantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]
-  def setParticipantPlace(coId: Long, sno: String, place: Placement): Future[Either[Error, Placement]] = 
-    postAction("setParticipantPlace", App.tourney.id, s"coId=${coId}&sno=${sno}&place=${Placement.encode(place)}", "", true).map {
-      case Left(err)  => Left(err.add("setParticipantPlace"))
+  // set the participant placement
+  def setPantPlace(coId: Long, sno: String, place: Placement): Future[Either[Error, Placement]] = 
+    postAction("setPantPlace", App.tourney.id, s"coId=${coId}&sno=${sno}&place=${Placement.encode(place)}", "", true).map {
+      case Left(err)  => Left(err.add("setPantPlace"))
       case Right(res) => Placement.decode(res)
     }
 
-  // setParticipantStatus set the status of a participants in a competition
-  // def setParticipantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
-  def setParticipantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]] = 
-    postAction("setParticipantStatus", App.tourney.id, s"coId=${coId}&sno=${sno}&status=${status.toString}","",true).map {
-      case Left(err)  => Left(err.add("setParticipantStatus"))
-      case Right(res) => Return.decode2Int(res, "setParticipantStatus")
+  // setPantStatus set the status of a participants in a competition
+  def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]] = 
+    postAction("setPantStatus", App.tourney.id, s"coId=${coId}&sno=${sno}&status=${status.toString}","",true).map {
+      case Left(err)  => Left(err.add("setPantStatus"))
+      case Right(res) => Return.decode2Int(res, "setPantStatus") match {
+        case Left(err)     => Left(err)
+        case Right(status) => { App.tourneyUpdate = true; App.tourney.setPantStatus(coId, sno, status) }
+      }
     }
 
   // setPantBulkStatus set the status of all participants in a competition
@@ -392,7 +392,10 @@ trait TourneySvc extends WrapperSvc
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]): Future[Either[Error, Int]] = 
     postAction("setPantBulkStatus", App.tourney.id, s"coId=${coId}", write(pantStatus),true).map {
       case Left(err)  => Left(err.add("setPantBulkStatus"))
-      case Right(res) => Return.decode2Int(res, "setParticipantStatus")
+      case Right(res) => Return.decode2Int(res, "setPantStatus") match {
+        case Left(err)  => Left(err)
+        case Right(err) => { App.tourneyUpdate = true; App.tourney.setPantBulkStatus(coId, pantStatus) }
+      }  
     }    
 
 

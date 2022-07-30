@@ -1,4 +1,4 @@
-package shared.model.tabletennis
+package shared.model
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
@@ -7,7 +7,7 @@ import shared.utils.Constants._
 import shared.utils.Routines._
 import shared.model.{ MEntry, MEntryGr, MEntryKo, MEntryBase }
 import shared.model.CompPhase._
-import shared.model.tabletennis.utility._
+import shared.model.Utility._
 import shared.utils.{ Error, Return }
 
 

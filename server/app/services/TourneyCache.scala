@@ -14,7 +14,6 @@ import shared.model._
 import shared.utils.Constants._
 import shared.utils.Routines._
 import shared.utils._
-import shared.model.tabletennis._
 import models.daos.TourneyDAO
 
 /**
@@ -300,14 +299,14 @@ object TIO {
             case 1 => 
               for(pls <- co.players) if (pls.persons.length == 1) {
                 val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
-                tourney(tony.id).pl2co((plId.toString, i+1)) =  Participant2Comp(plId.toString, i+1, pls.id, "",0)
+                tourney(tony.id).pl2co((plId.toString, i+1)) =  Pant2Comp(plId.toString, i+1, pls.id, "",0)
               }
             case 2 => 
               for(pls <- co.players) if (pls.persons.length == 2) {
                 val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
                 val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
                 val sno = plId1.toString + "·" + plId2.toString
-                tourney(tony.id).pl2co((sno, i+1)) =  Participant2Comp(sno, i+1, pls.id, "",0)
+                tourney(tony.id).pl2co((sno, i+1)) =  Pant2Comp(sno, i+1, pls.id, "",0)
               }
             case _                   => logger.info(s"insert error: invalid competition typ")
           }

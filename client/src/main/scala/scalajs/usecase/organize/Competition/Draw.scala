@@ -46,49 +46,46 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   def setContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
     // first get the base element identified by coId and coPhId
     val elemBase = getElemById(s"Draw_${coId}_${coPhId}")
-    
-    //println(s"setDrawContent pants: ${trny.cophs(coId, coPhId).pants.toString}")
-    val pants = trny.cophs(coId, coPhId).pants.map( _.getInfo(trny.comps(coId).typ))
-    //println(s"setDrawContent pants: ${pants.toString}")
 
-    // first set the start numbers
-    val inputElements = elemBase.querySelectorAll("small[data-drawPos]")
-    for( i <- 0 to inputElements.length-1) {
-      val elem = inputElements.item(i).asInstanceOf[HTMLElement]
-      val pos  = elem.getAttribute("data-drawPos").toInt
-      elem.setAttribute("data-sno", pants(pos-1)._1)
-    }
-    val nameElements = elemBase.querySelectorAll("small[data-drawName]")
-    for( i <- 0 to nameElements.length-1) {
-      val elem = nameElements.item(i).asInstanceOf[HTMLElement]
-      val pos  = elem.getAttribute("data-drawName").toInt
-      elem.innerHTML = pants(pos-1)._2
-    }
-    val clubElements = elemBase.querySelectorAll("small[data-drawClub]")
-    for( i <- 0 to clubElements.length-1) {
-      val elem = clubElements.item(i).asInstanceOf[HTMLElement]
-      val pos  = elem.getAttribute("data-drawClub").toInt
-      elem.innerHTML = pants(pos-1)._3
-    }
+    // generate draw frame
+    trny.cophs(coId, coPhId).coPhTyp match {
+      case CPT_GR => {
 
-    val ttrElements = elemBase.querySelectorAll("small[data-drawTTR]")
-    for( i <- 0 to ttrElements.length-1) {
-      val elem = ttrElements.item(i).asInstanceOf[HTMLElement]
-      val pos  = elem.getAttribute("data-drawTTR").toInt
-      elem.innerHTML = pants(pos-1)._4.toString
-    }
-    // val koRowDown = elemBase.querySelectorAll("td[data-koRowDown]")
-    // for( i <- 0 to koRowDown.length-1) {
-    //   val elem = koRowDown.item(i).asInstanceOf[HTMLElement]
-    //   val pos  = elem.getAttribute("data-koRowDown").toInt
-    //   if (pos % 2 == 1) {
-    //     elem.classList.add("border-top")
-    //     elem.classList.add("border-right")
-    //   } 
-    //   // elem.innerHTML = i.toString
-    //   // elem.nextElementSibling.innerHTML = "x"
-    //   // elem.nextElementSibling.nextElementSibling.innerHTML = "y"
-    // } 
+      }
+      case CPT_KO => {
+
+        // first set the start numbers
+        val inputElements = elemBase.querySelectorAll("small[data-drawPos]")
+        for( i <- 0 to inputElements.length-1) {
+          val elem = inputElements.item(i).asInstanceOf[HTMLElement]
+          val pos  = elem.getAttribute("data-drawPos").toInt
+          elem.setAttribute("data-sno", trny.cophs(coId, coPhId).ko.pants(pos-1).sno)
+        }
+        val nameElements = elemBase.querySelectorAll("small[data-drawName]")
+        for( i <- 0 to nameElements.length-1) {
+          val elem = nameElements.item(i).asInstanceOf[HTMLElement]
+          val pos  = elem.getAttribute("data-drawName").toInt
+          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).name
+        }
+        val clubElements = elemBase.querySelectorAll("small[data-drawClub]")
+        for( i <- 0 to clubElements.length-1) {
+          val elem = clubElements.item(i).asInstanceOf[HTMLElement]
+          val pos  = elem.getAttribute("data-drawClub").toInt
+          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).club
+        }
+
+        val ttrElements = elemBase.querySelectorAll("small[data-drawTTR]")
+        for( i <- 0 to ttrElements.length-1) {
+          val elem = ttrElements.item(i).asInstanceOf[HTMLElement]
+          val pos  = elem.getAttribute("data-drawTTR").toInt
+          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).rating.toString
+        }   
+
+      }
+      case CPT_SW => {}
+      case _      => {}
+    }  
+
   }
 
   // setFrame for a competition, coId != 0 and coPhId != 0
@@ -99,16 +96,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
       // generate draw frame
       coPhTyp match {
-        case CPT_GR  => {
-          // generate group configuration list: (grName: String, grId: Int, grSize: Int, pos: Int)
-          var pos = 1
-          var grpCfg = new ListBuffer[(String,Int,Int,Int)]()
-          for (grp <- trny.cophs((coId, coPhId)).groups) {
-            grpCfg += ((grp.name, grp.grId, grp.size, pos))
-            pos = pos + grp.size 
-          }
-          elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, grpCfg.toList).toString
-        }  
+        case CPT_GR => elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, trny.cophs(coId, coPhId).groups).toString
         case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, coPhId, size).toString
         case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size).toString
         case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))

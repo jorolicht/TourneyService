@@ -26,7 +26,6 @@ import shared.utils.Routines._
 
 import shared.model._
 import shared.utils.Constants._
-import shared.model.tabletennis._
 
 import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
@@ -58,6 +57,11 @@ object AddonMain extends TestUseCase("AddonMain")
 
   // Organize Competition Match tests
   @JSExport def testMatchList(coId: String, coPhId: String) = AddonOrgComp.testMatchList("testMatchList", coId.toLong, coPhId.toInt)
+  @JSExport def testPlayerRun(coId: String, coPhId: String) = AddonOrgComp.testPlayerRun("testPlayerRun", coId.toLong, coPhId.toInt)
+
+
+  // Sidebar tests
+  @JSExport def testShowSubMenu(menu: String)     = AddonSidebar.testShowSubMenu("testShowSubMenu", menu)
 
   // Competition tests
   @JSExport def testCompEncode(toId: String)      = AddonComp.testEncode(toId)

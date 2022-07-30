@@ -1,13 +1,18 @@
-package shared.model.tabletennis
+package shared.model
+
+import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
+
 import shared.utils.Routines._
 import shared.model.MEntryGr
 import shared.model.ParticipantEntry
-import shared.model.tabletennis.utility._
+import shared.model.Utility._
 
+
+case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
 case class GroupEntry(
   var valid:    Boolean, 
@@ -57,14 +62,28 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   var sets       = Array.ofDim[(Int, Int)](size)
   var balls      = Array.ofDim[(Int, Int)](size) 
 
-  def init(pls: Array[ParticipantEntry]): Boolean = {
-    if (pls.length == size) {
-      for (i <- 0 to size-1) pants(i) = pls(i) 
-      true
-    } else {
-      false
-    }
+  // helper info
+  var drawPos       = 0        // start position of group for draw 
+  var fillCnt: Int  = 0 
+  var avgRating:Int = 0
+  var occu: Map[String, Int] = Map[String, Int]().withDefaultValue(0)
+
+  // add participant
+  def addPant(pant: ParticipantEntry, avgPantRating: Int) = {
+    pants(fillCnt) = pant
+    fillCnt = fillCnt +  1
+    if (pant.club != "") occu(pant.club) = occu(pant.club) + 1
+    val (sum, pantCnt) = pants.foldLeft((0,0))((a, e) => if (e.rating == 0) (a._1 + avgPantRating, a._2+1) else (a._1 + e.rating, a._2+1) )
+    avgRating = sum/pantCnt
   }
+
+  def genOccuRating() = {
+    val (sum, pantCnt) = pants.foldLeft((0,0))((a, e) => if (e.rating != 0) (a._1 + e.rating, a._2+1) else (a._1, a._2) )
+    if (pantCnt > 0) avgRating = sum/pantCnt
+    for (pant <- pants) { if (pant.club != "") occu(pant.club) = occu(pant.club) + 1 }
+  }
+
+  def init(pls: List[ParticipantEntry]): Boolean = if (pls.length == size) { pants = pls.toArray; true } else false
 
   override def toString() = {
     val str = new StringBuilder(s"  Group ${name} (Id:${grId}/Size:${size}/Quali:${quali}) WinSets: ${noWinSets}\n")
@@ -90,7 +109,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     for (i <-0 to size-1; j <- i+1 to size-1) {
       grtx.results = grtx.results :+ results(i)(j).toResultEntry((i+1,j+1),(pants(i).sno,pants(j).sno))
     }
-    grtx.pants = pants.toList
+    grtx.pants = pants
     grtx
   }
 
@@ -171,25 +190,16 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
 }
 
 object Group {
-  def getNoRounds(size: Int): Int = {
-    if (size % 2 != 1 ) size - 1 else size
-  } 
+  import scala.collection.mutable.{ ArrayBuffer }
+  import shared.model.CompPhase._
 
-  def getName(grNo: Int, noGroups: Int) = {
-    val grId = grNo-1
-    if      (noGroups <  grNo)   {  s"Gr${grNo}"                     }
-    else if (noGroups <= 26  )   {  abc(grId).toString               } 
-    else if (noGroups <= 52  )   {  s"${abc(grId/2)}${(grId % 2)+1}" }
-    else                         {  s"Gr${grNo}"                     }
-  }
+  def getNoRounds(size: Int) = if (size % 2 != 1 ) size - 1 else size
 
-  def fromTx(grtx: GroupTx) = {
+  def fromTx(grtx: GroupTx, drawPos: Int = 0) = {
     val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
 
-    // add pants
-    for ((plentry, count) <- grtx.pants.zipWithIndex) {
-      if (count < grtx.pants.length) gr.pants(count) = plentry
-    }
+    // set participants
+    gr.pants  = grtx.pants
 
     // add matches
     for (resEntry <- grtx.results) {
@@ -198,9 +208,78 @@ object Group {
         gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
       } 
     }
+
+    gr.drawPos = drawPos
+    gr.genOccuRating
     gr.calc
     gr
   }
+
+  /** genGrpSplit - check whether the numbers of players can be
+   *  configurated with groups of size and size+1
+   */ 
+  def genGrpSplit(noPlayers: Int, size: Int): (Int, Int) = {
+    if (noPlayers < 2*size) (0,0) else {
+      if (noPlayers % (size+1) == 0) {
+        (0, noPlayers/(size+1))
+      } else {
+        if (noPlayers % size == 0) {
+          (noPlayers/size, 0)
+        } else {
+          val x = noPlayers % size
+          (noPlayers/size - x, x)
+        }
+      }
+    }
+  }
+
+
+  /** genGrpConfig - generate configuration array for groups
+   *  (grName: String, grId: Int, grSize: Int, pos: Int)
+   */
+  def genGrpConfig(secTyp: Int, noPlayer: Int): ArrayBuffer[GroupConfig] = {
+    var gList:  ArrayBuffer[(Int,Int)] = new ArrayBuffer()
+    var result: ArrayBuffer[GroupConfig] = new ArrayBuffer()
+
+    secTyp match {
+      case CPC_GRPS3  => { val g3 = noPlayer / 3; gList += ((3, g3)) } 
+      case CPC_GRPS34 => { val (g3, g4) = genGrpSplit(noPlayer, 3); gList += ((4, g4)); gList += ((3, g3)) } 
+      case CPC_GRPS4  => { val g4 = noPlayer / 4; gList += ((4, g4)) }       
+      case CPC_GRPS45 => { val (g4, g5) = genGrpSplit(noPlayer, 4); gList += ((5, g5)); gList += ((4, g4)) }
+      case CPC_GRPS5  => { val g5 = noPlayer / 5; gList += ((5, g5)) }  
+      case CPC_GRPS56 => { val (g5, g6) = genGrpSplit(noPlayer, 5); gList += ((6, g6)); gList += ((5, g5)) }
+      case CPC_GRPS6  => { val g6 = noPlayer / 6; gList += ((6, g6)) }
+    }
+
+    var cnt = 1
+    var pos = 1
+    for (gListEntry <- gList) {
+      for (entry <- 1 to gListEntry._2) {
+        result += (GroupConfig(cnt, genName(cnt), gListEntry._1, (gListEntry._1+1)/2, pos))
+        cnt = cnt + 1
+        pos = pos + gListEntry._1
+      }
+    }
+    result
+  }
+
+
+  // genName - generates a name for a group (like excel column name)
+  def genName(grpId: Int): String = {
+    if (grpId < 1) "?" else {
+      var num    = grpId
+      var name   = ""
+      var modulo = 0
+
+      while (num > 0) {
+        modulo = (num - 1) % 26
+        name = ('A'.toInt + modulo).toChar + name
+        num = (num - modulo) / 26
+      }
+      name
+    }
+  }
+
 }
 
 
@@ -211,8 +290,8 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var pants:     List[ParticipantEntry] = List[ParticipantEntry](),
-  var results:   List[ResultEntry] = List[ResultEntry]()
+  var pants:     Array[ParticipantEntry] = Array[ParticipantEntry](),
+  var results:   Array[ResultEntry]      = Array[ResultEntry]()
 ) 
 
 object GroupTx  {

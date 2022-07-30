@@ -17,7 +17,6 @@ import org.scalajs.dom.raw.HTMLElement
 
 import shared.model._
 import shared.model.CompPhase._
-import shared.model.tabletennis._
 import shared.utils._
 
 import scalajs.usecase.component._

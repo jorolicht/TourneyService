@@ -19,7 +19,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import shared.model._
 import shared.model.CompPhase._
 import shared.utils._
-import shared.model.tabletennis._
 import shared.utils.Constants._ 
 
 import scalajs.usecase.component.BasicHtml._

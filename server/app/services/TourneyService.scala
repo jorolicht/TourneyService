@@ -8,7 +8,6 @@ import play.api.i18n.Messages
 import com.google.inject.ImplementedBy
 
 import shared.model._
-import shared.model.tabletennis._
 import shared.utils._
 import shared.utils.UpdateTrigger
 
@@ -34,21 +33,21 @@ trait TourneyService {
   // Participant Interface (participant could be Single,Double or Team (future) 
   //
   
-  // setParticipant2Comp maps a participant to a competiton returns Participant2Comp
-  def setParticipant2Comp(p2c: Participant2Comp)(implicit tse :TournSVCEnv):Future[Either[Error, Participant2Comp]]
-  // setParticipant2Comps maps all participants to a competiton returns number of mapped entries
-  def setParticipant2Comps(p2cs: Seq[Participant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  // setPant2Comp maps a participant to a competiton returns Pant2Comp
+  def setPant2Comp(p2c: Pant2Comp)(implicit tse :TournSVCEnv):Future[Either[Error, Pant2Comp]]
+  // setPant2Comps maps all participants to a competiton returns number of mapped entries
+  def setPant2Comps(p2cs: Seq[Pant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
-  // delParticipant2Comp deletes entry, returns number of deleted entries (0 or 1)
-  def delParticipant2Comp(coId: Long, sno: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
+  // delPant2Comp deletes entry, returns number of deleted entries (0 or 1)
+  def delPant2Comp(coId: Long, sno: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
 
-  // delParticipant2Comps delete all participants of given competition id, if coId=0 deletes all participants from all competition
-  def delParticipant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def getParticipant2Comps(toId: Long): Future[Either[Error, Seq[Participant2Comp]]]
+  // delPant2Comps delete all participants of given competition id, if coId=0 deletes all participants from all competition
+  def delPant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  def getPant2Comps(toId: Long): Future[Either[Error, Seq[Pant2Comp]]]
 
-  def getParticipantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
-  def setParticipantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
-  def setParticipantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  def getPantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
+  def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
+  def setPantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   //

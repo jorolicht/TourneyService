@@ -38,7 +38,7 @@ import scalajs.usecase.dialog._
 // ***
 @JSExportTopLevel("OrganizeCompetition")
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
-  with TourneySvc with ViewServices
+  with TourneySvc with ViewServices with AppHelperSvc
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
@@ -73,7 +73,9 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CP_INIT)) 
         case CT_DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(coId), comp.status <= CP_INIT)) 
         case _         => error("update", s"competition typ not yet supported") 
-      }   
+      }
+      collapse("CompCard", false)
+      //showSBMenu("OrganizeCompetition")
     } else {
       setDisabled("BtnStartCompetition", true)
       setHtml("ParticipantCard", s"""
@@ -96,6 +98,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       // 
       case "StartCompetition"   => {
         // set coId if a new is available
+        val coPhIdPrev = 0 
         var coId = getData(elem, "coId", 0L)
         if (coId != 0) AppEnv.setCoId(coId) else coId = AppEnv.getCoId
 
@@ -108,16 +111,27 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", status, true) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
 
-        DlgCardCfgSection.show(coId, 0, pants)(Trny) map {
-          case Left(err)           => debug("DlgCardCfgSection", s"show => cancel: ${err}")
-          case Right((cfg, pants)) => {
+        DlgCardCfgCompPhase.show(coId, coPhIdPrev, pants)(Trny) map {
+          case Left(err)           => debug("DlgCardCfgCompPhase", s"show => cancel: ${err}")
+          case Right(result) => {
+            //debug("DlgCardCfgCompPhase", s"Result: ${result}")
+
             // update ALL entries, only entries with PLS_REDY or PLS_SIGN should be affected
-            val pantStatus = pants.map { p => (p.sno.value, if (p.checked) Constants.PLS_REDY else Constants.PLS_SIGN) }
+            val pantStatus = result.pants.map { p => (p.sno.value, if (p.checked) Constants.PLS_REDY else Constants.PLS_SIGN) }
             //for (pant <- pants) Trny.pl2co((pant.sno.value, coId)).status = if (pEntry.checked) PLS_REDY else PLS_SIGN
             setPantBulkStatus(coId, pantStatus.toList).map {
               case Left(err)   => error("setPantBulkStatus", s"${err}")
               case Right(res)  => {
-                for (pant <- pantStatus) Trny.pl2co((pant._1, coId)).status = pant._2
+                println(s"Competition Phase Configuration: ${CompPhase.config2Name(result.config)}")
+                
+                App.tourney.addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets, result.pants.map(_.sno)) match {
+                  case Left(err)     => error("addCompPhase", s"${err}")
+                  case Right(coPhId) => {
+                    AppEnv.coPhIdMap(coId) = coPhId
+                    OrganizeCompetitionTab.render("Draw")
+                  }
+                }
+
                 
               }  
             }
@@ -125,25 +139,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         }        
 
         //debug("StartCompetition", s"todo start competition")
-      }  
-
-  val PLS_SIGN =  0  // signup confirmed
-  val PLS_REDY =  1  // participation confirmed      
-
-    // val sno:       String,         // mapping of player identifier to start numbers = sno1 <MD> sno2 <MD> ...
-    //                                // player/double or team gets a participant of the competition
-    //                                // participants are identified by start numbers (sno) 
-    // val coId:      Long, 
-    // var ident:     String,
-    // var placement: String,         // format <position> or <fromPosition>.<toPosition>
-    // var status:    Int,            // -1 = pending signup acknowledge
-    //                                //  0 = register/signup
-    //                                //  1 = participate
-    //                                //  2 = currently playing
-    //                                //  3 = finished
-    //  var options:   String = "_"            
-
-
+      }
 
       case "AddCompetition"     => {    
         AppEnv.setCoId(0L)
@@ -240,19 +236,15 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         val coId = AppEnv.getCoId
         val sno  = getData(elem, "sno", "")
         val status = if (elem.asInstanceOf[dom.raw.HTMLInputElement].checked) 1 else 0 
-        setParticipantStatus(coId, sno, status).map { 
+        setPantStatus(coId, sno, status).map { 
           case Left(err)  => DlgShowError.show(List(err)) 
-          case Right(res) => App.tourney.setParticipantStatus(coId, sno, status) match {
-            case Left(err)  => error("setParticipantStatus", "action CheckParticipant, couldn't set participant status")
-            case Right(res) => {
-              // set statistic/numbers
-              val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
-              val (total, activ) = (p2c.length, p2c.filter(_.status > PLS_SIGN).length )
-              App.saveLocalTourney(App.tourney)
-              setHtml(s"Count_${coId}", s"${total}/${activ}") 
-            }
+          case Right(res) => {
+            // set statistic/numbers
+            val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
+            val (total, activ) = (p2c.length, p2c.filter(_.status > PLS_SIGN).length )
+            setHtml(s"Count_${coId}", s"${total}/${activ}")           
           }
-        }  
+        }
       }
 
       case "DeleteParticipant"      => { 
@@ -270,7 +262,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             case _         => error("update", s"competition typ not yet supported"); Future(false)
           }
           confirm.map { _ match {
-            case true  =>  delParticipant2Comp(coId, sno).map { 
+            case true  =>  delPant2Comp(coId, sno).map { 
               case Left(err)  => DlgShowError.show(List(err)) 
               case Right(res) => {
                 if ( App.tourney.pl2co.isDefinedAt((sno, coId)) ) App.tourney.pl2co -= ((sno,coId))
@@ -334,7 +326,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
     DlgCardRegDouble.show(coId, tourney, lang).map {
       case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
       case Right((plId1, plId2, status)) => {
-        setParticipant2Comp(Participant2Comp.double(plId1, plId2, coId, status)) map {
+        setPant2Comp(Pant2Comp.double(plId1, plId2, coId, status)) map {
           case Left(err)  => DlgShowError.show(List(err))
           case Right(p2c) => {
             info("RegDouble", s"success: ${p2c}")

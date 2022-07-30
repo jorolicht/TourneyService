@@ -17,6 +17,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 //import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
 import scala.concurrent._
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -30,7 +31,6 @@ import shared.model._
 import shared.model.CompPhase._
 import shared.model.Competition._
 import shared.utils.Constants._
-import shared.model.tabletennis._
 
 import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
@@ -175,6 +175,18 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
 
     SUCCESS(tnp)
   }  
+
+  def testPlayerRun(name: String, coId: Long, coPhId: Int) = {
+    val tnp = TNP(name, s"coId: ${coId} coPhId: ${coPhId}")
+    START(tnp)
+
+    val trny = App.tourney
+
+    println(s"${MEntry.playing.toString}")
+    
+    SUCCESS(tnp)
+  }  
+
 
 } 
 

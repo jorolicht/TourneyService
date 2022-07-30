@@ -56,8 +56,9 @@ object App extends BasicHtml
 
   val ucMap  = new scala.collection.mutable.HashMap[String, UseCase]
   
-  var tourney      = Tourney.init
-  
+  var tourney       = Tourney.init
+  var tourneyUpdate = false
+
   /** main - entry point of application
    *
    * @param name       - encodes action
@@ -91,6 +92,12 @@ object App extends BasicHtml
       AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
       cookieAllowed & msgsLoaded
     }  
+
+    // regularly update database
+    dom.window.setInterval(() => {
+      //println(s"Update Database: ${App.tourneyUpdate}") 
+      if (tourneyUpdate) { tourneyUpdate= true; saveLocalTourney(tourney) }
+    }, 10000)
 
     
     val result = initOk.map { _ match {
@@ -249,7 +256,7 @@ object App extends BasicHtml
             case "Competition"      => for { x <- updateCompetition(toId)      } yield updViews(updt) 
             case "Club"             => for { x <- updateClub(toId)             } yield updViews(updt) 
             case "Player"           => for { x <- updatePlayer(toId)           } yield updViews(updt) 
-            case "Participant2Comp" => for { x <- updateParticipant2Comp(toId) } yield updViews(updt) 
+            case "Pant2Comp" => for { x <- updatePant2Comp(toId) } yield updViews(updt) 
             case "Playfield"        => for { x <- updatePlayfield(toId)        } yield updViews(updt) 
             case "MatchKo"          => for { x <- updatePlayfield(toId); y <- updateMatchKo(toId, coId, coPh) } yield updViews(updt)
             case "MatchGr"          => for { x <- updatePlayfield(toId); y <- updateMatchGr(toId, coId, coPh, grId) } yield updViews(updt)
@@ -315,10 +322,10 @@ object App extends BasicHtml
     }
   }    
       
-  def updateParticipant2Comp(toId: Long): Future[Boolean] = {
-    //debug("updateParticipant2Comp", s"${toId}")
-    getParticipant2Comps(toId).map {
-      case Left(err)     => error("updateParticipant2Comp", getError(err)); false
+  def updatePant2Comp(toId: Long): Future[Boolean] = {
+    //debug("updatePant2Comp", s"${toId}")
+    getPant2Comps(toId).map {
+      case Left(err)     => error("updatePant2Comp", getError(err)); false
       case Right(p2cSeq) => { 
         tourney.pl2co   = collection.mutable.HashMap( p2cSeq.map { p2c => (p2c.sno, p2c.coId) -> p2c } :_*)
         saveLocalTourney(tourney)

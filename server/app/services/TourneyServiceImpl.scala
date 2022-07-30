@@ -18,7 +18,6 @@ import shared.utils.Constants._
 import shared.utils.Routines._
 
 import shared.utils.UpdateTrigger
-import shared.model.tabletennis._
 import shared.utils._
 import models.daos.TourneyDAO
 
@@ -128,10 +127,10 @@ class TourneyServiceImpl @Inject()()(  implicit
   // Participant Routines
   //  
 
-  /** setParticipant2Comp - maps a participant to a competiton returns Participant2Comp
+  /** setPant2Comp - maps a participant to a competiton returns Pant2Comp
    *                        overwrites existing entry 
    */ 
-  def setParticipant2Comp(p2c: Participant2Comp)(implicit tse :TournSVCEnv): Future[Either[Error, Participant2Comp]] =
+  def setPant2Comp(p2c: Pant2Comp)(implicit tse :TournSVCEnv): Future[Either[Error, Pant2Comp]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
@@ -140,10 +139,10 @@ class TourneyServiceImpl @Inject()()(  implicit
       }
     }      
 
-  /** setParticipant2Comps - maps all participants to a competiton returns Participant2Comp
+  /** setPant2Comps - maps all participants to a competiton returns Pant2Comp
    *                         overwrites all existing entry 
    */
-  def setParticipant2Comps(p2cs: Seq[Participant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
+  def setPant2Comps(p2cs: Seq[Pant2Comp])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
@@ -154,20 +153,20 @@ class TourneyServiceImpl @Inject()()(  implicit
     }     
 
 
-  /** delParticipant2Comp - delete participant from a competiton returns number of deleted entries
+  /** delPant2Comp - delete participant from a competiton returns number of deleted entries
    *               
    */
-  def delParticipant2Comp(coId: Long, sno: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
+  def delPant2Comp(coId: Long, sno: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => if ( trny.pl2co.isDefinedAt((sno, coId)) ) { trny.pl2co -= ((sno,coId)); Right(1) } else Right(0)
     }
 
   
-  /** delParticipant2Comps - del all participants from a competiton returns number of deleted entries
-   *                         if coId=0 all entries will be deleted 
+  /** delPant2Comps - del all participants from a competiton returns number of deleted entries
+   *                  if coId=0 all entries will be deleted 
    */
-  def delParticipant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
+  def delPant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
@@ -177,14 +176,14 @@ class TourneyServiceImpl @Inject()()(  implicit
       }
     }   
 
-  // getParticipant2Comps - returns all participants mapped to a competition
-  def getParticipant2Comps(toId: Long): Future[Either[Error, Seq[Participant2Comp]]] = 
+  // getPant2Comps - returns all participants mapped to a competition
+  def getPant2Comps(toId: Long): Future[Either[Error, Seq[Pant2Comp]]] = 
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => Right(trny.pl2co.values.toSeq)
     }
 
-  def getParticipantPlace(toId: Long, coId: Long, sno: String) : Future[Either[Error, String]] =
+  def getPantPlace(toId: Long, coId: Long, sno: String) : Future[Either[Error, String]] =
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
@@ -197,7 +196,7 @@ class TourneyServiceImpl @Inject()()(  implicit
     }
 
 
-  def setParticipantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv) : Future[Either[Error, Placement]] = 
+  def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv) : Future[Either[Error, Placement]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
@@ -211,20 +210,17 @@ class TourneyServiceImpl @Inject()()(  implicit
     }    
 
 
-  def setParticipantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
+  def setPantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => trny.setParticipantStatus(coId, sno, status)
+      case Right(trny)  => trny.setPantStatus(coId, sno, status)
     }  
 
 
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => {
-        for (p <- pantStatus) trny.setParticipantStatus(coId, p._1, p._2)
-        Right(pantStatus.filter(_._2>=PLS_REDY).length)
-      }  
+      case Right(trny)  => trny.setPantBulkStatus(coId, pantStatus)
     }  
 
 

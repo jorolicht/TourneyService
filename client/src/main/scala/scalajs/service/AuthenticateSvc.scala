@@ -17,7 +17,6 @@ import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 import upickle.default._
 
-import shared.model.tabletennis.ResultEntry
 import shared.utils._
 import shared.model._
 import scalajs.usecase.Helper

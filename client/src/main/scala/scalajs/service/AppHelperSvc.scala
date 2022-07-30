@@ -120,4 +120,21 @@ trait AppHelperSvc {
     ()
   }
 
+
+  def showSBMenu(name: String) = {
+    val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]
+    liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement].classList.remove("collapsed")
+
+    document.getElementById(s"APP__Sidebar__${name}").classList.add("show")
+  }
+
+  def hideSBMenu(name: String) = {
+    val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]
+    liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement].classList.add("collapsed")
+
+    document.getElementById(s"APP__Sidebar__${name}").classList.remove("show")
+  }
+
+
+
 }  

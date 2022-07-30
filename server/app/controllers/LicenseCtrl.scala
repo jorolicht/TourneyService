@@ -30,7 +30,6 @@ import play.api.i18n._
 import models.daos.{ TourneyDAO, LicenseDAO }
 import models.User
 import shared.model._
-import shared.model.tabletennis._
 import shared.utils.Routines._
 import shared.utils.{ Error, Return }
 import tourn.services._

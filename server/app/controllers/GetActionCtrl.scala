@@ -29,7 +29,6 @@ import play.api.i18n._
 import models.daos.{ TourneyDAO, LicenseDAO }
 import models.User
 import shared.model._
-import shared.model.tabletennis._
 import shared.utils._
 import tourn.services._
 
@@ -182,15 +181,15 @@ class GetActionCtrl @Inject()
       }
 
 
-      // getParticipant2Comps - returns mapping list of participants to competition
-      case "getParticipant2Comps"   => tsv.getParticipant2Comps(toId).map {
-        case Left(err)   => BadRequest(err.add("getParticipant2Comps").encode)
-        case Right(p2cs) => Ok(write[Seq[Participant2Comp]](p2cs))
+      // getPant2Comps - returns mapping list of participants to competition
+      case "getPant2Comps"   => tsv.getPant2Comps(toId).map {
+        case Left(err)   => BadRequest(err.add("getPant2Comps").encode)
+        case Right(p2cs) => Ok(write[Seq[Pant2Comp]](p2cs))
       }
 
-      // getParticipantPlace delivers placement string or error
-      case "getParticipantPlace" => tsv.getParticipantPlace(toId, Crypto.getParam(pMap, "coId", -1L), Crypto.getParam(pMap, "sno")).map {
-        case Left(err)     => BadRequest(err.add("getParticipantPlace").encode)
+      // getPantPlace delivers placement string or error
+      case "getPantPlace" => tsv.getPantPlace(toId, Crypto.getParam(pMap, "coId", -1L), Crypto.getParam(pMap, "sno")).map {
+        case Left(err)     => BadRequest(err.add("getPantPlace").encode)
         case Right(result) => Ok(result)
       } 
 
