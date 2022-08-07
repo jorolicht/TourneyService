@@ -108,7 +108,11 @@ case class ParticipantEntry(
   var place:     (Int,Int),      // position after finishing the round (group or ko)
   var occu:      Int = 0,
   var effRating: Int = 0        
-)  
+)  {
+  def getRating = {
+    if (rating == 0) "" else rating.toString
+  }
+}
 
 
 object ParticipantEntry {

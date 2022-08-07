@@ -44,7 +44,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   with TourneySvc with DrawSvc with MatchSvc
 {
 
-  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+  def render(param: String = "", ucInfo: String = "", update: Boolean=false) = {
     OrganizeCompetitionTab.render("Input")
   }
 
@@ -200,9 +200,9 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //  COMMON-SECTION
   //
   // setInputFrame for a competition, coId != 0
-  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
+  def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
     //debug("setFrame", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists(s"Input_${coId}_${coPhId}") | reload) {
+    if (!exists(s"Input_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val size    = trny.cophs(coId, coPhId).size
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
@@ -228,11 +228,12 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         case CPT_SW => setHtml(elem, "input for sw-system")
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
+      update(coId, coPhId)
     }
   }
 
 
-  def setContent(coId: Long, coPhId: Int) (implicit trny: Tourney) = {
+  def update(coId: Long, coPhId: Int) (implicit trny: Tourney) = {
     trny.cophs(coId, coPhId).coPhTyp match {
       case CPT_GR => {
         val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)

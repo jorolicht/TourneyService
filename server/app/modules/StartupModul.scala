@@ -34,8 +34,8 @@ class StartupRoutine @Inject()(
 ) extends Logging {
   
   implicit val cfg = config
-  implicit val gpeFormat    = Json.format[GameEntry]
-  implicit val gpFormat     = Json.format[GamePlanEntry]
+  // implicit val gpeFormat    = Json.format[GameEntry]
+  // implicit val gpFormat     = Json.format[GamePlanEntry]
 
   // def getConfig(config: Configuration, entry: String, default:String="") = {
   //   if (config.has(entry)) config.get[String](entry) else default
@@ -68,8 +68,8 @@ class StartupRoutine @Inject()(
     logger.info(s"Startup cloud instance -> date:$date home:${homeDir} accessCtrl:${Crypto.accessCtrl}")
   }
 
-  val source: String = Source.fromFile(s"${env.rootPath}/conf/GamePlan.json").getLines().mkString
-  GamePlan.init(Json.parse(source).as[List[GamePlanEntry]])
+  // val source: String = Source.fromFile(s"${env.rootPath}/conf/GamePlan.json").getLines().mkString
+  // GamePlan.init(Json.parse(source).as[List[GamePlanEntry]])
 }
 
 

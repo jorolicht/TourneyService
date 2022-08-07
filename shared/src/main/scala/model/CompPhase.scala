@@ -16,75 +16,73 @@ import shared.utils.Routines._
  *  number of players always less or equal size
  */
 
-case class CompPhase(val name: String, val coId: Long, val coPh: Int, 
-                     val coPhId: Int,  val coPhTyp: Int,
-                     val status: Int,  var enabled: Boolean, 
-                     var size: Int,    var noPlayers: Int, noWinSets: Int = 3) {
+case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPhCfg: Int, val coPhTyp: Int,     
+                     val status: Int, var enabled: Boolean, var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
   import CompPhase._
   
-  var pants        = ArrayBuffer[SNO]()        // participant list (start numbers)
   var matches      = ArrayBuffer[MEntry]()
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
 
   def encode = write[CompPhaseTx](toTx())
 
-  // distribute player to the groups (no,size,quali)
-  def init(pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig] = List()): Boolean = {
-    coPhTyp match { 
-      case CPT_GR => {
-        // generate groups
+  // // distribute player to the groups (no,size,quali)
+  // def init(pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig] = List()): Boolean = {
+  //   coPhTyp match { 
+  //     case CPT_GR => {
+  //       initGrDraw(this, pants, grpCfg, noWinSets)
+  //       // // generate groups
         
-        for (gEntry <- grpCfg) { groups = groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
-        val noGroups = groups.size
+  //       // for (gEntry <- grpCfg) { groups = groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
+  //       // val noGroups = groups.size
 
-        // init groups with pants 
-        val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
-        val avgPantRating = sum/cnt
+  //       // // init groups with pants 
+  //       // val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
+  //       // val avgPantRating = sum/cnt
 
-        // Step 0 - init effective rating
-        for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
+  //       // // Step 0 - init effective rating
+  //       // for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
 
-        // Step 1  - init club name occurence in pants
-        val clubOccuMap = HashMap[String, Int]().withDefaultValue(0) 
-        pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
-        for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
+  //       // // Step 1  - init club name occurence in pants
+  //       // val clubOccuMap = HashMap[String, Int]().withDefaultValue(0) 
+  //       // pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
+  //       // for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
 
-        // Step 2 - position the best players, one in each group  (take given rating)
-        val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
-        for (i <- 0 until pantsS1.size) {  groups(i).addPant(pantsS1(i), avgPantRating) }
+  //       // // Step 2 - position the best players, one in each group  (take given rating)
+  //       // val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
+  //       // for (i <- 0 until pantsS1.size) {  groups(i).addPant(pantsS1(i), avgPantRating) }
 
-        // Step 3 - position players with highest occurence and ascending rating
-        //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
-        //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
-        val pantsS3 = pantsS2.sortBy(_.rating)
+  //       // // Step 3 - position players with highest occurence and ascending rating
+  //       // //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
+  //       // //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
+  //       // val pantsS3 = pantsS2.sortBy(_.rating)
 
-        for (i <- 0 until pantsS3.size) {
-          val ratings = getMinOccBestAvg(pantsS3(i), groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
-          // get index of biggest element
-          val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
-          groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
-        }
+  //       // for (i <- 0 until pantsS3.size) {
+  //       //   val ratings = getMinOccBestAvg(pantsS3(i), groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
+  //       //   // get index of biggest element
+  //       //   val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
+  //       //   groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
+  //       // }
 
-        // Step 3: sort group according to pant rating
-        for (i <- 0 until noGroups) { groups(i).pants.sortInPlaceBy(x => - x.rating) } 
-        val lastPos = groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
-        // for (i <- 0 until noGroups) { 
-        //   for (j <- 0 until groups(i).size) {
-        //     println(s"${groups(i).name} ${groups(i).pants(j).name}  ${groups(i).pants(j).rating}") 
-        //   }  
-        // }
+  //       // // Step 3: sort group according to pant rating
+  //       // for (i <- 0 until noGroups) { groups(i).pants.sortInPlaceBy(x => - x.rating) } 
+  //       // val lastPos = groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
+  //       // // for (i <- 0 until noGroups) { 
+  //       // //   for (j <- 0 until groups(i).size) {
+  //       // //     println(s"${groups(i).name} ${groups(i).pants(j).name}  ${groups(i).pants(j).rating}") 
+  //       // //   }  
+  //       // // }
 
-        true
-      }  
-      case CPT_KO => {
-        ko = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)
-        ko.init(pants.toArray)
-        true
-      }  
-      case _      => false
-    }
-  }  
+  //       true
+  //     }  
+  //     case CPT_KO => {
+  //       ko = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)
+  //       ko.init(pants.toArray)
+  //       true
+  //     }  
+  //     case _      => false
+  //   }
+  // }  
 
   def getMaxRnds(): Int = {
     coPhTyp match {
@@ -308,24 +306,7 @@ def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize:
 
   // print readable competition phase - for debug purposes
   override def toString() = {
-    def grPhName(coPh: Int) = {
-      coPh match {
-        case CP_INIT => "READY"        
-        case CP_VRGR => "GRUPPEN-VORRUNDE"
-        case CP_ZRGR => "GRUPPEN-ZWISCHENRUNDE"
-        case CP_ERGR => "GRUPPEN-ENDRUNDE"
-        case CP_TRGR => "GRUPPEN-TROSTRUNDE"
-        case CP_ERKO => "KO-ENDRUNDE"
-        case CP_TRKO => "KO-TROSTRUNDE"
-        case _       => "UNKNOWN"
-      }
-    }
 
-    def pants2Str() = {
-      val str = new StringBuilder("-- PARTICIPANTS\n")
-      for { p <- pants }  yield { str ++= s"${p.value}:" } 
-      str.toString
-    }
     def matches2Str() = {
       val str = new StringBuilder("-- MATCHES\n")
       for { m <- matches }  yield { 
@@ -334,8 +315,7 @@ def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize:
       str.toString
     }
 
-    val str   = new StringBuilder(s"${name} (coId:${coId}) ${grPhName(coPh)}(${coPh}) Typ:${coPhTyp}\n")
-    str.append(s"${pants2Str()}\n")   
+    val str = new StringBuilder(s"${name} (coId:${coId}) coPhId: ${coPhId} coPhCfg: ${CompPhase.cfg2Name(coPhCfg)} typ:${coPhTyp}\n")
     str.append(s"${matches2Str()}\n") 
 
     coPhTyp match {
@@ -346,12 +326,10 @@ def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize:
     str.toString
   }  
 
-
   def toTx(): CompPhaseTx = {
-    CompPhaseTx(name, coId, coPh, coPhId, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
-                pants.map(x=>x.value), matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
+    CompPhaseTx(name, coId, coPhId, coPhCfg, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
+                matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
   }
-
 }
 
 
@@ -361,20 +339,6 @@ object CompPhase {
   val Category_Winner = 1
   val Category_Looser = 2
 
-  // Competition Phase
-  val CP_UNKN = -99
-  val CP_INIT =   0
-  val CP_VRGR =   1
-  val CP_ZRGR =   2
-  val CP_ERGR =   3
-  val CP_TRGR =   4
-  val CP_ERBO =   3     // Endrunde: KO oder Gruppe
-  val CP_TRBO =   4     // Trostrunde: KO oder Gruppe
-  val CP_LEER =   5     // LEER
-  val CP_VRKO =   6     // not yet available
-  val CP_ZRKO =   7     // not yet available
-  val CP_ERKO =   8     // only final KO round
-  val CP_TRKO =   9     // nur Trostrunde KO
 
   // Competition Phase Type
   val CPT_UNKN = 0
@@ -382,9 +346,20 @@ object CompPhase {
   val CPT_KO   = 2  // KO Phase
   val CPT_SW   = 3  // Switzsystem
 
-  // Competition Phase Config 
-  val CPC_UNKN     = -99
-  val CPC_UDEF     =   0
+  // Competition Phase Config (from 0 to 9 old values for compatibility)
+  val CPC_UNKN     = -99  
+  val CPC_INIT     =   0
+  val CPC_VRGR     =   1
+  val CPC_ZRGR     =   2
+  val CPC_ERGR     =   3
+  val CPC_TRGR     =   4
+  val CPC_ERBO     =   3   // Endrunde: KO oder Gruppe
+  val CPC_TRBO     =   4   // Trostrunde: KO oder Gruppe
+  val CPC_LEER     =   5   // LEER
+  val CPC_VRKO     =   6   // not yet available
+  val CPC_ZRKO     =   7   // not yet available
+  val CPC_ERKO     =   8   // only final KO round
+  val CPC_TRKO     =   9   // nur Trostrunde KO
   val CPC_GR3to9   = 100   // beliebige Gruppen-Spielphase 3-9er Gruppen
   val CPC_GRPS3    = 101   // Gruppensystem mit 3er
   val CPC_GRPS34   = 102   // Gruppensystem mit 3er und 4er
@@ -409,7 +384,7 @@ object CompPhase {
     str => fromTx(read[CompPhaseTx](str))
   )
 
-  def get(coId: Long, prevId: Int, config: Int, category: Int, name: String, noWinSets: Int, pants: ArrayBuffer[SNO]): Either[Error, CompPhase] = {  
+  def get(coId: Long, prevId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayers: Int): Either[Error, CompPhase] = {  
     // generate new coPhId
     val coPhId = category match {
       case CompPhase.Category_Start  => if (prevId == 0) 1 else 0
@@ -420,15 +395,14 @@ object CompPhase {
     if (coPhId == 0) {
       Left(Error("???"))
     } else {
-      val coTyp  = CompPhase.config2typ(config)
-      val coSize = coTyp match {
-        case CPT_GR => pants.size
-        case CPT_KO => genKOSize(pants.size)
-        case CPT_SW => pants.size  + pants.size%2
+      val coPhTyp  = CompPhase.cfg2typ(coPhCfg)
+      val coSize   = coPhTyp match {
+        case CPT_GR => noPlayers
+        case CPT_KO => genKOSize(noPlayers)
+        case CPT_SW => noPlayers  + noPlayers%2
         case _      => 0
       }
-     val coph = CompPhase(name, coId, CP_UNKN, coPhId, CompPhase.config2typ(config), CPS_CFG, true, coSize, pants.size, noWinSets )
-     coph.pants = pants
+     val coph = CompPhase(name, coId, coPhId, coPhCfg, coPhTyp, CPS_CFG, true, coSize, noPlayers, noWinSets )
      Right(coph)
     }
   }
@@ -443,21 +417,12 @@ object CompPhase {
     import scala.collection.mutable.HashSet
     import shared.model.Competition._
 
-    val cop = new CompPhase(tx.name, tx.coId, tx.coPh, tx.coPhId, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
-    cop.pants   = tx.pants.map(x=>SNO(x))
+    val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, tx.coPhCfg, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.matches = tx.matches.map(x=>x.decode)
 
     cop.coPhTyp match {
       case CPT_GR  => {
         // setup group with draw position information
-
-        // var grpPos = 1
-        // for (g <- tx.groups) { 
-        //   cop.groups = cop.groups :+ Group.fromTx(g)
-        //   cop.groups(cop.groups.size-1).drawPos = grpPos
-        //   cop.groups(cop.groups.size-1).genOccuRating
-        //   grpPos = grpPos + cop.groups(cop.groups.size-1).size 
-        // }
         
         val lastPos = tx.groups.foldLeft(1){ (pos, g) =>
           cop.groups = cop.groups :+ Group.fromTx(g, pos)
@@ -469,7 +434,7 @@ object CompPhase {
           // calculate depend and trigger
           val depMap = Map[Long, ListBuffer[Int]]()
           // init map with default value
-          for (p <- cop.pants) if (SNO.valid(p.value)) { depMap(SNO.plId(p.value)) = ListBuffer() }
+          cop.groups.foreach { g => g.pants.foreach { p => if (SNO.valid(p.sno)) { depMap(SNO.plId(p.sno)) = ListBuffer() } } }
 
           // setup list player -> games
           for (m <- cop.matches) {
@@ -522,9 +487,21 @@ object CompPhase {
     cop
   }
 
-  def config2Name(x: Int): String = {
+  def cfg2Name(x: Int): String = {
     x match {
       case CPC_UNKN     => "unknown"
+      case CPC_INIT     => "READY"
+      case CPC_VRGR     => "Gruppen-Vorrunde"
+      case CPC_ZRGR     => "Gruppen-Zwischenrunde"
+      case CPC_ERGR     => "Gruppen-Endrunde"
+      case CPC_TRGR     => "Gruppen-Trostrunde"
+      case CPC_ERBO     => "Endrunde"
+      case CPC_TRBO     => "Trostdunde"
+      case CPC_LEER     => "Leer-Runde"
+      case CPC_VRKO     => "KO-Vorrunde"
+      case CPC_ZRKO     => "KO-Zwischenrunde"
+      case CPC_ERKO     => "KO-Endrunde"
+      case CPC_TRKO     => "KO-Trostrunde"
       case CPC_GR3to9   => "Gruppenspiele"
       case CPC_KO       => "KO-Runde"
       case CPC_JGJ      => "Jeder-gegen-Jeden"
@@ -540,8 +517,20 @@ object CompPhase {
     }
   }
 
-  def config2typ(x:Int): Int = {
+  def cfg2typ(x:Int): Int = {
     x match {
+      case CPC_INIT     => CPT_UNKN 
+      case CPC_VRGR     => CPT_GR
+      case CPC_ZRGR     => CPT_GR
+      case CPC_ERGR     => CPT_GR
+      case CPC_TRGR     => CPT_GR
+      case CPC_ERBO     => CPT_UNKN
+      case CPC_TRBO     => CPT_UNKN
+      case CPC_LEER     => CPT_UNKN
+      case CPC_VRKO     => CPT_KO
+      case CPC_ZRKO     => CPT_KO
+      case CPC_ERKO     => CPT_KO
+      case CPC_TRKO     => CPT_KO
       case CPC_UNKN     => CPT_UNKN
       case CPC_GR3to9   => CPT_GR
       case CPC_KO       => CPT_KO
@@ -565,15 +554,14 @@ object CompPhase {
 case class CompPhaseTx(
   val name:      String, 
   val coId:      Long, 
-  val coPh:      Int, 
-  val coPhId:    Int, 
+  val coPhId:    Int,
+  val coPhCfg:   Int, 
   val coPhTyp:   Int,
   val status:    Int,
   var enabled:   Boolean, 
   var size:      Int, 
   val noPlayers: Int,
   val noWinSets: Int,
-  val pants:     ArrayBuffer[String],
   val matches:   ArrayBuffer[MEntryTx], 
   val groups:    ArrayBuffer[GroupTx],
   val ko:        KoRoundTx

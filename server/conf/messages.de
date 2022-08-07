@@ -549,6 +549,10 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.draw.table.club                  = Verein
   organize.competition.draw.table.ttr                   = TTR
 
+  organize.competition.draw.change.hdr                  = Eingabefehler für Neupositionierung
+  organize.competition.draw.change.msg                  = Für die Position {0} ist der Werte nicht korrekt
+  organize.competition.draw.changes.msg                 = Für die Positionen [{0}] sind die Werte nicht korrekt
+  
   organize.competition.draw.noSelection                 = Kein Wettbewerb ausgewählt.
   organize.competition.draw.noSection                   = Kein Spielabschnitt definiert.
   organize.competition.draw.invalidSection              = Konfiguration für Spielabschnitt z.Z. nicht unterstützt.

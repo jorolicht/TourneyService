@@ -336,6 +336,7 @@ class BasicHtml
     try { elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default)}
     catch { case _: Throwable => Helper.error("getData", s"${name} as Int"); default }
   }
+  
 
   def getData(elem: HTMLElement, name: String, default: Long): Long = {
     try { elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default)}
@@ -350,6 +351,11 @@ class BasicHtml
   def setData[A](id: String, attr: String, value: A)(implicit ucp: UseCaseParam) = {
     try document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
     catch { case _: Throwable => Helper.error("setData", s"id: ${ucp.idBase}__${id} attribute: ${attr} value: ${value}") }
+  }
+
+  def setData[A](elem: HTMLElement, attr: String, value: A) = {
+    try elem.setAttribute(s"data-${attr}", value.toString)
+    catch { case _: Throwable => Helper.error("setData", s"attribute: ${attr} value: ${value}") }
   }
 
   /**

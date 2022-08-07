@@ -32,14 +32,14 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
   with TourneySvc
 {
 
-  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+  def render(param: String = "", ucInfo: String = "", update: Boolean=false) = {
     OrganizeCompetitionTab.render("View")
   }
 
   // setFrame for a competition, coId != 0 and coPhId != 0
-  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
-    debug("setFrame", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists(s"View_${coId}_${coPhId}") | reload) {
+  def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
+    debug("init", s"coId: ${coId} coPhId: ${coPhId}")
+    if (!exists(s"View_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
       val coPhase = trny.cophs(coId, coPhId)
@@ -49,12 +49,13 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
         case CPT_SW => setHtml(elem, "input for switz-system")
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
+      update(coId, coPhId)
     }
   }
 
   // set content for competition phase for competition
-  def setContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
-    debug("setContent", s"coId: ${coId} coPhId: ${coPhId}")
+  def update(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
+    debug("update", s"coId: ${coId} coPhId: ${coPhId}")
     trny.cophs(coId, coPhId).coPhTyp match {
       case CPT_KO => showKoResult(coId, coPhId, trny.cophs(coId, coPhId).ko)      
       case CPT_GR => for (grp <- trny.cophs(coId, coPhId).groups ) showGrResult(coId, coPhId, grp)
@@ -119,10 +120,4 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
       setHtml_(s"APP__GrRound_${coId}_${coPhId}_Places_${group.grId}_${i}", group.pants(i).place._1.toString)
     } 
   } 
-
-  
 }
-
-
-
-

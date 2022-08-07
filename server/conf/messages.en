@@ -547,6 +547,10 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.draw.table.club                  = Club
   organize.competition.draw.table.ttr                   = TTR
 
+  organize.competition.draw.change.hdr                  = Position Information Incorrect
+  organize.competition.draw.change.msg                  = Check Position {0}
+  organize.competition.draw.changes.msg                 = Check Positions {0}
+
   organize.competition.draw.noSelection                 = No competition selected.
   organize.competition.draw.noSection                   = No competition section defined.
   organize.competition.draw.invalidSection              = Configuration for competition section not supported.

@@ -40,7 +40,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
   var tabMode: String = ""
 
-  def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+  def render(param: String = "", ucInfo: String = "", update: Boolean=false) = {
     tabMode = param
     
     val coId = AppEnv.getCoId
@@ -50,10 +50,10 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     // generate cards for competition phase if a competition is selected
     // and competition phases are available
     if (coId > 0 & coPhNameIds.length > 0) { 
-      if (!exists(s"Content") | reload) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
+      if (!exists(s"Content")) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
       // at least one competition phase is configured
       var coPhId = AppEnv.coPhIdMap.getOrElse(coId, coPhNameIds.head._2)
-      selectCoPh(coId, coPhId, tabMode, reload)
+      selectCoPh(coId, coPhId, tabMode, update)
     } else {
       setMainContent(showAlert(getMsg("noSelection"))) 
     }
@@ -101,7 +101,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
 
   // select a competition phase e.g. click on tab  
-  def selectCoPh(coId: Long, coPhId: Int, tabMode: String, reload:Boolean=false) = {
+  def selectCoPh(coId: Long, coPhId: Int, tabMode: String, update:Boolean=false) = {
     val aNodes = getElemById("Links").getElementsByTagName("a")
     
     // set register/tab active
@@ -115,19 +115,11 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
     // remember selection
     AppEnv.coPhIdMap(coId) = coPhId
+    implicit val trny = App.tourney
     tabMode match {
-      case "Draw"  => {
-        OrganizeCompetitionDraw.setFrame(coId, coPhId, reload)(App.tourney)
-        OrganizeCompetitionDraw.setContent(coId, coPhId)(App.tourney)
-      }  
-      case "Input" => {
-        OrganizeCompetitionInput.setFrame(coId, coPhId, reload)(App.tourney)
-        OrganizeCompetitionInput.setContent(coId, coPhId)(App.tourney)
-      }
-      case "View"  => {
-        OrganizeCompetitionView.setFrame(coId, coPhId, reload)(App.tourney)
-        OrganizeCompetitionView.setContent(coId, coPhId)(App.tourney)           
-      }
+      case "Draw"  => if (update) OrganizeCompetitionDraw.update(coId, coPhId) else OrganizeCompetitionDraw.init(coId, coPhId)
+      case "Input" => if (update) OrganizeCompetitionInput.update(coId, coPhId) else OrganizeCompetitionInput.init(coId, coPhId)
+      case "View"  => if (update) OrganizeCompetitionView.update(coId, coPhId) else OrganizeCompetitionView.init(coId, coPhId)
     }  
 
     // set relevant section visible

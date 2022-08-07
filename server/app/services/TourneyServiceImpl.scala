@@ -639,7 +639,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        trny.cophs((coph.coId, coph.coPh)) = coph
+        trny.cophs((coph.coId, coph.coPhId)) = coph
         if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
         Right(true)
       }

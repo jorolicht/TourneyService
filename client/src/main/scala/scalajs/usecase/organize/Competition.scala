@@ -67,11 +67,11 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     // set play card and select competition
     if (coId > 0) {
       val comp = App.tourney.comps(coId)
-      setDisabled("BtnStartCompetition", comp.status > CP_INIT)
+      setDisabled("BtnStartCompetition", comp.status > CPC_INIT)
       selTableRow(uc(coId.toString))
       comp.typ match {
-        case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CP_INIT)) 
-        case CT_DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(coId), comp.status <= CP_INIT)) 
+        case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CPC_INIT)) 
+        case CT_DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(coId), comp.status <= CPC_INIT)) 
         case _         => error("update", s"competition typ not yet supported") 
       }
       collapse("CompCard", false)
@@ -122,9 +122,9 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             setPantBulkStatus(coId, pantStatus.toList).map {
               case Left(err)   => error("setPantBulkStatus", s"${err}")
               case Right(res)  => {
-                println(s"Competition Phase Configuration: ${CompPhase.config2Name(result.config)}")
+                println(s"Competition Phase Configuration: ${CompPhase.cfg2Name(result.config)}")
                 
-                App.tourney.addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets, result.pants.map(_.sno)) match {
+                App.tourney.addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets, result.pants.size) match {
                   case Left(err)     => error("addCompPhase", s"${err}")
                   case Right(coPhId) => {
                     AppEnv.coPhIdMap(coId) = coPhId

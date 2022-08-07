@@ -67,7 +67,7 @@ object DlgBox extends BasicHtml
  /**
    * show - load twirl template and show it with message ids
    */
-  def showStd(header: String, body: String, buttons: Seq[String], defaultButton: Int=0, sameSize: Boolean=false) : Future[Int] = {
+  def showStd(header: String, body: String, buttons: Seq[String], defaultButton: Int=0, sameSize: Boolean=false): Future[Int] = {
     val p = Promise[Int]()
     val f = p.future
   

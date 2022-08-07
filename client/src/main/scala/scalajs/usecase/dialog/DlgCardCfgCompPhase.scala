@@ -100,14 +100,14 @@ object DlgCardCfgCompPhase extends BasicHtml
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {     
       case "Selection" => { 
-        val cst = getInput("CfgSelection", CPC_UDEF)  // competition phase category
-        setDisabled("Submit", cst == CPC_UDEF)
+        val cst = getInput("CfgSelection", CPC_UNKN)  // competition phase category
+        setDisabled("Submit", cst == CPC_UNKN)
         setHtml("CfgInfo", options2msg(cst, size)) 
         setInput("CfgName", genCfgName(cst, preCoPhId, (preCoPhId==0) || getRadioBtn("WinLoo", false)))
       }
 
       case "Winner" | "Looser" => {
-        val cst = getInput("CfgSelection", CPC_UDEF)
+        val cst = getInput("CfgSelection", CPC_UNKN)
         setInput("CfgName", genCfgName(cst, preCoPhId, (preCoPhId==0) || getRadioBtn("WinLoo", false)))
       }
       
@@ -133,12 +133,12 @@ object DlgCardCfgCompPhase extends BasicHtml
    * 
    */ 
   def validate(): Either[Error, Boolean] = {
-    result.config  = getInput("CfgSelection", CPC_UDEF)
+    result.config  = getInput("CfgSelection", CPC_UNKN)
     result.name    = getInput("CfgName", "")
     result.winSets = getInput("CfgWinset", 0)
     
     //winSets = getInput()
-    if (result.config == CPC_UDEF) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
+    if (result.config == CPC_UNKN) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
   }
 
   // set possible configuration section 
@@ -153,7 +153,7 @@ object DlgCardCfgCompPhase extends BasicHtml
   // setViewInfoOption
   def setViewInfoOption(size: Int): Unit = {
     val cfgOptions = sysOptions(size)
-    val selOptions = new StringBuilder(s"<option value='${CPC_UDEF}' selected>---</option>")
+    val selOptions = new StringBuilder(s"<option value='${CPC_UNKN}' selected>---</option>")
     for (cfg <- cfgOptions) {
       val msg= getMsg(s"option.${cfg}")
       selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
@@ -227,7 +227,7 @@ object DlgCardCfgCompPhase extends BasicHtml
         else                    { getMsg(s"name.4") }
       }
       case CPC_KO | CPC_SW | CPC_JGJ => if (winner) getMsg(s"name.3") else getMsg(s"name.4") 
-      case CPC_UDEF                  => ""
+      case CPC_UNKN                  => ""
       case _                         => getMsg(s"name.3") 
     }
   }  

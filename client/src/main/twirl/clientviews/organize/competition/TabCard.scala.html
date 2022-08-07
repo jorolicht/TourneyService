@@ -12,15 +12,21 @@
 
 @(coId: Long, coPhNameIdList:List[(String, Int)])(implicit ucc: UseCaseParam)
 
-<div @id("Links")>
-  <ul class="nav nav-tabs">
-    @for(coPhNameIdElem<-coPhNameIdList){
-      <li class="nav-item">
-        <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
-      </li>
-    }
-  </ul>
-</div>  
+<div class="container-fluid">
+  <div class="row mb-2">
+    <div class="col-10 ml-0 mr-0 pr-0 pl-0" @id("Links")>
+        <ul class="nav nav-tabs">
+          @for(coPhNameIdElem<-coPhNameIdList){
+            <li class="nav-item">
+              <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
+            </li>
+          }
+        </ul>
+    </div>  
+    <div class="col-auto text-right mt-2 border-bottom"><button>Test</button></div>
+  </div>
+</div>
+
 
 <div @id("Content")>
   <div id='DrawContent_@{coId}'>

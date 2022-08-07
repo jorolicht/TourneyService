@@ -140,7 +140,7 @@ object DlgCardComp extends BasicHtml
     setInputFields(mode == DlgOption.View)
     setVisible("Compose", mode != DlgOption.View)
     setVisible("Optional", mode != DlgOption.View)
-    if (comp.status > CP_INIT) setDisabled("status", true)
+    if (comp.status > CPC_INIT) setDisabled("status", true)
   }
 
   // setButton

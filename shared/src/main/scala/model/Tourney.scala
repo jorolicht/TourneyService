@@ -429,25 +429,13 @@ case class Tourney(
    *    111 => winner of winner of start phase 
    *    ...
    */
-  def addCompPhase(coId: Long, cophId: Int, config: Int, category: Int, name: String, noWinSets: Int, pants: ArrayBuffer[SNO]): Either[Error, Int] = {  
-    import shared.model.CompPhase._
-    
-    val noPlayers = pants.size
-    CompPhase.get(coId, cophId, config, category, name, noWinSets, pants) match {
+  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayer: Int): Either[Error, Int] = {      
+    CompPhase.get(coId, coPhId, coPhCfg, category, name, noWinSets, noPlayer) match {
       case Left(err)   => Left(err)
       case Right(coph) => {
         if ((coph.coPhId == 0) || cophs.isDefinedAt((coId, coph.coPhId))) {
           Left(Error("???")) 
         } else {
-          config match {
-            case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
-              coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this)), Group.genGrpConfig(config, noPlayers).toList)
-            }
-            case CPC_KO | CPC_SW  => { 
-              coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this))) 
-            }  
-            case _          => {}             
-          }
           cophs((coId, coph.coPhId)) = coph
           Right(coph.coPhId)
         }

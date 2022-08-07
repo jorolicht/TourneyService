@@ -59,29 +59,29 @@ object AddonComp extends UseCase("AddonComp")
     //                      var size: Int, var noPlayers: Int, noWinSets: Int = 3)
 
         val coPhGr = new CompPhase("TestGroup", 3L, 2, 99, CPT_GR, 5, true, 7, 7, 3)
-        val initGrRes  = coPhGr.init( ArrayBuffer(
-          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
-          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
-          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
-          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
-          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
-          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
-          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))),
-          List( GroupConfig(1, "A", 3, 2, 1), GroupConfig(2, "B", 4, 2, 4))
-        )
+        // val initGrRes  = coPhGr.init( ArrayBuffer(
+        //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
+        //   ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
+        //   ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
+        //   ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
+        //   ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
+        //   ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
+        //   ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))),
+        //   List( GroupConfig(1, "A", 3, 2, 1), GroupConfig(2, "B", 4, 2, 4))
+        //)
 
         //case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
         val coPhKO = new CompPhase("TestKO", 3L, 4, 99, CPT_KO, 4, true, 8, 7, 3)
-        val initKORes  = coPhKO.init( ArrayBuffer(
-          ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
-          ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
-          ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
-          ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
-          ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
-          ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
-          ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
-          ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))))
+        // val initKORes  = coPhKO.init( ArrayBuffer(
+        //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
+        //   ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
+        //   ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
+        //   ParticipantEntry("XXX133", "Lichtenegger, Robert3", "TTC Freising3", 1299, (0,0)),
+        //   ParticipantEntry("XXX134", "Lichtenegger, Robert4", "TTC Freising4", 1400, (0,0)),
+        //   ParticipantEntry("XXX135", "Lichtenegger, Robert5", "TTC Freising5", 1309, (0,0)),
+        //   ParticipantEntry("XXX136", "Lichtenegger, Robert6", "TTC Freising6", 2100, (0,0)),
+        //   ParticipantEntry("XXX137", "Lichtenegger, Robert7", "TTC Freising7", 1123, (0,0))))
   
         App.tourney.cophs((3l,4))  = coPhKO
         App.tourney.cophs((3l,2))  = coPhGr

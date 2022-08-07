@@ -1,7 +1,7 @@
 package shared.utils
 
-case class UpdateTrigger(cmdName: String, ident: String, toId: Long, coId: Long, coPh: Int, grId: Int) {
-  override def toString = s"$cmdName#$ident#$toId#$coId#$coPh#$grId"
+case class UpdateTrigger(cmdName: String, ident: String, toId: Long, coId: Long, coPhId: Int, grId: Int) {
+  override def toString = s"$cmdName#$ident#$toId#$coId#$coPhId#$grId"
 }
 
 object UpdateTrigger {

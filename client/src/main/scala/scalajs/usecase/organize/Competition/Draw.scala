@@ -3,6 +3,7 @@ package scalajs.usecase.organize
 // Start TestCases in Javascript Console
 // Start.testOrgCompDraw("<toId>")
 
+import scala.collection.mutable.{ ArrayBuffer }
 import scala.concurrent._
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -20,8 +21,10 @@ import shared.model._
 import shared.model.CompPhase._ 
 import shared.utils.Validation._ 
 import shared.utils.Routines._
+import shared.utils.Constants._
 import shared.utils._
 
+import scalajs.usecase.dialog.{ DlgBox }
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs._
@@ -32,7 +35,7 @@ import scalajs._
 // ***
 @JSExportTopLevel("OrganizeCompetitionDraw")
 object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")  
-  with TourneySvc with DrawSvc
+  with TourneySvc
 {
   import org.scalajs.dom.raw.HTMLElement
   import scala.collection.mutable.ListBuffer
@@ -42,66 +45,191 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   }
 
 
-  //set view for draw, input player list with (pos, SNO, Name, Club, TTR)
-  def setContent(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
+  @JSExport 
+  override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
+    debug("actionEvent", s"key: ${key}")
+    key match {
+      case "DrawRefresh"   => {
+        debug("Refresh", s"key: ${key}")
+
+        // set coId if a new is available
+        val (coId, coPhId)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
+        val drawElements = getElemById(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
+        val asign = (for ( i <- 0 to drawElements.length-1) yield {
+          val elem = drawElements.item(i).asInstanceOf[HTMLElement]
+          (elem.getAttribute("data-drawPos").toInt, elem.innerText.toIntOption.getOrElse(0))
+        }).unzip
+        val diff = asign._1.toSet.diff(asign._2.toSet)
+        if      (diff.size == 0) reassignDraw(App.tourney.cophs(coId, coPhId), asign._1.zip(asign._2).toMap)
+        else if (diff.size == 1) DlgBox.showStd(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
+        else                     DlgBox.showStd(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
+      } 
+    }
+  }
+
+
+  //update view for draw, input player list with (pos, SNO, Name, Club, TTR)
+  def update(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
     // first get the base element identified by coId and coPhId
-    val elemBase = getElemById(s"Draw_${coId}_${coPhId}")
+    val base = getElemById(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
 
     // generate draw frame
     trny.cophs(coId, coPhId).coPhTyp match {
-      case CPT_GR => {
-
-      }
-      case CPT_KO => {
-
-        // first set the start numbers
-        val inputElements = elemBase.querySelectorAll("small[data-drawPos]")
-        for( i <- 0 to inputElements.length-1) {
-          val elem = inputElements.item(i).asInstanceOf[HTMLElement]
-          val pos  = elem.getAttribute("data-drawPos").toInt
-          elem.setAttribute("data-sno", trny.cophs(coId, coPhId).ko.pants(pos-1).sno)
-        }
-        val nameElements = elemBase.querySelectorAll("small[data-drawName]")
-        for( i <- 0 to nameElements.length-1) {
-          val elem = nameElements.item(i).asInstanceOf[HTMLElement]
-          val pos  = elem.getAttribute("data-drawName").toInt
-          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).name
-        }
-        val clubElements = elemBase.querySelectorAll("small[data-drawClub]")
-        for( i <- 0 to clubElements.length-1) {
-          val elem = clubElements.item(i).asInstanceOf[HTMLElement]
-          val pos  = elem.getAttribute("data-drawClub").toInt
-          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).club
-        }
-
-        val ttrElements = elemBase.querySelectorAll("small[data-drawTTR]")
-        for( i <- 0 to ttrElements.length-1) {
-          val elem = ttrElements.item(i).asInstanceOf[HTMLElement]
-          val pos  = elem.getAttribute("data-drawTTR").toInt
-          elem.innerHTML = trny.cophs(coId, coPhId).ko.pants(pos-1).rating.toString
-        }   
-
-      }
+      case CPT_GR => updateGrView(base, trny.cophs(coId, coPhId).groups)  
+      case CPT_KO => updateKoView(base, trny.cophs(coId, coPhId).ko)
       case CPT_SW => {}
       case _      => {}
-    }  
-
+    }
   }
 
-  // setFrame for a competition, coId != 0 and coPhId != 0
-  def setFrame(coId: Long, coPhId: Int, reload: Boolean)(implicit trny: Tourney): Unit = {
-    if (!exists(s"Draw_${coId}_${coPhId}") | reload) {
+
+  // init frame for a competition, coId != 0 and coPhId != 0
+  def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
+    debug("init", s"coId: ${coId} coPhId: ${coPhId}")
+    if (!exists(s"Draw_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
       val size    = trny.cophs(coId, coPhId).size
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
       // generate draw frame
       coPhTyp match {
         case CPT_GR => elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, trny.cophs(coId, coPhId).groups).toString
-        case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, coPhId, size).toString
+        case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, coPhId, trny.cophs(coId, coPhId).ko).toString
         case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size).toString
         case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
       }
     }
-  }  
+  }
+
+  def setDrawPosition(elem: HTMLElement, pant: ParticipantEntry, pantPos: String="") = try {
+    setData(elem, "sno", pant.sno)
+    elem.querySelector(s"[data-name]").asInstanceOf[HTMLElement].innerHTML = pant.name
+    elem.querySelector(s"[data-club]").asInstanceOf[HTMLElement].innerHTML = pant.club
+    elem.querySelector(s"[data-rating]").asInstanceOf[HTMLElement].innerHTML = pant.getRating
+
+    // reset drawpos to original value    
+    val drawPosElem = elem.querySelector(s"[data-drawPos]").asInstanceOf[HTMLElement]
+    drawPosElem.innerHTML = getData(drawPosElem, "drawPos")
+  } catch { case _: Throwable => error("setDrawPosition ", s"Pos: ${pantPos} Pant: ${pant.sno} ${pant.name} [${pant.club}]") }
+
+
+  def updateGrView(base: HTMLElement, groups: ArrayBuffer[Group]) =
+    for (g <- groups) {
+      g.pants.zipWithIndex.foreach { case (pant, index) => {
+        val pantBase = base.querySelector(s"[data-pantPos='${g.grId}_${index}']").asInstanceOf[HTMLElement]
+        setDrawPosition(pantBase, pant, s"${g.grId}_${index}")
+      }}
+    } 
+
+  def updateKoView(base: HTMLElement, ko: KoRound) =
+    ko.pants.zipWithIndex.foreach { case (pant, index) => {
+      val pantBase = base.querySelector(s"[data-pantPos='${index+1}']").asInstanceOf[HTMLElement]
+      setDrawPosition(pantBase, pant, s"${index+1}")
+    }}
+
+
+  // reassingDraw set new draw
+  def reassignDraw(coph: CompPhase, reassign: Map[Int,Int])= {
+    val pants = Array.fill[ParticipantEntry](coph.size)(ParticipantEntry("0", "", "", 0, (0,0)))
+    val base = getElemById(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
+    coph.coPhTyp match {
+      case CPT_GR => {
+        coph.groups.foreach { g => 
+          g.pants.zipWithIndex.foreach { case (pant, index) => pants(reassign(g.drawPos + index) - 1) = pant }
+        }     
+        coph.groups.foreach { g => pants.slice(g.drawPos - 1, g.drawPos + g.size - 1).copyToArray(g.pants) }
+        updateGrView(base, coph.groups) 
+        //pants.zipWithIndex.foreach { case (pant, index) => println(s"[${index}] ${pant.name} ${pant.club} ${pant.getRating}") }
+      }
+      case CPT_KO => {} 
+      case _      => {}
+    }
+  }
+
+
+// iniGrDraw - initialie draw for group configurations 
+def initGrDraw(coph: CompPhase, pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig], noWinSets: Int): Either[Error, Boolean] = {
+  // generate groups
+  coph.groups = ArrayBuffer[Group]() 
+  for (gEntry <- grpCfg) { coph.groups = coph.groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
+  val noGroups = coph.groups.size
+
+  // calculate average pant rating
+  val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
+  val avgPantRating = sum/cnt
+
+  // Step 0 - init effective rating, pant with no rating get average rating
+  for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
+
+  // Step 1  - init club name occurence in pants
+  val clubOccuMap = scala.collection.mutable.Map[String, Int]().withDefaultValue(0) 
+  pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
+  for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
+
+  // Step 2 - position the best players, one in each group  (take given rating)
+  val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
+  for (i <- 0 until pantsS1.size) {  coph.groups(i).addPant(pantsS1(i), avgPantRating) }
+
+  // Step 3 - position players with highest occurence and ascending rating
+  //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
+  //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
+  val pantsS3 = pantsS2.sortBy(_.rating)
+
+  for (i <- 0 until pantsS3.size) {
+    val ratings = getMinOccBestAvg(pantsS3(i), coph.groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
+    // get index of biggest element
+    val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
+    coph.groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
+  }
+
+  // Step 3: sort group according to pant rating
+  for (i <- 0 until noGroups) { coph.groups(i).pants.sortInPlaceBy(x => - x.rating) } 
+  val lastPos = coph.groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
+  // for (i <- 0 until noGroups) { 
+  //   for (j <- 0 until groups(i).size) {
+  //     println(s"${groups(i).name} ${groups(i).pants(j).name}  ${groups(i).pants(j).rating}") 
+  //   }  
+  // }
+  
+  // reset all pants
+  // coph.groups.foreach { g => 
+  //   g.pants.zipWithIndex.foreach { case (pant, index) => coph.pants(g.drawPos + index - 1) = SNO(pant.sno) }
+  // }
+  Right(true)
+
+}
+
+
+
+  // target function for descrete optimization
+def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize: Int, maxRating: Int, maxGrpSize: Int, pantAvgRating: Int): ArrayBuffer[Long] = {
+  val result = ArrayBuffer.fill[Long](grps.size)(0)
+
+  for (i <- 0 until grps.size) {
+    result(i) = {
+      if (grps(i).fillCnt == grps(i).size) {
+        0L 
+      } else {
+        // calculate improvement of average rating 
+        val curDiffRating = if (grps(i).avgRating==0) 0 else (pantAvgRating - grps(i).avgRating).abs 
+        val newDiffRating = (pantAvgRating - ((grps(i).avgRating * grps(i).fillCnt + pant.effRating) / (grps(i).fillCnt+1))).abs
+        val improveRating = maxRating + (curDiffRating - newDiffRating)
+
+        // calculate free level
+        val freeGrpLevel = (grps(i).size - grps(i).fillCnt)
+        //val freeGrpLevel = (maxGrpSize - grps(i).cnt)
+
+        // calculate occu level
+        val occuLevel    = (pantSize - grps(i).occu(pant.club)) 
+        println(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
+
+        ((1000*occuLevel) + freeGrpLevel) * (2 * maxRating) + improveRating 
+      }
+    }
+  }
+  result
+}
+
+
+
   
 }
