@@ -75,7 +75,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
         val coId  = elem.getAttribute("data-coId")
         val coPhId = elem.getAttribute("data-coPhId")
 
-        val inputNodes = getElemById(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
+        val inputNodes = getElemById_(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
         val result = for( i <- 0 to inputNodes.length-1) yield {
           val elem   = inputNodes.item(i).asInstanceOf[HTMLElement]
           val posOld = elem.getAttribute("data-drawPos").toIntOption.getOrElse(-1)
@@ -93,6 +93,33 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
         debug("DrawRefresh", s"orgList: ${orgList}  newList: ${newList} reassign: ${reassign}")
       } 
 
+      case "Demo"   => {
+        val sElem = getElemById("Links").querySelector(".active").asInstanceOf[HTMLElement]
+        val (coId,coPhId) = (getData(sElem,"coId",0L), getData(sElem,"coPhId",0))
+
+           // regularly update database
+        dom.window.setTimeout(() => {
+          println(s"Demo Click Button Timeout")
+          val button = getElemById_(s"SaveBtn_${coId}_${coPhId}_1").asInstanceOf[HTMLElement]
+          val ballInput1 = getElemById_(s"Input_${coId}_${coPhId}").querySelector(s"[data-game_1='ball_1']").asInstanceOf[HTMLElement]
+          ballInput1.innerText = "1"
+          button.click()
+          println(s"Timeout Demo") 
+        }, 2000)
+
+      } 
+      case "Reset"   => {
+        debug("Reset", s"Reset Button press")
+      } 
+      case "Start"   => {
+        val sElem = getElemById("Links").querySelector(".active").asInstanceOf[HTMLElement]
+        val (coId,coPhId) = (getData(sElem,"coId",0L), getData(sElem,"coPhId",0))
+        debug("START", s"coId: ${coId} coPhId: ${coPhId}")
+        App.tourney.cophs((coId,coPhId)).setStatus(CPS_EIN)
+        App.execUseCase("OrganizeCompetitionInput", "", "")
+
+      }       
+
       case "SelectCoPh"  => selectCoPh(getData(elem, "coId", 0L), getData(elem, "coPhId", 0), tabMode)
 
       case _             => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
@@ -101,8 +128,15 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
 
   // select a competition phase e.g. click on tab  
-  def selectCoPh(coId: Long, coPhId: Int, tabMode: String, update:Boolean=false) = {
+  def selectCoPh(coId: Long, coPhId: Int, mode: String, update:Boolean=false) = {
     val aNodes = getElemById("Links").getElementsByTagName("a")
+
+    // control tab buttons
+    App.tourney.cophs(coId, coPhId).getStatus match {
+      case CPS_AUS => setVisible("BtnDemo", false);             setVisible("BtnStart", chkMode(mode,"ID")); setVisible("BtnReset", false)
+      case CPS_EIN => setVisible("BtnDemo", chkMode(mode,"I")); setVisible("BtnStart", false);              setVisible("BtnReset", chkMode(mode,"ID"))
+      case _       => setVisible("BtnDemo", false);             setVisible("BtnStart", false);              setVisible("BtnReset", chkMode(mode,"ID"))
+    }
     
     // set register/tab active
     for( i <- 0 to aNodes.length-1) {
@@ -116,7 +150,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     // remember selection
     AppEnv.coPhIdMap(coId) = coPhId
     implicit val trny = App.tourney
-    tabMode match {
+    mode match {
       case "Draw"  => if (update) OrganizeCompetitionDraw.update(coId, coPhId) else OrganizeCompetitionDraw.init(coId, coPhId)
       case "Input" => if (update) OrganizeCompetitionInput.update(coId, coPhId) else OrganizeCompetitionInput.init(coId, coPhId)
       case "View"  => if (update) OrganizeCompetitionView.update(coId, coPhId) else OrganizeCompetitionView.init(coId, coPhId)
@@ -127,7 +161,16 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     for( i <- 0 to contentNodes.length-1) {
       val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
       elem.style.display = if (getData(elem, "coPhId", 0) == coPhId & 
-                               getData(elem, "tabMode", "") == tabMode) "block" else "none"
+                               getData(elem, "tabMode", "") == mode) "block" else "none"
+    }
+  }
+
+  def chkMode(viewMode: String, chk: String): Boolean = {
+    viewMode match {
+      case "Draw"  => chk.contains("D")
+      case "View"  => chk.contains("V")
+      case "Input" => chk.contains("I") 
+      case _       => false
     }
   }
   

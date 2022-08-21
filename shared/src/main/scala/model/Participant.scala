@@ -99,7 +99,7 @@ import shared.utils.Routines._
   }
   
 
-// relevant information of an active player/participant within an competition
+// relevant information of an active participant(player) within an competition
 case class ParticipantEntry(
   var sno:       String,         // start number(s) concatenated string of player identifieres  
   val name:      String,                     
@@ -108,10 +108,8 @@ case class ParticipantEntry(
   var place:     (Int,Int),      // position after finishing the round (group or ko)
   var occu:      Int = 0,
   var effRating: Int = 0        
-)  {
-  def getRating = {
-    if (rating == 0) "" else rating.toString
-  }
+) {
+  def getRating = if (rating == 0) "" else rating.toString
 }
 
 

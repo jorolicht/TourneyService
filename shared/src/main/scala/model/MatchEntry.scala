@@ -41,6 +41,7 @@ trait MEntry {
   def setPlayfield(value:String):Unit
   def setInfo(value:String):Unit
   def setStatus(value:Int):Unit
+  def setGameNo(value: Int):Unit
 
   def setStatus(depFinished: Boolean=true): MEntry = {
     MEntry.setRunning(this, false) 
@@ -96,7 +97,7 @@ trait MEntry {
 
 
 case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, 
-                      gameNo: Int=0, round: Int=0, var playfield:String="", var status:Int=0,
+                      var gameNo: Int=0, round: Int=0, var playfield:String="", var status:Int=0,
                       var info: String="", var sets: (Int,Int) =(0,0), var result:String="",
                       val winSets: Int=0, var stNoA: String="", var stNoB: String=""  ) 
   extends MEntry { 
@@ -113,6 +114,7 @@ case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int,
   def setPlayfield(value: String) = { playfield = value }
   def setInfo(value: String)  = { info = value } 
   def setStatus(value:Int)    = { status = value }
+  def setGameNo(value: Int)   = { gameNo = value }
 }
 
 
@@ -121,7 +123,7 @@ case class MEntryKo(
   val coTyp: Int,                         // competition typ, e.g. CT_SINGLE, CT_DOUBLE
   val coPhId: Int,                        // competition phase identifier
   val coPhTyp: Int,                       // competition phase system, eg. CPT_GR, CPT_KO
-  val gameNo: Int,                        //(0) game number within phase
+  var gameNo: Int,                        //(0) game number within phase
   
   var stNoA:  String,                     //(1) participant A start number
   var stNoB:  String,                     //(2) participant B start number
@@ -160,6 +162,7 @@ case class MEntryKo(
   def setPlayfield(value: String) = { playfield = value }
   def setInfo(value:String)  = { info = value }  
   def setStatus(value:Int)   = { status = value } 
+  def setGameNo(value: Int)   = { gameNo = value }  
 
   def getWinPos():(Int,Int) = {
     val wPos = getMDIntArr(winPos)
@@ -179,7 +182,7 @@ case class MEntryGr(
   val coTyp:     Int,                    // competition typ, e.g. CT_SINGLE, CT_DOUBLE
   val coPhId:    Int,                    // competition phase identifier
   val coPhTyp:   Int,                    // competition phase system, eg. CPT_GR, CPT_KO
-  val gameNo:    Int,                    //(0) game number within phase
+  var gameNo:    Int,                    //(0) game number within phase
   
   var stNoA:     String,                 //(1) participant A start number
   var stNoB:     String,                 //(2) participant B start number
@@ -221,13 +224,19 @@ case class MEntryGr(
   def setPlayfield(value: String) = { playfield = value }
   def setInfo(value:String)       = { info = value } 
   def setStatus(value:Int)        = { status = value } 
+  def setGameNo(value: Int)       = { gameNo = value }
 
   def getTrigger()                = getMDIntArr(trigger)   
   def getDepend()                 = getMDIntArr(depend)
-  def hasDepend()                 = (depend != "_depend_")
-    
+  def hasDepend                   = (depend != "")
 }
 
+
+object MEntryGr {
+   def init(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, gameNo: Int, stNoA: String, stNoB: String, round: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
+     MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, "_default_", "", "", "", "", "", 0, (0,0), winSets, "")
+   }
+}
 
 case class MEntryTx(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, content: String) {
   def decode: MEntry = {
@@ -287,7 +296,6 @@ object MEntry {
     case MS_DRAW   => "DRAW"
     case MS_UNKN   => "UNKN"
     case _         => "ERROR"
-      
   }
 
   /** addRunning(plId: Long, gaId: (Long,Int,Int))
@@ -348,9 +356,4 @@ object MEntry {
     }
   }
 
-
-
-
 }
-
-

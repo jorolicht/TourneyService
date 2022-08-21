@@ -11,7 +11,7 @@ greeting                                              = Welcome!
 
   app.mockup                                          = false
   app.version                                         = 2022-05EN184
-  app.date                                            = 2022-07-14
+  app.date                                            = 2022-08-16
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -555,39 +555,15 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.draw.noSection                   = No competition section defined.
   organize.competition.draw.invalidSection              = Configuration for competition section not supported.
 
-  dlg.card.cfg.compphase.Title                            = Competition Configuration 
-  dlg.card.cfg.compphase.lbl.Selection                    = Game System Selection for {0} Participants
-  dlg.card.cfg.compphase.plh.Name                         = Name of Round/Gamesection 
 
-  dlg.card.cfg.compphase.option.info.1                    = Please select or enter name
-  dlg.card.cfg.compphase.option.info.2                    = Please select configuration and enter name
-  dlg.card.cfg.compphase.option.info.100                  = Round with Groups of Size 3-9
-  dlg.card.cfg.compphase.option.info.101                  = Round with Groups of Size 3
-  dlg.card.cfg.compphase.option.info.102                  = Round with Groups of Size 3 and 4
-  dlg.card.cfg.compphase.option.info.103                  = Round with Groups of Size 4
-  dlg.card.cfg.compphase.option.info.104                  = Round with Groups of Size 4 and 5
-  dlg.card.cfg.compphase.option.info.105                  = Round with Groups of Size 5
-  dlg.card.cfg.compphase.option.info.106                  = Round with Groups of Size 5 and 6
-  dlg.card.cfg.compphase.option.info.107                  = Round with Groups of Size 6
-  dlg.card.cfg.compphase.option.info.108                  = Round Robin
-  dlg.card.cfg.compphase.option.info.109                  = KO-System
-  dlg.card.cfg.compphase.option.info.110                  = Swiss-System
 
-  dlg.card.cfg.compphase.lbl.Winset                       = Winning Sets
-  dlg.card.cfg.compphase.btn.draw                         = START DRAW
+  organize.competition.tab.btn.demo                         = DEMO
+  organize.competition.tab.btn.reset                        = RESET
+  organize.competition.tab.btn.start                        = START
+#END Organize Competition
 
-  dlg.card.cfg.compphase.pants                            = Participants
-  dlg.card.cfg.compphase.pants.select                     = Select Participants
-  dlg.card.cfg.compphase.tbl.hdr.no                       = #
-  dlg.card.cfg.compphase.tbl.hdr.name                     = Name, Firstname
-  dlg.card.cfg.compphase.tbl.hdr.club                     = Club
-  dlg.card.cfg.compphase.tbl.hdr.pos                      = Position
-  dlg.card.cfg.compphase.tbl.hdr.signup                   = Check
 
-  dlg.card.cfg.compphase.name.1                           = Preliminary Round
-  dlg.card.cfg.compphase.name.2                           = Intermediate Round
-  dlg.card.cfg.compphase.name.3                           = Main Round
-  dlg.card.cfg.compphase.name.4                           = Consolation Round  
+
 
 
 #END Organize Competition
@@ -981,6 +957,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
 ###
 #  START Dialog Cards
 ###
+# Registration Single
   dlg.card.reg.single.lbl.Name                        = Single
   dlg.card.reg.single.lbl.TTR                         = TTR-Value
   dlg.card.reg.single.lbl.Club                        = Club
@@ -995,6 +972,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.card.reg.single.status.register                 = (pre-)registered
   dlg.card.reg.single.status.participate              = participating
 
+# Registration Double
   dlg.card.reg.double.Title                           = Double
   dlg.card.reg.double.lbl.Name1                       = Name Player 1
   dlg.card.reg.double.plh.Name1                       = <lastname, firstname>
@@ -1003,6 +981,41 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.card.reg.double.status.hdr                      = Status of double for competition:
   dlg.card.reg.double.status.register                 = (pre-)registered
   dlg.card.reg.double.status.participate              = participating
+
+# Competition Phase Configuration
+  dlg.card.cfg.compphase.Title                            = Competition Configuration 
+  dlg.card.cfg.compphase.lbl.Selection                    = Game System Selection for {0} Participants
+  dlg.card.cfg.compphase.plh.Name                         = Name of Round/Gamesection 
+
+  dlg.card.cfg.compphase.option.info.1                    = Please select or enter name
+  dlg.card.cfg.compphase.option.info.2                    = Please select configuration and enter name
+  dlg.card.cfg.compphase.option.info.100                  = Round with Groups of Size 3-9
+  dlg.card.cfg.compphase.option.info.101                  = Round with Groups of Size 3
+  dlg.card.cfg.compphase.option.info.102                  = Round with Groups of Size 3 and 4
+  dlg.card.cfg.compphase.option.info.103                  = Round with Groups of Size 4
+  dlg.card.cfg.compphase.option.info.104                  = Round with Groups of Size 4 and 5
+  dlg.card.cfg.compphase.option.info.105                  = Round with Groups of Size 5
+  dlg.card.cfg.compphase.option.info.106                  = Round with Groups of Size 5 and 6
+  dlg.card.cfg.compphase.option.info.107                  = Round with Groups of Size 6
+  dlg.card.cfg.compphase.option.info.108                  = Round Robin
+  dlg.card.cfg.compphase.option.info.109                  = KO-System
+  dlg.card.cfg.compphase.option.info.110                  = Swiss-System
+
+  dlg.card.cfg.compphase.lbl.Winset                       = Winning Sets
+  dlg.card.cfg.compphase.btn.draw                         = START DRAW
+
+  dlg.card.cfg.compphase.pants                            = Participants
+  dlg.card.cfg.compphase.pants.select                     = Select Participants
+  dlg.card.cfg.compphase.tbl.hdr.no                       = #
+  dlg.card.cfg.compphase.tbl.hdr.name                     = Name, Firstname
+  dlg.card.cfg.compphase.tbl.hdr.club                     = Club
+  dlg.card.cfg.compphase.tbl.hdr.pos                      = Position
+  dlg.card.cfg.compphase.tbl.hdr.signup                   = Check
+
+  dlg.card.cfg.compphase.name.1                           = Preliminary Round
+  dlg.card.cfg.compphase.name.2                           = Intermediate Round
+  dlg.card.cfg.compphase.name.3                           = Main Round
+  dlg.card.cfg.compphase.name.4                           = Consolation Round  
 #END Dialog Cards
 
 

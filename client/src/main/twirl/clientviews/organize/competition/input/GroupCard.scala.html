@@ -8,7 +8,7 @@
 @(coId: Long, coPhId: Int, maxRound: Int, winSets:Int)(implicit ucc: UseCaseParam)
 
 <div class="m-1">
-  <table @id(s"Input_${coId}_${coPhId}")>
+  <table id='Input_@{coId}_@{coPhId}'>
     <tbody>
       <tr class='border-bottom'>
         <th colspan='1' class="border-left border-right font-weight-bold text-center"><small class="ml-1 mr-1">@msg("group")</small></th>
@@ -22,9 +22,7 @@
 
         <th colspan='@{((winSets*2)-1)}' class="border-left border-right text-center"><small class="ml-1 mr-1">@msg("balls")</small></th>
         <th class="border-left border-right font-weight-bold"><small class="ml-1 mr-1">@msg("sets")</small></th>
-        <th colspan='2' class="text-right">
-          @actionButton("DeleteAllResults", "deleteAll", "btn-xs btn-danger ml-1 mr-1", "coId", coId.toString, "coPhId", coPhId.toString)
-        </th>
+        <th colspan='2' class="text-right"></th>
       </tr>      
     </tbody>
 
@@ -32,7 +30,7 @@
       <tbody>
         <tr><th colspan='16'><small class="font-weight-bold">@msg_(s"competition.GrRound", i.toString)</small></th></tr>
       </tbody>
-      <tbody @id(s"InputRound_${coId}_${coPhId}_${i}")></tbody>
+      <tbody id='InputRound_@{coId}_@{coPhId}_${i}'></tbody>
     } 
   </table>
 </div>

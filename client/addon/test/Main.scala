@@ -42,8 +42,8 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport def save()                            = AddonCmds.save()
   @JSExport def sync()                            = AddonCmds.sync()
   @JSExport def load(toId: String)                = AddonCmds.load(toId)
-  @JSExport def showCompPhase(coId: Int, coPhId: Int) = AddonCmds.showCompPhase(coId, coPhId)
-  @JSExport def showTourney                           = AddonCmds.showTourney()
+  @JSExport def showCompPhase()                   = AddonCmds.showCompPhase()
+  @JSExport def showTourney                       = AddonCmds.showTourney()
 
   // Basic tests
   @JSExport def testBasicHello(text: String)      = AddonBasic.testHello(text)

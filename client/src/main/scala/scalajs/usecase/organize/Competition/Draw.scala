@@ -54,7 +54,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
         // set coId if a new is available
         val (coId, coPhId)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
-        val drawElements = getElemById(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
+        val drawElements = getElemById_(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
         val asign = (for ( i <- 0 to drawElements.length-1) yield {
           val elem = drawElements.item(i).asInstanceOf[HTMLElement]
           (elem.getAttribute("data-drawPos").toInt, elem.innerText.toIntOption.getOrElse(0))
@@ -71,7 +71,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   //update view for draw, input player list with (pos, SNO, Name, Club, TTR)
   def update(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
     // first get the base element identified by coId and coPhId
-    val base = getElemById(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+    val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
 
     // generate draw frame
     trny.cophs(coId, coPhId).coPhTyp match {
@@ -86,7 +86,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   // init frame for a competition, coId != 0 and coPhId != 0
   def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists(s"Draw_${coId}_${coPhId}")) {
+    if (!exists_(s"Draw_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
       val size    = trny.cophs(coId, coPhId).size
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
@@ -130,7 +130,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   // reassingDraw set new draw
   def reassignDraw(coph: CompPhase, reassign: Map[Int,Int])= {
     val pants = Array.fill[ParticipantEntry](coph.size)(ParticipantEntry("0", "", "", 0, (0,0)))
-    val base = getElemById(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
+    val base = getElemById_(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
     coph.coPhTyp match {
       case CPT_GR => {
         coph.groups.foreach { g => 
@@ -146,90 +146,120 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   }
 
 
-// iniGrDraw - initialie draw for group configurations 
-def initGrDraw(coph: CompPhase, pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig], noWinSets: Int): Either[Error, Boolean] = {
-  // generate groups
-  coph.groups = ArrayBuffer[Group]() 
-  for (gEntry <- grpCfg) { coph.groups = coph.groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
-  val noGroups = coph.groups.size
-
-  // calculate average pant rating
-  val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
-  val avgPantRating = sum/cnt
-
-  // Step 0 - init effective rating, pant with no rating get average rating
-  for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
-
-  // Step 1  - init club name occurence in pants
-  val clubOccuMap = scala.collection.mutable.Map[String, Int]().withDefaultValue(0) 
-  pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
-  for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
-
-  // Step 2 - position the best players, one in each group  (take given rating)
-  val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
-  for (i <- 0 until pantsS1.size) {  coph.groups(i).addPant(pantsS1(i), avgPantRating) }
-
-  // Step 3 - position players with highest occurence and ascending rating
-  //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
-  //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
-  val pantsS3 = pantsS2.sortBy(_.rating)
-
-  for (i <- 0 until pantsS3.size) {
-    val ratings = getMinOccBestAvg(pantsS3(i), coph.groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
-    // get index of biggest element
-    val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
-    coph.groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
+  def initDraw(coph: CompPhase, pants: ArrayBuffer[SNO])(implicit trny: Tourney): Future[Either[Error, Boolean]] = {
+    coph.coPhCfg match {
+      case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
+        initGrDraw(coph, pants.map(_.getPantEntry(coph.coId)), Group.genGrpConfig(coph.coPhCfg, pants.size).toList) match {
+          case Left(err)  => Future(Left(err))
+          case Right(res) => initGrMatches(coph, trny.comps(coph.coId).typ) match {
+            case Left(err)  => Future(Left(err))
+            case Right(res) => coph.setStatus(CPS_AUS); Future(Right(res))
+          }
+        }
+      }
+      case CPC_KO | CPC_SW  => { 
+        //coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this))) 
+        Future(Left(Error("???")))
+      }  
+      case _          => Future(Left(Error("???")))   
+    }
   }
 
-  // Step 3: sort group according to pant rating
-  for (i <- 0 until noGroups) { coph.groups(i).pants.sortInPlaceBy(x => - x.rating) } 
-  val lastPos = coph.groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
-  // for (i <- 0 until noGroups) { 
-  //   for (j <- 0 until groups(i).size) {
-  //     println(s"${groups(i).name} ${groups(i).pants(j).name}  ${groups(i).pants(j).rating}") 
-  //   }  
-  // }
-  
-  // reset all pants
-  // coph.groups.foreach { g => 
-  //   g.pants.zipWithIndex.foreach { case (pant, index) => coph.pants(g.drawPos + index - 1) = SNO(pant.sno) }
-  // }
-  Right(true)
 
-}
+  // iniGrDraw - initialie draw for group configurations 
+  def initGrDraw(coph: CompPhase, pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig]): Either[Error, Boolean] = {
+    // generate groups
+    coph.groups = ArrayBuffer[Group]() 
+    for (gEntry <- grpCfg) { coph.groups = coph.groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, coph.noWinSets) } 
+    val noGroups = coph.groups.size
 
+    // calculate average pant rating
+    val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
+    val avgPantRating = sum/cnt
+
+    // Step 0 - init effective rating, pant with no rating get average rating
+    for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
+
+    // Step 1  - init club name occurence in pants
+    val clubOccuMap = scala.collection.mutable.Map[String, Int]().withDefaultValue(0) 
+    pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
+    for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
+
+    // Step 2 - position the best players, one in each group  (take given rating)
+    val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
+    for (i <- 0 until pantsS1.size) {  coph.groups(i).addPant(pantsS1(i), avgPantRating) }
+
+    // Step 3 - position players with highest occurence and ascending rating
+    //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
+    //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
+    val pantsS3 = pantsS2.sortBy(_.rating)
+
+    for (i <- 0 until pantsS3.size) {
+      val ratings = getMinOccBestAvg(pantsS3(i), coph.groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
+      // get index of biggest element
+      val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
+      coph.groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
+    }
+
+    // Step 3: sort group according to pant rating
+    for (i <- 0 until noGroups) { coph.groups(i).pants.sortInPlaceBy(x => - x.rating) } 
+    val lastPos = coph.groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
+    Right(true)
+  }
 
 
   // target function for descrete optimization
-def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize: Int, maxRating: Int, maxGrpSize: Int, pantAvgRating: Int): ArrayBuffer[Long] = {
-  val result = ArrayBuffer.fill[Long](grps.size)(0)
+  def getMinOccBestAvg(pant: ParticipantEntry, grps: ArrayBuffer[Group], pantSize: Int, maxRating: Int, maxGrpSize: Int, pantAvgRating: Int): ArrayBuffer[Long] = {
+    val result = ArrayBuffer.fill[Long](grps.size)(0)
 
-  for (i <- 0 until grps.size) {
-    result(i) = {
-      if (grps(i).fillCnt == grps(i).size) {
-        0L 
-      } else {
-        // calculate improvement of average rating 
-        val curDiffRating = if (grps(i).avgRating==0) 0 else (pantAvgRating - grps(i).avgRating).abs 
-        val newDiffRating = (pantAvgRating - ((grps(i).avgRating * grps(i).fillCnt + pant.effRating) / (grps(i).fillCnt+1))).abs
-        val improveRating = maxRating + (curDiffRating - newDiffRating)
+    for (i <- 0 until grps.size) {
+      result(i) = {
+        if (grps(i).fillCnt == grps(i).size) {
+          0L 
+        } else {
+          // calculate improvement of average rating 
+          val curDiffRating = if (grps(i).avgRating==0) 0 else (pantAvgRating - grps(i).avgRating).abs 
+          val newDiffRating = (pantAvgRating - ((grps(i).avgRating * grps(i).fillCnt + pant.effRating) / (grps(i).fillCnt+1))).abs
+          val improveRating = maxRating + (curDiffRating - newDiffRating)
 
-        // calculate free level
-        val freeGrpLevel = (grps(i).size - grps(i).fillCnt)
-        //val freeGrpLevel = (maxGrpSize - grps(i).cnt)
+          // calculate free level
+          val freeGrpLevel = (grps(i).size - grps(i).fillCnt)
+          //val freeGrpLevel = (maxGrpSize - grps(i).cnt)
 
-        // calculate occu level
-        val occuLevel    = (pantSize - grps(i).occu(pant.club)) 
-        println(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
+          // calculate occu level
+          val occuLevel    = (pantSize - grps(i).occu(pant.club)) 
+          println(s"Pant: ${pant} improvementRating: ${improveRating} freeGrpLevel: ${freeGrpLevel } occuLevel: ${occuLevel}")
 
-        ((1000*occuLevel) + freeGrpLevel) * (2 * maxRating) + improveRating 
+          ((1000*occuLevel) + freeGrpLevel) * (2 * maxRating) + improveRating 
+        }
       }
     }
+    result
   }
-  result
-}
 
 
+  def initGrMatches(coph: CompPhase, coTyp: Int): Either[Error, Boolean] = {
+    import shared.utils.GamePlan
+    coph.matches = ArrayBuffer[MEntry]()
 
-  
+    try { coph.groups.foreach { g =>
+      val gPE = GamePlan.Group(g.size)
+      for (rnd <-1 to gPE.noRounds) { gPE.rounds(rnd-1).foreach { wgw =>
+        coph.matches += MEntryGr.init(coph.coId, coTyp, coph.coPhId, coph.coPhTyp, 0, g.pants(wgw._1-1).sno, g.pants(wgw._2-1).sno, rnd, g.grId, wgw, coph.noWinSets)
+      }}  
+    }} catch { case _: Throwable => error("initGrMatches ", s"${coph.toString}"); Left(Error("??? initGrMatches")) }
+
+    coph.matches = coph.matches.sortBy(r => (r.round, r.asInstanceOf[MEntryGr].grId))
+    for (i <- 0 until coph.matches.size) { coph.matches(i).setGameNo(i+1) } 
+    coph.genGrMatchDependencies() match {
+      case Left(err)  => Left(err)
+      case Right(res) => {
+        for (i <- 0 until coph.matches.size) { if (coph.matches(i).asInstanceOf[MEntryGr].hasDepend) { coph.matches(i).setStatus(MEntry.MS_BLOCK)} } 
+        Right(res)
+      }
+    }
+ 
+
+  } 
+
 }

@@ -176,6 +176,7 @@ class BasicHtml
     catch { case _: Throwable => error("setHtml", s"content: ${content.toString.take(10)}") } 
   }  
 
+
   def insertHtml(elemId: String, pos: String, content: String)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(ucp.idBase + "__" + elemId).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
     catch { case _: Throwable => error("insertHtml", s"id: ${ucp.idBase}__${elemId} pos: ${pos} content: ${content.take(10)}") } 
@@ -505,7 +506,7 @@ class BasicHtml
 
 
   def exists(id: String)(implicit ucp: UseCaseParam): Boolean = { (document.getElementById(ucp.idBase + "__" + id) != null) }  
-
+  def exists_(id: String)(implicit ucp: UseCaseParam): Boolean = { (document.getElementById(id) != null) } 
 
   /* getElementById does not know what kind of element nodeValue is. 
    * It does not have access to the .html to figure that out, and hence it returns a very 

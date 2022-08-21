@@ -42,13 +42,13 @@ object InfoSchedule extends UseCase("InfoSchedule")
     */
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     val lang = AppEnv.getLang
-    debug("render", s" Start: ${Trny.startDate} End: ${Trny.endDate}" )
+    debug("render", s" Start: ${App.tourney.startDate} End: ${App.tourney.endDate}" )
 
     // call string for date
-    val toDate = if (Trny.startDate == Trny.endDate) {
-      int2date(Trny.startDate, lang)
+    val toDate = if (App.tourney.startDate == App.tourney.endDate) {
+      int2date(App.tourney.startDate, lang)
     } else {
-      getMsg("date.range", int2date(Trny.startDate, lang), int2date(Trny.endDate, lang))
+      getMsg("date.range", int2date(App.tourney.startDate, lang), int2date(App.tourney.endDate, lang))
     }
 
     val coSeq = (for {
@@ -65,7 +65,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
 
     setMainContent(clientviews.info.html.ScheduleTmpl(
-      Trny.name, toDate, Trny.orgDir, Trny.organizer, coSeq).toString
+      App.tourney.name, toDate, App.tourney.orgDir, App.tourney.organizer, coSeq).toString
     )
    
     setVisible("DoublePlayer", false)

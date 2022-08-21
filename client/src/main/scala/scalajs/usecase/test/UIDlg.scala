@@ -60,21 +60,21 @@ object UIDlg extends UseCase("UIDlg")
         // case class PantSelect(val sno: SNO, val name: String, val info: String, var checked: Boolean, val winner: Boolean=true)
         // getInfo returns tuple (SNO.value, Name, Club, TTR)
 
-        val pants = (Trny.pl2co.filterKeys(_._2 == coId).map { x =>
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).map { x =>
           val sno = SNO(x._2.sno) 
-          val (snoValue, name, club, ttr) = sno.getInfo(Trny.comps(coId).typ)(Trny)
+          val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", x._2.status == PLS_REDY) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
         
         // val pants = ArrayBuffer[PantSelect]()
         // for (i <-1 to size) { 
         //   val sno = SNO(i.toString)
-        //   val info = sno.getInfo(1)(Trny)
+        //   val info = sno.getInfo(1)(App.tourney)
         //   debug("DlgCardCfgSection", s"${sno}  ${info}") 
         //   pants += PantSelect(sno, info._2, info._4.toString, true)            
         // }
 
-        DlgCardCfgCompPhase.show(1L, 0, pants)(Trny) map {
+        DlgCardCfgCompPhase.show(1L, 0, pants)(App.tourney) map {
           case Left(err)  => println(s"testCase: ${testCase} error -> ${err}") 
           case Right(res) => println(s"testCase: ${testCase} result: ${res}") 
         }

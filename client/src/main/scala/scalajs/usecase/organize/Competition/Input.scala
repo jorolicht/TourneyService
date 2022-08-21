@@ -54,12 +54,12 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     import org.scalajs.dom.document
 
     def getRow(coId: Long, coPhId: Int, game: Int):HTMLElement = {
-      val rowBase = getElemById(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+      val rowBase = getElemById_(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]
       rowBase.querySelector(s"[data-game_${game}='row']").asInstanceOf[HTMLElement]    
     }  
     
     def getRowBase(coId: Long, coPhId: Int):HTMLElement = {
-      getElemById(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]   
+      getElemById_(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]   
     } 
 
     val trny = App.tourney
@@ -199,10 +199,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //
   //  COMMON-SECTION
   //
-  // setInputFrame for a competition, coId != 0
+  // init input for a competition, coId != 0
   def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
-    //debug("setFrame", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists(s"Input_${coId}_${coPhId}")) {
+    debug("init", s"coId: ${coId} coPhId: ${coPhId}")
+    if (!exists_(s"Input_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val size    = trny.cophs(coId, coPhId).size
       val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
@@ -216,10 +216,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           for (rnd <- maxRnd to 0 by -1) {
             val cnt = scala.math.pow(2, rnd-1).toInt.max(1) 
             val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}"
-            setHtml(tableElem, "")
+            BasicHtml.setHtml_(tableElem, "")
             for (j<-1 to cnt) {
               gameNo = gameNo + 1
-              val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+              val rowElem = getElemById_(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${gameNo}", "row") 
               setHtml(rowElem, clientviews.organize.competition.input.html.KoMatchEntry(coId, coPhId, gameNo, winSets))
             }
@@ -232,8 +232,9 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }
   }
 
-
+  // update input for a competition, coId != 0
   def update(coId: Long, coPhId: Int) (implicit trny: Tourney) = {
+    debug("update", s"coId: ${coId} coPhId: ${coPhId}")
     trny.cophs(coId, coPhId).coPhTyp match {
       case CPT_GR => {
         val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
@@ -241,11 +242,13 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         for (rnd <- 1 to maxRnd) {
           val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}"
           setHtml(tableElem, "")
-          for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
-            val rowElem = getElemById(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
-            rowElem.setAttribute(s"data-game_${m.gameNo}", "row") 
-            setGrMatch(coId, coPhId, rowElem, m.asInstanceOf[MEntryGr])(trny)
-          }
+          try {
+            for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
+              val rowElem = getElemById_(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+              rowElem.setAttribute(s"data-game_${m.gameNo}", "row") 
+              setGrMatch(coId, coPhId, rowElem, m.asInstanceOf[MEntryGr])(trny)
+            }
+          } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
         } 
       }  
       case CPT_KO => for (m <- trny.cophs(coId, coPhId).matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo])(trny)
@@ -363,8 +366,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   def getMatchRow(m: MEntry): HTMLElement = { 
     try {
       val tableElem = m.coPhTyp match {
-        case CPT_KO  => getElemById(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
-        case CPT_GR  => getElemById(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CPT_KO  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CPT_GR  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
         case _       => dom.document.createElement("div").asInstanceOf[HTMLElement] 
       }
       tableElem.querySelector(s"[data-game_${m.gameNo}='row']").asInstanceOf[HTMLElement]

@@ -87,10 +87,13 @@ object AddonCmds extends UseCase("AddonCmds")
   }
 
 
-  def showCompPhase(coId:Int, coPhId:Int) = {
-    println(App.tourney.cophs((coId.asInstanceOf[Long], coPhId)).toString)
+  def showCompPhase() = {    
+    val (coId, coPhId) = dom.window.prompt("Enter coId and coPhId separated by comma:") match {
+      case s"${coId},${coPhId}" => (coId.toLongOption.getOrElse(0L), coPhId.toIntOption.getOrElse(0))
+      case _                    => (0L,0)
+    }
+    if (coId != 0) println(App.tourney.cophs((coId, coPhId)).toString) else println("Input error")
   }
-
 
 
 }

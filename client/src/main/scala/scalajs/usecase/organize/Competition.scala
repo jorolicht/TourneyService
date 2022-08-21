@@ -62,7 +62,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     }
 
     // set main card
-    setHtml("CompCard", CompCard(genCompetitionTblData(Trny, AppEnv.getLang), coId))
+    setHtml("CompCard", CompCard(genCompetitionTblData(App.tourney, AppEnv.getLang), coId))
  
     // set play card and select competition
     if (coId > 0) {
@@ -90,6 +90,8 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
   @JSExport 
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
+    import cats.data.EitherT
+    
     //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     debug("actionEvent", s"key: ${key}")
     key match {
@@ -104,41 +106,36 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
         debug("actionEvent", s"node id: ${elem.id} coId: ${coId}")
 
-        val pants = (Trny.pl2co.filterKeys(_._2 == coId).map { x =>
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).map { x =>
           val sno = SNO(x._2.sno) 
-          val (snoValue, name, club, ttr) = sno.getInfo(Trny.comps(coId).typ)(Trny)
+          val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
           val status = (x._2.status == Constants.PLS_REDY)
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", status, true) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
 
-        DlgCardCfgCompPhase.show(coId, coPhIdPrev, pants)(Trny) map {
-          case Left(err)           => debug("DlgCardCfgCompPhase", s"show => cancel: ${err}")
+        DlgCardCfgCompPhase.show(coId, coPhIdPrev, pants)(App.tourney) map {
+          case Left(err)     => debug("DlgCardCfgCompPhase", s"show => cancel: ${err}")
           case Right(result) => {
-            //debug("DlgCardCfgCompPhase", s"Result: ${result}")
-
-            // update ALL entries, only entries with PLS_REDY or PLS_SIGN should be affected
+            // initial configuration of competition phase
             val pantStatus = result.pants.map { p => (p.sno.value, if (p.checked) Constants.PLS_REDY else Constants.PLS_SIGN) }
-            //for (pant <- pants) Trny.pl2co((pant.sno.value, coId)).status = if (pEntry.checked) PLS_REDY else PLS_SIGN
-            setPantBulkStatus(coId, pantStatus.toList).map {
-              case Left(err)   => error("setPantBulkStatus", s"${err}")
-              case Right(res)  => {
-                println(s"Competition Phase Configuration: ${CompPhase.cfg2Name(result.config)}")
-                
-                App.tourney.addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets, result.pants.size) match {
-                  case Left(err)     => error("addCompPhase", s"${err}")
-                  case Right(coPhId) => {
-                    AppEnv.coPhIdMap(coId) = coPhId
-                    OrganizeCompetitionTab.render("Draw")
-                  }
-                }
+            val pantSelect = pantStatus.filter(_._2 == Constants.PLS_REDY).map(x => SNO(x._1))
+            (for {
+              pUpdate <- EitherT(setPantBulkStatus(coId, pantStatus.toList))
+              coph    <- EitherT(addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets, pantSelect.size))
+              draw    <- EitherT(OrganizeCompetitionDraw.initDraw(coph, pantSelect)(App.tourney))
+            } yield { (coph, draw) }).value.map {
+              case Left(err)        => error("compPhaseConfig", s"error message: ${err}")
+              case Right(finalRes)  => {
+                AppEnv.coPhIdMap(finalRes._1.coId) = finalRes._1.coPhId
+                App.execUseCase("OrganizeCompetitionDraw", "", "")
 
-                
-              }  
+                // OrganizeCompetitionTab.render("Draw")
+                // markSBEntry("OrganizeCompetitionDraw")
+                println(s"TOURNEY: \n ${App.tourney.toString()}")
+              } 
             }
-          }
-        }        
-
-        //debug("StartCompetition", s"todo start competition")
+          } 
+        }
       }
 
       case "AddCompetition"     => {    

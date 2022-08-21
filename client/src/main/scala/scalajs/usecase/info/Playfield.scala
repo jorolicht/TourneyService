@@ -30,13 +30,13 @@ object InfoPlayfield extends UseCase("InfoPlayfield")
 {
   
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    //debug("render", s"run.id: ${Trny.run.id} id: ${Trny.id}")
-    setMainContent(clientviews.info.html.PlayfieldTmpl(Trny.playfields.values.toSeq, AppEnv.msgs).toString)
+    //debug("render", s"run.id: ${App.tourney.run.id} id: ${App.tourney.id}")
+    setMainContent(clientviews.info.html.PlayfieldTmpl(App.tourney.playfields.values.toSeq, AppEnv.msgs).toString)
   }
 
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
-    setMainContent(clientviews.info.html.PlayfieldTmpl(Trny.playfields.values.toSeq, AppEnv.msgs).toString)
+    setMainContent(clientviews.info.html.PlayfieldTmpl(App.tourney.playfields.values.toSeq, AppEnv.msgs).toString)
   }
 
 }

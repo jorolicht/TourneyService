@@ -11,7 +11,7 @@ greeting                                              = Herzlich Willkommen!
 
   app.mockup                                          = false
   app.version                                         = 2022-05DE184
-  app.date                                            = 2022-07-14
+  app.date                                            = 2022-08-16
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -556,6 +556,10 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.draw.noSelection                 = Kein Wettbewerb ausgewählt.
   organize.competition.draw.noSection                   = Kein Spielabschnitt definiert.
   organize.competition.draw.invalidSection              = Konfiguration für Spielabschnitt z.Z. nicht unterstützt.
+
+  organize.competition.tab.btn.demo                         = DEMO
+  organize.competition.tab.btn.reset                        = RESET
+  organize.competition.tab.btn.start                        = START
 #END Organize Competition
 
 
@@ -948,6 +952,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 ###
 #  START Dialog Cards
 ###
+# Registration Single
   dlg.card.reg.single.Title                           = Einzel
   dlg.card.reg.single.lbl.Name                        = Name
   dlg.card.reg.single.lbl.TTR                         = TTR-Wert
@@ -963,6 +968,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.reg.single.status.participate              = teilnehmend
 
 
+# Registration Double
   dlg.card.reg.double.Title                           = Doppel
   dlg.card.reg.double.lbl.Name1                       = Name Spieler 1
   dlg.card.reg.double.plh.Name1                       = <Nachname, Vorname>
@@ -972,6 +978,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.reg.double.status.register                 = (vor-)angemeldet
   dlg.card.reg.double.status.participate              = teilnehmend
 
+# Competition Phase Configuration
   dlg.card.cfg.compphase.Title                          = Wettbewerb-Konfiguration 
   dlg.card.cfg.compphase.lbl.Selection                  = Spielsystemauswahl für {0} Teilnehmer
   dlg.card.cfg.compphase.plh.Name                       = Name Spielabschnitt
@@ -1017,8 +1024,6 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.cfg.compphase.name.2                         = Zwischenrunde
   dlg.card.cfg.compphase.name.3                         = Hauptrunde
   dlg.card.cfg.compphase.name.4                         = Trostrunde
-
-
 #END Dialog Cards
 
 

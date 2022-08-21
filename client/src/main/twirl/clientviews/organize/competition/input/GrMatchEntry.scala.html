@@ -18,11 +18,11 @@
 <td class="border text-center" contenteditable='true' data-game_@gameNo='playfield'></td>
 <td class="border text-center"></td>
 @for(i <- 0 to (winSets-1)*2){
-    <td width='30px' data-game_@gameNo='ball_@(i+1)' class="border text-center" contenteditable='true' style='font-size:small;'></td>
+  <td width='30px' data-game_@gameNo='ball_@(i+1)' class="border text-center" contenteditable='true' style='font-size:small;'></td>
 }
 <td class="border text-center" data-game_@gameNo='sets' contenteditable='true'></td>
 <td class="text-center ml-1 mr-1">
-  <button data-game_@gameNo='save' data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
+  <button id='SaveBtn_@{coId}_@{coPhId}_@{gameNo}' data-game_@gameNo='save' data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
 </td>
 <td class="text-center">
   <button data-game_@gameNo='delete' data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("DeleteMatchResult", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 

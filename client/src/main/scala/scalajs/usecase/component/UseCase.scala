@@ -46,7 +46,6 @@ abstract class UseCase(val name: String) extends BasicHtml
   def sidebar: Boolean = true
   def check(): Boolean = { true }
   def save(param: String = ""): Unit = {} 
-  def Trny = App.tourney
 
   val idBase = if (name == "") "APP" else s"APP__${name}"
   val msgBase = if (name == "") "app" else name.split("(?=[A-Z])").mkString(".").toLowerCase 

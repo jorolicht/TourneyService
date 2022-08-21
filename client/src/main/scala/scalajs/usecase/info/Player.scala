@@ -49,7 +49,6 @@ object InfoPlayer extends UseCase("InfoPlayer")
    *  @return: Seq(CompetitionInfo(id,name,cnt), Seq(PlayerInfo(number,name,club,ttr)))            
    */
   def viewCompPlayer(): Seq[(Long, String, Int, Seq[(String, String, String, String, String)])] = {
-    val tourney = Trny
 
     def getPlayerInfos(tourney: Tourney, coId: Long): Seq[(String, String, String, String, String)] = {
       val fromStatus = if (tourney.comps(coId).status > CS_RESET ) PLS_REDY else PLS_SIGN
@@ -79,8 +78,8 @@ object InfoPlayer extends UseCase("InfoPlayer")
     }
 
     (for {  
-      co      <- tourney.comps.values
-      plinfos  = getPlayerInfos(tourney, co.id) 
+      co      <- App.tourney.comps.values
+      plinfos  = getPlayerInfos(App.tourney, co.id) 
     } yield {
       (co.id, co.genName(getMsg _), plinfos.size, plinfos)
     }).toSeq.filter(_._3 > 0).sortWith(_._3 > _._3)

@@ -110,16 +110,18 @@ trait AppHelperSvc {
 
     setVisibleByAttr_("sbentry","Admin", admin)
     if (ucName != "" & ucName != "HomeMain") {
-      try {
-        val elem = document.querySelectorAll(s"[data-sbentry='${ucName}']").head.asInstanceOf[HTMLElement].parentElement
-        if (elem!=null) elem.classList.remove("collapse")
-        document.querySelectorAll(s"[data-sbtext]").map(_.asInstanceOf[HTMLElement].classList.remove("text-light"))
-        document.querySelectorAll(s"[data-sbtext='${ucName}']").map(_.asInstanceOf[HTMLElement].classList.add("text-light"))
-      } catch { case _: Throwable => Helper.warn("setSidebar", s"ucName: ${ucName}")}
+      try markSBEntry(ucName)
+      catch { case _: Throwable => Helper.warn("setSidebar", s"ucName: ${ucName}")}
     } 
     ()
   }
 
+  def markSBEntry(ucName: String) = {
+    val elem = document.querySelectorAll(s"[data-sbentry='${ucName}']").head.asInstanceOf[HTMLElement].parentElement
+    if (elem!=null) elem.classList.remove("collapse")    
+    document.querySelectorAll(s"[data-sbtext]").map(_.asInstanceOf[HTMLElement].classList.remove("text-light"))
+    document.querySelectorAll(s"[data-sbtext='${ucName}']").map(_.asInstanceOf[HTMLElement].classList.add("text-light"))
+  }
 
   def showSBMenu(name: String) = {
     val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]

@@ -45,8 +45,7 @@ case class Tourney(
   var players:    Map[Long, Player]                     = Map(),
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
-  var pl2co:      Map[(String, Long), Pant2Comp] = Map(),  // registered player in a competition key: (sno, coId)
-  //var coSects:    Map[(Long, Int), CompSection]         = Map(),  // map (coId, secId)   -> Competition Section
+  var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
   var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo)   -> Playfield
 )
@@ -429,7 +428,7 @@ case class Tourney(
    *    111 => winner of winner of start phase 
    *    ...
    */
-  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayer: Int): Either[Error, Int] = {      
+  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayer: Int): Either[Error, CompPhase] = {      
     CompPhase.get(coId, coPhId, coPhCfg, category, name, noWinSets, noPlayer) match {
       case Left(err)   => Left(err)
       case Right(coph) => {
@@ -437,7 +436,7 @@ case class Tourney(
           Left(Error("???")) 
         } else {
           cophs((coId, coph.coPhId)) = coph
-          Right(coph.coPhId)
+          Right(coph)
         }
       }
     }
