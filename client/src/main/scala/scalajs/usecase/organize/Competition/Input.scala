@@ -215,11 +215,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           var gameNo = 0
           for (rnd <- maxRnd to 0 by -1) {
             val cnt = scala.math.pow(2, rnd-1).toInt.max(1) 
-            val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}"
-            BasicHtml.setHtml_(tableElem, "")
+            val tableId = s"InputRound_${coId}_${coPhId}_${rnd}"
+            BasicHtml.setHtml_(tableId, "")
             for (j<-1 to cnt) {
               gameNo = gameNo + 1
-              val rowElem = getElemById_(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+              val rowElem = getElemById_(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${gameNo}", "row") 
               setHtml(rowElem, clientviews.organize.competition.input.html.KoMatchEntry(coId, coPhId, gameNo, winSets))
             }
@@ -240,11 +240,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val matchMap = trny.cophs(coId,coPhId).matches.groupBy(mEntry=>mEntry.round)
         val maxRnd = trny.cophs(coId, coPhId).getMaxRnds
         for (rnd <- 1 to maxRnd) {
-          val tableElem = s"InputRound_${coId}_${coPhId}_${rnd}"
-          setHtml(tableElem, "")
+          val tableId = s"InputRound_${coId}_${coPhId}_${rnd}"
+          BasicHtml.setHtml_(tableId, "")
           try {
             for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
-              val rowElem = getElemById_(tableElem).asInstanceOf[HTMLTableElement].insertRow(-1)
+              val rowElem = getElemById_(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${m.gameNo}", "row") 
               setGrMatch(coId, coPhId, rowElem, m.asInstanceOf[MEntryGr])(trny)
             }

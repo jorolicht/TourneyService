@@ -114,24 +114,26 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   }
 
 
-  def setMatch(m: MEntryGr): Boolean = { 
+  def setMatch(m: MEntryGr): Either[shared.utils.Error, Boolean] = { 
+    import shared.model.MEntry._
+    import shared.utils.Error
     val balls     = m.result.split('·')
     val sets      = getSets(balls, noWinSets)
 
     if (m.wgw._1 < 1 | m.wgw._1 > size | m.wgw._2 < 1 | m.wgw._2 > size) {
-      false 
-    } else if (m.status >= 2 & validSets(sets, noWinSets)) {
+      Left(Error("??? who-against-who invalid"))
+    } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(sets, noWinSets)) {
       results(m.wgw._1-1)(m.wgw._2-1).valid    = true
       results(m.wgw._1-1)(m.wgw._2-1).balls    = balls
       results(m.wgw._1-1)(m.wgw._2-1).sets     = sets
       results(m.wgw._1-1)(m.wgw._2-1).points   = getPoints(sets, noWinSets)
       results(m.wgw._1-1)(m.wgw._2-1).ballDiff = getBalls(balls, noWinSets)
       results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
-      true
+      Right(true)
     } else {
       results(m.wgw._1-1)(m.wgw._2-1).valid = false
       results(m.wgw._2-1)(m.wgw._1-1).valid = false   
-      true
+      Right(false)
     }
   } 
 

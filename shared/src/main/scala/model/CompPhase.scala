@@ -77,10 +77,24 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   def setMatch(m: MEntry): Unit = {  
     matches(m.gameNo-1) = m
     m.coPhTyp match {
-      case CPT_GR => if (m.asInstanceOf[MEntryGr].grId > 0 & m.asInstanceOf[MEntryGr].grId <= groups.length) {
-        groups(m.asInstanceOf[MEntryGr].grId-1).setMatch(m.asInstanceOf[MEntryGr])
-      }
-      case CPT_KO => ko.setMatch(m.asInstanceOf[MEntryKo])
+      case CPT_GR => {
+        val mtch = m.asInstanceOf[MEntryGr]
+        if (mtch.grId > 0 & mtch.grId <= groups.length) {
+          groups(mtch.grId-1).setMatch(mtch) match {
+            case Left(err)  => println(s"Error: set group match: ${err.toString}" )
+            case Right(res) => if (res) groups(mtch.grId-1).calc else println("Error: set group match, invalid param")
+          }
+        } else {
+          println("Error: set group match, invalid group Id")
+        }
+      }  
+
+
+
+      case CPT_KO => ko.setMatch(m.asInstanceOf[MEntryKo]) match {
+        case Left(err)  => println("Error: set ko match, invalid param")
+        case Right(res) => if (res) ko.calc else println("Error: set ko match, invalid param")
+      } 
  
       case _      => ()
     }

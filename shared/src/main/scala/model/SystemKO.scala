@@ -119,19 +119,22 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     }
   }
 
-  def setMatch(m: MEntry): Boolean = {
+  def setMatch(m: MEntry): Either[shared.utils.Error, Boolean] = {
     val rEntry = ResultEntry.fromMatchEntry(m)
-    if (validPos(rEntry.pos)) { results(getIndex(rEntry.pos)) = rEntry; true } else false
+    if (validPos(rEntry.pos)) { 
+      results(getIndex(rEntry.pos)) = rEntry
+      Right(true)
+    } else Right(false)
   }
 
-  def setMatch(m: MEntry, prt: (String)=>Unit): Boolean = {
+  def setMatch(m: MEntry, prt: (String)=>Unit): Either[shared.utils.Error, Boolean] = {
     val rEntry = ResultEntry.fromMatchEntry(m)
     if (validPos(rEntry.pos)) {
       prt(s"addkoMatch: index=${getIndex(rEntry.pos)} rEntry=${rEntry}")
       results(getIndex(rEntry.pos)) = rEntry
-      true
+      Right(true)
     } else {
-      false
+      Right(false)
     }
   }
   

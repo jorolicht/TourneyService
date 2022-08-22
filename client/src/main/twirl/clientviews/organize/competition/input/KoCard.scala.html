@@ -8,7 +8,7 @@
 @(coId: Long, coPhId: Int, maxRound: Int, winSets:Int)(implicit ucc: UseCaseParam)
 
 <div class="m-1">
-  <table @id(s"Input_${coId}_${coPhId}")>
+  <table id='Input_@{coId}_@{coPhId}'>
     <tbody>
       <tr class='border-bottom'>
         <th colspan='3' class="border-left border-right font-weight-bold text-center ml-1 mr-1">@msg("who_a_who")</th>
@@ -24,10 +24,8 @@
     </tbody>
 
     @for(i <- maxRound to 0 by -1) {
-      <tbody>
-        <tr><th colspan='12'><small class="font-weight-bold">@msg_(s"competition.koRound.${i}")</small></th></tr>
-      </tbody>
-      <tbody @id(s"InputRound_${coId}_${coPhId}_${i}")></tbody>
+      <tbody><tr><th colspan='12'><small class="font-weight-bold">@msg_(s"competition.koRound.${i}")</small></th></tr></tbody>
+      <tbody id='InputRound_@{coId}_@{coPhId}_@{i}'></tbody>
     } 
   </table>
 </div>

@@ -96,17 +96,13 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
       case "Demo"   => {
         val sElem = getElemById("Links").querySelector(".active").asInstanceOf[HTMLElement]
         val (coId,coPhId) = (getData(sElem,"coId",0L), getData(sElem,"coPhId",0))
-
-           // regularly update database
-        dom.window.setTimeout(() => {
-          println(s"Demo Click Button Timeout")
-          val button = getElemById_(s"SaveBtn_${coId}_${coPhId}_1").asInstanceOf[HTMLElement]
-          val ballInput1 = getElemById_(s"Input_${coId}_${coPhId}").querySelector(s"[data-game_1='ball_1']").asInstanceOf[HTMLElement]
-          ballInput1.innerText = "1"
-          button.click()
-          println(s"Timeout Demo") 
-        }, 2000)
-
+        var cnt = 0
+        App.tourney.cophs((coId,coPhId)).matches.foreach { m =>
+          if (m.status != MEntry.MS_FIN & m.status != MEntry.MS_FIX) {
+            enterDemoResult(coId, coPhId, m.gameNo, m.winSets, cnt*600)
+            cnt = cnt+1
+          }
+        }
       } 
       case "Reset"   => {
         debug("Reset", s"Reset Button press")
@@ -173,5 +169,45 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
       case _       => false
     }
   }
+
+
+  // enterDemoResult - generate demo result and put it into the input fields and
+  //                   press enter button, first enter table entry which marks 
+  //                   the beginning of the match after random time (2-4 seconds)
+  //                   enter result
+  def enterDemoResult(coId: Long, coPhId: Int, matchNo: Int, noWinSets: Int, offsetMS: Int) = {
+    import scala.collection.mutable.ArrayBuffer
+    var balls = ArrayBuffer[String]()
+    var ballElems = ArrayBuffer[HTMLElement]()
+
+    println(s"enterDemoResult match: ${matchNo}")
+    val r = scala.util.Random
+    val saveBtn = getElemById_(s"SaveBtn_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
+    val pfElem = getElemById_(s"Playfield_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
+    val result = (for (i<-0 until (noWinSets*2)+1) yield {r.nextInt(2)}).toArray
+    val (setA, setB) = result.foldLeft((0,0)) {(t,v) => if (t._1 == noWinSets | t._2 == noWinSets) (t._1, t._2) else (t._1 + v, t._2 + (v^1)) }     
+    
+    for (i<-0 until (setA+setB)) {
+      val ball = if (result(i)>0 ) s"${r.nextInt(15)}"  else s"-${r.nextInt(15)}" 
+      balls += ball
+      ballElems += getElemById_(s"Input_${coId}_${coPhId}").querySelector(s"[data-game_${matchNo}='ball_${i+1}']").asInstanceOf[HTMLElement]
+    }
+    // first set playfield to indicate running game
+    dom.window.setTimeout(() => { pfElem.innerText = s"${r.nextInt(9)+1}"; clickButton(saveBtn) }, offsetMS)
+
+    // later enter result, to finisch game
+    val playtime = offsetMS + 1000*(r.nextInt(3)+1)
+    for (i<-0 until (setA+setB)) {
+      dom.window.setTimeout(() => { ballElems(i).innerText = balls(i); if (i == setA+setB-1) clickButton(saveBtn) }, playtime + i*100)
+    }
+  }
+
+  def clickButton(btn: HTMLElement) = {
+    val bgC = btn.style.backgroundColor
+    btn.style.backgroundColor="#7F7F7F"
+    dom.window.setTimeout(() => { btn.style.backgroundColor=bgC }, 100)
+    btn.click()
+  }
   
+
 }
