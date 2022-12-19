@@ -105,7 +105,7 @@ lazy val client = (project in file("client")).settings(
     "org.typelevel"     %%% "cats-core" % "2.2.0",
     "com.chuusai"       %%% "shapeless" % "2.3.3",
     "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
-    "org.rogach"        %%% "scallop" % "4.0.2"
+    "org.rogach"        %%% "scallop" % "4.1.0"
   )
 ).enablePlugins(ScalaJSPlugin).enablePlugins(JSDependenciesPlugin)
   .dependsOn(sharedJs)

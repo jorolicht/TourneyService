@@ -17,38 +17,136 @@ import shared.utils.Routines._
  */
 
 case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPhCfg: Int, val coPhTyp: Int,     
-                     var status: Int, var enabled: Boolean, var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
+                     var status: Int, var demo: Boolean, var size: Int, var noPlayers: Int, noWinSets: Int = 3) {
   import CompPhase._
   
   var matches      = ArrayBuffer[MEntry]()
+  var mFinished    = 0
+  var mTotal       = 0
+    
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
 
-  def encode = write[CompPhaseTx](toTx())
-
-  def getMaxRnds(): Int = {
-    coPhTyp match {
-      case CPT_GR => if (groups(0).size % 2 == 0) groups(0).size - 1 else groups(0).size
-      case CPT_KO => { 
-        size match {
-          case 2                          =>   1
-          case x if (3  <= x && x <= 4)   =>   2
-          case x if (5  <= x && x <= 8)   =>   3
-          case x if (9  <= x && x <= 16)  =>   4
-          case x if (17 <= x && x <= 32)  =>   5
-          case x if (33 <= x && x <= 64)  =>   6
-          case x if (65 <= x && x <= 128) =>   7
-          case _                          =>  -1
-        }
-      }
-      case _      => 0
-    }  
+  //*****************************************************************************
+  // Status Routines
+  //*****************************************************************************
+  def setStatus():Unit = { 
+    mFinished = matches.foldLeft(0) ((cnt, m) => if (m.finished) cnt + 1 else cnt)
+    mTotal    = matches.size
+    status match {
+      case CPS_UNKN => println(s"ERROR: CompPhase.setStatus -> status=${status}" ) 
+      case CPS_AUS  => if (mFinished == mTotal) println(s"ERROR: CompPhase.setStatus -> status=${status}" )   
+      case CPS_EIN  => if (mFinished == mTotal) setStatus(CPS_FIN)
+      case CPS_FIN  => if (mFinished < mTotal)  setStatus(CPS_EIN)  
+      case CPS_DEP  => if (mFinished < mTotal)  println(s"ERROR: CompPhase.setStatus -> status=${status}" )     
+    }
   }
 
-  def setStatus(value: Int) = { status = value }
+  def setStatus(value: Int):Unit = { status = value }
   def getStatus             = status
 
-  def gameNoExists(gameNo: Int): Boolean =  (gameNo>0) && (gameNo <= matches.size)
+  // getStatusText - only for debug purposes
+  def getStatusTxt = status match {
+      case CPS_UNKN => "UNKNOWN"
+      case CPS_AUS  => "DRAW"  
+      case CPS_EIN  => "INPUT"
+      case CPS_FIN  => "FINISHED"  
+      case CPS_DEP  => "DEPENDEND STARTED"     
+    }
+
+  //*****************************************************************************
+  // Draw/Init Routines
+  //*****************************************************************************
+  def draw(pants: ArrayBuffer[ParticipantEntry], compTyp: Int): Either[Error, Boolean] = {
+    coPhCfg match {
+      case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
+        noPlayers = pants.size
+        drawGr(pants, Group.genGrpConfig(coPhCfg, pants.size).toList) match {
+          case Left(err)  => Left(err)
+          case Right(res) => initGrMatches(compTyp) match {
+            case Left(err)  => Left(err)
+            case Right(res) => setStatus(CPS_AUS); Right(res)
+          }
+        }
+      }
+      case CPC_KO | CPC_SW  => { 
+        Left(Error("???"))
+      }  
+      case _          => Left(Error("???"))
+    }
+  
+  }
+
+  // initialie draw for group configurations 
+  def drawGr(pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig]): Either[Error, Boolean] = {
+    // generate groups
+    groups = ArrayBuffer[Group]() 
+    for (gEntry <- grpCfg) { groups = groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
+    val noGroups = groups.size
+
+    // calculate average pant rating
+    val (sum, cnt, maxRating) = pants.foldLeft((0,0,0))((a, e) => if (e.rating == 0) (a._1, a._2, a._3) else (a._1 + e.rating, a._2+1, e.rating.max(a._3) ) )
+    val avgPantRating = sum/cnt
+
+    // Step 0 - init effective rating, pant with no rating get average rating
+    for (i <- 0 until pants.size) { pants(i).effRating = if (pants(i).rating == 0) avgPantRating else pants(i).rating   }
+
+    // Step 1  - init club name occurence in pants
+    val clubOccuMap = scala.collection.mutable.Map[String, Int]().withDefaultValue(0) 
+    pants.map(pant => { if (pant.club != "") clubOccuMap(pant.club) = clubOccuMap(pant.club) + 1 } )
+    for (i <- 0 until pants.size) { pants(i).occu = clubOccuMap(pants(i).club) }
+
+    // Step 2 - position the best players, one in each group  (take given rating)
+    val (pantsS1, pantsS2) = pants.sortBy(_.rating).reverse.splitAt(noGroups)
+    for (i <- 0 until pantsS1.size) {  groups(i).addPant(pantsS1(i), avgPantRating) }
+
+    // Step 3 - position players with highest occurence and ascending rating
+    //val (pantsS3, pantsS4) = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating).splitAt(noGroups)
+    //val pantsS3 = pantsS2.sortBy(x => (pants.size + 1 - x.occu) * maxRating + x.effRating)    
+    val pantsS3 = pantsS2.sortBy(_.rating)
+
+    for (i <- 0 until pantsS3.size) {
+      val ratings = getMinOccBestAvg(pantsS3(i), groups, pants.size, MAX_RATING, noGroups, avgPantRating)  
+      // get index of biggest element
+      val bestRatingPos = ratings.zipWithIndex.maxBy(_._1)._2
+      groups(bestRatingPos).addPant(pantsS3(i), avgPantRating)
+    }
+
+    // Step 3: sort group according to pant rating
+    for (i <- 0 until noGroups) { groups(i).pants.sortInPlaceBy(x => - x.rating) } 
+    val lastPos = groups.foldLeft(1){ (pos, g) =>  g.drawPos = pos; pos + g.size }
+    Right(true)
+  }
+
+    def initGrMatches(coTyp: Int): Either[Error, Boolean] = {
+    import shared.utils.GamePlan
+    matches = ArrayBuffer[MEntry]()
+
+    try { groups.foreach { g =>
+      val gPE = GamePlan.Group(g.size)
+      for (rnd <-1 to gPE.noRounds) { gPE.rounds(rnd-1).foreach { wgw =>
+        matches += MEntryGr.init(coId, coTyp, coPhId, coPhTyp, 0, g.pants(wgw._1-1).sno, g.pants(wgw._2-1).sno, rnd, g.grId, wgw, noWinSets)
+      }}  
+    }} catch { case _: Throwable => println("ERROR: initGrMatches exception generating matches according to plan"); Left(Error("err0197.msg.initGrMatches.generating")) }
+
+    matches = matches.sortBy(r => (r.round, r.asInstanceOf[MEntryGr].grId))
+    for (i <- 0 until matches.size) { matches(i).setGameNo(i+1) } 
+    genGrMatchDependencies() match {
+      case Left(err)  => Left(err)
+      case Right(res) => {
+        for (i <- 0 until matches.size) { if (matches(i).asInstanceOf[MEntryGr].hasDepend) { matches(i).setStatus(MEntry.MS_BLOCK)} } 
+        Right(res)
+      }
+    }
+  } 
+
+
+
+  //*****************************************************************************
+  // Match Routines
+  //*****************************************************************************
+
+  def existsMatchNo(matchNo: Int): Boolean = (matchNo>0) && (matchNo <= matches.size)
 
   def depFinished(gameNo: Int, coPhTyp: Int): Boolean = {
     coPhTyp match {
@@ -56,7 +154,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         val depend = matches(gameNo-1).asInstanceOf[MEntryGr].getDepend 
         // check if any dependend match is not yet finished
         // set new status based on dependend matches are finished
-        val depFinished = depend.map(g => if (gameNoExists(g)) matches(g-1).finished else true) 
+        val depFinished = depend.map(g => if (existsMatchNo(g)) matches(g-1).finished else true) 
         !depFinished.contains(false)
       }
       case _     => true
@@ -100,6 +198,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }
   }
   
+  
   def setMatchPropagate(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): List[Int] = { 
     import scala.collection.mutable.ListBuffer
     
@@ -128,18 +227,20 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
       case CPT_KO => {
         val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
         // propagate winner
-        if (gameNoExists(gWin) && m.finished) { 
+        if (existsMatchNo(gWin) && m.finished) { 
           setMatch(getMatch(gWin).setPant(pWin, m.getWinner).setStatus(true))
           triggerList.append(gWin)
         }  
         // propagate looser i.e. 3rd place match
         val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
-        if (gameNoExists(gLoo) && m.finished) {
+        if (existsMatchNo(gLoo) && m.finished) {
           setMatch(getMatch(gLoo).setPant(pLoo, m.getLooser).setStatus(true))
           triggerList.append(gLoo)
         }
       }
     }
+
+    setStatus() 
     triggerList.toList
   }
 
@@ -204,17 +305,17 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         // propagate deletion of that position
         val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
         println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
-        if (gameNoExists(gWin)) { triggerList ++= resetMatchPropagate(gWin, pWin==0, pWin==1 ) }  
+        if (existsMatchNo(gWin)) { triggerList ++= resetMatchPropagate(gWin, pWin==0, pWin==1 ) }  
 
         // propagate looser i.e. 3rd place match
         val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
         println(s"propagate looser gameNo: ${gLoo} position: ${pWin}")
-        if (gameNoExists(gLoo)) { triggerList ++= resetMatchPropagate(gLoo, pLoo==0, pLoo==1 ) } 
+        if (existsMatchNo(gLoo)) { triggerList ++= resetMatchPropagate(gLoo, pLoo==0, pLoo==1 ) } 
       }
     }
+    setStatus() 
     triggerList.toList
-  } 
-
+  }
 
   // calculate players position within competition phase
   def calcModel(grId: Int = -1): Boolean = {
@@ -311,6 +412,38 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   }
 
 
+  //*****************************************************************************
+  // General Routines
+  //*****************************************************************************
+
+  def encode = write[CompPhaseTx](toTx())
+
+  def toTx(): CompPhaseTx = {
+    CompPhaseTx(name, coId, coPhId, coPhCfg, coPhTyp, status, demo, size, noPlayers, noWinSets, matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
+  }
+
+
+  def getMaxRnds(): Int = {
+    coPhTyp match {
+      case CPT_GR => if (groups(0).size % 2 == 0) groups(0).size - 1 else groups(0).size
+      case CPT_KO => { 
+        size match {
+          case 2                          =>   1
+          case x if (3  <= x && x <= 4)   =>   2
+          case x if (5  <= x && x <= 8)   =>   3
+          case x if (9  <= x && x <= 16)  =>   4
+          case x if (17 <= x && x <= 32)  =>   5
+          case x if (33 <= x && x <= 64)  =>   6
+          case x if (65 <= x && x <= 128) =>   7
+          case _                          =>  -1
+        }
+      }
+      case _      => 0
+    }  
+  }
+
+  // getDescription of competition phase
+  def getDescription(getMsg: (String, Seq[String])=>String) = CompPhase.getDescription(coPhCfg, noPlayers, getMsg)
 
   // print readable competition phase - for debug purposes
   override def toString() = {
@@ -324,7 +457,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }
 
     val str = new StringBuilder(s"${name} (coId:${coId}) coPhId: ${coPhId} coPhCfg: ${CompPhase.cfg2Name(coPhCfg)} typ:${coPhTyp}\n")
-    str.append(s"status: ${CompPhase.status2Name(status)} enabled: ${enabled} noPlayers: ${noPlayers} noWinSets: ${noWinSets}\n") 
+    str.append(s"status: ${CompPhase.status2Name(status)} demo: ${demo} noPlayers: ${noPlayers} noWinSets: ${noWinSets}\n") 
     str.append(s"${matches2Str()}\n") 
 
     coPhTyp match {
@@ -335,13 +468,13 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     str.toString
   }  
 
-  def toTx(): CompPhaseTx = {
-    CompPhaseTx(name, coId, coPhId, coPhCfg, coPhTyp, status, enabled, size, noPlayers, noWinSets, 
-                matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
-  }
 }
 
 
+
+//*****************************************************************************
+// Companion Object
+//*****************************************************************************
 object CompPhase {
   // Competition Phase Category
   val Category_Start  = 0
@@ -356,7 +489,7 @@ object CompPhase {
   val CPT_SW   = 3  // Switzsystem
 
   // Competition Phase Config (from 0 to 9 old values for compatibility)
-  val CPC_UNKN     = -99  
+  val CPC_UNKN     =  -1  
   val CPC_INIT     =   0
   val CPC_VRGR     =   1
   val CPC_ZRGR     =   2
@@ -394,29 +527,18 @@ object CompPhase {
     str => fromTx(read[CompPhaseTx](str))
   )
 
-  def get(coId: Long, prevId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayers: Int): Either[Error, CompPhase] = {  
-    // generate new coPhId
-    val coPhId = category match {
-      case CompPhase.Category_Start  => if (prevId == 0) 1 else 0
-      case CompPhase.Category_Winner => if (prevId > 0) (prevId*2 + 1) else 0
-      case CompPhase.Category_Looser => if (prevId > 0) (prevId*2) else 0
-      case _                         => 0
+  def get(): CompPhase = CompPhase("",0L,0,0,0,0,false,0,0,0)
+    
+  def get(coId: Long, coPhId: Int, coPhCfg: Int, name: String, noWinSets: Int, noPlayers: Int=0): CompPhase = {  
+    val coPhTyp  = CompPhase.cfg2typ(coPhCfg)
+    val coSize   = coPhTyp match {
+      case CPT_GR => noPlayers
+      case CPT_KO => genKOSize(noPlayers)
+      case CPT_SW => noPlayers  + noPlayers%2
+      case _      => 0
     }
-    if (coPhId == 0) {
-      Left(Error("???"))
-    } else {
-      val coPhTyp  = CompPhase.cfg2typ(coPhCfg)
-      val coSize   = coPhTyp match {
-        case CPT_GR => noPlayers
-        case CPT_KO => genKOSize(noPlayers)
-        case CPT_SW => noPlayers  + noPlayers%2
-        case _      => 0
-      }
-     val coph = CompPhase(name, coId, coPhId, coPhCfg, coPhTyp, CPS_UNKN, true, coSize, noPlayers, noWinSets )
-     Right(coph)
-    }
+    CompPhase(name, coId, coPhId, coPhCfg, coPhTyp, CPS_UNKN, true, coSize, noPlayers, noWinSets )
   }
-
 
   def decode(coPhStr: String): Either[Error, CompPhase] = 
     try Right(fromTx(read[CompPhaseTx](coPhStr)))
@@ -427,7 +549,7 @@ object CompPhase {
     import scala.collection.mutable.HashSet
     import shared.model.Competition._
 
-    val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, tx.coPhCfg, tx.coPhTyp, tx.status, tx.enabled, tx.size, tx.noPlayers, tx.noWinSets) 
+    val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, tx.coPhCfg, tx.coPhTyp, tx.status, tx.demo, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.matches = tx.matches.map(x=>x.decode)
 
     cop.coPhTyp match {
@@ -519,6 +641,30 @@ object CompPhase {
       case _           => "UNKNOWN(x)"
     }  
   }
+
+  def getDescription(coPhCfg: Int, noPlayers: Int, getMsg: (String, Seq[String])=>String): String = {
+    import shared.model.Group
+    import shared.model.KoRound
+
+    def getMsgNumber(value: Int): String = {
+      if (value > 0 && value < 10) getMsg(s"number.${value}",Seq()) else value.toString
+    }
+
+    coPhCfg match {
+      case CPC_GRPS3  => { val size1 = noPlayers / 3; getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1))) }   
+      case CPC_GRPS34 => { val (size1, size2) = Group.genGrpSplit(noPlayers, 3); getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1), getMsgNumber(size2))) }
+      case CPC_GRPS4  => { val size1 = noPlayers / 4; getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1))) } 
+      case CPC_GRPS45 => { val (size1, size2) = Group.genGrpSplit(noPlayers, 4); getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1), getMsgNumber(size2))) } 
+      case CPC_GRPS5  => { val size1 = noPlayers / 5; getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1))) }
+      case CPC_GRPS56 => { val (size1, size2) = Group.genGrpSplit(noPlayers, 5); getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1), getMsgNumber(size2))) }   
+      case CPC_GRPS6  => { val size1 = noPlayers / 6; getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1))) }
+      case CPC_KO     => { getMsg(s"competition.phase.description.${coPhCfg}", Seq(KoRound.getSize(noPlayers).toString)) }
+      case CPC_SW     => { val size1 = noPlayers+(noPlayers%2); getMsg(s"competition.phase.description.${coPhCfg}", Seq(getMsgNumber(size1))) }
+      case CPC_JGJ    => { getMsg(s"competition.phase.description.${coPhCfg}", Seq(noPlayers.toString)) }
+      case _          => { getMsg(s"competition.phase.description.000", Seq()) }
+    }
+  }
+
 }
 
 
@@ -532,7 +678,7 @@ case class CompPhaseTx(
   val coPhCfg:   Int, 
   val coPhTyp:   Int,
   val status:    Int,
-  var enabled:   Boolean, 
+  var demo:      Boolean, 
   var size:      Int, 
   val noPlayers: Int,
   val noWinSets: Int,

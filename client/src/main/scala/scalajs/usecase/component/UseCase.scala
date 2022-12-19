@@ -52,8 +52,14 @@ abstract class UseCase(val name: String) extends BasicHtml
   val expName = if (name == "") "App" else name
   val dataAttrPref = if (name == "") "app" else name.split("(?=[A-Z])").mkString("-").toLowerCase
 
-  implicit val ucp=UseCaseParam(idBase, msgBase, expName, dataAttrPref, BasicHtml.getMsg_ _ ) 
-
+  implicit val ucp=UseCaseParam(idBase, msgBase, expName, dataAttrPref, AppEnv.getMessage _ ) 
+  
+  def getCompEnv(elem: HTMLElement):(CompPhase, Long, Int) = {
+    try {
+      val (coId, coPhId) = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
+      (App.tourney.cophs((coId, coPhId)), coId, coPhId)
+    } catch { case _: Throwable => error(s"getCompEnv", s"data elements for coId and coPhId not found"); (CompPhase.get() ,0L ,0) }  
+  }
 }
 
 object UseCase {

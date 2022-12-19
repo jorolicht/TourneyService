@@ -1,8 +1,6 @@
 package scalajs.usecase.dialog
 
 // Start TestCases
-// DlgCardCfgSection: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=1#
-//                    http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=4#
 //                                       
 
 import scala.collection.mutable.{ ArrayBuffer }
@@ -27,7 +25,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, CompPhase, Player, PantSelect, SNO }
+import shared.model.{ Tourney, CompPhase, Player, SNO, Participant, Pant }
 import shared.model.CompPhase._
 import shared.utils._
 import clientviews.dialog.DlgCardCfgCompPhase.html
@@ -35,27 +33,25 @@ import clientviews.dialog.DlgCardCfgCompPhase.html
 
 @JSExportTopLevel("DlgCardCfgCompPhase")
 object DlgCardCfgCompPhase extends BasicHtml 
-  with TourneySvc with DrawSvc
+  with TourneySvc 
 {
   this: BasicHtml =>
-  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int, var pants: ArrayBuffer[PantSelect])
+  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int)
+  case class PantSelect(sno: SNO, name: String, info: String, var checked: Boolean)
 
-  implicit val ucp     = UseCaseParam("APP__DlgCardCfgCompPhase", "dlg.card.cfg.compphase", "DlgCardCfgCompPhase", "dlgcardcfgcompphase", scalajs.AppEnv.getMessage _ )
-  private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
+  implicit val ucp  = UseCaseParam("APP__DlgCardCfgCompPhase", "dlg.card.cfg.compphase", "DlgCardCfgCompPhase", "dlgcardcfgcompphase", scalajs.AppEnv.getMessage _ )
 
-  var coId:      Long   = 0L
-  var preCoPhId: Int    = 0
-  var size:      Int    = 0
-  var pants             = new ArrayBuffer[PantSelect]()
+  var coId  = 0L
+  var size  = 0
+  var pants = new Array[PantSelect](0)
 
-  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0, new ArrayBuffer[PantSelect]() )
+  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0)
 
 
   /** show dialog returns either tupel result or an error
    *  result tupel (name, config, category, winSets, pants)
    */
-  def show(coIdP: Long, preCoPhIdP: Int, pantsP: ArrayBuffer[PantSelect])
-    (implicit trny: Tourney): Future[Either[Error, Result]] = 
+  def show(coIdInput: Long)(implicit trny: Tourney): Future[Either[Error, Result]] = 
   {
     val p = Promise[Boolean]()
     val f = p.future
@@ -77,21 +73,31 @@ object DlgCardCfgCompPhase extends BasicHtml
       }
     }
     
-    load()
-    coId         = coIdP
-    preCoPhId    = preCoPhIdP
-    pants        = pantsP
-    result.pants = pants.filter(_.checked)
-    size         = pants.filter(_.checked).size
-    setView()
+    // load modal dialog if necessary
+    if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
+    coId = coIdInput
+
+    // initialize participants to be shown 
+    // only participants with status signed or ready
+    pants = (trny.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.SIGN || x2.status == Pant.REDY } map { x =>
+      val sno = SNO(x._2.sno) 
+      val (snoValue, name, club, ttr) = sno.getInfo(trny.comps(coId).typ)
+      val enabled = (x._2.status == Pant.REDY)
+      // show name, club name and ttr value
+      PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled) 
+    }).to(Array).sortBy(x => (!x.checked, x.name))
+
+    size = pants.filter(_.checked).size
+    //set pant view - init view for participant selection
+    setHtml("PantTbl", html.Pants(pants))
+    setMainView(size)
 
     // register routines for cancel and submit
     $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
     $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
     $(getId("Modal","#")).modal("show")
 
-    f.map(x => Right(result))
-     .recover { case e: Exception =>  Left(Error(e.getMessage)) }
+    f.map(x => Right(result)).recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
 
 
@@ -102,23 +108,17 @@ object DlgCardCfgCompPhase extends BasicHtml
       case "Selection" => { 
         val cst = getInput("CfgSelection", CPC_UNKN)  // competition phase category
         setDisabled("Submit", cst == CPC_UNKN)
-        setHtml("CfgInfo", options2msg(cst, size)) 
-        setInput("CfgName", genCfgName(cst, preCoPhId, (preCoPhId==0) || getRadioBtn("WinLoo", false)))
-      }
-
-      case "Winner" | "Looser" => {
-        val cst = getInput("CfgSelection", CPC_UNKN)
-        setInput("CfgName", genCfgName(cst, preCoPhId, (preCoPhId==0) || getRadioBtn("WinLoo", false)))
+        setHtml("CfgInfo", CompPhase.getDescription(cst, size, getMsg_ )) 
+        setInput("CfgName", genCfgName(cst, 0, true))
       }
       
       case "Check" => elem.asInstanceOf[Input].value.toIntOption match {
         case None        => error("actionEvent", s"key: 'Check' - invalid index ")
         case Some(index) => {
           pants(index).checked = elem.asInstanceOf[Input].checked
-          result.pants = pants.filter(_.checked)
           size = pants.filter(_.checked).size
-          setViewInfoOption(size)
-          debug("actionEvent", s"value: size: ${size} ${index}  ${result.pants(index).checked} ")
+          setMainView(size)
+          debug("actionEvent", s"value: size: ${size} ${index}  ${pants(index).checked} ")
         }
       }
 
@@ -132,30 +132,23 @@ object DlgCardCfgCompPhase extends BasicHtml
   /** validate input configuration input return selected option or a List of Errors
    * 
    */ 
-  def validate(): Either[Error, Boolean] = {
+  def validate()(implicit trny: Tourney): Either[Error, Boolean] = {
     result.config  = getInput("CfgSelection", CPC_UNKN)
     result.name    = getInput("CfgName", "")
     result.winSets = getInput("CfgWinset", 0)
-    
-    //winSets = getInput()
-    if (result.config == CPC_UNKN) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
+
+    //set participant status 
+    pants.foreach { entry => trny.setPantStatus(coId, entry.sno.value, if (entry.checked) Pant.REDY else Pant.SIGN) }
+    if (result.config == CPC_UNKN || result.name == "" || result.winSets == 0 ) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
   }
 
-  // set possible configuration section 
-  def setView()(implicit trny: Tourney): Unit = {
-    // for now switch off looser round
-    // setVisible("BtnRadioWinLoo", coPhId != 0)
-    setVisible("BtnRadioWinLoo", false)
-    setViewInfoOption(size)
-    setHtml("PantTbl", html.Pants(result.pants.toArray))
-  }
   
-  // setViewInfoOption
-  def setViewInfoOption(size: Int): Unit = {
+  // setMainView
+  def setMainView(size: Int): Unit = {
     val cfgOptions = sysOptions(size)
     val selOptions = new StringBuilder(s"<option value='${CPC_UNKN}' selected>---</option>")
     for (cfg <- cfgOptions) {
-      val msg= getMsg(s"option.${cfg}")
+      val msg = getMsg(s"option.${cfg}")
       selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
     }
     setHtml("lbl.Selection", getMsg("lbl.Selection", size.toString)) 
@@ -200,31 +193,13 @@ object DlgCardCfgCompPhase extends BasicHtml
     }
   }
 
-  // options2msg - convert option to message
-  def options2msg(option: Int, noPlayer: Int): String = {
-    import shared.model.Group
-    option match {
-      case CPC_GRPS3  => { val size1 = noPlayer / 3; getMsg(s"option.info.${option}", size1.toString) }   
-      case CPC_GRPS34 => { val (size1, size2) = Group.genGrpSplit(noPlayer, 3); getMsg(s"option.info.${option}", size1.toString, size2.toString) }
-      case CPC_GRPS4  => { val size1 = noPlayer / 4; getMsg(s"option.info.${option}", size1.toString) } 
-      case CPC_GRPS45 => { val (size1, size2) = Group.genGrpSplit(noPlayer, 4); getMsg(s"option.info.${option}", size1.toString, size2.toString) } 
-      case CPC_GRPS5  => { val size1 = noPlayer / 5; getMsg(s"option.info.${option}", size1.toString) }
-      case CPC_GRPS56 => { val (size1, size2) = Group.genGrpSplit(noPlayer, 5); getMsg(s"option.info.${option}", size1.toString, size2.toString) }   
-      case CPC_GRPS6  => { val size1 = noPlayer / 6; getMsg(s"option.info.${option}", size1.toString) }
-      case CPC_KO     => { getMsg(s"option.info.${option}", genKOSize(noPlayer).toString) }
-      case CPC_SW     => { val size1 = noPlayer+(noPlayer%2); getMsg(s"option.info.${option}", size1.toString) }
-      case CPC_JGJ    => { getMsg(s"option.info.${option}", noPlayer.toString) }
-      case _          => { getMsg(s"option.info.2") }
-    }
-  }
-
   // genCfgName - generate configuration name proposal
   def genCfgName(option: Int, coPhId: Int, winner: Boolean=true): String = {
     option match {
       case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6  => {
         if      (coPhId == 0)  { getMsg(s"name.1") } 
-        else if (winner)        { getMsg(s"name.2") } 
-        else                    { getMsg(s"name.4") }
+        else if (winner)       { getMsg(s"name.2") } 
+        else                   { getMsg(s"name.4") }
       }
       case CPC_KO | CPC_SW | CPC_JGJ => if (winner) getMsg(s"name.3") else getMsg(s"name.4") 
       case CPC_UNKN                  => ""

@@ -11,7 +11,7 @@ import play.api.{ Environment, Configuration, Logger }
 import play.api.i18n.Messages
 
 import shared.model._
-import shared.utils.Constants._
+import shared.model.Tourney._
 import shared.utils.Routines._
 import shared.utils._
 import models.daos.TourneyDAO
@@ -35,7 +35,6 @@ import models.daos.TourneyDAO
  *  def clean()(implicit  ec: ExecutionContext, env: Environment): Unit
  * 
  */
-
 
 // Tourney Input Output (Information Cache)
 object TIO {
@@ -266,7 +265,7 @@ object TIO {
     val endDate   = if (eDate==0) date2Int(ctt.endDate)  else eDate
 
     val tb = TournBase(ctt.name, organizer, orgDir, startDate, endDate, ctt.ident, 
-                       TT_TT, true, contact, address, 0)
+                       TTY_TT, true, contact, address, 0)
     tonyDao.insertOrUpdate(tb).map { tony => 
       if (tony.id > 0) {
         tourney(tony.id) = Tourney.init(tony)

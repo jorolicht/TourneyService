@@ -353,7 +353,7 @@ object InputCtrl extends BasicHtml
 
       case _         => {
         val value1 = elem.value
-        val value2 = getInput_(auxId, "")
+        val value2 = getInput(s"_${auxId}", "")
         val id = elem.id
         showHlp_(id, false)
 

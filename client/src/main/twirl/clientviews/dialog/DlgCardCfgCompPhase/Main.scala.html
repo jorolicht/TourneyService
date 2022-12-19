@@ -51,17 +51,6 @@
             <div class="form-group col-sm-6 mb-2">
             </div>
           </div>
-
-          <div @id("BtnRadioWinLoo") class="form-row mb-2"> <!--  Row 3 - Optional Winner/Looser -->
-            <div class="form-group col-sm-12 mb-0" style="line-height:0.8;">
-              <small>Teilnehmerauswahl für nächsten Abschnitt auf Basis der Ergebnisse der vorherigen Runde.</small>  
-              <input type="radio" @id("Winner") class="" @name("WinLoo") value="true" checked @actionEvent("Winner", "onchange")>
-              <label class="mb-0 pb-0 pt-0 col-form-label-sm" @forAttr("Winner")>Gewinner</label>
-              <input type="radio" @id("Looser") class="" @name("WinLoo") value="false" @actionEvent("Looser", "onchange")>
-              <label class="mb-0 pb-0 pt-0 col-form-label-sm" @forAttr("Looser") >Verlierer</label>                 
-            </div>
-          </div>
-
         </div>
       </div>
      

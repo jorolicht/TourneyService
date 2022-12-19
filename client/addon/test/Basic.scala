@@ -38,9 +38,21 @@ object AddonBasic extends UseCase("AddonBasic")
   
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def testHello(text: String) = s"Hello ${text}!"
+  def execTest(number: Int, param: String)= {
+    number match {
+      case 0 => test_0(param)
+      case 1 => test_1(param)
+      case 2 => test_2()
+      case _ => println("Invalid BASIC test option")
+    }
+  }
 
-  def testDate(testDate: String): String = {
+
+  // Test 0 - hello world
+  def test_0(text: String) = s"Hello ${text}!"
+
+  // Test 1 - date formatting
+  def test_1(testDate: String): String = {
     import java.time._
     import java.time.format.DateTimeFormatter
 
@@ -54,6 +66,23 @@ object AddonBasic extends UseCase("AddonBasic")
     val newDate    = sourceDate.plusDays(10)                   // Adding 10 days to source date.
     val formatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd") // Setting date format
     newDate.format(formatter)
+  }
+
+  // Test 2 - matching types in scalajs
+  def test_2() = {
+    def fun[T](data:T)= data match{
+      case _:Int => "Int"
+      case _:Double => "Double"
+      case _:String => "String"
+      case _ => "Undefined"
+    } 
+
+    val x = 5.6
+    val y = "hero"
+    val z = 234
+    println(fun(x))
+    println(fun(y))
+    println(fun(z))
   }
 
 }

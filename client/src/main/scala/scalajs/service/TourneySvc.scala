@@ -396,7 +396,7 @@ trait TourneySvc extends WrapperSvc
         case Left(err)  => Left(err)
         case Right(err) => { App.tourneyUpdate = true; App.tourney.setPantBulkStatus(coId, pantStatus) }
       }  
-    }    
+    }
 
 
   //
@@ -474,8 +474,8 @@ trait TourneySvc extends WrapperSvc
   //
   //  COMPETITION PHASE Interface
   //
-  def addCompPhase(coId: Long, coPhIdPrev: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayer: Int): Future[Either[Error, CompPhase]] = 
-    App.tourney.addCompPhase(coId, coPhIdPrev, coPhCfg, category, name, noWinSets, noPlayer) match {
+  def addCompPhase(coId: Long, coPhIdPrev: Int, coPhCfg: Int, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
+    App.tourney.addCompPhase(coId, coPhIdPrev, coPhCfg, name, noWinSets) match {
       case Left(err)  => Future(Left(err))
       case Right(res) => Future(Right(res))
     }

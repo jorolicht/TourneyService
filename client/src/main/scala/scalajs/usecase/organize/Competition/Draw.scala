@@ -38,6 +38,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   with TourneySvc
 {
   import org.scalajs.dom.raw.HTMLElement
+
   import scala.collection.mutable.ListBuffer
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
@@ -47,13 +48,10 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
   @JSExport 
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
-    debug("actionEvent", s"key: ${key}")
+    val (coPhase, coId, coPhId) = getCompEnv(elem) 
+    debug("actionEvent", s"key: ${key} coId: ${coId} coPhId: ${coPhId}")
     key match {
       case "DrawRefresh"   => {
-        debug("Refresh", s"key: ${key}")
-
-        // set coId if a new is available
-        val (coId, coPhId)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
         val drawElements = getElemById_(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
         val asign = (for ( i <- 0 to drawElements.length-1) yield {
           val elem = drawElements.item(i).asInstanceOf[HTMLElement]
@@ -64,39 +62,41 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         else if (diff.size == 1) DlgBox.showStd(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
         else                     DlgBox.showStd(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
       } 
+      case "Start"   => {
+        App.tourney.cophs((coId,coPhId)).setStatus(CPS_EIN)
+        App.execUseCase("OrganizeCompetitionInput", "", "")        
+      }
     }
   }
 
-
-  //update view for draw, input player list with (pos, SNO, Name, Club, TTR)
-  def update(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
-    // first get the base element identified by coId and coPhId
-    val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
-
-    // generate draw frame
-    trny.cophs(coId, coPhId).coPhTyp match {
-      case CPT_GR => updateGrView(base, trny.cophs(coId, coPhId).groups)  
-      case CPT_KO => updateKoView(base, trny.cophs(coId, coPhId).ko)
-      case CPT_SW => {}
-      case _      => {}
-    }
-  }
-
-
-  // init frame for a competition, coId != 0 and coPhId != 0
-  def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
+  // set draw page for a competition phase (round), coId != 0 and coPhId != 0
+  def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists_(s"Draw_${coId}_${coPhId}")) {
-      val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
-      val size    = trny.cophs(coId, coPhId).size
-      val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
+      // init view
+      val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val size    = coPhase.size
+      val coPhTyp = coPhase.coPhTyp
       // generate draw frame
       coPhTyp match {
-        case CPT_GR => elem.innerHTML = clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, trny.cophs(coId, coPhId).groups).toString
-        case CPT_KO => elem.innerHTML = clientviews.organize.competition.draw.html.KOCard(coId, coPhId, trny.cophs(coId, coPhId).ko).toString
-        case CPT_SW => elem.innerHTML = clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size).toString
-        case _      => elem.innerHTML = showAlert(getMsg("invalidSection"))
+        case CPT_GR => setHtml(elem, clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, coPhase.groups))
+        case CPT_KO => setHtml(elem, clientviews.organize.competition.draw.html.KOCard(coId, coPhId, coPhase.ko))
+        case CPT_SW => setHtml(elem, clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size))
+        case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
+    } else { 
+      // update view
+      val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+      coPhase.coPhTyp match {
+        case CPT_GR => {
+          setVisible(s"${coId}_${coPhId}", (coPhase.status == CompPhase.CPS_AUS) )(UCP("DrawStartBtn"))
+          updateGrView(base, coPhase.groups)
+        }
+
+        case CPT_KO => updateKoView(base, coPhase.ko)
+        case CPT_SW => {}
+        case _      => {}
+      }    
     }
   }
 
@@ -108,7 +108,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
     // reset drawpos to original value    
     val drawPosElem = elem.querySelector(s"[data-drawPos]").asInstanceOf[HTMLElement]
-    drawPosElem.innerHTML = getData(drawPosElem, "drawPos")
+    drawPosElem.innerHTML = getData(drawPosElem, "drawPos", "")
   } catch { case _: Throwable => error("setDrawPosition ", s"Pos: ${pantPos} Pant: ${pant.sno} ${pant.name} [${pant.club}]") }
 
 
@@ -146,24 +146,24 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   }
 
 
-  def initDraw(coph: CompPhase, pants: ArrayBuffer[SNO])(implicit trny: Tourney): Future[Either[Error, Boolean]] = {
+  def initDraw(pants: ArrayBuffer[ParticipantEntry], compTyp: Int)(implicit coph: CompPhase): Future[Either[Error, Boolean]] = {
     coph.coPhCfg match {
       case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
-        initGrDraw(coph, pants.map(_.getPantEntry(coph.coId)), Group.genGrpConfig(coph.coPhCfg, pants.size).toList) match {
+        initGrDraw(coph, pants, Group.genGrpConfig(coph.coPhCfg, pants.size).toList) match {
           case Left(err)  => Future(Left(err))
-          case Right(res) => initGrMatches(coph, trny.comps(coph.coId).typ) match {
+          case Right(res) => initGrMatches(coph, compTyp) match {
             case Left(err)  => Future(Left(err))
             case Right(res) => coph.setStatus(CPS_AUS); Future(Right(res))
           }
         }
       }
       case CPC_KO | CPC_SW  => { 
-        //coph.init(pants.map(_.getPantEntry(comps(coId).typ)(this))) 
         Future(Left(Error("???")))
       }  
       case _          => Future(Left(Error("???")))   
     }
   }
+
 
 
   // iniGrDraw - initialie draw for group configurations 
@@ -258,8 +258,6 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         Right(res)
       }
     }
- 
-
   } 
 
 }

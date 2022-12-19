@@ -22,7 +22,12 @@
 
         <th colspan='@{((winSets*2)-1)}' class="border-left border-right text-center"><small class="ml-1 mr-1">@msg("balls")</small></th>
         <th class="border-left border-right font-weight-bold"><small class="ml-1 mr-1">@msg("sets")</small></th>
-        <th colspan='2' class="text-right"></th>
+        <th class="text-right">
+          <button id='InputDemo__@{coId}_@{coPhId}' data-coId='@coId' data-coPhId='@coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("Demo", "onclick")>@msg_("std.btn.demo")</button> 
+        </th>
+        <th class="text-right">
+          <button data-coId='@coId' data-coPhId='@coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("DeleteAll", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 
+        </th>
       </tr>      
     </tbody>
 

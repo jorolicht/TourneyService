@@ -16,10 +16,8 @@ import scala.concurrent._
 import scala.util.{Success, Failure}
 
 // tourney service client imports
-import shared.model.{ Tourney, TournBase, Player }
+import shared.model.{ Tourney, TournBase, Player, Participant }
 import shared.model.Competition._
-
-import shared.utils.Constants._ 
 import shared.utils._
 
 import scalajs.usecase.component._
@@ -51,7 +49,7 @@ object InfoPlayer extends UseCase("InfoPlayer")
   def viewCompPlayer(): Seq[(Long, String, Int, Seq[(String, String, String, String, String)])] = {
 
     def getPlayerInfos(tourney: Tourney, coId: Long): Seq[(String, String, String, String, String)] = {
-      val fromStatus = if (tourney.comps(coId).status > CS_RESET ) PLS_REDY else PLS_SIGN
+      val fromStatus = if (tourney.comps(coId).status > CS_RESET ) Participant.PLS_REDY else Participant.PLS_SIGN
       (for { ((sno,co),info) <- tourney.pl2co if (co == coId) } yield {
         if (info.status >= fromStatus & tourney.comps(co).typ == 1) { 
           val pl = info.getPlayerId

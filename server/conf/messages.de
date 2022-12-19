@@ -11,7 +11,7 @@ greeting                                              = Herzlich Willkommen!
 
   app.mockup                                          = false
   app.version                                         = 2022-05DE184
-  app.date                                            = 2022-08-16
+  app.date                                            = 2022-12-06
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -81,6 +81,7 @@ greeting                                              = Herzlich Willkommen!
   sidebar.label.AdminLicense                          = Lizenz
   sidebar.label.AdminDatabase                         = Database
   sidebar.label.AdminReport                           = Berichte
+  sidebar.label.OrganizeCompetitionCtrl               = Steuerung
   sidebar.label.OrganizeCompetitionDraw               = Auslosung
   sidebar.label.OrganizeCompetitionInput              = Eingabe
   sidebar.label.OrganizeCompetitionView               = Anzeige  
@@ -263,6 +264,16 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
 ###
 # General Labels
 ###
+  number.1                                            = 1
+  number.2                                            = zwei
+  number.3                                            = drei
+  number.4                                            = vier
+  number.5                                            = fünf
+  number.6                                            = sechs
+  number.7                                            = sieben
+  number.8                                            = acht
+  number.9                                            = neun     
+
   tourney.typ.name                                    = None
   tourney.typ.name                                    = Sportart
   tourney.typ.-1                                      = Sportart
@@ -335,7 +346,6 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
 
   competition.GrRound                                 = Runde {0}
 
-
   competition.typ.0                                   = Typ
   competition.typ.1                                   = EINZEL
   competition.typ.2                                   = DOPPEL
@@ -363,6 +373,48 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   competition.phase.7                                 = KO-ZWISCHENRUNDE
   competition.phase.8                                 = KO-ENDRUNDE
   competition.phase.9                                 = KO-TROSTRUNDE
+
+  competition.phase.status.0                          = UNBEKANNT
+  competition.phase.status.1                          = AUSLOSUNG
+  competition.phase.status.2                          = EINGABE
+  competition.phase.status.3                          = BEENDET
+  competition.phase.status.4                          = BEENDET / NACHFOLGENDE RUNDE GESTARTET
+
+  competition.phase.description.000                   = Konfiguration der Spielrunde
+  competition.phase.description.100                   = Gruppenspiele mit {0} Gruppen
+  competition.phase.description.101                   = Gruppenspiele mit {0} <span class="h5">&#x2682;</span>-Gruppen
+  competition.phase.description.102                   = Gruppenspiele mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
+  competition.phase.description.103                   = Gruppenspiele mit {0} <span class="h5">&#x2683;</span>-Gruppen
+  competition.phase.description.104                   = Gruppenspiele mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
+  competition.phase.description.105                   = Gruppenspiele mit {0} <span class="h5">&#x2684;</span>-Gruppen
+  competition.phase.description.106                   = Gruppenspiele mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
+  competition.phase.description.107                   = Gruppenspiele mit {0} <span class="h5">&#x2685;</span>-Gruppen
+  competition.phase.description.108                   = Gruppe {0}-Feld Jeder-gegen-Jeden
+  competition.phase.description.109                   = KO-System {0}-Feld
+  competition.phase.description.110                   = Schweizer System {0}-Feld
+
+  competition.phase.option.100                        = Spielrunde mit 3er-9er Gruppen
+  competition.phase.option.101                        = Spielrunde mit 3er-Gruppen 
+  competition.phase.option.102                        = Spielrunde mit 3er- und 4er-Gruppen
+  competition.phase.option.103                        = Spielrunde mit 4er-Gruppen
+  competition.phase.option.104                        = Spielrunde mit 4er- und 5er-Gruppen
+  competition.phase.option.105                        = Spielrunde mit 5er-Gruppen
+  competition.phase.option.106                        = Spielrunde mit 5er- und 6er-Gruppen
+  competition.phase.option.107                        = Spielrunde mit 6er-Gruppen
+  competition.phase.option.108                        = Gruppe jeder-gegen-jeden
+  competition.phase.option.109                        = KO-System
+  competition.phase.option.110                        = Schweizer System
+  competition.phase.option.info.100                   = Konfiguration mit {0} Gruppen
+  competition.phase.option.info.101                   = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppen
+  competition.phase.option.info.102                   = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
+  competition.phase.option.info.103                   = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppen
+  competition.phase.option.info.104                   = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
+  competition.phase.option.info.105                   = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppen
+  competition.phase.option.info.106                   = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
+  competition.phase.option.info.107                   = Konfiguration mit {0} <span class="h5">&#x2685;</span>-Gruppen
+  competition.phase.option.info.108                   = Konfiguration {0}-Feld Jeder-gegen-Jeden
+  competition.phase.option.info.109                   = Konfiguration {0}-Feld KO-System
+  competition.phase.option.info.110                   = Konfiguration {0}-Feld Schweizer System    
 
   certificate.place.range                             = {0}. - {1}. Platz
   certificate.place.value                             = {0}. Platz
@@ -466,8 +518,6 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
 ###
   organize.certificate.btn.print                        = URKUNDE
   organize.competition.config.card                      = Konfiguration
-  
-
   organize.competition.CompCard                         = Wettbewerbe
   organize.competition.btn.new                          = NEUEN WETTBEWERB ANLEGEN
   organize.competition.confirm.delete.hdr               = Löschbestätigung 
@@ -494,7 +544,6 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.input.tit.delete                 = Ergebniseingabe löschen
   organize.competition.input.btn.deleteAll              = LÖSCHEN
 
- 
   dlg.card.comp.Title                                   = Wettbewerb
   dlg.card.comp.plh.name                                = Name des Wettbewerbs
   dlg.card.comp.plh.startTime                           = Startzeit &#128197;
@@ -552,14 +601,40 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.draw.change.hdr                  = Eingabefehler für Neupositionierung
   organize.competition.draw.change.msg                  = Für die Position {0} ist der Werte nicht korrekt
   organize.competition.draw.changes.msg                 = Für die Positionen [{0}] sind die Werte nicht korrekt
-  
   organize.competition.draw.noSelection                 = Kein Wettbewerb ausgewählt.
   organize.competition.draw.noSection                   = Kein Spielabschnitt definiert.
   organize.competition.draw.invalidSection              = Konfiguration für Spielabschnitt z.Z. nicht unterstützt.
 
-  organize.competition.tab.btn.demo                         = DEMO
-  organize.competition.tab.btn.reset                        = RESET
-  organize.competition.tab.btn.start                        = START
+  organize.competition.ctrl.plh.name                    = z.B. KO-Endrunde
+  organize.competition.ctrl.lbl.DemoBtn                 = Demobutton zur Erzeugung zufälliger Ergebnisse anzeigen.
+  organize.competition.ctrl.lbl.noPlayers               = Anzahl Spieler [teilnehmend/registriert]:
+  organize.competition.ctrl.val.noPlayers               = [{0}/{1}]
+  organize.competition.ctrl.lbl.winner                  = Gewinner
+  organize.competition.ctrl.lbl.looser                  = Verlierer
+  organize.competition.ctrl.lbl.all                     = alle
+  organize.competition.ctrl.lbl.pantbase                = Spielerauswahlbasis
+  organize.competition.ctrl.lbl.winsets                 = Gewinnsätze
+  organize.competition.ctrl.lbl.gamesystem              = Spielsystem
+  organize.competition.ctrl.lbl.nameround               = Name der Runde
+  organize.competition.ctrl.lbl.following               = NACHFOLGENDE RUNDE
+  organize.competition.ctrl.lbl.state                   = STATUS
+  organize.competition.ctrl.lbl.start                   = STARTEN
+  organize.competition.ctrl.btn.delete                  = LÖSCHEN
+  organize.competition.ctrl.btn.reset                   = ZURÜCKSETZEN  
+  organize.competition.ctrl.pants                       = Teilnehmer
+  organize.competition.ctrl.tbl.hdr.no                  = #
+  organize.competition.ctrl.tbl.hdr.name                = Name, Vorname
+  organize.competition.ctrl.tbl.hdr.info                = Info
+  organize.competition.ctrl.tbl.hdr.signup              = Check
+  organize.competition.ctrl.fmt.single                  = {0} [{1}]
+  organize.competition.ctrl.fmt.grp.info                = Gruppe: {0} Platzierung: {1}
+  organize.competition.ctrl.finished                    = {0} von {1} Spielen beendet
+
+  organize.competition.tab.btn.demo                     = DEMO
+  organize.competition.tab.btn.reset                    = RESET
+  organize.competition.tab.btn.start                    = START
+  organize.competition.tab.notStarted                   = Wettbewerb noch nicht gestarted
+  organize.competition.tab.noSelection                  = Kein Wettbewerb ausgewählt
 #END Organize Competition
 
 
@@ -862,6 +937,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 ###
   std.btn.ok                                          = OK
   std.btn.start                                       = STARTEN
+  std.btn.demo                                        = DEMO
   std.btn.edit                                        = BEARBEITEN
   std.btn.save                                        = SICHERN
   std.btn.delete                                      = LÖSCHEN
@@ -996,18 +1072,17 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 
   dlg.card.cfg.compphase.option.info.1                  = Bitte Namen auswählen oder eingeben
   dlg.card.cfg.compphase.option.info.2                  = Bitte Konfiguraton und Namen auswählen/eingeben
-  dlg.card.cfg.compphase.option.info.100                = Konfiguration: mit {0} Gruppen
-
-  dlg.card.cfg.compphase.option.info.101                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppen
-  dlg.card.cfg.compphase.option.info.102                = Konfiguration: mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
-  dlg.card.cfg.compphase.option.info.103                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppen
-  dlg.card.cfg.compphase.option.info.104                = Konfiguration: mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
-  dlg.card.cfg.compphase.option.info.105                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppen
-  dlg.card.cfg.compphase.option.info.106                = Konfiguration: mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
-  dlg.card.cfg.compphase.option.info.107                = Konfiguration: mit {0} <span class="h5">&#x2685;</span>-Gruppen
-  dlg.card.cfg.compphase.option.info.108                = Konfiguration: {0}-Feld Jeder-gegen-Jeden
-  dlg.card.cfg.compphase.option.info.109                = Konfiguration: {0}-Feld KO-System
-  dlg.card.cfg.compphase.option.info.110                = Konfiguration: {0}-Feld Schweizer System     
+  dlg.card.cfg.compphase.option.info.100                = Konfiguration mit {0} Gruppen
+  dlg.card.cfg.compphase.option.info.101                = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.102                = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.103                = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.104                = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.105                = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.106                = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
+  dlg.card.cfg.compphase.option.info.107                = Konfiguration mit {0} <span class="h5">&#x2685;</span>-Gruppen
+  dlg.card.cfg.compphase.option.info.108                = Konfiguration {0}-Feld Jeder-gegen-Jeden
+  dlg.card.cfg.compphase.option.info.109                = Konfiguration {0}-Feld KO-System
+  dlg.card.cfg.compphase.option.info.110                = Konfiguration {0}-Feld Schweizer System     
 
   dlg.card.cfg.compphase.lbl.Winset                     = Gewinnsätze
   dlg.card.cfg.compphase.btn.draw                       = START AUSLOSUNG
@@ -1257,5 +1332,10 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
   err0191.ctrl.decode.MEntry                          = Dekodierfehler im Controller Datentyp MEntry: {0}
   err0192.input.invalid.sets                          = Ungültiges Eingabeformat für Sätze
+  err0193.organize.competition.selection              = Ungültige Wettbewerbs-Auswahl: {0}
+  err0194.msg.addCompPhase.existing                   = Wettbewerb kann nicht (erneut) gestartet werden
+  err0195.msg.addCompPhase.name                       = Ungültiger Name für Runde/Wettbewerbsabschnitt (Länge mind. 2 Zeichen)
+  err0196.msg.addCompPhase.config                     = Ungültige (keine) Konfiguration ausgewählt
+  err0197.msg.initGrMatches.generating                = Interner Fehler, Spiele konnten nicht entsprechend dem Spielplan generiert werden
 
 #END Error Codes/Messages

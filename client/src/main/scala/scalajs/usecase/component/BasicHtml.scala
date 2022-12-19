@@ -46,10 +46,9 @@ object BasicHtml {
 
   def setResult(text: String) = insertHtml_("APP__Load", "afterbegin", s"""<textarea id="APP_Result" style="display:none;">${text}</textarea>""")
 
-
   def setHtml_(id: String, content: => String): Unit = {
     try document.getElementById(id).asInstanceOf[HTMLElement].innerHTML = content
-    catch { case _: Throwable => Helper.error("setHtml_", s"id: ${id} -> ${content}") } 
+    catch { case _: Throwable => Helper.error("setHtml_", s"id: ${id} -> ${content.take(10)}") } 
   }
 
   def insertHtml_(id: String, pos: String, content: String): Unit = {
@@ -129,8 +128,8 @@ class BasicHtml
    */
 
   // getElemById - get the html element
-  def getElemById(id: String)(implicit ucp: UseCaseParam) = {
-    val elem = document.getElementById(ucp.idBase + "__" + id)
+  def getElemById(id: String)(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")) = {
+    val elem = if (ucp.idBase =="") document.getElementById(id) else document.getElementById(ucp.idBase + "__" + id)
     if (elem == null) document.createElement("div") else elem
   }  
 
@@ -146,44 +145,43 @@ class BasicHtml
   def getIdHa(id: String)(implicit ucp: UseCaseParam) = { s"#${ucp.idBase}__${id}"}
 
   def checkId(id: String)(implicit ucp: UseCaseParam):Boolean = { 
-    try (document.getElementById(ucp.idBase + "__" + id).textContent.length > 0)
+    try (document.getElementById(ucpId(id)).textContent.length > 0)
     catch { case _: Throwable => false }
   }  
 
 
+  def ite[T](cond: Boolean, valA: T, valB:T): T = if (cond) valA else valB
+  def ucpId(id: String)(implicit ucp: UseCaseParam): String = if (ucp.idBase == "") id else s"${ucp.idBase}__${id}"
+  
   /** setHtml
     *
     * @param elemId  - id of html element
     * @param content - html content of element
     */ 
-  def setHtml(elemId: String, content: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + elemId).asInstanceOf[HTMLElement].innerHTML = content
-    catch { case _: Throwable => error("setHtml", s"id: ${ucp.idBase}__${elemId} content: ${content.take(10)}") } 
+
+  def setHtml[I,C](idElt: I, content: C = "")(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
+    val value = content match {
+        case _:String => content.asInstanceOf[String]
+        case _        => content.toString
+    }     
+    try idElt match {
+      case _:String => {
+        if   (ucp.idBase =="") document.getElementById(idElt.asInstanceOf[String]).asInstanceOf[HTMLElement].innerHTML = value
+        else                   document.getElementById(ucp.idBase + "__" + idElt.asInstanceOf[String]).asInstanceOf[HTMLElement].innerHTML = value 
+      }   
+      case _        => idElt.asInstanceOf[HTMLElement].innerHTML = value
+    } catch { case _: Throwable => error("setHtml", s"idElt: ${idElt} usecase: ${ucp.idBase} content: ${value.take(10)}") }
   }
 
-  def setHtml(elemId: String, content: play.twirl.api.Html)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + elemId).asInstanceOf[HTMLElement].innerHTML = content.toString
-    catch { case _: Throwable => error("setHtml", s"id: ${ucp.idBase}__${elemId} content: ${content.toString.take(10)}") } 
-  }
+  def setText(id: String, content: String)(implicit ucp: UseCaseParam): Unit = 
+    doTry(s"setText ${id} ${content.take(10)}") { document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLElement].innerText = content }
 
-  def setHtml(elem: HTMLElement, content: play.twirl.api.Html)(implicit ucp: UseCaseParam): Unit = {
-    try elem.innerHTML = content.toString
-    catch { case _: Throwable => error("setHtml", s"content: ${content.toString.take(10)}") } 
-  }  
-  
-  def setHtml(elem: HTMLElement, content: String)(implicit ucp: UseCaseParam): Unit = {
-    try elem.innerHTML = content
-    catch { case _: Throwable => error("setHtml", s"content: ${content.toString.take(10)}") } 
-  }  
-
-
-  def insertHtml(elemId: String, pos: String, content: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + elemId).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
-    catch { case _: Throwable => error("insertHtml", s"id: ${ucp.idBase}__${elemId} pos: ${pos} content: ${content.take(10)}") } 
+  def insertHtml(id: String, pos: String, content: String)
+                (implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
+    try document.getElementById(ucpId(id)).asInstanceOf[HTMLElement].insertAdjacentHTML(pos,content)
+    catch { case _: Throwable => error("insertHtml", s"id: ${ucpId(id)} pos: ${pos} content: ${content.take(10)}") } 
   }
   
-
-
   def setHtmlVisible(id: String, visible: Boolean, content: String="")(implicit ucp: UseCaseParam): Unit = {
     try {
       val elem = document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLElement]
@@ -192,15 +190,16 @@ class BasicHtml
     } catch { case _: Throwable => error(s"setHtmlVisible", s"id: ${ucp.idBase}__${id} visible: ${visible} content: ${content.take(10)}") } 
   }
 
-  def setText(id: String, content: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLElement].innerText = content
-    catch { case _: Throwable => error(s"setHtml", s"id: ${ucp.idBase}__${id} content: ${content.take(10)}") } 
+  def setDisabled(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].disabled = value
+    catch { case _: Throwable => error(s"setDisabled", s"id: ${ucpId(id)} value: ${value}") } 
   }
 
-  def setDisabled(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].disabled = value
-    catch { case _: Throwable => error(s"setDisabled", s"id: ${ucp.idBase}__${id} value: ${value}") } 
+  def setDisabled(elem:HTMLElement, value: Boolean): Unit = {
+    try elem.asInstanceOf[Input].disabled = value
+    catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
   }
+
 
   def setDisabledByName(name: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try {
@@ -209,14 +208,10 @@ class BasicHtml
     } catch { case _: Throwable => error(s"setDisabledByName", s"name: ${ucp.idBase}__${name} value: ${value}") } 
   }
 
-  def setDisabled(elem:HTMLElement, value: Boolean): Unit = {
-    try elem.asInstanceOf[Input].disabled = value
-    catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
-  }
 
   def showModal(id: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[js.Dynamic].showModal()
-    catch { case _: Throwable => error(s"showModal", s"id: ${ucp.idBase}__${id}") } 
+    try document.getElementById(ucpId(id)).asInstanceOf[js.Dynamic].showModal()
+    catch { case _: Throwable => error(s"showModal", s"id: ${ucpId(id)}") } 
   }
 
 
@@ -227,8 +222,8 @@ class BasicHtml
     * @param visible - true or false
     */ 
   def setVisible(id: String, visible: Boolean)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
-    catch { case _: Throwable => error(s"setVisible", s"id: ${ucp.idBase}__${id} visible: ${visible}") }
+    try document.getElementById(ucpId(id)).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
+    catch { case _: Throwable => error(s"setVisible", s"id: ${ucpId(id)} visible: ${visible}") }
   }  
 
 
@@ -318,40 +313,25 @@ class BasicHtml
     * @param default
     * @return
     */
-  def getData(id: String, name: String, default: Int)(implicit ucp: UseCaseParam): Int = {
-    try getData(document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement], name, default)
-    catch { case _: Throwable => Helper.error("getData", s"id: ${id} name: ${name} as Int"); default }
-  }  
 
-  def getData(id: String, name: String, default: Long)(implicit ucp: UseCaseParam): Long = {
-    try getData(document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement], name, default)
-    catch { case _: Throwable => Helper.error("getData", s"id: ${id} name: ${name} as Long"); default }
-  }  
-
-  def getData(id: String, name: String, default: String)(implicit ucp: UseCaseParam): String = {
-    try getData(document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement], name, default)
-    catch { case _: Throwable => Helper.error("getData", s"id: ${id} name: ${name} as String"); default }
-  }
-
-  def getData(elem: HTMLElement, name: String, default: Int): Int = {
-    try { elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default)}
-    catch { case _: Throwable => Helper.error("getData", s"${name} as Int"); default }
-  }
-  
-
-  def getData(elem: HTMLElement, name: String, default: Long): Long = {
-    try { elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default)}
-    catch { case _: Throwable => Helper.error("getData", s"${name} as Long"); default }
-  }
-  
-  def getData(elem: HTMLElement, name: String, default: String=""): String = {
-    try   elem.getAttribute(s"data-${name}")
-    catch { case _: Throwable => Helper.error("getData", s"${name} as String"); default }
+  def getData[I, A](id: I, name: String, default: A)(implicit ucp: UseCaseParam): A = {
+    try {
+      val elem = id match {
+        case _:String => document.getElementById(ucpId(id.asInstanceOf[String])).asInstanceOf[HTMLElement]
+        case _        => id.asInstanceOf[HTMLElement]
+      }
+      default match {
+        case _:Int    => elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default.asInstanceOf[Int]).asInstanceOf[A]
+        case _:Long   => elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default.asInstanceOf[Long]).asInstanceOf[A]
+        case _:String => elem.getAttribute(s"data-${name}").asInstanceOf[A]
+        case _        => { error("getData", s"idElt: ${id}  usecase: ${ucp.idBase} default: ${default}"); default }
+      }
+    }  catch { case _: Throwable => Helper.error("getData", s"id: ${id} name: ${name} default: ${default}"); default }
   }
 
   def setData[A](id: String, attr: String, value: A)(implicit ucp: UseCaseParam) = {
-    try document.getElementById(s"${ucp.idBase}__${id}").asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
-    catch { case _: Throwable => Helper.error("setData", s"id: ${ucp.idBase}__${id} attribute: ${attr} value: ${value}") }
+    try document.getElementById(ucpId(id)).asInstanceOf[HTMLElement].setAttribute(s"data-${attr}", value.toString)
+    catch { case _: Throwable => Helper.error("setData", s"id: ${ucpId(id)} attribute: ${attr} value: ${value}") }
   }
 
   def setData[A](elem: HTMLElement, attr: String, value: A) = {
@@ -366,61 +346,52 @@ class BasicHtml
     * @param defVal
     * @return
     */
-  def getInput(name: String, defVal: String = "")(implicit ucp: UseCaseParam): String = {
-    try { if (name=="") "" else document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value }
-    catch { case _: Throwable => defVal }
-  }
 
-  def getInput_(name: String, defVal: String = ""): String = {
-    try { if (name=="") "" else document.getElementById(name).asInstanceOf[Input].value }
-    catch { case _: Throwable => defVal }
-  }
+  def getInput[I,R](idElt: I, defVal: R = "")(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): R = {
+    try { 
+      val result = idElt match {
+        case _:String => {
+          val id = idElt.asInstanceOf[String]
+          if   (id.startsWith("_")) document.getElementById(id.substring(1)).asInstanceOf[Input].value
+          else document.getElementById(ucpId(id)).asInstanceOf[Input].value  
+        }  
+        case _        => idElt.asInstanceOf[Input].value
+      }
 
-  def getInput(name: String, defVal: Long)(implicit ucp: UseCaseParam): Long = {
-    try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value.toLong 
-    catch { case _: Throwable => defVal }
-  }
-  def getInput(name: String, defVal: Int)(implicit ucp: UseCaseParam): Int = {
-    try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value.toInt 
-    catch { case _: Throwable => defVal }
-  }
-  def getInput(name: String, defVal: Boolean)(implicit ucp: UseCaseParam): Boolean = {
-    try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].checked
-    catch { case _: Throwable => defVal }
-  }
-  def getInput(elem: HTMLElement, defVal: Long)(implicit ucp: UseCaseParam): Long = {
-    try elem.asInstanceOf[Input].value.toLong
-    catch { case _: Throwable =>  Helper.error("getInput", "element as long");  defVal }
-  }
-  def getInput(elem: HTMLElement, defVal: String)(implicit ucp: UseCaseParam): String = {
-    try elem.asInstanceOf[Input].value
-    catch { case _: Throwable =>  Helper.error("getInput", "element as string");  defVal }
+      defVal match {
+        case _:Int    => result.toIntOption.getOrElse(defVal).asInstanceOf[R]
+        case _:Long   => result.toLongOption.getOrElse(defVal).asInstanceOf[R]
+        case _:String => result.asInstanceOf[R]
+        case _        => { error("getInput", s"idElt: ${idElt}  uc: ${ucp.idBase} defVal: ${defVal}"); defVal }
+      } 
+
+    } catch { case _: Throwable => error("getInput", s"idElt: ${idElt} usecase: ${ucp.idBase} defVal: ${defVal}"); defVal }
   }
 
   def getBooleanOption(name: String)(implicit ucp: UseCaseParam): Option[Boolean] = {
-    try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value.toBooleanOption
+    try document.getElementById(ucpId(name)).asInstanceOf[Input].value.toBooleanOption
     catch { case _: Throwable => Helper.error("getBooleanOption", s"${name}"); None }
   }
 
   def getIntOption(name: String)(implicit ucp: UseCaseParam): Option[Int] = {
-    try document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value.toIntOption
+    try document.getElementById(ucpId(name)).asInstanceOf[Input].value.toIntOption
     catch { case _: Throwable => Helper.error("getIntOption", s"${name}"); None }
   }
 
   def setBooleanOption(name: String, input: Option[Boolean])(implicit ucp: UseCaseParam): Unit = {
     try input match {
-      case None        => document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value = "None"
-      case Some(value) => document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value = value.toString
+      case None        => document.getElementById(ucpId(name)).asInstanceOf[Input].value = "None"
+      case Some(value) => document.getElementById(ucpId(name)).asInstanceOf[Input].value = value.toString
     }
     catch { case _: Throwable => error(s"setBooleanOption", s"name: ${ucp.idBase}__${name}") }
   }
 
   def setIntOption(name: String, input: Option[Int])(implicit ucp: UseCaseParam): Unit = {
     try input match {
-      case None        => document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value = "None"
-      case Some(value) => document.getElementById(ucp.idBase + "__" + name).asInstanceOf[Input].value = value.toString
+      case None        => document.getElementById(ucpId(name)).asInstanceOf[Input].value = "None"
+      case Some(value) => document.getElementById(ucpId(name)).asInstanceOf[Input].value = value.toString
     }
-    catch { case _: Throwable => error(s"setIntOption", s"name: ${ucp.idBase}__${name}") }
+    catch { case _: Throwable => error(s"setIntOption", s"name: ${ucpId(name)}") }
   }  
 
 
@@ -485,23 +456,13 @@ class BasicHtml
     * @param ucp usecase param
     */
   def setInput(id: String, text: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].value = text
-    catch { case _: Throwable => error(s"setInput", s"id: ${ucp.idBase}__${id}") }
-  }  
-
-  def setInput_(id: String, text: String): Unit = {
-    try document.getElementById(id).asInstanceOf[Input].value = text
-    catch { case _: Throwable => AppEnv.logger.error(s"setInput_ -> id: ${id} value: ${text}") }
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].value = text
+    catch { case _: Throwable => error(s"setInput", s"id: ${ucpId(id)}") }
   } 
 
   def getTextContent(id: String, defVal: String="")(implicit ucp: UseCaseParam): String = {
-    try document.getElementById(ucp.idBase + "__" + id).textContent
-    catch { case _: Throwable => error("getTextContent", s"id: ${ucp.idBase}__${id}"); defVal }
-  }
-
-  def getTextAsLong(id: String, defVal: Long=0L)(implicit ucp: UseCaseParam): Long = {
-    try document.getElementById(ucp.idBase + "__" + id).textContent.toLongOption.getOrElse(defVal)
-    catch { case _: Throwable => error("getTextAsLong", s"id: ${ucp.idBase}__${id}"); defVal }
+    try document.getElementById(ucpId(id)).textContent
+    catch { case _: Throwable => error("getTextContent", s"id: ${ucpId(id)}"); defVal }
   }
 
 
@@ -518,38 +479,45 @@ class BasicHtml
 
   /** get/setAttribute
    * 
-   * @param elemId of html element
+   * @param id of html element
    * @param attrName value of attribute
    * @param defVal if no value is present
    * @param attrValue value of attribute
    */
-  def getAttribute(elemId: String, attrName: String, defVal: String="")(implicit ucp: UseCaseParam): String = {
-    try document.getElementById(ucp.idBase + "__" + elemId).getAttribute(attrName)
-    catch { case _: Throwable => { error("getAttribute", s"id: ${ucp.idBase}__${elemId} attrName: ${attrName}"); defVal }}
+  def getAttribute(id: String, attrName: String, defVal: String="")(implicit ucp: UseCaseParam): String = {
+    try document.getElementById(ucpId(id)).getAttribute(attrName)
+    catch { case _: Throwable => { error("getAttribute", s"id: ${ucpId(id)} attrName: ${attrName}"); defVal }}
   }
 
-  def setAttribute(elemId: String, attrName: String, attrValue: String)(implicit ucp: UseCaseParam): Unit = {
-    BasicHtml.setAttribute_(ucp.idBase + "__" + elemId, attrName, attrValue)
+  def setAttribute(id: String, attrName: String, attrValue: String)(implicit ucp: UseCaseParam): Unit = {
+    BasicHtml.setAttribute_(ucpId(id), attrName, attrValue)
   }  
 
+  def setPlaceholder(id: String, value: String)
+                    (implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].placeholder = value
+    catch { case _: Throwable => error("setPlaceholder", s"id: ${ucpId(id)}") } 
+  }  
+
+
   def removeAttribute(id: String, attrName: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).removeAttribute(attrName)
-    catch { case _: Throwable => error("removeAttribute", s"id: ${ucp.idBase}__${id} attrName: ${attrName}") } 
+    try document.getElementById(ucpId(id)).removeAttribute(attrName)
+    catch { case _: Throwable => error("removeAttribute", s"id: ${ucpId(id)} attrName: ${attrName}") } 
   }
 
   def selectOption(id: String, selValue: String)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].value = selValue
-    catch { case _: Throwable => error("selectOption", s"id: ${ucp.idBase}__${id} option: ${selValue}") } 
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].value = selValue
+    catch { case _: Throwable => error("selectOption", s"id: ${ucpId(id)} option: ${selValue}") } 
   }
 
-  def addClass(elemId: String, _class: String*)(implicit ucp: UseCaseParam): Unit = {
-    try _class.foreach(cValue => document.getElementById(ucp.idBase + "__" + elemId).classList.add(cValue) )
-    catch { case _: Throwable => error("addClass", s"id: ${ucp.idBase}__${elemId} class: ${_class}") } 
+  def addClass(id: String, _class: String*)(implicit ucp: UseCaseParam): Unit = {
+    try _class.foreach(cValue => document.getElementById(ucpId(id)).classList.add(cValue) )
+    catch { case _: Throwable => error("addClass", s"id: ${ucpId(id)} class: ${_class}") } 
   }
 
-  def removeClass(elemId: String, _class: String*)(implicit ucp: UseCaseParam): Unit = {
-    try _class.foreach(cValue => document.getElementById(ucp.idBase + "__" + elemId).classList.remove(cValue))
-    catch { case _: Throwable => error("removeClass", s"id: ${ucp.idBase}__${elemId}  class: ${_class}") } 
+  def removeClass(id: String, _class: String*)(implicit ucp: UseCaseParam): Unit = {
+    try _class.foreach(cValue => document.getElementById(ucpId(id)).classList.remove(cValue))
+    catch { case _: Throwable => error("removeClass", s"id: ${ucpId(id)}  class: ${_class}") } 
   }
 
   /** add/removeDataClass
@@ -568,43 +536,41 @@ class BasicHtml
   }
 
   def setRadioBtn(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].checked = value
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].checked = value
     catch { case _: Throwable => error("setRadioBtn", s"id: ${ucp.idBase}__${id} -> ${value}") } 
   }
 
   def setRadioBtnByValue(name: String, value: String)(implicit ucp: UseCaseParam): Unit = {
-    val inpNodes = document.getElementsByName(ucp.idBase + "__" + name).asInstanceOf[NodeList]
+    val inpNodes = document.getElementsByName(ucpId(name)).asInstanceOf[NodeList]
     val node = inpNodes.filter(_.asInstanceOf[Input].value == value).head
     node.asInstanceOf[Input].checked= true
   }
 
-  def getRadioBtn(name: String)(implicit ucp: UseCaseParam): String = {
+  def getRadioBtn[A](name: String, defVal: A)(implicit ucp: UseCaseParam): A = {
     try {
-      val inpNodes = document.getElementsByName(ucp.idBase + "__" + name).asInstanceOf[NodeList]
+      val inpNodes = document.getElementsByName(ucpId(name)).asInstanceOf[NodeList]
       val node = inpNodes.filter(_.asInstanceOf[Input].checked).head
-      node.asInstanceOf[Input].value
-    }
-    catch { case _: Throwable => error("getRadioBtn", s"name: ${ucp.idBase}__${name}"); "" }
-  }
-
-  def getRadioBtn(name: String, defVal: Boolean)(implicit ucp: UseCaseParam): Boolean = {
-    try {
-      val inpNodes = document.getElementsByName(ucp.idBase + "__" + name).asInstanceOf[NodeList]
-      val node = inpNodes.filter(_.asInstanceOf[Input].checked).head
-      node.asInstanceOf[Input].value.toBooleanOption.getOrElse(defVal)
-    }
-    catch { case _: Throwable => error("getRadioBtn", s"name: ${ucp.idBase}__${name}"); defVal }
+      defVal match {
+        case _:Int    => node.asInstanceOf[Input].value.toIntOption.getOrElse(defVal).asInstanceOf[A]
+        case _:Long   => node.asInstanceOf[Input].value.toLongOption.getOrElse(defVal).asInstanceOf[A]
+        case _:String => node.asInstanceOf[Input].value.asInstanceOf[A]
+        case _        => { error("getRadioBtn", s"name: ${ucp.idBase}__${name} invalid default value"); defVal }
+      }   
+    } catch { case _: Throwable => error("getRadioBtn", s"name: ${ucp.idBase}__${name}"); defVal }
   }
 
 
-  def setCheckbox(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].checked = value
-    catch { case _: Throwable => error("setCheckbox", s"id: ${ucp.idBase}__${id} -> ${value}") } 
+  def setCheckbox[A](idElt: A, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
+    try idElt match {
+      case _:String => document.getElementById(ucp.idBase + "__" + idElt.asInstanceOf[String]).asInstanceOf[Input].checked = value
+      case _        => idElt.asInstanceOf[Input].checked = value
+    } catch { case _: Throwable => error("setCheckbox", s"idElt: ${idElt} -> ${value}") } 
   }
+
 
   def getCheckbox(id: String)(implicit ucp: UseCaseParam): Boolean = {
-    try document.getElementById(ucp.idBase + "__" + id).asInstanceOf[Input].checked
-    catch { case _: Throwable => error("getCheckbox", s"id: ${ucp.idBase}__${id}"); false } 
+    try document.getElementById(ucpId(id)).asInstanceOf[Input].checked
+    catch { case _: Throwable => error("getCheckbox", s"id: ${ucpId(id)}"); false } 
   }
 
   
@@ -613,7 +579,7 @@ class BasicHtml
     * @param id attribute of element
     */
   def togCollapse(id1: String, id2: String="")(implicit ucp: UseCaseParam): Unit = 
-    if (id2=="") togCollapse_(s"${ucp.idBase}__${id1}") else togCollapse_(s"${ucp.idBase}__${id1}", s"${ucp.idBase}__${id2}" )  
+    if (id2=="") togCollapse_(ucpId(id1)) else togCollapse_(ucpId(id1), ucpId(id2) )  
   
   def togCollapse_(id1: String, id2: String=""): Unit = {
     try {
@@ -646,13 +612,7 @@ class BasicHtml
     elems2rem.map { elem => elem.classList.remove(classText); elem.classList.remove(classBg) }  
     selElem.classList.add(classText)
     selElem.classList.add(classBg)
-  }  
-
-
-  def innerText(id: String, content: String): Unit = {
-    try document.getElementById(id).asInstanceOf[HTMLElement].innerText = content
-    catch { case _: Throwable => errLog(s"innerText => id: ${id} content: ${content.take(10)}") } 
-  }
+  } 
 
 
   /** getMsg/getError
@@ -660,7 +620,10 @@ class BasicHtml
     * @param key  - message key
     * @param args - inserts into message
     */
-  def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
+  def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = {
+    if (key.startsWith("_")) AppEnv.getMessage(key.substring(1), args: _*) else AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
+  }
+
 
   def setMainContent(content: String): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content
   def setMainContent(content: play.twirl.api.Html): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString
@@ -683,5 +646,8 @@ class BasicHtml
      case _ => false
     }}
 
+  def doTry(msg: String)(op: => Unit) = {
+    try op catch { case _: Throwable => Helper.error("doTry", msg) }
+  }  
 
 }

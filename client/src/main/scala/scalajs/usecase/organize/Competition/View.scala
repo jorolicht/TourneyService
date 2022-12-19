@@ -36,33 +36,29 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
     OrganizeCompetitionTab.render("View")
   }
 
-  // setFrame for a competition, coId != 0 and coPhId != 0
-  def init(coId: Long, coPhId: Int)(implicit trny: Tourney): Unit = {
-    debug("init", s"coId: ${coId} coPhId: ${coPhId}")
+  // set view page for a competition phase(round), coId != 0 and coPhId != 0
+  def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
+    debug("setPage", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists(s"View_${coId}_${coPhId}")) {
+      // init page
       val elem    = getElemById_(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
-      val coPhTyp = trny.cophs(coId, coPhId).coPhTyp
-      val coPhase = trny.cophs(coId, coPhId)
+      val coPhTyp = coPhase.coPhTyp
       coPhTyp match {
         case CPT_GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))
         case CPT_KO => setHtml(elem, clientviews.organize.competition.view.html.KoCard(coId, coPhId, coPhase.ko))
         case CPT_SW => setHtml(elem, "input for switz-system")
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
-      update(coId, coPhId)
     }
-  }
-
-  // set content for competition phase for competition
-  def update(coId: Long, coPhId: Int)(implicit trny: Tourney) = {
-    debug("update", s"coId: ${coId} coPhId: ${coPhId}")
-    trny.cophs(coId, coPhId).coPhTyp match {
-      case CPT_KO => showKoResult(coId, coPhId, trny.cophs(coId, coPhId).ko)      
-      case CPT_GR => for (grp <- trny.cophs(coId, coPhId).groups ) showGrResult(coId, coPhId, grp)
+    // update page
+    coPhase.coPhTyp match {
+      case CPT_KO => showKoResult(coId, coPhId, coPhase.ko)      
+      case CPT_GR => for (grp <- coPhase.groups ) showGrResult(coId, coPhId, grp)
       case CPT_SW => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
       case _      => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
     }
-  } 
+  }
+
 
   // show results of ko round
   def showKoResult(coId: Long, coPhId: Int, koRound: KoRound) = {

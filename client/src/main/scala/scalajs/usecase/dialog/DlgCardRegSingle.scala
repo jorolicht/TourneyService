@@ -29,9 +29,8 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player }
+import shared.model.{ Tourney, Player, Participant }
 import shared.utils._
-import shared.utils.Constants._
 import clientviews.dialog.html
 
 
@@ -77,8 +76,8 @@ object DlgCardRegSingle extends BasicHtml
     var email   = ""
 
     val bYear  = getInput("Year", 0)
-    val status = getRadioBtn("PlayerStatus").toIntOption.getOrElse(-1) 
-    val gender = getRadioBtn("Gender").toIntOption.getOrElse(0) 
+    val status = getRadioBtn("PlayerStatus", -1)
+    val gender = getRadioBtn("Gender", 0) 
 
     debug("validate", s"status: ${status}")
 
@@ -160,7 +159,7 @@ object DlgCardRegSingle extends BasicHtml
     setClubList(trny)
     setPlayerView("","", 0L)(trny)
 
-    setRadioBtnByValue("PlayerStatus", PLS_REDY.toString)
+    setRadioBtnByValue("PlayerStatus", Participant.PLS_REDY.toString)
     setHtml("Class", trny.getCompName(coId))
   }
   

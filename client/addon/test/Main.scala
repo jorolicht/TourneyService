@@ -1,5 +1,14 @@
 package addon.test
 
+/*
+** test -s compphase -n 1
+**
+**
+**
+*/
+
+import org.rogach.scallop._
+
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
@@ -44,10 +53,6 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport def load(toId: String)                = AddonCmds.load(toId)
   @JSExport def showCompPhase()                   = AddonCmds.showCompPhase()
   @JSExport def showTourney                       = AddonCmds.showTourney()
-
-  // Basic tests
-  @JSExport def testBasicHello(text: String)      = AddonBasic.testHello(text)
-  @JSExport def testBasicDate(testDate: String)   = AddonBasic.testDate(testDate)
   
  // Organize Competition tests
   @JSExport def testOrgCompDraw(param: String)    = AddonOrgComp.testDraw(TNP("testDraw", param))
@@ -77,6 +82,43 @@ object AddonMain extends TestUseCase("AddonMain")
   
   // get debug Level
   @JSExport def getDebug() = println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
+
+
+    /** test command
+   * 
+   */ 
+  def cmdTest(args: Array[String]) = {
+    import addon.test._
+    class ConfTest(arguments: Seq[String]) extends ScallopConf(arguments) {
+      override def onError(e: Throwable): Unit = e match {
+        case _ => printHelp()
+      }
+      //version("TourneyService 1.2.3 (c) 2022 Robert Lichtenegger")
+      banner("""Usage: test --scope [type|tourney|competition|compphase|player|basic] --param <value> --number <number>
+              |Options:
+              |""".stripMargin)
+
+      val scope   = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog"))
+      val number = opt[Int](name="number")
+      val param  = opt[String](name="param")
+      verify()
+    }
+
+    val conf   = new ConfTest(args)
+    val scope  = conf.scope.getOrElse("unknown")
+    val number = conf.number.getOrElse(0)
+    val param  = conf.param.getOrElse("")
+
+    scope match {
+      case "basic"     => AddonBasic.execTest(number, param)
+      case "dialog"    => AddonDialog.execTest(number, param)
+      case "compphase" => AddonCompPhase.execTest(number, param)
+      case _           => ()
+    }
+
+  }
+
+
 
 }
 

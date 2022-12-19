@@ -24,9 +24,8 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player }
+import shared.model.{ Tourney, Player, Participant }
 import shared.utils._
-import shared.utils.Constants._
 import clientviews.dialog.html
 
 
@@ -67,7 +66,7 @@ object DlgCardRegDouble extends BasicHtml
     import scala.collection.mutable.ListBuffer
     
     var eList   = ListBuffer[Error]()
-    val status = getRadioBtn("PlayerStatus").toIntOption.getOrElse(-1) 
+    val status = getRadioBtn("PlayerStatus", -1)
     debug("validate", s"status: ${status}")
  
     val id1 = getInput("Name1", 0L)
@@ -101,7 +100,7 @@ object DlgCardRegDouble extends BasicHtml
     selCoId = coId
     setNameList("Name1", trny, coId, 0, 0)
     setNameList("Name2", trny, coId, 0, 0)
-    setRadioBtnByValue("PlayerStatus", PLS_REDY.toString)
+    setRadioBtnByValue("PlayerStatus", Participant.PLS_REDY.toString)
     setHtml("Class", trny.getCompName(coId))
   }
   

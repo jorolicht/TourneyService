@@ -56,7 +56,7 @@ abstract class TestUseCase(val name: String) extends BasicHtml
   def SUCCESS(tnp: TNP)(implicit ucp: UseCaseParam) = AppEnv.logger.info(s"SUCCESS ${name}.${tnp.name}")
   def START(tnp: TNP)(implicit ucp: UseCaseParam) = AppEnv.logger.info(s"START ${name}.${tnp.name} => param: ${tnp.param}")
 
-  implicit val ucp=UseCaseParam(idBase, msgBase, expName, dataAttrPref, BasicHtml.getMsg_ _ ) 
+  implicit val ucp=UseCaseParam(idBase, msgBase, expName, dataAttrPref, AppEnv.getMessage _) 
 }
 
 object TestUseCase {

@@ -10,4 +10,5 @@ object Helper {
   def info(func:  => String, msg: =>String) = AppEnv.logger.info(s"${func}-> ${msg}")
   def warn(func:  => String, msg: =>String) = AppEnv.logger.warn(s"${func}-> ${msg}")
   def error(func: => String, msg: =>String) = AppEnv.logger.error(s"${func}-> ${msg}")
+
 }

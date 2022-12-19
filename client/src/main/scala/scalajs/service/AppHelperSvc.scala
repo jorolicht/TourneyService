@@ -117,11 +117,18 @@ trait AppHelperSvc {
   }
 
   def markSBEntry(ucName: String) = {
+    println(s"Call markSBEntry: ${ucName}")
     val elem = document.querySelectorAll(s"[data-sbentry='${ucName}']").head.asInstanceOf[HTMLElement].parentElement
     if (elem!=null) elem.classList.remove("collapse")    
     document.querySelectorAll(s"[data-sbtext]").map(_.asInstanceOf[HTMLElement].classList.remove("text-light"))
     document.querySelectorAll(s"[data-sbtext='${ucName}']").map(_.asInstanceOf[HTMLElement].classList.add("text-light"))
   }
+
+  def unmarkSBEntry(ucName: String) = {
+    val elem = document.querySelectorAll(s"[data-sbentry='${ucName}']").head.asInstanceOf[HTMLElement].parentElement
+    document.querySelectorAll(s"[data-sbtext]").map(_.asInstanceOf[HTMLElement].classList.remove("text-light"))
+  }
+
 
   def showSBMenu(name: String) = {
     val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]

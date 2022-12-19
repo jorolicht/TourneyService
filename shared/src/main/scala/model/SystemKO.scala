@@ -147,6 +147,20 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
 
 
 object KoRound {
+
+  // getSize - generates KO-size for number of players
+  def getSize(cntPlayer: Int): Int = cntPlayer match {
+    case 2                          =>   2
+    case x if (3  <= x && x <= 4)   =>   4
+    case x if (5  <= x && x <= 8)   =>   8
+    case x if (9  <= x && x <= 16)  =>  16
+    case x if (17 <= x && x <= 32)  =>  32
+    case x if (33 <= x && x <= 64)  =>  64
+    case x if (65 <= x && x <= 128) => 128
+    case _                          =>   0
+  }
+
+  // getNoRounds calculates number of rounds
   def getNoRounds(noPlayers: Int): Int = {
     noPlayers match {  
       case a if   65 to 128 contains a => 7

@@ -110,6 +110,7 @@ case class ParticipantEntry(
   var effRating: Int = 0        
 ) {
   def getRating = if (rating == 0) "" else rating.toString
+  def getPlace  = place._1.toString
 }
 
 
@@ -122,8 +123,28 @@ object ParticipantEntry {
   }
 
   def bye(name: String="bye") =  ParticipantEntry(SNO.BYE, name, "", 0, (0, 0))
-
 }
 
-// PantSelect - info for participant selection for next round
-case class PantSelect(val sno: SNO, val name: String, val info: String, var checked: Boolean, val winner: Boolean=true)
+
+object Participant {
+  // participant status
+  val PLS_UNKN = -99
+  val PLS_RJEC = -3  // rejected
+  val PLS_WAIT = -2  // waiting list 
+  val PLS_SICO = -1  // pending signup confirmation
+  val PLS_SIGN =  0  // signup confirmed
+  val PLS_REDY =  1  // participation confirmed
+  val PLS_PLAY =  2  // currently playing
+  val PLS_FINE =  3  // competition finished
+}  
+
+object Pant {
+  // participant status
+  val UNKN = -99
+  val RJEC = -3  // rejected
+  val WAIT = -2  // waiting list 
+  val SICO = -1  // pending signup confirmation
+  val SIGN =  0  // signup confirmed
+  val REDY =  1  // participation confirmed
+  val FINE =  2  // competition finished
+}  

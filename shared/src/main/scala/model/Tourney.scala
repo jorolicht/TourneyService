@@ -215,31 +215,6 @@ case class Tourney(
       Left(Error("err0014.trny.compNotFound", coId.toString))
     }  
   }
-
-
-
-
-  /** setCompDraw - returns new secId  
-   *  CompSection(val id: Int, val preId: Int, val coId: Long, val name: String, val secTyp: Int) 
-   */
-  // def setCompDraw(co: Competition, nameSec: String, typSec: Int, prevSec: Int, 
-  //                 winners: Boolean, noWinSets: Int, 
-  //                 pants: Array[SNO]): Either[Error, Int] = {
-  //   addSect(prevSec, co.id, nameSec, typSec, winners) match {
-  //     case Left(err)    => Left(Error("err0171.trny.setCompDraw"))
-  //     case Right(secId) => {        
-  //       if (coSects.isDefinedAt((co.id, secId))) {
-  //         coSects((co.id, secId)).pants     = pants
-  //         coSects((co.id, secId)).noPlayer  = pants.filter(p => !p.isBye).size
-  //         coSects((co.id, secId)).size      = pants.size
-  //         coSects((co.id, secId)).noWinSets = noWinSets
-  //         Right(secId) 
-  //       } else {
-  //         Left(Error("err0172.trny.setCompDraw"))
-  //       }
-  //     }
-  //   }
-  // }  
   
 
   /** getCompName - get name of competition
@@ -247,30 +222,6 @@ case class Tourney(
    */ 
   def getCompName(coId: Long): String = if (comps.isDefinedAt(coId)) comps(coId).name else ""
 
-  //addSect - adds a competition section to a competition 
-  // def addSect(prevSec: Int, coId: Long, nameSec: String, typSec: Int, winSec: Boolean=true): Either[Error, Int] = { 
-  //   val newId = coSects.keys.filter(x => x._1 == coId).map(x => x._2).max + 1
-
-  //   if (coSects.isDefinedAt((coId, newId))) {
-  //     Left(Error("err0169.trny.addSect"))
-  //   } else if (prevSec == 0) {
-  //     // new (first) entry without previous entry
-  //     coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
-  //     Right(newId)
-  //   } else if (!coSects.isDefinedAt((coId, prevSec))) { 
-  //     // now previous entry
-  //     Left(Error("err0048.trny.addSect"))
-  //   } else {
-  //     // new entry with previous entry
-  //     coSects((coId, newId)) = new CompSection(newId, prevSec, coId, nameSec, typSec)
-  //     if (winSec) {
-  //       coSects((coId, prevSec)).winId = newId
-  //     } else {
-  //       coSects((coId, prevSec)).looId = newId
-  //     }
-  //     Right(newId)
-  //   }
-  // }
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
@@ -399,7 +350,7 @@ case class Tourney(
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]):Either[Error, Int] = 
     seqEither(for (p <- pantStatus) yield setPantStatus(coId, p._1, p._2)) match {
       case Left(err)  => Left(err)
-      case Right(res) => Right(pantStatus.filter(_._2>=PLS_REDY).length)
+      case Right(res) => Right(pantStatus.filter(_._2>=Participant.PLS_REDY).length)
     }
 
   def getPant(coId: Long, sno: SNO): ParticipantEntry = sno.getPantEntry(comps(coId).typ)(this)
@@ -414,35 +365,41 @@ case class Tourney(
   def getCompPhaseStatus(coId: Long, coPhId: Int): Int = 
     if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhase.CPS_UNKN } 
 
-  /** add a competition phase to a competition (Category_Start) 
-   *  or an existing competition phase (Category_Winner/Looser)
-   *  The newly generated competition phase identifier (coPhId) 
-   *  is based on the previous coPhId. If the newly generated
-   *  competition phase is "based" on the looser of the previous round
-   *  then the new id is build with adding a "0" to the previous otherwise a "1"
-   *  Example:
-   *    1   => start competition phase
-   *    10  => looser of start phase
-   *    11  => winner of start phase
-   *    101 => winner of looser of start phase
-   *    111 => winner of winner of start phase 
-   *    ...
+  /** add a competition phase to a competition (start competition with first competition phase)
+   *  or add an a new competition phase to an finished existing competition phase
+   *  there are max two competition phases allowed to follow an existing competition phase (e.g winner/looser round)
+   *  coPhId:  0 -> 1      (Starting competition phase)
+   *           1 -> 2 / 3  
+   *           2 -> 4 / 5
+   *           3 -> 6 / 7
    */
-  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, category: Int, name: String, noWinSets: Int, noPlayer: Int): Either[Error, CompPhase] = {      
-    CompPhase.get(coId, coPhId, coPhCfg, category, name, noWinSets, noPlayer) match {
-      case Left(err)   => Left(err)
-      case Right(coph) => {
-        if ((coph.coPhId == 0) || cophs.isDefinedAt((coId, coph.coPhId))) {
-          Left(Error("???")) 
-        } else {
-          cophs((coId, coph.coPhId)) = coph
-          Right(coph)
-        }
-      }
+  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, name: String, noWinSets: Int): Either[Error, CompPhase] = {      
+    
+    // generate a new following competition phase identifier
+    val newCoPhId = if (coPhId == 0) {
+      // check if competiton identifier (1) is not used
+      if (!cophs.isDefinedAt((coId, 1))) 1 else 0 
+    } else {
+      // check if there is a free competition identifier
+      if       (!cophs.isDefinedAt((coId, coPhId*2)))   coPhId*2 
+      else if  (!cophs.isDefinedAt((coId, coPhId*2+1))) coPhId*2+1 
+      else 0 
     }
+    
+    //Error("err0164.RegDouble.Name.missing", "1")
 
+    if (newCoPhId == 0) {
+      Left(Error("err0194.msg.addCompPhase.existing")) 
+    } else if (name.length < 2) {
+      Left(Error("err0195.msg.addCompPhase.name")) 
+    } else if (coPhCfg == CompPhase.CPC_UNKN ) {
+      Left(Error("err0196.msg.addCompPhase.config")) 
+    } else { 
+      val coph = CompPhase.get(coId, newCoPhId, coPhCfg, name, noWinSets)
+      cophs((coId, coph.coPhId)) = coph
+      Right(coph)
+    }
   }
-  
 
 
   //
@@ -489,7 +446,6 @@ case class Tourney(
       |  ${pfsStr()}
       |""".stripMargin('|')
   } 
-
 }
 
 
@@ -497,6 +453,13 @@ object Tourney {
   implicit def rw: RW[Tourney] = macroRW
   def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", 0)
   def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, tBase.typ)
+
+  // tourney type
+  val TTY_UNKN  = -1  // UNKNOWN
+  val TTY_ANY   =  0  // ANY
+  val TTY_TT    =  1  // Table Tennis 
+  val TTY_SK    =  2  // Schafkopf
+
 
   val defaultEncodingVersion: Int = 1
   def decode(trnyStr: String): Either[Error, Tourney] = {

@@ -1,9 +1,9 @@
 @*
- * Template Organize Competition Card for Draw, Input, View
+ * Template Organize Competition Card for Ctrl, Draw, Input, View
  * Show result input pages of competition phases
  * allow user to enter results
  * configuration phases (e.g. Preliminary Round, KO-Round, ...)
- * 
+ * test -s compphase -n 1
  *@
 @import shared.model.Competition
 @import shared.utils.UseCaseParam  
@@ -12,39 +12,31 @@
 
 @(coId: Long, coPhNameIdList:List[(String, Int)])(implicit ucc: UseCaseParam)
 
-<div class="container-fluid">
-  <div class="row mb-2">
-    <div class="col-9 ml-0 mr-0 pr-0 pl-0" @id("Links")>
-        <ul class="nav nav-tabs">
-          @for(coPhNameIdElem<-coPhNameIdList){
-            <li class="nav-item">
-              <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
-            </li>
-          }
-        </ul>
-    </div>  
-    <div class="col-auto d-flex justify-content-end mt-2 border-bottom">
-    @actionButton("Demo", "demo", "btn-xs btn-info m-1")
-    @actionButton("Reset", "reset", "btn-xs btn-danger m-1")
-    @actionButton("Start", "start", "btn-xs btn-success m-1")</div>
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-12 ml-0 mr-0 pr-0 pl-0" @id("Links")>
+          <ul class="nav nav-tabs">
+            @for(coPhNameIdElem<-coPhNameIdList){
+              <li class="nav-item">
+                <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
+              </li>
+            }
+          </ul>
+      </div>  
+      <!-- <div class="col-auto d-flex justify-content-end mt-2 border-bottom">
+        <span>&nbsp;</span>  
+        @actionButton("Demo", "demo", "btn-xs btn-info m-1")
+        @actionButton("Reset", "reset", "btn-xs btn-danger m-1")
+        @actionButton("Start", "start", "btn-xs btn-success m-1")
+      </div> -->
+    </div>
   </div>
-</div>
 
-
+  
 <div @id("Content")>
-  <div id='DrawContent_@{coId}'>
-    @for(coPhNameIdElem<-coPhNameIdList){
-      <section style="display:none;" data-tabMode='Draw'  data-coPhId='@coPhNameIdElem._2'></section>
-    }
-  </div>
-  <div id='InputContent_@{coId}'>
-    @for(coPhNameIdElem<-coPhNameIdList){ 
-      <section style="display:none;" data-tabMode='Input' data-coPhId='@coPhNameIdElem._2'></section>
-    }
-  </div>
-  <div id='ViewContent_@{coId}'>
-    @for(coPhNameIdElem<-coPhNameIdList){
-      <section style="display:none;" data-tabMode='View'  data-coPhId='@coPhNameIdElem._2'></section>
-    }
-  </div>
+  @for(i<-List("Ctrl","Draw","Input","View")){
+    <div id='@{i}Content_@{coId}'>
+      @for(coPhNameIdElem<-coPhNameIdList){ <section style="display:none;" data-section='@{i}'  data-coPhId='@coPhNameIdElem._2'></section> }
+    </div> 
+  }
 </div>

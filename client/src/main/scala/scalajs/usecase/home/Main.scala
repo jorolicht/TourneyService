@@ -36,6 +36,7 @@ object HomeMain extends UseCase("HomeMain")
   def render(ucParam: String = "", ucInfo: String = "", reload: Boolean=false) = {
     ucParam match {
       case "None"              => { }
+      case "Console"           => { val cmd = dom.window.prompt("Enter Command: "); Console.execute(cmd) }
       case "Content"           => setContent(ucInfo)
       case "Error"             => setMainContent(clientviews.home.html.Error(ucInfo).toString)
       case "ErrorCode"         => setMainContent(clientviews.home.html.Error(getError(ucInfo)).toString)
@@ -45,7 +46,7 @@ object HomeMain extends UseCase("HomeMain")
                                     case Left(errMsg)   => {}
                                     case Right(result)  => {
                                       val (content, author, pubDate) = markdown2html(result)
-                                      setHtml_("mainContent", clientviews.home.html.Main("Test").toString)
+                                      setMainContent(clientviews.home.html.Main("Test"))
                                       $("#carouselContent").html(s"""<article class="markdown-body">$content</article>""") 
                                       setFooter(author, pubDate)
                                     }

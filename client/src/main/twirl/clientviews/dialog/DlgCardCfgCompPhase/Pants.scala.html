@@ -1,15 +1,13 @@
 @*
- * Template for Participants
- * 
- * Start Test Dialog: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardCfgSection&ucInfo=1#
+ * Template for Participants in competition phase configuration
  *
  *@
 
-@import shared.model.PantSelect  
 @import shared.utils.UseCaseParam   
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
+@import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
 
 @(pants: Array[PantSelect])(implicit ucc: UseCaseParam)
 
@@ -25,13 +23,13 @@
       <td class="text-right tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
     </tr>	
 
-    @for((pant, index) <- pants.view.zipWithIndex){
+    @for(index <- 0 until pants.length){
       <tr style="border-bottom:2px solid #ccc;">
         <td class="text-left tuse-height">@(index+1)</td>
-        <td class="text-left tuse-height">@pant.name</td>
-        <td class="text-left tuse-height">@pant.info</td>
+        <td class="text-left tuse-height">@pants(index).name</td>
+        <td class="text-left tuse-height">@pants(index).info</td>
         <td class="text-right tuse-height">
-          <input data-sno='@pant.sno.value' class='' type='checkbox' value='@index' @checked(pant.checked) @actionEvent("Check", "onclick") >
+          <input data-sno='@pants(index).sno.value' class='' type='checkbox' value='@index' @checked(pants(index).checked) @actionEvent("Check", "onclick") >
         </td>
       </tr>
     }

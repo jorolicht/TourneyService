@@ -22,6 +22,7 @@ import upickle.default._
 
 import shared.utils._
 import shared.model._
+import shared.model.Tourney._
 import shared.model.Competition._
 import shared.utils.Constants._ 
 import shared.utils.Routines._
@@ -123,7 +124,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
 
       // Click on new tourney button
       case "New"   => {
-        DlgCardTourney.show("new", TournBase("", AppEnv.getOrganizer, AppEnv.getOrgDir, getNow(), getNow(), "", TT_UNKN, true, "", "" , 0L)).map {
+        DlgCardTourney.show("new", TournBase("", AppEnv.getOrganizer, AppEnv.getOrgDir, getNow(), getNow(), "", TTY_UNKN, true, "", "" , 0L)).map {
           case Left(err) => {} // only cancel as error DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
           case Right(tb) => addTournBase(tb).map {
             case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
@@ -250,7 +251,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
     val player  = App.tourney.players
     for {
       co    <- tourney.comps.values
-      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= PLS_SICO)
+      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= Participant.PLS_SICO)
     } yield {
       if (co.typ == CT_SINGLE) {
         buf.append(s"${plco.sno},${player(plco.getPlayerId).lastname},${player(plco.getPlayerId).firstname},${player(plco.getPlayerId).getTTR},${player(plco.getPlayerId).clubName},${co.name}\n")

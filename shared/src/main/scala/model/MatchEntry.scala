@@ -69,7 +69,8 @@ trait MEntry {
     } catch  { case _: Throwable => "" }
   }
 
-  def finished = ((status == MEntry.MS_FIN) || (status == MEntry.MS_DRAW))
+  def finished = ((status == MEntry.MS_FIN) || (status == MEntry.MS_FIX) || (status == MEntry.MS_DRAW))
+
   def validSets(): Boolean = ((sets._1 == winSets & sets._2 < winSets) | (sets._1 < winSets & sets._2 == winSets))
 
   def reset(resetPantA: Boolean=false, resetPantB: Boolean=false):MEntry = { 

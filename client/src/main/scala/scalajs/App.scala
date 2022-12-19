@@ -43,7 +43,7 @@ object App extends BasicHtml
   var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
                     InfoEnabled, InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
-                    OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
+                    OrganizeCompetitionCtrl, OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
                     AdminDatabase, AdminLicense 
                    )
 

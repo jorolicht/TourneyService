@@ -11,7 +11,7 @@ greeting                                              = Welcome!
 
   app.mockup                                          = false
   app.version                                         = 2022-05EN184
-  app.date                                            = 2022-08-16
+  app.date                                            = 2022-12-06
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -81,9 +81,10 @@ greeting                                              = Welcome!
   sidebar.label.AdminLicense                          = License
   sidebar.label.AdminDatabase                         = Database
   sidebar.label.AdminReport                           = Reports
-  sidebar.label.OrganizeCompetitionDraw               = Auslosung
-  sidebar.label.OrganizeCompetitionInput              = Eingabe
-  sidebar.label.OrganizeCompetitionView               = Anzeige
+  sidebar.label.OrganizeCompetitionCtrl               = Control
+  sidebar.label.OrganizeCompetitionDraw               = Draw
+  sidebar.label.OrganizeCompetitionInput              = Input
+  sidebar.label.OrganizeCompetitionView               = View
 
   sidebar.title.HomeSearch                            = Tournament Search
   sidebar.title.Info                                  = Tournament Information
@@ -263,6 +264,16 @@ home.register.lbl.withdrawal                          = The cancellation policy 
 ###
 # General Labels
 ###
+  number.1                                            = one
+  number.2                                            = two
+  number.3                                            = three
+  number.4                                            = four
+  number.5                                            = five
+  number.6                                            = six
+  number.7                                            = seven
+  number.8                                            = eight
+  number.9                                            = nine 
+
   tourney.typ.None                                    = Sport
   tourney.typ.name                                    = Sport
   tourney.typ.-1                                      = type of sport
@@ -363,6 +374,48 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   competition.phase.8                                 = KO FINAL
   competition.phase.9                                 = KO-TROSTRUNDE
 
+  competition.phase.status.0                          = UNKNOWN
+  competition.phase.status.1                          = DRAW
+  competition.phase.status.2                          = INPUT
+  competition.phase.status.3                          = FINISHED
+  competition.phase.status.4                          = FINISHED / FOLLOWING ROUND STARTED
+
+  competition.phase.description.000                   = Configuration of Round
+  competition.phase.description.100                   = Round with Groups of Size 3-9
+  competition.phase.description.101                   = Round with Groups of Size 3
+  competition.phase.description.102                   = Round with Groups of Size 3 and 4
+  competition.phase.description.103                   = Round with Groups of Size 4
+  competition.phase.description.104                   = Round with Groups of Size 4 and 5
+  competition.phase.description.105                   = Round with Groups of Size 5
+  competition.phase.description.106                   = Round with Groups of Size 5 and 6
+  competition.phase.description.107                   = Round with Groups of Size 6
+  competition.phase.description.108                   = Round Robin
+  competition.phase.description.109                   = KO-System {0}-Field
+  competition.phase.description.110                   = Swiss-System {0}-Field
+
+  competition.phase.option.100                        = Round with Groups of Size 3-9
+  competition.phase.option.101                        = Round with Groups of Size 3
+  competition.phase.option.102                        = Round with Groups of Size 3 and 4
+  competition.phase.option.103                        = Round with Groups of Size 4
+  competition.phase.option.104                        = Round with Groups of Size 4 and 5
+  competition.phase.option.105                        = Round with Groups of Size 5
+  competition.phase.option.106                        = Round with Groups of Size 5 and 6
+  competition.phase.option.107                        = Round with Groups of Size 6
+  competition.phase.option.108                        = Round Robin
+  competition.phase.option.109                        = KO-System
+  competition.phase.option.110                        = Swiss-System
+  competition.phase.option.info.100                   = Configuration with {0} Groups
+  competition.phase.option.info.101                   = Configuration with {0} <span class="h5">&#x2682;</span>-Groups
+  competition.phase.option.info.102                   = Configuration with {0} <span class="h5">&#x2682;</span>-Group(s) and {1} <span class="h5">&#x2683;</span>-Group(s)
+  competition.phase.option.info.103                   = Configuration with {0} <span class="h5">&#x2683;</span>-Groups
+  competition.phase.option.info.104                   = Configuration with {0} <span class="h5">&#x2683;</span>-Group(s) and {1} <span class="h5">&#x2684;</span>-Group(s)
+  competition.phase.option.info.105                   = Configuration with {0} <span class="h5">&#x2684;</span>-Groups
+  competition.phase.option.info.106                   = Configuration with {0} <span class="h5">&#x2684;</span>-Group(s) and {1} <span class="h5">&#x2685;</span>-Group(s)
+  competition.phase.option.info.107                   = Configuration with {0} <span class="h5">&#x2685;</span>-Groups
+  competition.phase.option.info.108                   = Configuration {0}-Field Round Robin
+  competition.phase.option.info.109                   = Configuration {0}-Field KO-System
+  competition.phase.option.info.110                   = Configuration {0}-Field Swiss System  
+
   certificate.place.range                             = {0}. - {1}. place
   certificate.place.value                             = {0}. place
   certificate.title                                   = Certificate {0}
@@ -371,6 +424,7 @@ home.register.lbl.withdrawal                          = The cancellation policy 
 
   download.typ.1                                      = TourneyRegistrations.csv
 #END General Labels
+
 
 
 ###
@@ -465,8 +519,6 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
 ###
   organize.certificate.btn.print                        = CERTIFICATE
   organize.competition.config.card                      = Configuration
-
-      
   organize.competition.hdr                              = Competitions
   organize.competition.btn.new                          = CREATE NEW COMPETITION
   organize.competition.confirm.delete.hdr               = Confirm Deletion
@@ -550,22 +602,40 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.draw.change.hdr                  = Position Information Incorrect
   organize.competition.draw.change.msg                  = Check Position {0}
   organize.competition.draw.changes.msg                 = Check Positions {0}
-
   organize.competition.draw.noSelection                 = No competition selected.
   organize.competition.draw.noSection                   = No competition section defined.
   organize.competition.draw.invalidSection              = Configuration for competition section not supported.
 
+  organize.competition.ctrl.plh.name                    = e.g. Final Round
+  organize.competition.ctrl.lbl.DemoBtn                 = Show demo button to generate random results
+  organize.competition.ctrl.lbl.noPlayers               = Number of Players [active/registered]: 
+  organize.competition.ctrl.val.noPlayers               = [{0}/{1}]
+  organize.competition.ctrl.lbl.winner                  = Winner
+  organize.competition.ctrl.lbl.looser                  = Looser
+  organize.competition.ctrl.lbl.all                     = All
+  organize.competition.ctrl.lbl.pantbase                = Participant Selection
+  organize.competition.ctrl.lbl.winsets                 = Winning sets
+  organize.competition.ctrl.lbl.gamesystem              = Game System 
+  organize.competition.ctrl.lbl.nameround               = Name of Round
+  organize.competition.ctrl.lbl.following               = FOLLOWING ROUND
+  organize.competition.ctrl.lbl.state                   = STATE
+  organize.competition.ctrl.lbl.start                   = START ROUND
+  organize.competition.ctrl.btn.delete                  = DELETE
+  organize.competition.ctrl.btn.reset                   = RESET
+  organize.competition.ctrl.pants                       = Participants
+  organize.competition.ctrl.tbl.hdr.no                  = #
+  organize.competition.ctrl.tbl.hdr.name                = Lastname, Firstname
+  organize.competition.ctrl.tbl.hdr.info                = Info
+  organize.competition.ctrl.tbl.hdr.signup              = Check
+  organize.competition.ctrl.fmt.single                  = {0} [{1}]
+  organize.competition.ctrl.fmt.grp.info                = Group: {0} Position: {1}
+  organize.competition.ctrl.finished                    = {0} of {1} matches finished
 
-
-  organize.competition.tab.btn.demo                         = DEMO
-  organize.competition.tab.btn.reset                        = RESET
-  organize.competition.tab.btn.start                        = START
-#END Organize Competition
-
-
-
-
-
+  organize.competition.tab.btn.demo                     = DEMO
+  organize.competition.tab.btn.reset                    = RESET
+  organize.competition.tab.btn.start                    = START
+  organize.competition.tab.notStarted                   = Competition not yet started
+  organize.competition.tab.noSelection                  = No competition selected
 #END Organize Competition
 
 
@@ -714,6 +784,7 @@ info.schedule.signup.ok.header                        = Registration approved:
 info.schedule.consent.text                            = Consent to electronic data processing. The provided data will solely be used for the tourney management. This includes passing game results to the organizer and possibly forwarding results to responsible sports associations as well as publication of the game results with names and club names.
 
 info.results.noEntries                                = Competitions not yet started
+
 
 
 ###
@@ -869,6 +940,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
 ###
   std.btn.ok                                          = OK
   std.btn.start                                       = START
+  std.btn.demo                                        = DEMO
   std.btn.edit                                        = EDIT  
   std.btn.save                                        = SAVE
   std.btn.delete                                      = DELETE
@@ -986,20 +1058,31 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.card.cfg.compphase.Title                            = Competition Configuration 
   dlg.card.cfg.compphase.lbl.Selection                    = Game System Selection for {0} Participants
   dlg.card.cfg.compphase.plh.Name                         = Name of Round/Gamesection 
+  dlg.card.cfg.compphase.option.100                       = Round with Groups of Size 3-9
+  dlg.card.cfg.compphase.option.101                       = Round with Groups of Size 3
+  dlg.card.cfg.compphase.option.102                       = Round with Groups of Size 3 and 4
+  dlg.card.cfg.compphase.option.103                       = Round with Groups of Size 4
+  dlg.card.cfg.compphase.option.104                       = Round with Groups of Size 4 and 5
+  dlg.card.cfg.compphase.option.105                       = Round with Groups of Size 5
+  dlg.card.cfg.compphase.option.106                       = Round with Groups of Size 5 and 6
+  dlg.card.cfg.compphase.option.107                       = Round with Groups of Size 6
+  dlg.card.cfg.compphase.option.108                       = Round Robin
+  dlg.card.cfg.compphase.option.109                       = KO-System
+  dlg.card.cfg.compphase.option.110                       = Swiss-System
 
   dlg.card.cfg.compphase.option.info.1                    = Please select or enter name
   dlg.card.cfg.compphase.option.info.2                    = Please select configuration and enter name
-  dlg.card.cfg.compphase.option.info.100                  = Round with Groups of Size 3-9
-  dlg.card.cfg.compphase.option.info.101                  = Round with Groups of Size 3
-  dlg.card.cfg.compphase.option.info.102                  = Round with Groups of Size 3 and 4
-  dlg.card.cfg.compphase.option.info.103                  = Round with Groups of Size 4
-  dlg.card.cfg.compphase.option.info.104                  = Round with Groups of Size 4 and 5
-  dlg.card.cfg.compphase.option.info.105                  = Round with Groups of Size 5
-  dlg.card.cfg.compphase.option.info.106                  = Round with Groups of Size 5 and 6
-  dlg.card.cfg.compphase.option.info.107                  = Round with Groups of Size 6
-  dlg.card.cfg.compphase.option.info.108                  = Round Robin
-  dlg.card.cfg.compphase.option.info.109                  = KO-System
-  dlg.card.cfg.compphase.option.info.110                  = Swiss-System
+  dlg.card.cfg.compphase.option.info.100                  = Configuration with {0} Groups
+  dlg.card.cfg.compphase.option.info.101                  = Configuration with {0} <span class="h5">&#x2682;</span>-Groups
+  dlg.card.cfg.compphase.option.info.102                  = Configuration with {0} <span class="h5">&#x2682;</span>-Group(s) and {1} <span class="h5">&#x2683;</span>-Group(s)
+  dlg.card.cfg.compphase.option.info.103                  = Configuration with {0} <span class="h5">&#x2683;</span>-Groups
+  dlg.card.cfg.compphase.option.info.104                  = Configuration with {0} <span class="h5">&#x2683;</span>-Group(s) and {1} <span class="h5">&#x2684;</span>-Group(s)
+  dlg.card.cfg.compphase.option.info.105                  = Configuration with {0} <span class="h5">&#x2684;</span>-Groups
+  dlg.card.cfg.compphase.option.info.106                  = Configuration with {0} <span class="h5">&#x2684;</span>-Group(s) and {1} <span class="h5">&#x2685;</span>-Group(s)
+  dlg.card.cfg.compphase.option.info.107                  = Configuration with {0} <span class="h5">&#x2685;</span>-Groups
+  dlg.card.cfg.compphase.option.info.108                  = Configuration {0}-Field Round Robin
+  dlg.card.cfg.compphase.option.info.109                  = Configuration {0}-Field KO-System
+  dlg.card.cfg.compphase.option.info.110                  = Configuration {0}-Field Swiss System  
 
   dlg.card.cfg.compphase.lbl.Winset                       = Winning Sets
   dlg.card.cfg.compphase.btn.draw                         = START DRAW
@@ -1221,7 +1304,6 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0162.Player.already.exists                       = Player with this name exists already
   err0163.Player.already.registered                   = Player already registered with competition
   err0164.RegDouble.Name.missing                      = Name of Player {0} missing
-
   err0165.decode.Match                                = decoding error, data type Match: {0}
   err0166.decode.Matches                              = decoding error, data type Matches: {0}
   err0167.decode.CompSystem                           = decoding error, data type CompSystem: {0}
@@ -1242,7 +1324,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0182.ctrl.delTourney                             = Controller error in routine delTourney: {0} 
   err0183.ctrl.decode.updComps                        = Error in routine updComps, could not decode sequence of competitions
   err0184.ctrl.decode.updPlayers                      = Error in routine updPlayers, could not decode sequence of players
-  err0185.ctrl.decode.setPant2Comps            = Error in routine setPant2Comps, could not decode sequence of players to competition mapping
+  err0185.ctrl.decode.setPant2Comps                   = Error in routine setPant2Comps, could not decode sequence of players to competition mapping
   err0186.ctrl.decode.setClubs                        = Error in routine setClubs, could not decode list of clubs
   err0187.trny.setClub                                = Error in routine setClub, change clubname to already existing club
   err0188.decode.ParticipantEntry                     = decoding error, data type ParticipantEntry: {0}
@@ -1250,5 +1332,11 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0190.ctrl.lic.notfound                           = License not found: {0}
   err0191.ctrl.decode.MEntry                          = Controller decoding error, data type MEntry: {0}
   err0192.input.invalid.sets                          = Invalid input format for sets
+  err0193.organize.competition.selection              = Invalid competition selection: {0}
+  err0194.msg.addCompPhase.existing                   = Not able to start competition (again)
+  err0195.msg.addCompPhase.name                       = Invalid name for competition phase/round (at least 2 Characters please)
+  err0196.msg.addCompPhase.config                     = No or invalid configuration selected
+  err0197.msg.initGrMatches.generating                = Internal error, could not generate matches according to plan
+
 
 #END error codes / messages
