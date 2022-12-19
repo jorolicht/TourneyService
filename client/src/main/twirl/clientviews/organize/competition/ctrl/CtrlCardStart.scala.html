@@ -1,0 +1,101 @@
+@*
+ * Template for controlling competition phases
+ * 
+ *@
+@import shared.model._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import shared.utils.Constants._
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+@import scalajs.usecase.organize.OrganizeCompetitionCtrl.PantSelect
+
+@(coId: Long, pants: Array[PantSelect])(implicit ucc: UseCaseParam)
+
+@checked(value: Boolean) = @{ if(value) "checked" else "" }
+<div>
+  <div class="card mb-1">
+    <div class="tuse-card-header">		
+      <div class="float-left mt-2">
+        <a @Html(collapse("SuccCompPhase")) >
+          <h6 class="text-dark">
+            <i class="fa fa-fw fa-bars"></i>Wettbewerb konfigurieren und starten
+          </h6>
+        </a>
+      </div>
+      <div class="float-right mt-1 mr-1">
+        <button @id(s"StartBtn_${coId}") data-coId='@coId' data-coPhId='0' type='button' class='btn btn-outline-secondary btn-xs ml-1 mr-1' @actionEvent("Start", "onclick")>@msg("lbl.start")</button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div>
+        <div class="row mb-2"> <!--  Row 1 - Name of Start Round -->
+          <div class="col-3"><strong>@msg("lbl.nameround")</strong></div>
+          <div class="col">@inputTextPlh(name="name",_class="form-control-xs", lbl="", hlp="", minlength=2)</div>
+        </div>
+
+        <div class="row mb-2"> <!--  Row 2 - Game System -->
+          <div class="col-3"><strong>Spielsystem</strong></div>
+          <div class="col">
+            <select @id(s"CfgOptions_${coId}") class="form-control-sm" @actionEvent("Selection", "onchange")></select>
+          </div>
+        </div>
+ 
+        <div class="row mb-2">
+          <div class="col-3"><strong>Gewinnsätze</strong></div>
+          <div class="col-2">
+            <select @id("CfgWinset") class="form-control-sm" >
+              <option value='2'>2</option>
+              <option value='3' selected>3</option>
+              <option value='4'>4</option>
+            </select>
+          </div>
+          <div class="col d-flex justify-content-end">@msg("lbl.noPlayers")&nbsp;<span @id(s"PlayerInfo_${coId}")>xx</span></div>
+        </div>
+
+        <div class="card pb-0"> <!--  Box for participants --> 
+          <div class="tuse-card-header">		
+            <div class="float-left mt-2">
+              <a @Html(collapse("PantCard")) >
+                <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("pants")</h6>
+              </a>
+            </div>
+          </div>
+        
+          <div @id("PantCard") class="card-body pb-2 pt-0 collapse">
+
+            <!-- START table vor participants -->
+            <div style="max-height: 250px; overflow: auto;">  
+              <table @id("PantTbl") class="table table-sm small table-hover tuse-border">
+                <tbody>
+                  <tr style="border-bottom:2px solid #ccc;">
+                    <td class="text-left tuse-height"><strong>@msg("tbl.hdr.no")</strong></td>
+                    <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
+                    <td class="text-center tuse-height"><strong>@msg("tbl.hdr.info")</strong></td>
+                    <td class="text-right tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
+                  </tr>	
+                  
+                  @for(index <- 0 until pants.length){
+                    <tr style="border-bottom:2px solid #ccc;">
+                      <td class="text-left tuse-height">@(index+1)</td>
+                      <td class="text-left tuse-height">@pants(index).name</td>
+                      <td class="text-left tuse-height">@pants(index).info</td>
+                      <td class="text-right tuse-height">
+                        <input data-coId='@coId' data-sno='@pants(index).sno.value' class='' type='checkbox' value='@index' @checked(pants(index).checked) @actionEvent("Check", "onclick") >
+                      </td>
+                    </tr>
+                  }                  
+                  
+                </tbody>
+              </table>
+            </div>
+            <!-- END TABLE FRAME-->
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- END CARD BODY-->
+  </div>  <!-- END CARD-->
+</div>

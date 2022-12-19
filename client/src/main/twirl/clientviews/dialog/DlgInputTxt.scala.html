@@ -1,0 +1,38 @@
+@*
+ * Template for Input Dialog Text
+ *@
+
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._  
+ 
+@(header: String="", body:String="", placeholder:String="", btnClose:String="CLOSE", btnStart:String="START")(implicit ucp: UseCaseParam)
+<!-- START Modal Dialog for Input Text -->
+<div class="modal fade" id='DlgInputTxt' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content bg-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id='DlgInputTxt__Header'>@header</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <h6 class="modal-title" id='DlgInputTxt__Body'>@body</h6>
+        <input id='DlgInputTxt__Input' placeholder='@placeholder' type='text' class='form-control form-control-sm mb-2' @actionEvent("Input", "oninput")> 
+        <small id='DlgInputTxt__Error' class='text-danger' style='display:none'>Error Text</small>
+        <div class="modal-footer">
+          <button id='DlgInputTxt__Close' class="btn btn-outline-secondary btn-xs" type="button" autofocus>@btnClose</button>
+          <button id='DlgInputTxt__Start' class="btn btn-outline-secondary btn-xs" type="button">@btnStart</button>
+        </div>
+      </div> 
+    </div>    
+  </div>
+
+
+</div>
+<!-- END Modal Dialog Input Text -->
+
+
