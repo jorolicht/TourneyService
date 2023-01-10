@@ -1,0 +1,61 @@
+@*
+ * Template for controlling competition phases
+ * 
+ *@
+@import shared.model._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import shared.utils.Constants._
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+
+@(coId: Long, coPhId: Int)(implicit ucc: UseCaseParam)
+
+<div @id(s"Ctrl_${coId}_${coPhId}") class="m-1">
+
+  <div class="card mb-1">
+    <div class="card-body">
+      <h6 class="card-title">
+        @msg("lbl.state")
+        <button type='button' class='btn btn-outline-danger btn-xs ml-2' disabled><strong @id(s"Status_${coId}_${coPhId}")>AUSLOSUNG</strong></button>
+      </h6>
+      <ul class='mb-0'>
+        <li @id(s"Config_${coId}_${coPhId}")>KO-Runde 5 4er-Gruppen und 3 3er-Gruppen</li>
+        <li @id(s"Finished_${coId}_${coPhId}")>13 von 14 Spielen beendet</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card mb-1">
+    <div class="card-body">
+      <h6 class="card-title">AKTIONEN</h6>
+      <div class="row mb-1">
+        <div class="col-2">@actionButton("StartRound", "std.btn.start", "btn btn-outline-secondary btn-xs ml-1 mr-1",coId, coPhId)</div>
+        <div class="col" @id(s"MsgStartRound")>Spielphase/Runde starten.</div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-2">@actionButton("DeleteRound", "std.btn.delete", "btn btn-outline-secondary btn-xs ml-1 mr-1",coId, coPhId)</div>
+        <div class="col" @id(s"MsgDeleteRound")>Spielphase/Runde löschen.</div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-2">@actionButton("ResetRound", "std.btn.reset", "btn btn-outline-secondary btn-xs ml-1 mr-1",coId, coPhId)</div>
+        <div class="col" @id(s"MsgResetRound")>
+          Spielphase/Runde in den Zustand AUSLOSUNG zurücksetzen. Achtung alle Ergebniseingaben dieser Runde und alle nachfolgenden Runden werden gelöscht.
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-2">@actionButton("StartFollowing", "std.btn.start", "btn btn-outline-secondary btn-xs ml-1 mr-1",coId, coPhId)</div>
+        <div class="col" @id(s"MsgStartFollowing") >Nachfolgende Spielphase/Runde starten.</div>
+      </div>
+
+      <div class="row mb-0">
+        <div class="col">@inputCheckbox("DemoBtn", "mb-0", coId, coPhId)</div>
+      </div>
+    </div>
+  </div>
+
+</div>

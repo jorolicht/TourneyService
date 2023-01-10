@@ -1,0 +1,38 @@
+@*
+ * Template for Input Prompt
+ *@
+
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._  
+ 
+@(title: String="")(implicit ucp: UseCaseParam)
+<!-- START Modal Dialog for Prompt -->
+<div class="modal fade" id='DlgPrompt' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content bg-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id='DlgPrompt__Title'>@title</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <input id='DlgPrompt__Input' type='text' class='form-control form-control-sm mb-2' @actionEvent("Input", "oninput")> 
+        <div class="modal-footer">
+          <button id='DlgPrompt__Close' class="btn btn-outline-secondary btn-xs" type="button" autofocus>@msgStd("btn.close")</button>
+          <button id='DlgPrompt__Start' class="btn btn-outline-secondary btn-xs" type="button">@msgStd("btn.submit")</button>
+        </div>
+      </div> 
+
+
+
+
+    </div>    
+  </div>
+
+
+</div>
+<!-- END Modal Dialog Prompt -->
