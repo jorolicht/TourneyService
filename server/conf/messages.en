@@ -11,7 +11,7 @@ greeting                                              = Welcome!
 
   app.mockup                                          = false
   app.version                                         = 2022-05EN184
-  app.date                                            = 2022-12-06
+  app.date                                            = 2022-12-28
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -116,6 +116,7 @@ greeting                                              = Welcome!
   home.main.GoodBye                                   = Bye!
   home.main.Error                                     = An error occurred!
   home.main.Cookie                                    = Unfortunately, nothing works without cookies!
+  home.main.prompt                                    = Enter command:
 #END HomeMain
 
 ###
@@ -618,6 +619,7 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.ctrl.lbl.gamesystem              = Game System 
   organize.competition.ctrl.lbl.nameround               = Name of Round
   organize.competition.ctrl.lbl.following               = FOLLOWING ROUND
+  organize.competition.ctrl.lbl.warnfollowing           = FOLLOWING ROUND (Caveat: current round not finished)
   organize.competition.ctrl.lbl.state                   = STATE
   organize.competition.ctrl.lbl.start                   = START ROUND
   organize.competition.ctrl.btn.delete                  = DELETE
@@ -630,6 +632,12 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.ctrl.fmt.single                  = {0} [{1}]
   organize.competition.ctrl.fmt.grp.info                = Group: {0} Position: {1}
   organize.competition.ctrl.finished                    = {0} of {1} matches finished
+  organize.competition.ctrl.delete.confirm              = Deletion Confirmation
+  organize.competition.ctrl.delete.one                  = Delete Round {0} 
+  organize.competition.ctrl.delete.more                 = Delete Round {0} and following Round(s) {1}  
+  organize.competition.ctrl.reset.confirm               = Reset Confirmation
+  organize.competition.ctrl.reset.one                   = Reset Round {0}? 
+  organize.competition.ctrl.reset.more                  = Reset Round {0} and DELETE following Round(s) {1}?  
 
   organize.competition.tab.btn.demo                     = DEMO
   organize.competition.tab.btn.reset                    = RESET
@@ -940,6 +948,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
 ###
   std.btn.ok                                          = OK
   std.btn.start                                       = START
+  std.btn.submit                                      = SUBMIT
   std.btn.demo                                        = DEMO
   std.btn.edit                                        = EDIT  
   std.btn.save                                        = SAVE
@@ -950,6 +959,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   std.btn.new                                         = NEW
   std.btn.add                                         = ADD
   std.btn.cancel                                      = CANCEL
+  std.btn.reset                                       = RESET
   std.btn.close                                       = CLOSE
   std.btn.xclose                                      = <span>&times;</span>
 #END standard buttons
@@ -1337,6 +1347,6 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0195.msg.addCompPhase.name                       = Invalid name for competition phase/round (at least 2 Characters please)
   err0196.msg.addCompPhase.config                     = No or invalid configuration selected
   err0197.msg.initGrMatches.generating                = Internal error, could not generate matches according to plan
-
+  err0198.getArrayBuffer                              = Could not read or decode local storage {0} 
 
 #END error codes / messages

@@ -2,6 +2,7 @@ package scalajs
 
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{Success, Failure}
 
 import scala.scalajs._
@@ -9,13 +10,7 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-// import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
-// import org.scalajs.dom.ext._             // import stmt sequence is important
-// import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
-
-
 import org.scalajs.dom.ext._             // import stmt sequence is important
-//import org.scalajs.dom.raw._
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 import org.scalajs.logging._
 import upickle.default._
@@ -41,8 +36,11 @@ object AppEnv extends BasicHtml
   this: BasicHtml =>
   implicit val ucp=UseCaseParam("APP", "app", "App", "app", getMessage _ ) 
 
+  
+  
   var logger:Logger = org.scalajs.logging.NullLogger
   var messages      = Map[String,Map[String,String]]()
+  var prompt        = scala.collection.mutable.ArrayBuffer[String]()
   val coPhIdMap     = scala.collection.mutable.Map[Long, Int]()
   var lang          = "de"
   def msgs          = messages(lang)
@@ -101,6 +99,10 @@ object AppEnv extends BasicHtml
     home = dom.window.location.protocol + "//" + dom.window.location.host
     println(s"initContext home: ${home}")
     result
+  }
+
+  def initPrompt() = {
+    prompt = scala.collection.mutable.ArrayBuffer("command1", "command2")
   }
 
   def resetContext(): Unit = { 
@@ -227,6 +229,12 @@ object AppEnv extends BasicHtml
     } catch { case _: Throwable => false }
   }
 
+  def getArrayBuffer(name: String): Either[Error, ArrayBuffer[String]] = {
+    try {
+      Right(read[ArrayBuffer[String]](dom.window.localStorage.getItem(name) ))
+    } catch { case _: Throwable => Left(Error("err0198.getArrayBiffer", name)) }
+  }
+
 
   /** setLocalStorage
    *
@@ -242,6 +250,12 @@ object AppEnv extends BasicHtml
     try dom.window.localStorage.setItem(name, value.toString)
     catch { case _: Throwable => () }
   }
+
+  def setArrayBuffer(name: String, value: ArrayBuffer[String]): Unit = {
+    try dom.window.localStorage.setItem(name, write[ArrayBuffer[String]](value))
+    catch { case _: Throwable => () }
+  }
+
 
   /** initCookie - check settings of cookie show cookie dialog
    * 

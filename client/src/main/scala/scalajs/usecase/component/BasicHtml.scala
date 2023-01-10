@@ -225,6 +225,11 @@ class BasicHtml
     try document.getElementById(ucpId(id)).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
     catch { case _: Throwable => error(s"setVisible", s"id: ${ucpId(id)} visible: ${visible}") }
   }  
+  def setVisible(elem: HTMLElement, visible: Boolean): Unit = {
+    try elem.style.setProperty("display", disProp(visible))
+    catch { case _: Throwable => Helper.error(s"setVisible", s"elem: ${elem} visible: ${visible}") }
+  }  
+
 
 
   /**
@@ -491,7 +496,13 @@ class BasicHtml
 
   def setAttribute(id: String, attrName: String, attrValue: String)(implicit ucp: UseCaseParam): Unit = {
     BasicHtml.setAttribute_(ucpId(id), attrName, attrValue)
-  }  
+  }
+
+  def setAttribute(elem: HTMLElement, attrName: String, attrValue: String): Unit = {
+    try elem.setAttribute(attrName, attrValue)
+    catch { case _: Throwable => Helper.error("setAttribute", s"elem:${elem}  ${attrName }-> ${attrValue}") } 
+  }
+
 
   def setPlaceholder(id: String, value: String)
                     (implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
@@ -519,6 +530,16 @@ class BasicHtml
     try _class.foreach(cValue => document.getElementById(ucpId(id)).classList.remove(cValue))
     catch { case _: Throwable => error("removeClass", s"id: ${ucpId(id)}  class: ${_class}") } 
   }
+
+  def setClass(id: String, value: Boolean, _class: String*)(implicit ucp: UseCaseParam): Unit = {
+    try if (value) {
+       _class.foreach(cValue => document.getElementById(ucpId(id)).classList.add(cValue))
+    } else {
+      _class.foreach(cValue => document.getElementById(ucpId(id)).classList.remove(cValue))
+    }   
+    catch { case _: Throwable => error("setClass", s"id: ${ucpId(id)}  class: ${_class}") } 
+  }
+
 
   /** add/removeDataClass
    * 
@@ -623,7 +644,10 @@ class BasicHtml
   def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = {
     if (key.startsWith("_")) AppEnv.getMessage(key.substring(1), args: _*) else AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
   }
-
+  
+  def getMsgPref(prefix: String, key: String, args: String*): String = {
+    if (prefix == "") AppEnv.getMessage(key, args: _*) else AppEnv.getMessage(prefix + "." + key, args: _*)
+  }
 
   def setMainContent(content: String): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content
   def setMainContent(content: play.twirl.api.Html): Unit = document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString
@@ -648,6 +672,12 @@ class BasicHtml
 
   def doTry(msg: String)(op: => Unit) = {
     try op catch { case _: Throwable => Helper.error("doTry", msg) }
-  }  
+  } 
+
+  def gE(id: String, prefix: String=""): HTMLElement = {
+    try document.getElementById(prefix + id).asInstanceOf[HTMLElement]
+    catch { case _: Throwable => Helper.error("gE", s"id: ${id} prefix: ${prefix}"); null } 
+  }
+
 
 }

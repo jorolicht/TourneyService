@@ -48,9 +48,7 @@ object AddonMain extends TestUseCase("AddonMain")
 {
   
   // Commands
-  @JSExport def save()                            = AddonCmds.save()
-  @JSExport def sync()                            = AddonCmds.sync()
-  @JSExport def load(toId: String)                = AddonCmds.load(toId)
+
   @JSExport def showCompPhase()                   = AddonCmds.showCompPhase()
   @JSExport def showTourney                       = AddonCmds.showTourney()
   
@@ -65,26 +63,25 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport def testPlayerRun(coId: String, coPhId: String) = AddonOrgComp.testPlayerRun("testPlayerRun", coId.toLong, coPhId.toInt)
 
 
-  // Sidebar tests
-  @JSExport def testShowSubMenu(menu: String)     = AddonSidebar.testShowSubMenu("testShowSubMenu", menu)
-
-  // Competition tests
-  @JSExport def testCompEncode(toId: String)      = AddonComp.testEncode(toId)
   
-  // Match tests
-  //@JSExport def testMatchEncode(param: String="") = AddonMatch.testEncode(TNP("testEncode", param))
 
-  // Tourney tests
-  @JSExport def testTourneyLoad(toId: Long)       = AddonTourney.testLoad(toId)
+  /** execute command
+   * 
+   */ 
+  def cmdExecute(args: Array[String]) = {
+    try {
+      args(0) match {
+        case "load"            => AddonCmds.load(args(1))
+        case "getDebug"        => println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
+        case "setDebug"        => AppEnv.setDebugLevel(args(1))
+        case "testCompEncode"  => AddonComp.testEncode(args(1))
+        case "testShowSubMenu" => AddonSidebar.testShowSubMenu("testShowSubMenu", args(1))
+      }
 
-  // set debug Level
-  @JSExport def setDebug(level: String) = AppEnv.setDebugLevel(level)
+    } catch { case _:Throwable => println(s"Exception cmdStart: ${args.mkString(" ")}")}
+  }  
   
-  // get debug Level
-  @JSExport def getDebug() = println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
-
-
-    /** test command
+  /** test command
    * 
    */ 
   def cmdTest(args: Array[String]) = {
@@ -98,7 +95,7 @@ object AddonMain extends TestUseCase("AddonMain")
               |Options:
               |""".stripMargin)
 
-      val scope   = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog"))
+      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")
       verify()

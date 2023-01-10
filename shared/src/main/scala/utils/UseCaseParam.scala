@@ -21,3 +21,4 @@ object UCP {
   def apply(base: String, msgBase: String ):UseCaseParam = UseCaseParam(base,msgBase,"","", (x:String,y:Seq[String])=>"")
 }  
 
+ 

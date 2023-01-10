@@ -74,9 +74,14 @@ object Console
     val args  = cmd.split(" ")
     val args1 = args.patch(0,Nil,1)
     args(0).toLowerCase match {
-      case "log"  => cmdLog(args1)
-      case "test" => addon.test.AddonMain.cmdTest(args1)
-      case "dump" => {
+      case "log"   => cmdLog(args1)
+      case "test"  => addon.test.AddonMain.cmdTest(args1)
+      case "exec"  => addon.test.AddonMain.cmdExecute(args1)
+      case "save"  => addon.test.AddonCmds.save()
+      case "sync"  => addon.test.AddonCmds.sync()
+      case "show"  => addon.test.AddonCmds.showTourney()
+
+      case "dump"  => {
         val conf = new ConfDump(args1)
       } 
 
@@ -115,5 +120,54 @@ object Console
     }
     println(s"Current LogLevel: ${AppEnv.getDebugLevel.getOrElse("UNKNOWN")}")
   }
+
+  def prompt(title: String) : Future[Either[String, String]] = {
+    import org.scalajs.dom.raw.HTMLElement
+    import scalajs.usecase.dialog.DlgPrompt
+    import scala.collection.mutable.ArrayBuffer
+
+    val maxLen = 50
+    var pPosition = -1
+    var pHistory  = AppEnv.getArrayBuffer("AppEnv.prompt") match {
+      case Left(err) => ArrayBuffer[String]()
+      case Right(aB) => aB
+    }
+
+    def actionEvent(key: String, elem: HTMLElement, event: dom.Event) = {
+      key match {
+        case "Up"   => {
+          
+          pPosition = (pPosition + 1) % pHistory.length
+          DlgPrompt.set(pHistory(pPosition))
+          //println(s"UP: ${pPosition} value: ${pHistory(pPosition)}")
+        }
+        case "Down" => {
+          if (pPosition >= 0) pPosition = pPosition - 1
+          if (pPosition >=0 ) DlgPrompt.set(pHistory(pPosition)) else DlgPrompt.set("")
+          //println(s"Down: ${pPosition} value: ${pHistory(pPosition)}")
+        }
+      }
+    }
+
+    val initVal = if (pHistory.length > 0) { 
+      pPosition = 0
+      pHistory(0) 
+    } else {
+      pPosition = -1
+      ""
+    }  
+
+    DlgPrompt.show(title, initVal, actionEvent) map {
+      case Left(err)    => Left(err)
+      case Right(input) => {
+        // save history
+        pHistory.insert(0, input)
+        if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
+        AppEnv.setArrayBuffer("AppEnv.prompt", pHistory) 
+        Right(input)
+      }  
+    }
+  }
+
 
 }  

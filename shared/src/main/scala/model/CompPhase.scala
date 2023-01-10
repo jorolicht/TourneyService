@@ -32,7 +32,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   //*****************************************************************************
   def setStatus():Unit = { 
     mFinished = matches.foldLeft(0) ((cnt, m) => if (m.finished) cnt + 1 else cnt)
-    mTotal    = matches.size
+    
     status match {
       case CPS_UNKN => println(s"ERROR: CompPhase.setStatus -> status=${status}" ) 
       case CPS_AUS  => if (mFinished == mTotal) println(s"ERROR: CompPhase.setStatus -> status=${status}" )   
@@ -65,7 +65,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
           case Left(err)  => Left(err)
           case Right(res) => initGrMatches(compTyp) match {
             case Left(err)  => Left(err)
-            case Right(res) => setStatus(CPS_AUS); Right(res)
+            case Right(res) => { setStatus(CPS_AUS); mTotal = matches.size; Right(res) }
           }
         }
       }
@@ -118,7 +118,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     Right(true)
   }
 
-    def initGrMatches(coTyp: Int): Either[Error, Boolean] = {
+  def initGrMatches(coTyp: Int): Either[Error, Boolean] = {
     import shared.utils.GamePlan
     matches = ArrayBuffer[MEntry]()
 

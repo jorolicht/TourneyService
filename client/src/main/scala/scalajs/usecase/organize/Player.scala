@@ -18,7 +18,7 @@ import upickle.default._
 
 import shared.utils._
 import shared.model._
-import shared.model.Participant
+import shared.model.Pant
 import shared.utils.Routines._
 
 import scalajs.usecase.dialog._
@@ -44,16 +44,16 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     player = view4PlayerRegister()
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._5 >= Participant.PLS_SICO))) 
-    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._5 == Participant.PLS_WAIT))) 
-    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._5 == Participant.PLS_RJEC)))
+    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._5 >= Pant.SICO))) 
+    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._5 == Pant.WAIT))) 
+    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._5 == Pant.RJEC)))
   
     // check if there are players with need signup commitment
-    setBadge(player.filter(_._5 == Participant.PLS_SICO).length)
+    setBadge(player.filter(_._5 == Pant.SICO).length)
   }       
 
   def setBadge(cnt: Int = (-1)) = {
-    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._5 == Participant.PLS_SICO).length else cnt    
+    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._5 == Pant.SICO).length else cnt    
     if (sicoCnt > 0) {
        // add badge if not already added, do it now
       setHtml("SidebarBadge", sicoCnt.toString)
@@ -158,11 +158,11 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
     val coId = coIdStr.toLongOption.getOrElse(0L)
     status match {
-      case "PLS_SIGN" => confirm(coId, sno, Participant.PLS_SIGN).map { if (_) setPlayerStatusUpdate(coId, sno, Participant.PLS_SIGN) }
-      case "PLS_WAIT" => confirm(coId, sno, Participant.PLS_WAIT).map { if (_) setPlayerStatusUpdate(coId, sno, Participant.PLS_WAIT) }
-      case "PLS_RJEC" => confirm(coId, sno, Participant.PLS_RJEC).map { if (_) setPlayerStatusUpdate(coId, sno, Participant.PLS_RJEC) }
-      case "PLS_REDY" => setPlayerStatusUpdate(coId, sno, Participant.PLS_REDY)
-      case "PLS_UNDO" => setPlayerStatusUpdate(coId, sno, Participant.PLS_SIGN)
+      case "PLS_SIGN" => confirm(coId, sno, Pant.SIGN).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.SIGN) }
+      case "PLS_WAIT" => confirm(coId, sno, Pant.WAIT).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.WAIT) }
+      case "PLS_RJEC" => confirm(coId, sno, Pant.RJEC).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.RJEC) }
+      case "PLS_REDY" => setPlayerStatusUpdate(coId, sno, Pant.REDY)
+      case "PLS_UNDO" => setPlayerStatusUpdate(coId, sno, Pant.SIGN)
       case         _  => error("buttonSetStatus", s"error unknown status")
     }
   }  
@@ -185,9 +185,9 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     val firstname = App.tourney.contact.firstname
 
     val dlgMsg = status match {
-      case Participant.PLS_RJEC => (getMsg("hdr.reject"),getMsg("body.reject"),getMsg("email.reject",email,firstname))
-      case Participant.PLS_WAIT => (getMsg("hdr.wait"),getMsg("body.wait"),getMsg("email.wait",email,firstname))
-      case Participant.PLS_SIGN => (getMsg("hdr.confirm"),getMsg("body.confirm"),getMsg("email.confirm",email,firstname))
+      case Pant.RJEC => (getMsg("hdr.reject"),getMsg("body.reject"),getMsg("email.reject",email,firstname))
+      case Pant.WAIT => (getMsg("hdr.wait"),getMsg("body.wait"),getMsg("email.wait",email,firstname))
+      case Pant.SIGN => (getMsg("hdr.confirm"),getMsg("body.confirm"),getMsg("email.confirm",email,firstname))
       case        _ => ("UNKNOWN","message","")
     }
 

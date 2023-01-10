@@ -126,17 +126,8 @@ object ParticipantEntry {
 }
 
 
-object Participant {
-  // participant status
-  val PLS_UNKN = -99
-  val PLS_RJEC = -3  // rejected
-  val PLS_WAIT = -2  // waiting list 
-  val PLS_SICO = -1  // pending signup confirmation
-  val PLS_SIGN =  0  // signup confirmed
-  val PLS_REDY =  1  // participation confirmed
-  val PLS_PLAY =  2  // currently playing
-  val PLS_FINE =  3  // competition finished
-}  
+
+
 
 object Pant {
   // participant status

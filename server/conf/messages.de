@@ -11,7 +11,7 @@ greeting                                              = Herzlich Willkommen!
 
   app.mockup                                          = false
   app.version                                         = 2022-05DE184
-  app.date                                            = 2022-12-06
+  app.date                                            = 2022-12-28
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -116,6 +116,7 @@ greeting                                              = Herzlich Willkommen!
   home.main.GoodBye                                   = Bye!  
   home.main.Error                                     = Ein Fehler ist aufgetreten!
   home.main.Cookie                                    = Ohne Cookies geht leider nichts!
+  home.main.prompt                                    = Eingabe Kommando:
 #END HomeMain        
 
 ###
@@ -617,6 +618,7 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.ctrl.lbl.gamesystem              = Spielsystem
   organize.competition.ctrl.lbl.nameround               = Name der Runde
   organize.competition.ctrl.lbl.following               = NACHFOLGENDE RUNDE
+  organize.competition.ctrl.lbl.warnfollowing           = NACHFOLGENDE RUNDE (Achtung: aktuelle Runde nicht beendet)
   organize.competition.ctrl.lbl.state                   = STATUS
   organize.competition.ctrl.lbl.start                   = STARTEN
   organize.competition.ctrl.btn.delete                  = LÖSCHEN
@@ -629,6 +631,12 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.ctrl.fmt.single                  = {0} [{1}]
   organize.competition.ctrl.fmt.grp.info                = Gruppe: {0} Platzierung: {1}
   organize.competition.ctrl.finished                    = {0} von {1} Spielen beendet
+  organize.competition.ctrl.delete.confirm              = Löschbestätigung
+  organize.competition.ctrl.delete.one                  = Spielrunde {0} löschen
+  organize.competition.ctrl.delete.more                 = Spielrunde {0} und nachfolgende Spielrunde(n) {1} löschen  
+  organize.competition.ctrl.reset.confirm               = Reset Bestätigung
+  organize.competition.ctrl.reset.one                   = Spielrunde {0} zurücksetzen?
+  organize.competition.ctrl.reset.more                  = Spielrunde {0} zurücksetzen und nachfolgende Spielrunde(n) {1} löschen?  
 
   organize.competition.tab.btn.demo                     = DEMO
   organize.competition.tab.btn.reset                    = RESET
@@ -937,6 +945,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 ###
   std.btn.ok                                          = OK
   std.btn.start                                       = STARTEN
+  std.btn.submit                                      = AUSFÜHREN
   std.btn.demo                                        = DEMO
   std.btn.edit                                        = BEARBEITEN
   std.btn.save                                        = SICHERN
@@ -948,6 +957,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   std.btn.new                                         = NEU
   std.btn.add                                         = HINZUFÜGEN
   std.btn.close                                       = SCHLIESSEN
+  std.btn.reset                                       = ZURÜCKSETZEN
   std.btn.xclose                                      = <span>&times;</span>
 #END Standard Buttons
 
@@ -1337,5 +1347,6 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0195.msg.addCompPhase.name                       = Ungültiger Name für Runde/Wettbewerbsabschnitt (Länge mind. 2 Zeichen)
   err0196.msg.addCompPhase.config                     = Ungültige (keine) Konfiguration ausgewählt
   err0197.msg.initGrMatches.generating                = Interner Fehler, Spiele konnten nicht entsprechend dem Spielplan generiert werden
+  err0198.getArrayBuffer                              = Lokaler Speicher konnte nicht gelesen werden {0}
 
 #END Error Codes/Messages

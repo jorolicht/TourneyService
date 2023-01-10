@@ -36,7 +36,7 @@
 <div @id("Content")>
   @for(i<-List("Ctrl","Draw","Input","View")){
     <div id='@{i}Content_@{coId}'>
-      @for(coPhNameIdElem<-coPhNameIdList){ <section style="display:none;" data-section='@{i}'  data-coPhId='@coPhNameIdElem._2'></section> }
+      @for(coPhNameIdElem<-coPhNameIdList){ <section style="display:none;" data-section='@{i}' data-coPhId='@coPhNameIdElem._2'></section> }
     </div> 
   }
 </div>

@@ -95,5 +95,4 @@ object AddonCmds extends UseCase("AddonCmds")
     if (coId != 0) println(App.tourney.cophs((coId, coPhId)).toString) else println("Input error")
   }
 
-
 }

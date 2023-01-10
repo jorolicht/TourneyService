@@ -350,7 +350,7 @@ case class Tourney(
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]):Either[Error, Int] = 
     seqEither(for (p <- pantStatus) yield setPantStatus(coId, p._1, p._2)) match {
       case Left(err)  => Left(err)
-      case Right(res) => Right(pantStatus.filter(_._2>=Participant.PLS_REDY).length)
+      case Right(res) => Right(pantStatus.filter(_._2>=Pant.REDY).length)
     }
 
   def getPant(coId: Long, sno: SNO): ParticipantEntry = sno.getPantEntry(comps(coId).typ)(this)
@@ -385,8 +385,6 @@ case class Tourney(
       else if  (!cophs.isDefinedAt((coId, coPhId*2+1))) coPhId*2+1 
       else 0 
     }
-    
-    //Error("err0164.RegDouble.Name.missing", "1")
 
     if (newCoPhId == 0) {
       Left(Error("err0194.msg.addCompPhase.existing")) 
@@ -401,6 +399,24 @@ case class Tourney(
     }
   }
 
+  def delCompPhase(coId: Long, coPhId: Int) = if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId))
+
+  def delCompPhases(coId: Long, coPhIds: List[Int]) = coPhIds.foreach { coPhId => if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId)) }
+
+  def getCompPhaseFollowing(coId: Long, coPhId: Int): List[Int] = {
+    var result = scala.collection.mutable.ListBuffer[Int]()
+    if (coPhId != 0 & coId != 0) {
+      if (cophs.isDefinedAt((coId, coPhId*2)))   result.append(coPhId*2) ++ getCompPhaseFollowing(coId, coPhId*2)
+      if (cophs.isDefinedAt((coId, coPhId*2+1))) result.append(coPhId*2+1) ++ getCompPhaseFollowing(coId, coPhId*2+1) 
+    }
+    result.toList
+  }  
+
+  def getCompPhaseNames(coId: Long, coPhIds: List[Int]): List[String] = {
+    for (coPhId <- coPhIds) yield { cophs((coId, coPhId)).name }  
+  } 
+
+  def getCompPhaseName(coId: Long, coPhId: Int): String = cophs((coId, coPhId)).name
 
   //
   // print readable tourney - for debug purposes

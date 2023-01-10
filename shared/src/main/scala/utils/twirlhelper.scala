@@ -27,6 +27,7 @@ package object twirlhelper {
   def msgLbl(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.lbl.${name}", Seq())
   def msgHlp(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.hlp.${name}", Seq())
   def msgTit(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.tit.${name}", Seq())
+  def msgStd(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"std.${name}", Seq())
 
   def collapse(name: String)(implicit ucp: UseCaseParam): String = {
     s""" href="javascript:InputCtrl.collapse('${ucp.idBase}__${name}')" """

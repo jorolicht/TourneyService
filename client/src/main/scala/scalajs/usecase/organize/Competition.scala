@@ -17,10 +17,9 @@ import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom
 import upickle.default._
 
 import shared.model._
-import shared.model.Participant
+import shared.model.Pant
 import shared.model.Competition._
 import shared.model.CompPhase._
-//import shared.utils.Validation._ 
 import shared.utils.Routines._
 import shared.utils._
 
@@ -32,6 +31,7 @@ import scalajs._
 
 import clientviews.organize.competition.html._
 import scalajs.usecase.dialog._
+import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
 
 // ***
 // COMPETITION Administration
@@ -103,16 +103,30 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       // Action with competition
       // 
       case "StartCompetition"   => {
+        //import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
         // set coId if a new is available
         val coPhIdPrev = 0 
         var coId = getData(elem, "coId", 0L)
         if (coId != 0) AppEnv.setCoId(coId) else coId = AppEnv.getCoId
 
         debug("actionEvent", s"node id: ${elem.id} coId: ${coId}")
+
+        // initialize participants to be shown 
+        // only participants with status signed or ready
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.SIGN || x2.status == Pant.REDY } map { x =>
+          val sno = SNO(x._2.sno) 
+          val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
+          val enabled = (x._2.status == Pant.REDY)
+          // show name, club name and ttr value
+          PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled) 
+        }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
         
-        startCompetitionDlg(coId, coPhIdPrev)(App.tourney).map {
+        startCompetitionDlg(coId, coPhIdPrev, pants)(App.tourney).map {
           case Left(err)   => error("startCompetitionDlg", s"error message: ${err}")
-          case Right(coph) => {
+          case Right((coph, pantResult)) => {
+            //set pant status in participant 2 competition mapping
+            pantResult.foreach { x => App.tourney.pl2co((x.sno.value, coId)).status = if (x.checked)  Pant.REDY else Pant.SIGN }
+
             AppEnv.coPhIdMap(coId) = coph.coPhId
             App.execUseCase("OrganizeCompetitionDraw", "", "")
             println(s"CompPhase: \n ${coph.toString()}")
@@ -249,7 +263,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           case Right(res) => {
             // set statistic/numbers
             val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
-            val (total, activ) = (p2c.length, p2c.filter(_.status > Participant.PLS_SIGN).length )
+            val (total, activ) = (p2c.length, p2c.filter(_.status > Pant.SIGN).length )
             setHtml(s"Count_${coId}", s"${total}/${activ}")           
           }
         }
@@ -349,28 +363,25 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
 
 
   /** START COMPETITION DIALOG
-    * 
-    */
-  def startCompetitionDlg(coId: Long, preCoPhId: Int)(implicit trny: Tourney): Future[Either[Error, CompPhase]] = {
+   * 
+   */
+  def startCompetitionDlg(coId: Long, preCoPhId: Int, pants: ArrayBuffer[PantSelect])
+                         (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[PantSelect]) ]] = {
     import cats.data.EitherT
-      
+    import scalajs.usecase.dialog.DlgCardCfgCompPhase
+    import scalajs.usecase.dialog.DlgCardCfgCompPhase.Result
+
     (for {
-      dlgResult <-  EitherT(DlgCardCfgCompPhase.show(coId))
+      dlgResult <-  EitherT(DlgCardCfgCompPhase.show(coId, pants))
       coph      <-  EitherT(addCompPhase(coId, preCoPhId, dlgResult.config, dlgResult.name, dlgResult.winSets))
-      draw      <-  EitherT(
-                      OrganizeCompetitionDraw.initDraw(
-                        (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.REDY } map { x =>
-                          SNO(x._2.sno).getPantEntry(coId)(App.tourney)
-                        }).to(ArrayBuffer),
-                        trny.comps(coId).typ
-                      )(coph)
-                    )
-    } yield { (coph, draw) }).value.map {
-      case Left(err)        => { error("addCompPhase", s"message: ${err}"); Left(err) }
-      case Right(finalRes)  => Right(finalRes._1)
+    } yield { (dlgResult, coph) }).value.map {
+      case Left(err)     => Left(err)
+      case Right(result) => {
+        val pants = result._1.pants.filter { case x => x.checked } map { x => x.sno.getPantEntry(coId)(trny) }
+        result._2.draw(pants, trny.comps(coId).typ)
+        Right((result._2, result._1.pants))
+      }  
     }
-
-  }
-
+  } 
   
 }

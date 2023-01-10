@@ -61,16 +61,18 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     def getRowBase(coId: Long, coPhId: Int):HTMLElement = {
       getElemById_(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]   
     }
-    
-    //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
-    debug("actionEvent", s"key: ${key}")
-    key match {
+        
+    val (coId, coPhId) = (getData(elem,"coId",0L), getData(elem,"coPhId",0))
+    val action = if (!App.tourney.cophs.contains((coId, coPhId)) || App.tourney.cophs((coId, coPhId)).getStatus != CompPhase.CPS_EIN) "BadRequest" else key 
+
+    debug("actionEvent", s"key: ${key} -> ${action}")
+    action match {
 
       case "SaveMatchResult"   => { 
-        val (coId, coPhId, game)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0), getData(elem, "game", 0))
-        val rowBase               = getRowBase(coId, coPhId)
-        val row                   = getRow(coId, coPhId, game)
-        val coPhase               = App.tourney.cophs((coId, coPhId))
+        val coPhase = App.tourney.cophs((coId, coPhId))
+        val game    = getData(elem, "game", 0)
+        val rowBase = getRowBase(coId, coPhId)
+        val row     = getRow(coId, coPhId, game)
         
         // get balls and/or sets
         // check values and if ok save input to local match (and server)
@@ -98,19 +100,18 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       }
       
       case "DeleteMatchResult"   => {
-        val (coId, coPhId, game) = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0), getData(elem, "game", 0))
-        val rowBase              = getRowBase(coId, coPhId) 
-        val coPhase              = App.tourney.cophs((coId, coPhId))   
-
+        val coPhase  = App.tourney.cophs((coId, coPhId))
+        val game     = getData(elem, "game", 0)
+        val rowBase  = getRowBase(coId, coPhId) 
+ 
         val gameUpdateList = coPhase.resetMatchPropagate(game)
         for (g <- gameUpdateList) setMatchView(rowBase, coId, coPhId, g)(coPhase)
         debug("actionEvent", s"DeleteMatchResult -> delete ${game} refresh: ${gameUpdateList.toString} status: ${coPhase.getStatusTxt}") 
       }
 
       case "DeleteAll"   => { 
-        val (coId, coPhId)  = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
+        val coPhase  = App.tourney.cophs((coId, coPhId))
         val rowBase         = getRowBase(coId, coPhId) 
-        val coPhase         = App.tourney.cophs((coId, coPhId)) 
 
         val gameUpdateList  = coPhase.resetAllMatches()
         for (g <- gameUpdateList) setMatchView(rowBase, coId, coPhId, g)(coPhase)
@@ -119,9 +120,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 
 
       case "Demo"   => {
-        val (coId,coPhId) = (getData(elem,"coId",0L), getData(elem,"coPhId",0))
-        val coPhase       = App.tourney.cophs((coId, coPhId)) 
-        var cnt = 0
+        val coPhase = App.tourney.cophs((coId, coPhId))
+        var cnt     = 0
         coPhase.matches.foreach { m =>
           if (m.status != MEntry.MS_FIN & m.status != MEntry.MS_FIX) {
             enterDemoResult(coId, coPhId, m.gameNo, m.winSets, cnt*600)
@@ -129,10 +129,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           }
         }
       } 
+      case "BadRequest"          => debug("actionEvent", s"Invalid status (!= CPS_INPUT), invalid coId ${coId} or invalid coPhId ${coPhId}") 
 
       case _                     => debug("actionEvent(error)", s"unknown key: ${key}") 
-
-    }
+    } // end key match
   }        
 
 
@@ -256,7 +256,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           try {
             for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
               val rowElem = getElemById_(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
-              rowElem.setAttribute(s"data-game_${m.gameNo}", "row") 
+              rowElem.setAttribute(s"data-game_${m.gameNo}", "row")
+              // rowElem.setAttribute("contenteditable", "true")
               setGrMatch(coId, coPhId, rowElem, m.asInstanceOf[MEntryGr])
             }
           } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
@@ -294,7 +295,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 
 
   //
-  //  KO-SECTION
+  //  setMatchViewContent
   //
   def setMatchViewContent(row: HTMLElement, m: MEntry)  = {
     import shared.model.MEntry._

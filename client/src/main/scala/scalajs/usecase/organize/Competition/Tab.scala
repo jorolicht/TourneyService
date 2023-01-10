@@ -52,10 +52,10 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
     debug("render", s"coId: ${coId} coPhId: ${coPhId} section: ${selSection}")
 
-
     if (coId == 0) {                            
       DlgInfo.show("XXXFehlende Auswahl", "XXXBitte einen Wettbewerb auswählen", "alert")
       OrganizeCompetition.render()
+      unmarkSBEntry("OrganizeCompetition")
     } else if (coPhId == 0) {
       DlgInfo.show("XXXKein Spielrunde konfiguriert/gestartet", "XXXBitte einen Wettbewerb auswählen und starten", "alert")
       OrganizeCompetition.render()
@@ -133,7 +133,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     // remember selection
     AppEnv.coPhIdMap(coId) = coPhId     
     section match {
-      case "Ctrl"  => OrganizeCompetitionCtrl.setPage(coId, coPhId)
+      case "Ctrl"  => OrganizeCompetitionCtrl.setPage(coPhase)
       case "Draw"  => OrganizeCompetitionDraw.setPage(coId, coPhId)
       case "Input" => OrganizeCompetitionInput.setPage(coId, coPhId)
       case "View"  => OrganizeCompetitionView.setPage(coId, coPhId)

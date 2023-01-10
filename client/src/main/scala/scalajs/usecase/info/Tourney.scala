@@ -251,7 +251,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
     val player  = App.tourney.players
     for {
       co    <- tourney.comps.values
-      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= Participant.PLS_SICO)
+      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= Pant.SICO)
     } yield {
       if (co.typ == CT_SINGLE) {
         buf.append(s"${plco.sno},${player(plco.getPlayerId).lastname},${player(plco.getPlayerId).firstname},${player(plco.getPlayerId).getTTR},${player(plco.getPlayerId).clubName},${co.name}\n")

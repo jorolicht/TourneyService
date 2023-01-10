@@ -25,7 +25,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, CompPhase, Player, SNO, Participant, Pant }
+import shared.model.{ Tourney, CompPhase, Player, SNO, Pant }
 import shared.model.CompPhase._
 import shared.utils._
 import clientviews.dialog.DlgCardCfgCompPhase.html
@@ -36,22 +36,22 @@ object DlgCardCfgCompPhase extends BasicHtml
   with TourneySvc 
 {
   this: BasicHtml =>
-  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int)
+  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int, var pants: ArrayBuffer[PantSelect])
   case class PantSelect(sno: SNO, name: String, info: String, var checked: Boolean)
 
   implicit val ucp  = UseCaseParam("APP__DlgCardCfgCompPhase", "dlg.card.cfg.compphase", "DlgCardCfgCompPhase", "dlgcardcfgcompphase", scalajs.AppEnv.getMessage _ )
 
   var coId  = 0L
   var size  = 0
-  var pants = new Array[PantSelect](0)
+  var pants = ArrayBuffer[PantSelect]()
 
-  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0)
+  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0, pants)
 
 
   /** show dialog returns either tupel result or an error
    *  result tupel (name, config, category, winSets, pants)
    */
-  def show(coIdInput: Long)(implicit trny: Tourney): Future[Either[Error, Result]] = 
+  def show(coIdInput: Long, pantsInput: ArrayBuffer[PantSelect]): Future[Either[Error, Result]] = 
   {
     val p = Promise[Boolean]()
     val f = p.future
@@ -77,16 +77,7 @@ object DlgCardCfgCompPhase extends BasicHtml
     if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
     coId = coIdInput
 
-    // initialize participants to be shown 
-    // only participants with status signed or ready
-    pants = (trny.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.SIGN || x2.status == Pant.REDY } map { x =>
-      val sno = SNO(x._2.sno) 
-      val (snoValue, name, club, ttr) = sno.getInfo(trny.comps(coId).typ)
-      val enabled = (x._2.status == Pant.REDY)
-      // show name, club name and ttr value
-      PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled) 
-    }).to(Array).sortBy(x => (!x.checked, x.name))
-
+    pants  = pantsInput
     size = pants.filter(_.checked).size
     //set pant view - init view for participant selection
     setHtml("PantTbl", html.Pants(pants))
@@ -132,13 +123,14 @@ object DlgCardCfgCompPhase extends BasicHtml
   /** validate input configuration input return selected option or a List of Errors
    * 
    */ 
-  def validate()(implicit trny: Tourney): Either[Error, Boolean] = {
+  def validate(): Either[Error, Boolean] = {
     result.config  = getInput("CfgSelection", CPC_UNKN)
     result.name    = getInput("CfgName", "")
     result.winSets = getInput("CfgWinset", 0)
+    result.pants   = pants
 
     //set participant status 
-    pants.foreach { entry => trny.setPantStatus(coId, entry.sno.value, if (entry.checked) Pant.REDY else Pant.SIGN) }
+    //pants.foreach { entry => trny.setPantStatus(coId, entry.sno.value, if (entry.checked) Pant.REDY else Pant.SIGN) }
     if (result.config == CPC_UNKN || result.name == "" || result.winSets == 0 ) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
   }
 

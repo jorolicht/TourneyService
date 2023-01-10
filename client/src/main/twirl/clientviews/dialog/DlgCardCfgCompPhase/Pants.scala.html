@@ -3,13 +3,14 @@
  *
  *@
 
+@import scala.collection.mutable.ArrayBuffer 
 @import shared.utils.UseCaseParam   
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
 @import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
 
-@(pants: Array[PantSelect])(implicit ucc: UseCaseParam)
+@(pants: ArrayBuffer[PantSelect])(implicit ucc: UseCaseParam)
 
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
