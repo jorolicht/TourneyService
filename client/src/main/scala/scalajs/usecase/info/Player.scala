@@ -49,7 +49,7 @@ object InfoPlayer extends UseCase("InfoPlayer")
   def viewCompPlayer(): Seq[(Long, String, Int, Seq[(String, String, String, String, String)])] = {
 
     def getPlayerInfos(tourney: Tourney, coId: Long): Seq[(String, String, String, String, String)] = {
-      val fromStatus = if (tourney.comps(coId).status > CS_RESET ) Pant.REDY else Pant.SIGN
+      val fromStatus = if (tourney.comps(coId).status > CS_REDY ) Pant.REDY else Pant.SIGN
       (for { ((sno,co),info) <- tourney.pl2co if (co == coId) } yield {
         if (info.status >= fromStatus & tourney.comps(co).typ == 1) { 
           val pl = info.getPlayerId

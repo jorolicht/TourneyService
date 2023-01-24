@@ -1,5 +1,6 @@
 package shared.model
 
+import scala.collection.mutable.ArrayBuffer
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
@@ -10,9 +11,12 @@ import shared.model.ParticipantEntry
 import shared.model.Utility._
 
 class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
-  var pants    = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
+  var pants    = ArrayBuffer.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
   var results  = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
   var sno2pos  = scala.collection.mutable.Map[String, Int]()
+
+  // optional generated info for draw round [GroupName, GroupId, GroupPos/up, RankValue/down]
+  var drawInfo = ArrayBuffer[(String, Int, Int, Int)]()
 
   // calculate index of match within results
   def getIndex(pos: (Int, Int)): Int = getIndex(pos._1,pos._2)
@@ -61,23 +65,17 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     (rnd >= 0 & rnd <= rnds & mano > 0 & mano <= scala.math.pow(2,scala.math.max(rnd-1,0)).toInt) 
   }
 
-  def init(pls: Array[ParticipantEntry]): Boolean = {
-    if (pls.length == size) {
-      for (i <- 0 to size-1) {
-        pants(i) = pls(i)
-        sno2pos += (pls(i).sno -> i) 
-      }
-      /* init results with positions
-      var index = 0 
-      for (r <- rnds to 0 by -1; g <- 1 to scala.math.pow(2,scala.math.max(r-1,0)).toInt) {
-        results(index).pos = (r,g)
-        index = index + 1   
-      } */
-      true
+  def init(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Boolean = 
+    if (participants.size != size) { 
+      false 
     } else {
-      false
+      pants    = participants
+      drawInfo = dInfo
+      // initialize sno mapping 
+      sno2pos = scala.collection.mutable.Map[String, Int]()
+      for (i <- 0 to size-1) sno2pos += (pants(i).sno -> i) 
+      true 
     }
-  }
 
   override def toString() = {
     val str = new StringBuilder(s"  KO-Runde size:${size} rounds:${rnds} noWinSets:${noWinSets}\n")
@@ -148,6 +146,57 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
 
 object KoRound {
 
+  /** genPosField - generate position field              
+    *
+    * @param posField  4,8,16,32,64, 128 + 1 length 
+    * @param lowerBound
+    * @param upperBound
+    */
+  def genPosField(posField: Array[Int], lowerBound: Int, upperBound: Int):Unit = {
+
+    def firstLastSum(baseFieldSize: Int, fieldSize:Int): Int = {
+      var value = 3
+      var step = 2
+      var tmp = baseFieldSize
+      while(tmp > fieldSize) {
+        value = value + step
+        step = 2 * step
+        tmp = tmp / 2
+      }  
+      value
+    }  
+
+    val fSize = posField.length - 1
+    val curSize = upperBound - lowerBound + 1
+
+    if (posField(lowerBound) == 0 && posField(upperBound) == 0) {
+      posField(lowerBound) = 1 // START
+      genPosField(posField, lowerBound, upperBound)
+    } else if (posField(lowerBound) > 0) {
+      posField(upperBound) = firstLastSum(fSize, curSize) - posField(lowerBound)
+    } else if (posField(upperBound) > 0) {  
+      posField(lowerBound) = firstLastSum(fSize, curSize) - posField(upperBound)
+    }
+
+    if (curSize > 2) {
+       genPosField(posField, lowerBound,  lowerBound + (curSize / 2) - 1 )
+       genPosField(posField, lowerBound + (curSize / 2), upperBound)
+    }
+  }  
+
+  /** genSettingPositions - generate setting positions for ko-field              
+    *                       LUULLUULLUULLUU....
+    * @param fSize   (4,8,16,32, ... )
+    */  
+  def genSettingPositions(fSize: Int): Array[Int] = {
+    val posField = Array.fill(fSize+1)(0)
+    val setPositions = Array.fill(fSize+1)(0)
+    genPosField(posField, 1, fSize)
+    for (i<-1 to fSize) { setPositions(posField(i)) = i }
+    setPositions 
+  }
+
+
   // getSize - generates KO-size for number of players
   def getSize(cntPlayer: Int): Int = cntPlayer match {
     case 2                          =>   2
@@ -163,13 +212,13 @@ object KoRound {
   // getNoRounds calculates number of rounds
   def getNoRounds(noPlayers: Int): Int = {
     noPlayers match {  
-      case a if   65 to 128 contains a => 7
-      case b if   33 to  64 contains b => 6
-      case c if   17 to  32 contains c => 5
-      case d if    9 to  16 contains d => 4
-      case e if    5 to   8 contains e => 3
-      case f if    3 to   4 contains f => 2
-      case g if    1 to   2 contains g => 1
+      case a if 65 to 128 contains a => 7
+      case b if 33 to  64 contains b => 6
+      case c if 17 to  32 contains c => 5
+      case d if  9 to  16 contains d => 4
+      case e if  5 to   8 contains e => 3
+      case f if  3 to   4 contains f => 2
+      case g if  1 to   2 contains g => 1
       case _                           => 0
     }
   }

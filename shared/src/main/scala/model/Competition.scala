@@ -38,7 +38,7 @@ case class Competition(
   var typ:          Int,         // 0=UNDEFINED 1=EINZEL, 2=DOPPEL, 3=MIXED, 4=TEAM 
   val startDate:    String,      // Format: yyyymmdd#hhmm
                                  // Format: "dd.MM.yyyy HH:mm" or "yyyy-dd-MM HH:mm"
-  var status:       Int,         // -1=Voranmeldung möglich, 0=Reset, 1...n 
+  var status:       Int,         // -1=WEB/SELF REGISTRATION, 0=READY, 1=RUNNING 
   var options:      String = "" 
 
   /** 
@@ -71,18 +71,19 @@ case class Competition(
   def getOptLong(index: Int): Long    = getMDLong(options, index)
   def setOpt[X](value: X, index: Int) = { options = setMD(options, value, index) }
 
-  def getAgeGroup: String      = getMDStr(options,0);  def setAgeGroup(value: String)      = { options = setMD(options, value, 0) }
-  def getRatingRemark: String  = getMDStr(options,1);  def setRatingRemark(value: String)  = { options = setMD(options, value, 1) }
-  def getRatingLowLevel: Int   = getMDInt(options,2);  def setRatingLowLevel(value: Int)   = { options = setMD(options, value, 2) }
-  def getRatingUpperLevel: Int = getMDInt(options,3);  def setRatingUpperLevel(value: Int) = { options = setMD(options, value, 3) }
-  def getSex: Int              = getMDInt(options,4);  def setSex(value:Int)               = { options = setMD(options, value, 4) }  
-  def getMaxPerson: Int        = getMDInt(options,5);  def setMaxPerson(value:Int)         = { options = setMD(options, value, 5) }
-  def getEntryFee: String      = getMDStr(options,6);  def setEntryFee(value:String)       = { options = setMD(options, value, 6) }
-  def getAgeFrom: String       = getMDStr(options,7);  def setAgeFrom(value:String)        = { options = setMD(options, value, 7) }
-  def getAgeTo: String         = getMDStr(options,8);  def setAgeTo(value:String)          = { options = setMD(options, value, 8) }
-  def getPreRndMod: String     = getMDStr(options,9);  def setPreRndMod(value:String)      = { options = setMD(options, value, 9) }
-  def getFinRndMod: String     = getMDStr(options,10); def setFinRndMod(value:String)      = { options = setMD(options, value, 10) }
-  def getManFinRank: String    = getMDStr(options,11); def setManFinRank(value:String)     = { options = setMD(options, value, 11) }
+  def getAgeGroup: String      = getMDStr(options,0);   def setAgeGroup(value: String)      = { options = setMD(options, value, 0) }
+  def getRatingRemark: String  = getMDStr(options,1);   def setRatingRemark(value: String)  = { options = setMD(options, value, 1) }
+  def getRatingLowLevel: Int   = getMDInt(options,2);   def setRatingLowLevel(value: Int)   = { options = setMD(options, value, 2) }
+  def getRatingUpperLevel: Int = getMDInt(options,3);   def setRatingUpperLevel(value: Int) = { options = setMD(options, value, 3) }
+  def getSex: Int              = getMDInt(options,4);   def setSex(value:Int)               = { options = setMD(options, value, 4) }  
+  def getMaxPerson: Int        = getMDInt(options,5);   def setMaxPerson(value:Int)         = { options = setMD(options, value, 5) }
+  def getEntryFee: String      = getMDStr(options,6);   def setEntryFee(value:String)       = { options = setMD(options, value, 6) }
+  def getAgeFrom: String       = getMDStr(options,7);   def setAgeFrom(value:String)        = { options = setMD(options, value, 7) }
+  def getAgeTo: String         = getMDStr(options,8);   def setAgeTo(value:String)          = { options = setMD(options, value, 8) }
+  def getPreRndMod: String     = getMDStr(options,9);   def setPreRndMod(value:String)      = { options = setMD(options, value, 9) }
+  def getFinRndMod: String     = getMDStr(options,10);  def setFinRndMod(value:String)      = { options = setMD(options, value, 10) }
+  def getManFinRank: String    = getMDStr(options,11);  def setManFinRank(value:String)     = { options = setMD(options, value, 11) }
+  def getWebRegister: Boolean  = getMDBool(options,12); def setWebRegister(value:Boolean)   = { options = setMD(options, value, 12) }
 
   // formatTime - depending on local
   // 0 - date and time
@@ -132,12 +133,15 @@ case class Competition(
   def getToTTR: String   = if (getRatingUpperLevel>0) "%04d".format(getRatingUpperLevel) else "XXXX"
   
   def genName(fun:(String, Seq[String])=>String): String = {
-    if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${fun("competition.typ."+typ.toString,Seq())}" }
+    if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${getTypName(fun)}" }
   }
 
   def equal(co: Competition): Boolean = hash == co.hash
   def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
   def encode = write[Competition](this)
+
+  def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.status.${status}",Seq())
+  def getTypName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.typ.${typ}",Seq())
 
 }                                                               
 
@@ -153,12 +157,11 @@ object Competition {
 
 
   // Competition Status
-  val CS_UNKN  = -99 // unknown status
-  val CS_WEBRE =  -2 // Registrierung / Anmeldung via WEB
-  val CS_REGIS =  -1 // Registrierung / Anmeldung
-  val CS_RESET =   0 // RESET
-  val CS_RUN   =   1 // RUNNING  
+  val CS_UNKN  =  -1 // unknown status
+  val CS_REDY  =   0 // Ready / RESET
+  val CS_RUN   = 100 // RUNNING  
   
+  // Competition Status (old values)
   val CS_VRAUS = 1   // Auslosung der Vorrunde
   val CS_VREIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
   val CS_VRFIN = 3   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
@@ -174,9 +177,6 @@ object Competition {
   def tupled = (this.apply _).tupled
   def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
   def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
-  def genName(name: String, aG: String, rR: String, cT: String): String = {
-    if(name!="") { name } else { s"$aG $rR ${cT.toUpperCase}" }
-  }
 
 
   def parseStartTime(startDate: String): String = {

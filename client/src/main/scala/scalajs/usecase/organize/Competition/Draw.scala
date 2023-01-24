@@ -79,9 +79,9 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       val coPhTyp = coPhase.coPhTyp
       // generate draw frame
       coPhTyp match {
-        case CPT_GR => setHtml(elem, clientviews.organize.competition.draw.html.GroupCard(coId, coPhId, coPhase.groups))
-        case CPT_KO => setHtml(elem, clientviews.organize.competition.draw.html.KOCard(coId, coPhId, coPhase.ko))
-        case CPT_SW => setHtml(elem, clientviews.organize.competition.draw.html.SwitzCard(coId, coPhId, size))
+        case CPT_GR => setHtml(elem, clientviews.organize.competition.draw.html.GroupCard(coPhase))
+        case CPT_KO => setHtml(elem, clientviews.organize.competition.draw.html.KOCard(coPhase))
+        case CPT_SW => setHtml(elem, clientviews.organize.competition.draw.html.SwitzCard(coPhase))
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
     } else { 

@@ -9,6 +9,7 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
+@import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
 
 @()(implicit ucc: UseCaseParam)
 
@@ -40,7 +41,7 @@
             </div>
           </div>
 
-          <div class="form-row mb-2"> <!--  Row 2 - Name of Section -->
+          <div class="form-row mb-1"> <!--  Row 2 - Name of Section -->
             <div class="form-group col-sm-6 mb-2">
               <input @id("CfgName") type="text" class="form-control form-control-sm" 
                 @plh("Name") list='@_name("CfgNameList")'>
@@ -51,6 +52,16 @@
             <div class="form-group col-sm-6 mb-2">
             </div>
           </div>
+
+          <div @id("qualifyWinners") class="form-row mb-2"> <!--  Row 2 - Name of Section -->
+            <div class="form-group col-sm-12 mb-2 ml-4">
+              <label class="form-check-label">
+                <input @id("Winners") type="checkbox" class="form-check-input" value="" @actionEvent("Winners", "onclick")>
+                Qualifizierung der Bestplazierten
+            </label>
+            </div>
+          </div>
+
         </div>
       </div>
      
@@ -76,10 +87,7 @@
           </div>
         </div>
       
-        <div @id("PantCard")' class="card-body pb-2 pt-0 collapse">
-          <strong>@msg("pants.select")</strong>
-          <span @id("PantTbl")></span>
-        </div>
+        <div @id("PantCard")' class="card-body pb-2 pt-0 collapse"></div>
       </div>
 
     </div>

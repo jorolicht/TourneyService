@@ -32,6 +32,7 @@ import scalajs._
 import clientviews.organize.competition.html._
 import scalajs.usecase.dialog._
 import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
+import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
 
 // ***
 // COMPETITION Administration
@@ -50,19 +51,16 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     val toId = AppEnv.getToId
     val coId = AppEnv.getCoId
     
-    // genCompetitionTblData - returns Sequence of tupels with competition attributes
-    def genCompetitionTblData(trny: Tourney, lang: String): Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
-      (for { co <- trny.comps.values.toSeq } yield co.typ match {
-        case CT_SINGLE | CT_DOUBLE => {
-          val (cnt, cntActiv) = trny.getCompCnt(co)
-          (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.formatTime(lang), cnt, cntActiv, co.status, co.genRange(), co.options)
-        }
-        case _ => (co.id, co.name, co.getAgeGroup, co.getRatingRemark, co.typ, co.startDate, 0, 0, co.status, co.genRange(), co.options)
-      }).toSeq.sortBy(_._6)
-    }
+    val compList = (for { co <- App.tourney.comps.values.toSeq } yield {
+      val (cnt, cntActiv) = App.tourney.getCompCnt(co)
+      (co, cnt, cntActiv)
+    }).toSeq.sortBy(_._1.startDate)  
 
     // set main card
-    setHtml("CompCard", CompCard(genCompetitionTblData(App.tourney, AppEnv.getLang), coId))
+    //for (comp <- compList) println(s"CoPhases: ${comp._1.name} Status: ${comp._1.status}") // DEBUG
+  
+    setHtml("CompCard", CompCard(compList, AppEnv.getLang) )
+    //println(s"Competition.update")
  
     // set play card and select competition
     if (coId > 0) {
@@ -121,46 +119,21 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
         
-        startCompetitionDlg(coId, coPhIdPrev, pants)(App.tourney).map {
+        startCompPhaseDlg(coId, coPhIdPrev, QualifyTyp.None, pants)(App.tourney).map {
           case Left(err)   => error("startCompetitionDlg", s"error message: ${err}")
           case Right((coph, pantResult)) => {
             //set pant status in participant 2 competition mapping
-            pantResult.foreach { x => App.tourney.pl2co((x.sno.value, coId)).status = if (x.checked)  Pant.REDY else Pant.SIGN }
-
+            for ((key, pEntry) <- App.tourney.pl2co) { if (key._2 == coId && pEntry.status == Pant.REDY) pEntry.status == Pant.SIGN }
+            pantResult.foreach { x => App.tourney.pl2co((x.sno, coId)).status = Pant.REDY }
+            
             AppEnv.coPhIdMap(coId) = coph.coPhId
+            App.tourney.comps(coId).status = Competition.CS_RUN
+            coph.drawOnRanking(pantResult, App.tourney.comps(coId).typ)
+            //coph.status = CompPhase.CPS_AUS  
             App.execUseCase("OrganizeCompetitionDraw", "", "")
             println(s"CompPhase: \n ${coph.toString()}")
           }
         }
-
-
-        // DlgCardCfgCompPhase.show(coId, coPhIdPrev)(App.tourney) map {
-        //   case Left(err)     => debug("DlgCardCfgCompPhase", s"show => cancel: ${err}")
-        //   //case class Result(var name: String, var config: Int, var category: Int, var winSets: Int)
-        //   case Right(result) => {
-
-        //     // take all pants with status ready
-        //     var pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.REDY } map { x =>
-        //       SNO(x._2.sno).getPantEntry(coId)(App.tourney)
-        //     }).to(ArrayBuffer)
-
-        //     // initial configuration of competition phase
-        //     (for {
-        //       coph    <- EitherT(addCompPhase(coId, coPhIdPrev, result.config, result.category, result.name, result.winSets))
-        //       draw    <- EitherT(OrganizeCompetitionDraw.initDraw(pants, App.tourney.comps(coId).typ)(coph))
-        //     } yield { (coph, draw) }).value.map {
-        //       case Left(err)        => error("compPhaseConfig", s"error message: ${err}")
-        //       case Right(finalRes)  => {
-        //         AppEnv.coPhIdMap(finalRes._1.coId) = finalRes._1.coPhId
-        //         App.execUseCase("OrganizeCompetitionDraw", "", "")
-
-        //         // OrganizeCompetitionTab.render("Draw")
-        //         // markSBEntry("OrganizeCompetitionDraw")
-        //         println(s"TOURNEY: \n ${App.tourney.toString()}")
-        //       } 
-        //     }
-        //   } 
-        // }
       }
 
       case "AddCompetition"     => {    
@@ -229,19 +202,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
       case "CheckCompetition"      => { 
         val coId = getData(elem, "coId", 0L)
-        val status = if (elem.asInstanceOf[dom.raw.HTMLInputElement].checked) CS_REGIS else CS_RESET
-
-        event.stopPropagation()
-        setCompStatus(coId, status).map {
-          case Left(err)  => DlgShowError.show(List(err))
-          case Right(res) => {
-            if (!res) error("setCompStatus", s"failed for coId: ${coId}")
-            App.tourney.comps(coId).status = status 
-            App.saveLocalTourney(App.tourney)
-            AppEnv.setCoId(coId)
-            update()
-          }
-        }
+        App.tourney.comps(coId).setWebRegister(getCheckbox(elem)) 
       }       
 
       case "SelectCompetition"    => {   
@@ -264,7 +225,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             // set statistic/numbers
             val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
             val (total, activ) = (p2c.length, p2c.filter(_.status > Pant.SIGN).length )
-            setHtml(s"Count_${coId}", s"${total}/${activ}")           
+            setHtml(s"Counter_${coId}", s"${total}/${activ}")           
           }
         }
       }
@@ -362,26 +323,31 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
   }
 
 
-  /** START COMPETITION DIALOG
+  /** START COMPETITION PHASE DIALOG
    * 
    */
-  def startCompetitionDlg(coId: Long, preCoPhId: Int, pants: ArrayBuffer[PantSelect])
-                         (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[PantSelect]) ]] = {
+  def startCompPhaseDlg(coId: Long, baseCoPhId: Int, qualify: QualifyTyp.Value, pants: ArrayBuffer[PantSelect])
+                         (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[ParticipantEntry]) ]] = {
+
+
     import cats.data.EitherT
     import scalajs.usecase.dialog.DlgCardCfgCompPhase
     import scalajs.usecase.dialog.DlgCardCfgCompPhase.Result
+    import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
 
     (for {
-      dlgResult <-  EitherT(DlgCardCfgCompPhase.show(coId, pants))
-      coph      <-  EitherT(addCompPhase(coId, preCoPhId, dlgResult.config, dlgResult.name, dlgResult.winSets))
+      dlgResult <-  EitherT(DlgCardCfgCompPhase.show(coId, qualify, pants))
+      coph      <-  EitherT(addCompPhase(coId, baseCoPhId, dlgResult.qualify, dlgResult.config, dlgResult.name, dlgResult.winSets))
     } yield { (dlgResult, coph) }).value.map {
       case Left(err)     => Left(err)
       case Right(result) => {
         val pants = result._1.pants.filter { case x => x.checked } map { x => x.sno.getPantEntry(coId)(trny) }
-        result._2.draw(pants, trny.comps(coId).typ)
-        Right((result._2, result._1.pants))
+        //result._2.draw(pants, trny.comps(coId).typ)
+        Right((result._2, pants))
       }  
     }
-  } 
+  }
+
+
   
 }

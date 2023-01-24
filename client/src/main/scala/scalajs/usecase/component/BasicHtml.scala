@@ -130,7 +130,7 @@ class BasicHtml
   // getElemById - get the html element
   def getElemById(id: String)(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")) = {
     val elem = if (ucp.idBase =="") document.getElementById(id) else document.getElementById(ucp.idBase + "__" + id)
-    if (elem == null) document.createElement("div") else elem
+    if (elem == null) document.createElement("div").asInstanceOf[HTMLElement] else elem.asInstanceOf[HTMLElement] 
   }  
 
   // getElemById_ - get the html element
@@ -500,7 +500,7 @@ class BasicHtml
 
   def setAttribute(elem: HTMLElement, attrName: String, attrValue: String): Unit = {
     try elem.setAttribute(attrName, attrValue)
-    catch { case _: Throwable => Helper.error("setAttribute", s"elem:${elem}  ${attrName }-> ${attrValue}") } 
+    catch { case _: Throwable => Helper.error("setAttribute", s"elem:${elem} ${attrName }-> ${attrValue}") } 
   }
 
 
@@ -592,6 +592,11 @@ class BasicHtml
   def getCheckbox(id: String)(implicit ucp: UseCaseParam): Boolean = {
     try document.getElementById(ucpId(id)).asInstanceOf[Input].checked
     catch { case _: Throwable => error("getCheckbox", s"id: ${ucpId(id)}"); false } 
+  }
+  
+  def getCheckbox(elem: HTMLElement): Boolean = {
+    try elem.asInstanceOf[Input].checked
+    catch { case _: Throwable => Helper.error("getCheckbox", s"elem: ${elem}"); false } 
   }
 
   

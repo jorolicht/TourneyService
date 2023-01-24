@@ -82,17 +82,42 @@ object AddonCmds extends UseCase("AddonCmds")
     }
   }
 
-  def showTourney() = {
-    println(App.tourney.toString)
-  }
 
+  def showTourney(toId: Long) = {
+    import cats.data.EitherT
+    import cats.implicits._ 
 
-  def showCompPhase() = {    
-    val (coId, coPhId) = dom.window.prompt("Enter coId and coPhId separated by comma:") match {
-      case s"${coId},${coPhId}" => (coId.toLongOption.getOrElse(0L), coPhId.toIntOption.getOrElse(0))
-      case _                    => (0L,0)
+    if (toId == 0) {
+      error("load", s"loading tourney ${toId} not possible")
+    } else {
+      (for {
+        pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
+        coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+        result    <- EitherT(App.loadRemoteTourney(toId))
+      } yield { (result, pw) }).value.map {
+        case Left(err)    => error("load", s"error message: ${err}")
+        case Right(res)   => {
+          println(s"TOURNEY: \n ${App.tourney.toString()}")
+        } 
+      } 
     }
-    if (coId != 0) println(App.tourney.cophs((coId, coPhId)).toString) else println("Input error")
   }
+
+  def showCompPhase(coId: Long, coPhId: Int) = {
+    if (!App.tourney.cophs.contains((coId, coPhId))) {
+      error("showCompPhase", s"competition phase coId: ${coId} coPhId: ${coPhId} not found")
+    } else {
+      println(s"${App.tourney.cophs((coId, coPhId)).toString}")
+    } 
+  }
+
+  def showCompetition(coId: Long) = {
+    if (!App.tourney.comps.contains(coId)) {
+      error("showCompetition", s"competition coId: ${coId} not found")
+    } else {
+      println(s"${App.tourney.prtComp(coId, AppEnv.getMessage)}")
+    } 
+  }
+
 
 }

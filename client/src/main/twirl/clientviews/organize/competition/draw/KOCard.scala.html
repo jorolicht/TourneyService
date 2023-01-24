@@ -4,62 +4,65 @@
  * Start Test:
  * 
  *@
+@import scala.collection.mutable.ArrayBuffer
+@import shared.model.CompPhase
 @import shared.model.ParticipantEntry 
 @import shared.model.KoRound  
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coId: Long, cophId: Int, ko: KoRound)(implicit ucc: UseCaseParam)
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
 
 @bTR = @{ """<td class='tdDrawGroup border-top border-right'></td>"""}
 @bBR = @{ """<td class='tdDrawGroup border-bottom border-right'></td>"""}
 @bR  = @{ """<td class='tdDrawGroup border-right'></td>"""}
 @bN  = @{ """<td class='tdDrawGroup'></td>"""}
 
-@koMatch(pants: Array[ParticipantEntry], pos: Int) = @{  Html(s"""  
-  ${koEntry(pants(pos+0), pos+1, bN  + bN + bN + bN + bN, bTR + bN + bN + bN + bN)} 
-  ${koEntry(pants(pos+1), pos+2, bBR + bN + bN + bN + bN, bN  + bN + bN + bN + bN)} 
+@koMatch(coph: CompPhase, pos: Int) = @{  Html(s"""  
+  ${koEntry(coph.ko.pants(pos+0), coph.ko.drawInfo(pos+0), pos+1, bN  + bN + bN + bN + bN, bTR + bN + bN + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+1), coph.ko.drawInfo(pos+1), pos+2, bBR + bN + bN + bN + bN, bN  + bN + bN + bN + bN)} 
 """) } 
-@koMatch2(pants: Array[ParticipantEntry], pos: Int) = @{  Html(s"""  
-  ${koEntry(pants(pos+0), pos+1,   bN  + bN  + bN + bN + bN, bTR + bN  + bN + bN + bN)} 
-  ${koEntry(pants(pos+1), pos+2, bBR + bTR + bN + bN + bN, bN  + bR  + bN + bN + bN)} 
-  ${koEntry(pants(pos+2), pos+3, bN  + bR  + bN + bN + bN, bTR + bBR + bN + bN + bN)} 
-  ${koEntry(pants(pos+3), pos+4, bBR + bN  + bN + bN + bN, bN  + bN  + bN + bN + bN)} 
+@koMatch2(coph: CompPhase, pos: Int) = @{  Html(s"""  
+  ${koEntry(coph.ko.pants(pos+0), coph.ko.drawInfo(pos+0), pos+1,   bN  + bN  + bN + bN + bN, bTR + bN  + bN + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+1), coph.ko.drawInfo(pos+1), pos+2, bBR + bTR + bN + bN + bN, bN  + bR  + bN + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+2), coph.ko.drawInfo(pos+2), pos+3, bN  + bR  + bN + bN + bN, bTR + bBR + bN + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+3), coph.ko.drawInfo(pos+3), pos+4, bBR + bN  + bN + bN + bN, bN  + bN  + bN + bN + bN)} 
   """) } 
 
-@koMatch4(pants: Array[ParticipantEntry], pos: Int) = @{  Html(s"""  
-  ${koEntry(pants(pos+0), pos+1, bN  + bN  + bN  + bN + bN, bTR + bN  + bN  + bN + bN)} 
-  ${koEntry(pants(pos+1), pos+2, bBR + bTR + bN  + bN + bN, bN  + bR  + bN  + bN + bN)} 
-  ${koEntry(pants(pos+2), pos+3, bN  + bR  + bTR + bN + bN, bTR + bBR + bR  + bN + bN)} 
-  ${koEntry(pants(pos+3), pos+4, bBR + bN  + bR  + bN + bN, bN  + bN  + bR  + bN + bN)}
-  ${koEntry(pants(pos+4), pos+5, bN  + bN  + bR  + bN + bN, bTR + bN  + bR  + bN + bN)} 
-  ${koEntry(pants(pos+5), pos+6, bBR + bTR + bR  + bN + bN, bN  + bR  + bTR + bN + bN)} 
-  ${koEntry(pants(pos+6), pos+7, bN  + bR  + bN  + bN + bN, bTR + bBR + bN  + bN + bN)} 
-  ${koEntry(pants(pos+7), pos+8, bBR + bN  + bN  + bN + bN, bN  + bN  + bN  + bN + bN)}   
+@koMatch4(coph: CompPhase, pos: Int) = @{  Html(s"""  
+  ${koEntry(coph.ko.pants(pos+0), coph.ko.drawInfo(pos+0), pos+1, bN  + bN  + bN  + bN + bN, bTR + bN  + bN  + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+1), coph.ko.drawInfo(pos+1), pos+2, bBR + bTR + bN  + bN + bN, bN  + bR  + bN  + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+2), coph.ko.drawInfo(pos+2), pos+3, bN  + bR  + bTR + bN + bN, bTR + bBR + bR  + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+3), coph.ko.drawInfo(pos+3), pos+4, bBR + bN  + bR  + bN + bN, bN  + bN  + bR  + bN + bN)}
+  ${koEntry(coph.ko.pants(pos+4), coph.ko.drawInfo(pos+4), pos+5, bN  + bN  + bR  + bN + bN, bTR + bN  + bR  + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+5), coph.ko.drawInfo(pos+5), pos+6, bBR + bTR + bR  + bN + bN, bN  + bR  + bTR + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+6), coph.ko.drawInfo(pos+6), pos+7, bN  + bR  + bN  + bN + bN, bTR + bBR + bN  + bN + bN)} 
+  ${koEntry(coph.ko.pants(pos+7), coph.ko.drawInfo(pos+7), pos+8, bBR + bN  + bN  + bN + bN, bN  + bN  + bN  + bN + bN)}   
 """) } 
 
-@koMatch8(pants: Array[ParticipantEntry], pos: Int) = @{  Html(s"""  
-  ${koEntry(pants(pos+0),   pos+1, bN  + bN  + bN  + bN  + bN, bTR + bN  + bN  + bN  + bN)} 
-  ${koEntry(pants(pos+1),   pos+2, bBR + bTR + bN  + bN  + bN, bN  + bR  + bN  + bN  + bN)} 
-  ${koEntry(pants(pos+2),   pos+3, bN  + bR  + bTR + bN  + bN, bTR + bBR + bR  + bN  + bN)} 
-  ${koEntry(pants(pos+3),   pos+4, bBR + bN  + bR  + bN  + bN, bN  + bN  + bR  + bN  + bN)}
-  ${koEntry(pants(pos+4),   pos+5, bN  + bN  + bR  + bTR + bN, bTR + bN  + bR  + bR  + bN)} 
-  ${koEntry(pants(pos+5),   pos+6, bBR + bTR + bR  + bR  + bN, bN  + bR  + bBR + bR  + bN)} 
-  ${koEntry(pants(pos+6),   pos+7, bN  + bR  + bN  + bR  + bN, bTR + bBR + bN  + bR  + bN)} 
-  ${koEntry(pants(pos+7),   pos+8, bBR + bN  + bN  + bR  + bN, bN  + bN  + bN  + bR  + bN)}
-  ${koEntry(pants(pos+8),   pos+9, bN  + bN  + bN  + bR  + bN, bTR + bN  + bN  + bR  + bN)} 
-  ${koEntry(pants(pos+9),  pos+10, bBR + bTR + bN  + bR  + bN, bN  + bR  + bN  + bR  + bN)} 
-  ${koEntry(pants(pos+10), pos+11, bN  + bR  + bTR + bR  + bN, bTR + bBR + bR  + bR  + bN)} 
-  ${koEntry(pants(pos+11), pos+12, bBR + bN  + bR  + bR  + bN, bN  + bN  + bR  + bBR + bN)}
-  ${koEntry(pants(pos+12), pos+13, bN  + bN  + bR  + bN  + bN, bTR + bN  + bR  + bN  + bN)} 
-  ${koEntry(pants(pos+13), pos+14, bBR + bTR + bR  + bN  + bN, bN  + bR  + bBR + bN  + bN)} 
-  ${koEntry(pants(pos+14), pos+15, bN  + bR  + bN  + bN  + bN, bTR + bBR + bN  + bN  + bN)} 
-  ${koEntry(pants(pos+15), pos+16, bBR + bN  + bN  + bN  + bN, bN  + bN  + bN  + bN  + bN)}   
+coph: CompPhase
+@koMatch8(coph: CompPhase, pos: Int) = @{  Html(s""" 
+  ${koEntry(coph.ko.pants(pos+0),  coph.ko.drawInfo(pos+0),   pos+1,  bN  + bN  + bN  + bN  + bN, bTR + bN  + bN  + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+1),  coph.ko.drawInfo(pos+1),   pos+2,  bBR + bTR + bN  + bN  + bN, bN  + bR  + bN  + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+2),  coph.ko.drawInfo(pos+2),   pos+3,  bN  + bR  + bTR + bN  + bN, bTR + bBR + bR  + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+3),  coph.ko.drawInfo(pos+3),   pos+4,  bBR + bN  + bR  + bN  + bN, bN  + bN  + bR  + bN  + bN)}
+  ${koEntry(coph.ko.pants(pos+4),  coph.ko.drawInfo(pos+4),   pos+5,  bN  + bN  + bR  + bTR + bN, bTR + bN  + bR  + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+5),  coph.ko.drawInfo(pos+5),   pos+6,  bBR + bTR + bR  + bR  + bN, bN  + bR  + bBR + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+6),  coph.ko.drawInfo(pos+6),   pos+7,  bN  + bR  + bN  + bR  + bN, bTR + bBR + bN  + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+7),  coph.ko.drawInfo(pos+7),   pos+8,  bBR + bN  + bN  + bR  + bN, bN  + bN  + bN  + bR  + bN)}
+  ${koEntry(coph.ko.pants(pos+8),  coph.ko.drawInfo(pos+8),   pos+9,  bN  + bN  + bN  + bR  + bN, bTR + bN  + bN  + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+9),  coph.ko.drawInfo(pos+9),   pos+10, bBR + bTR + bN  + bR  + bN, bN  + bR  + bN  + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+10), coph.ko.drawInfo(pos+10),  pos+11, bN  + bR  + bTR + bR  + bN, bTR + bBR + bR  + bR  + bN)} 
+  ${koEntry(coph.ko.pants(pos+11), coph.ko.drawInfo(pos+11),  pos+12, bBR + bN  + bR  + bR  + bN, bN  + bN  + bR  + bBR + bN)}
+  ${koEntry(coph.ko.pants(pos+12), coph.ko.drawInfo(pos+12),  pos+13, bN  + bN  + bR  + bN  + bN, bTR + bN  + bR  + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+13), coph.ko.drawInfo(pos+13),  pos+14, bBR + bTR + bR  + bN  + bN, bN  + bR  + bBR + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+14), coph.ko.drawInfo(pos+14),  pos+15, bN  + bR  + bN  + bN  + bN, bTR + bBR + bN  + bN  + bN)} 
+  ${koEntry(coph.ko.pants(pos+15), coph.ko.drawInfo(pos+15),  pos+16, bBR + bN  + bN  + bN  + bN, bN  + bN  + bN  + bN  + bN)}   
 """) } 
 
 
-@koEntry(pant: ParticipantEntry, pos: Int, up: String, down: String ) = @{ Html(s""" 
+@koEntry(pant: ParticipantEntry, dInfo:(String,Int,Int,Int), pos: Int, up: String, down: String ) = @{ Html(s""" 
   <tr data-pantPos='${pos}' data-sno='${pant.sno}'>
     <td rowspan='2' class='border p-1 text-center'><small class='font-weight-bold'>${pos}</small></td>
     <td rowspan="2" contenteditable='true' style="width:30px; font-size:small;" 
@@ -68,6 +71,7 @@
     <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-name='${pos}'>${pant.name}</small></td>
     <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-club='${pos}'>${pant.club}</small></td>
     <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-rating='${pos}'>${pant.getRating}</small></td>
+    <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-drawInfo='${pos}'>${dInfo._2}[${dInfo._3}]</small></td>
     ${up}
   </tr>
   <tr>${down}</tr>
@@ -75,12 +79,12 @@
 
 
 <div class="m-1">
-  <table @id(s"Draw_${coId}_${cophId}")>
+  <table @id(s"Draw_${coph.coId}_${coph.coPhId}")>
     <tr>
       <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
       <th>
         <div class="text-center ml-1 mr-1">
-          <button data-coId='@coId' data-cophId='@cophId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+          <button data-coId='@coph.coId' data-cophId='@coph.coPhId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
             <i class="fa fa-refresh" aria-hidden="true"></i>
           </button>
         </div>
@@ -88,6 +92,7 @@
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr") </small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">Group[Pos]</small></th>
       <th></th>
       <th></th> 
       <th></th> 
@@ -96,16 +101,16 @@
       <th></th> 
       <th></th>
     </tr>
-    @ko.size match {
-      case 2  =>  { @koMatch(ko.pants,  0) }				
-      case 4  =>  { @koMatch2(ko.pants, 0) }
-      case 8  =>  { @koMatch4(ko.pants, 0) }
-      case 16 =>  { @koMatch8(ko.pants, 0) }
-      case 32 =>  { @koMatch8(ko.pants, 0) @koMatch8(ko.pants, 16)}
-      case 64 =>  { @koMatch8(ko.pants, 0) @koMatch8(ko.pants, 16) @koMatch8(ko.pants, 32) @koMatch8(ko.pants, 48)}
+    @coph.ko.size match {
+      case 2  =>  { @koMatch(coph,  0) }				
+      case 4  =>  { @koMatch2(coph, 0) }
+      case 8  =>  { @koMatch4(coph, 0) }
+      case 16 =>  { @koMatch8(coph, 0) }
+      case 32 =>  { @koMatch8(coph, 0) @koMatch8(coph, 16)}
+      case 64 =>  { @koMatch8(coph, 0) @koMatch8(coph, 16) @koMatch8(coph, 32) @koMatch8(coph, 48)}
       case 128 => { 
-        @koMatch8(ko.pants, 0)  @koMatch8(ko.pants, 16) @koMatch8(ko.pants, 32) @koMatch8(ko.pants, 49) 
-        @koMatch8(ko.pants, 64) @koMatch8(ko.pants, 80) @koMatch8(ko.pants, 96) @koMatch8(ko.pants, 112)
+        @koMatch8(coph, 0)  @koMatch8(coph, 16) @koMatch8(coph, 32) @koMatch8(coph, 49) 
+        @koMatch8(coph, 64) @koMatch8(coph, 80) @koMatch8(coph, 96) @koMatch8(coph, 112)
       }
     }    
 

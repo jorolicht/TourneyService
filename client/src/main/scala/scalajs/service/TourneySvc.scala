@@ -474,8 +474,8 @@ trait TourneySvc extends WrapperSvc
   //
   //  COMPETITION PHASE Interface
   //
-  def addCompPhase(coId: Long, coPhIdPrev: Int, coPhCfg: Int, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
-    App.tourney.addCompPhase(coId, coPhIdPrev, coPhCfg, name, noWinSets) match {
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
+    App.tourney.addCompPhase(coId, baseCoPhId, cfgWinner, coPhCfg, name, noWinSets) match {
       case Left(err)  => Future(Left(err))
       case Right(res) => Future(Right(res))
     }

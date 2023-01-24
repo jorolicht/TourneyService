@@ -80,8 +80,8 @@ object InfoSchedule extends UseCase("InfoSchedule")
     setHtml("PlayerYear2", plYears)
 
     // check if there is a competition with allows registering users
-    setVisible("RegisterCard", App.tourney.comps.toSeq.filter(_._2.status == CS_WEBRE).length > 0)
- 
+    setVisible("RegisterCard", App.tourney.comps.toSeq.filter(_._2.getWebRegister).length > 0)
+
     // tourneyinfo hints
     getInvitation.map {
       case Left(value)     => addClass("HintCard", "hidden-xl-down")

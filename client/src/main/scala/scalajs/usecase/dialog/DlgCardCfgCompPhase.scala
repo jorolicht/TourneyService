@@ -30,28 +30,44 @@ import shared.model.CompPhase._
 import shared.utils._
 import clientviews.dialog.DlgCardCfgCompPhase.html
 
-
 @JSExportTopLevel("DlgCardCfgCompPhase")
 object DlgCardCfgCompPhase extends BasicHtml 
   with TourneySvc 
 {
   this: BasicHtml =>
-  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int, var pants: ArrayBuffer[PantSelect])
-  case class PantSelect(sno: SNO, name: String, info: String, var checked: Boolean)
+  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int, var qualify: Boolean, var pants: ArrayBuffer[PantSelect])
+  case class PantSelect(sno: SNO, name: String, info: String, var checked: Boolean, val qualify: QualifyTyp.Value=QualifyTyp.None)
+  
+  object QualifyTyp extends Enumeration {
+    val None   = Value("0") 
+    val Winner = Value("1")
+    val Looser = Value("2")
+    val All    = Value("3") 
+    def get(value: String):QualifyTyp.Value = {
+      value match {
+        case "0" => QualifyTyp.None
+        case "1" => QualifyTyp.Winner
+        case "2" => QualifyTyp.Looser
+        case "3" => QualifyTyp.All
+      }
+    }
+  } 
+
 
   implicit val ucp  = UseCaseParam("APP__DlgCardCfgCompPhase", "dlg.card.cfg.compphase", "DlgCardCfgCompPhase", "dlgcardcfgcompphase", scalajs.AppEnv.getMessage _ )
 
   var coId  = 0L
   var size  = 0
+  var qualifyMode = QualifyTyp.None
   var pants = ArrayBuffer[PantSelect]()
 
-  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0, pants)
+  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0, true, pants)
 
 
   /** show dialog returns either tupel result or an error
    *  result tupel (name, config, category, winSets, pants)
    */
-  def show(coIdInput: Long, pantsInput: ArrayBuffer[PantSelect]): Future[Either[Error, Result]] = 
+  def show(coIdInput: Long, qualify: QualifyTyp.Value, pantsInput: ArrayBuffer[PantSelect]): Future[Either[Error, Result]] = 
   {
     val p = Promise[Boolean]()
     val f = p.future
@@ -77,10 +93,20 @@ object DlgCardCfgCompPhase extends BasicHtml
     if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
     coId = coIdInput
 
-    pants  = pantsInput
-    size = pants.filter(_.checked).size
+    pants       = pantsInput
+    size        = pants.filter(_.checked).size
     //set pant view - init view for participant selection
-    setHtml("PantTbl", html.Pants(pants))
+    setHtml("PantCard", html.Pants(pants))
+    
+    // set qualify checkbox
+    setVisible("qualifyWinners", qualify!=QualifyTyp.None)
+    if (qualify!=QualifyTyp.None) {
+      setDisabled("Winners", qualify!=QualifyTyp.All)
+      setCheckbox("Winners", qualify==QualifyTyp.All | qualify==QualifyTyp.Winner) 
+      qualifyMode = ite(qualify==QualifyTyp.All | qualify==QualifyTyp.Winner, QualifyTyp.Winner, QualifyTyp.Looser)
+    } else {
+      qualifyMode = QualifyTyp.None
+    }
     setMainView(size)
 
     // register routines for cancel and submit
@@ -113,6 +139,17 @@ object DlgCardCfgCompPhase extends BasicHtml
         }
       }
 
+      case "Winners" =>  {
+        val pantTbl = getElemById("PantTbl")
+        val winner  = getCheckbox("Winners")
+
+        qualifyMode = ite(winner, QualifyTyp.Winner, QualifyTyp.Looser)
+        pants.foreach { pant => 
+          val elem = pantTbl.querySelector(s"[data-sno='${pant.sno.value}']").asInstanceOf[HTMLElement] 
+          setCheckbox(elem, if (winner) pant.qualify == QualifyTyp.Winner else pant.qualify == QualifyTyp.Looser)
+        }
+      }
+
       case "Close"        => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
 
       case _              => {}
@@ -127,6 +164,7 @@ object DlgCardCfgCompPhase extends BasicHtml
     result.config  = getInput("CfgSelection", CPC_UNKN)
     result.name    = getInput("CfgName", "")
     result.winSets = getInput("CfgWinset", 0)
+    result.qualify = qualifyMode == QualifyTyp.None || qualifyMode == QualifyTyp.Winner || qualifyMode == QualifyTyp.All
     result.pants   = pants
 
     //set participant status 

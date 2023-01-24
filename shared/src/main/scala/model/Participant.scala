@@ -123,6 +123,7 @@ object ParticipantEntry {
   }
 
   def bye(name: String="bye") =  ParticipantEntry(SNO.BYE, name, "", 0, (0, 0))
+  def getBye(value: Int=0) =  ParticipantEntry(SNO.bye(value).value, "", "", 0, (0, 0))
 }
 
 

@@ -63,7 +63,12 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }
         
     val (coId, coPhId) = (getData(elem,"coId",0L), getData(elem,"coPhId",0))
-    val action = if (!App.tourney.cophs.contains((coId, coPhId)) || App.tourney.cophs((coId, coPhId)).getStatus != CompPhase.CPS_EIN) "BadRequest" else key 
+    val action = if (App.tourney.cophs.contains((coId, coPhId))) {
+      val status = App.tourney.cophs((coId, coPhId)).getStatus
+      if (status == CompPhase.CPS_EIN || status == CompPhase.CPS_FIN) key else "BadRequest"
+    } else {
+      "BadRequest"
+    }
 
     debug("actionEvent", s"key: ${key} -> ${action}")
     action match {
@@ -215,7 +220,9 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //  COMMON-SECTION
   //
   // set input page for a competition phase, coId != 0 and coPhId != 0
-  def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
+  def setPage(coPhase: CompPhase): Unit = {
+    val coId   = coPhase.coId
+    val coPhId = coPhase.coPhId
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists_(s"Input_${coId}_${coPhId}")) {
       val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
@@ -224,7 +231,9 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       val maxRnd  = coPhase.getMaxRnds
       val winSets = coPhase.noWinSets
       coPhTyp match {
-        case CPT_GR => setHtml(elem, clientviews.organize.competition.input.html.GroupCard(coId, coPhId, maxRnd, winSets))
+        case CPT_GR => { 
+          setHtml(elem, clientviews.organize.competition.input.html.GroupCard(coId, coPhId, maxRnd, winSets))
+        }  
         case CPT_KO => {
           setHtml(elem, clientviews.organize.competition.input.html.KoCard(coId, coPhId, maxRnd, winSets))
           var gameNo = 0
@@ -258,7 +267,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
               val rowElem = getElemById_(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${m.gameNo}", "row")
               // rowElem.setAttribute("contenteditable", "true")
-              setGrMatch(coId, coPhId, rowElem, m.asInstanceOf[MEntryGr])
+              setGrMatch(coPhase, rowElem, m.asInstanceOf[MEntryGr])
             }
           } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
         } 
@@ -270,6 +279,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
                 showAlert(getMsg("invalidSection"))) 
       }  
     }
+    
+    // STATUS dependend settings
+    val editible = (coPhase.status == CompPhase.CPS_EIN | coPhase.status == CompPhase.CPS_FIN)
+    setAttribute(gE(s"Input_${coId}_${coPhId}"), "contenteditable", editible.toString)
+    setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo & editible)
   }
 
 
@@ -286,10 +300,17 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //
   //  GROUP-SECTION
   //
-  def setGrMatch(coId: Long, coPhId: Int, elem: HTMLElement, m: MEntryGr)(implicit coPhase: CompPhase) = {
+  def setGrMatch2(coId: Long, coPhId: Int, elem: HTMLElement, m: MEntryGr)(implicit coPhase: CompPhase) = {
     val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
     elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
       coId, coPhId, grpName, wgw, m.gameNo, coPhase.noWinSets).toString
+    setMatchViewContent(elem, m) 
+  }
+  
+  def setGrMatch(coph: CompPhase, elem: HTMLElement, m: MEntryGr) = {
+    val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
+    elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
+      coph.coId, coph.coPhId, grpName, wgw, m.gameNo, coph.noWinSets).toString
     setMatchViewContent(elem, m) 
   }
 

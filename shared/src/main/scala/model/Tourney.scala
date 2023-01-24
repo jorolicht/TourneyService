@@ -176,6 +176,30 @@ case class Tourney(
     }
   }  
 
+  /** prtComp
+    * 
+    *
+    * @param coId
+    * @return
+    */
+  def prtComp(coId: Long, fun:(String, Seq[String])=>String): String = {
+
+    if (!comps.contains(coId)) {
+      s"Competition coId ${coId} does not exist" 
+    } else {
+      val co = comps(coId)
+      val str = new StringBuilder(s"COMPETITION(${co.id}): ${co.name} \n  typ: ${co.getTypName(fun)} status: ${co.getStatusName(fun)}\n")
+      var first=true   
+      for ((k,v) <- cophs) {
+        if (k._1 == coId && first)  { 
+          str.append(s"  CompPhases: ${v.name}(${k._2}) status: ${v.status} player: ${v.noPlayers}"); first = false 
+        } else {
+          str.append(s"              ${v.name}(${k._2}) status: ${v.getStatusTxt} player: ${v.noPlayers}")
+        }
+      }
+      str.toString
+    }
+  }
 
   /** getCompCnt - returns number of registered and active participants  
    *
@@ -373,29 +397,22 @@ case class Tourney(
    *           2 -> 4 / 5
    *           3 -> 6 / 7
    */
-  def addCompPhase(coId: Long, coPhId: Int, coPhCfg: Int, name: String, noWinSets: Int): Either[Error, CompPhase] = {      
+  def addCompPhase(coId: Long, prefCoPhId: Int, winner: Boolean, coPhCfg: Int, name: String, noWinSets: Int): Either[Error, CompPhase] = {      
     
-    // generate a new following competition phase identifier
-    val newCoPhId = if (coPhId == 0) {
-      // check if competiton identifier (1) is not used
-      if (!cophs.isDefinedAt((coId, 1))) 1 else 0 
-    } else {
-      // check if there is a free competition identifier
-      if       (!cophs.isDefinedAt((coId, coPhId*2)))   coPhId*2 
-      else if  (!cophs.isDefinedAt((coId, coPhId*2+1))) coPhId*2+1 
-      else 0 
-    }
-
-    if (newCoPhId == 0) {
-      Left(Error("err0194.msg.addCompPhase.existing")) 
-    } else if (name.length < 2) {
-      Left(Error("err0195.msg.addCompPhase.name")) 
-    } else if (coPhCfg == CompPhase.CPC_UNKN ) {
-      Left(Error("err0196.msg.addCompPhase.config")) 
-    } else { 
-      val coph = CompPhase.get(coId, newCoPhId, coPhCfg, name, noWinSets)
-      cophs((coId, coph.coPhId)) = coph
-      Right(coph)
+    val startOption = 
+    if      (prefCoPhId == 0 & cophs.isDefinedAt((coId, 1)))      Left(Error("err0194.msg.addCompPhase.existing"))
+    else if (prefCoPhId == 0 & !cophs.isDefinedAt((coId, 1)))     Right(1)
+    else if (!cophs.isDefinedAt((coId, prefCoPhId*2+1)) & winner) Right(prefCoPhId*2+1)                 
+    else if (!cophs.isDefinedAt((coId, prefCoPhId*2)) & !winner)  Right(prefCoPhId*2) 
+    else                                                          Left(Error("err0194.msg.addCompPhase.existing"))
+    
+    startOption match {
+      case Left(err)     => Left(err)
+      case Right(coPhId) => {
+        val coph = CompPhase.get(coId, coPhId, coPhCfg, name, noWinSets)
+        cophs((coId, coph.coPhId)) = coph
+        Right(coph)
+      }
     }
   }
 

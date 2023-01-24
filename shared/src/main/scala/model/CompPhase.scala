@@ -57,7 +57,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   //*****************************************************************************
   // Draw/Init Routines
   //*****************************************************************************
-  def draw(pants: ArrayBuffer[ParticipantEntry], compTyp: Int): Either[Error, Boolean] = {
+  def drawOnRanking(pants: ArrayBuffer[ParticipantEntry], compTyp: Int): Either[Error, Boolean] = {
     coPhCfg match {
       case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
         noPlayers = pants.size
@@ -70,12 +70,112 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         }
       }
       case CPC_KO | CPC_SW  => { 
+        noPlayers = pants.size
         Left(Error("???"))
       }  
       case _          => Left(Error("???"))
     }
-  
   }
+
+  /** drawWithGroupInfo - draw based on previous group 
+    *                     input p
+    *
+    * @param pants        ParticipantEntry
+    * @param drawInfo     tupel [GroupName, GroupId, GroupPos, RankValue]
+    * @param compTyp
+    * @return
+    */
+
+  def drawWithGroupInfo(pants: ArrayBuffer[ParticipantEntry], drawInfo: ArrayBuffer[(String, Int, Int, Int)], compTyp: Int): Either[Error, Boolean] = {
+    def changeUpDown(invert: Boolean, value: Boolean): Boolean = if (invert) !value else value
+
+    coPhCfg match {
+      case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
+        noPlayers = pants.size
+        Left(Error("???"))
+      }
+      case CPC_KO | CPC_SW  => {
+        noPlayers = pants.size
+        size = KoRound.getSize(noPlayers)
+        ko = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)
+
+
+        // draw => map pants (sorted by results) to ko-tree
+        // position of best placed participants follows the following scheme: up/down/down/up/up/down/down
+        // position of 2nd best is in the opposite part
+        // 0. step initialize up down scheme ULLUULLUULL and
+        //    setting positions     
+        val upDownScheme = List.fill(size/4)(List(true, false, false, true)).flatten.toArray
+        val settingPositions = KoRound.genSettingPositions(size)
+
+        // 1. step generate upDownMap grId/pos -> Up/Down
+        //    [GroupName, GroupId, GroupPos, RankValue]
+        val upDownMap = HashMap[ (Int,Int), Boolean]()
+        val minPos = drawInfo.minBy(_._3)._3
+
+        drawInfo.zip(upDownScheme).foreach { case (item, updo) => 
+          if (item._3 == minPos) {
+            upDownMap += ((item._2, minPos) -> updo)
+          } else if (!upDownMap((item._2, minPos))) {
+            upDownMap += ((item._2, item._3) -> updo); println("Error: upDownMap does not contain all values")  
+          } else {
+            upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
+          }
+        } 
+
+        println(s"Input: ----------------------------------------")
+        var cnt = 1
+        pants.zip(drawInfo).foreach { x => 
+          println(s"${cnt}  -> ${x._1.name} Group: ${x._2._1} GroupId: ${x._2._2} Pos: ${x._2._3} updown: ${upDownMap((x._2._2,x._2._3))}")
+          cnt = cnt + 1
+        }
+
+        // 2. step generate initial drawing
+        //val pantsWithDrawInfo = pants.zip(drawInfo).map(x => (x, upDownMap((x._2._2,x._2._3))))
+        val pantsWithDrawInfo = pants.zip(drawInfo)
+        val pantsRes     = ArrayBuffer.fill(size) (ParticipantEntry("0", "", "", 0, (0,0))) 
+        val drawInfoRes  = ArrayBuffer.fill(size) ("",0,0,0) 
+
+        // 3. step split pants into up and down positions
+        val (upList, downList) = pantsWithDrawInfo.partition(x => upDownMap((x._2._2,x._2._3))       )
+       
+        for (i <- 0 until size) {
+          val pos = settingPositions(i+1)
+          val up  = (pos <= size/2)
+          if (up && upList.size > 0) {
+            pantsRes(pos-1)    = upList(0)._1
+            drawInfoRes(pos-1) = upList(0)._2
+            upList.remove(0)
+          }  
+          if (!up && downList.size > 0) {
+            pantsRes(pos-1)    = downList(0)._1
+            drawInfoRes(pos-1) = downList(0)._2
+            downList.remove(0)
+          }
+        }
+
+        // Error check, all participants set?
+        if (upList.size > 0 || downList.size > 0) println("Error: upDownList size > 0")
+
+        // println(s"PANTS: ----------------------------------------")
+        // var cnt4 = 1
+        // pantsRes.foreach { x => 
+        //   println(s"${cnt4}  -> ${x.name}") 
+        //   cnt4 = cnt4 + 1
+        // }        
+
+        
+        if (ko.init(pantsRes, drawInfoRes)) {
+          setStatus(CPS_AUS)
+          Right(true)
+        } else {
+          Left(Error("???"))
+        }
+      }  
+      case _          => Left(Error("???"))
+    }
+  }
+
 
   // initialie draw for group configurations 
   def drawGr(pants: ArrayBuffer[ParticipantEntry], grpCfg: List[GroupConfig]): Either[Error, Boolean] = {
@@ -141,7 +241,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   } 
 
 
-
   //*****************************************************************************
   // Match Routines
   //*****************************************************************************
@@ -186,7 +285,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
           println("Error: set group match, invalid group Id")
         }
       }  
-
 
 
       case CPT_KO => ko.setMatch(m.asInstanceOf[MEntryKo]) match {
@@ -456,8 +554,8 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
       str.toString
     }
 
-    val str = new StringBuilder(s"${name} (coId:${coId}) coPhId: ${coPhId} coPhCfg: ${CompPhase.cfg2Name(coPhCfg)} typ:${coPhTyp}\n")
-    str.append(s"status: ${CompPhase.status2Name(status)} demo: ${demo} noPlayers: ${noPlayers} noWinSets: ${noWinSets}\n") 
+    val str = new StringBuilder(s"${name} (coId:${coId}) coPhId: ${coPhId} coPhCfg: ${CompPhase.cfg2Name(coPhCfg)} typ: ${CompPhase.getTypName(coPhTyp)}\n")
+    str.append(s"status: ${CompPhase.status2Name(status)} demo: ${demo} size: ${size}  noPlayers: ${noPlayers} noWinSets: ${noWinSets}\n") 
     str.append(s"${matches2Str()}\n") 
 
     coPhTyp match {
@@ -469,7 +567,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   }  
 
 }
-
 
 
 //*****************************************************************************
@@ -569,6 +666,15 @@ object CompPhase {
       case _       => // invalid competition phase
     }
     cop
+  }
+
+  def getTypName(x: Int):String = {
+    x match {
+      case CPT_UNKN => "UNKNOWN-TYP"
+      case CPT_GR   => "GROUP-TYP"
+      case CPT_KO   => "KO-TYP"
+      case CPT_SW   => "SWITZ-TYP"     
+    }
   }
 
   def cfg2Name(x: Int): String = {

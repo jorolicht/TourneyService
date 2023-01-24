@@ -135,7 +135,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     section match {
       case "Ctrl"  => OrganizeCompetitionCtrl.setPage(coPhase)
       case "Draw"  => OrganizeCompetitionDraw.setPage(coId, coPhId)
-      case "Input" => OrganizeCompetitionInput.setPage(coId, coPhId)
+      case "Input" => OrganizeCompetitionInput.setPage(coPhase)
       case "View"  => OrganizeCompetitionView.setPage(coId, coPhId)
     }  
 

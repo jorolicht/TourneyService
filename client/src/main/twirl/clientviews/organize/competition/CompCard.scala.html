@@ -8,14 +8,12 @@
 @import shared.model.Competition._
 @import clientviews.component.helper.html._
 
-@* Sequence of:
- *  Competition:
- *  (id, name, getAgeGroup, getRatingRemark, typ, formatTime(lang), cnt, cntActiv, status, genRange, options) 
- *  ( 1,    2,           3,               4,   5,                6,   7         8,      9,       10,      11)
+@* 
+ * Input sequence of competitions with number of registered and number of activ players
+ * 
  *@
 
-@(comps: Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)], coId: Long)(implicit ucc: UseCaseParam)
-@idCount(cnt: Long) = @{ ucc.idBase + "__Count_" + cnt }
+@(compInfos: Seq[(Competition, Int, Int)], lang: String)(implicit ucc: UseCaseParam)
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
 <table @id("MainTbl") class="table table-sm small table-hover tuse-border">
@@ -31,7 +29,7 @@
 			<td class="text-right tuse-height"></td>
 		</tr>	
 
-	@if(comps.isEmpty) {
+	@if(compInfos.isEmpty) {
 		<tr>      
 			<td colspan="9" class="text-center">
 				<div class="alert alert-info" role="alert">
@@ -40,28 +38,28 @@
 			</td>
 		</tr>
 	} else {			
-		@for(co <- comps) {	
-			<tr data-coId='@co._1' @id(s"${co._1}") @actionEvent("SelectCompetition", "onclick")>  
-				<td class="text-left tuse-height"><strong>@co._1</strong</td>
-				<td class="text-left tuse-height">@Competition.genName(co._2, co._3, co._4, msg_("competition.typ."+co._5))</td>
-				<td class="text-left tuse-height">@co._6</td>
-				<td class="text-left tuse-height">@co._10</td>
-				<td id="@idCount(co._1)" class="text-center tuse-height">@co._7/@co._8</td>
-				<td @id("CompStatus_"+co._1.toString)' class="text-right tuse-height">@msg_("competition.status." + co._9)</td>
+		@for(co <- compInfos) {	
+			<tr data-coId='@co._1.id' @id(s"${co._1.id}") @actionEvent("SelectCompetition", "onclick")>  
+				<td class="text-left tuse-height"><strong>@co._1.id</strong</td>
+				<td class="text-left tuse-height">@co._1.genName(msg_)</td>
+				<td class="text-left tuse-height">@co._1.formatTime(lang)</td>
+				<td class="text-left tuse-height">@co._1.genRange</td>
+				<td @id(s"Counter_${co._1.id}") class="text-center tuse-height">@co._2/@co._3</td>
+				<td @id(s"Status_${co._1.id}") class="text-right tuse-height">@co._1.getStatusName(msg_)</td>
 				<td class="text-center tuse-height"> 
-					@if(-1==co._9 | 0==co._9){
-						<div class="form-check-inline">
-							<input data-coId='@co._1' class="form-check-input" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(-1==co._9) >
-						</div>
-					} 
+					<div class="form-check-inline">
+						@if(co._1.status==Competition.CS_REDY){
+						  <input data-coId='@co._1.id' class="form-check-input" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(co._1.getWebRegister) >
+						}	
+					</div>
 				</td>
 				<td class="text-right tuse-height">
-					@if(co._9<=0){
-					  <a @id("icon.edit") @tit("edit") data-coId='@co._1' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
+					@if(co._1.status==Competition.CS_REDY){
+					  <a @id("icon.edit") @tit("edit") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
 					}
-					<a @tit("view") data-coId='@co._1' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
-					<a @tit("delete") data-coId='@co._1' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
-					@if(co._9<=CS_RESET){
+					<a @tit("view") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
+					<a @tit("delete") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
+					@if(co._1.status==Competition.CS_REDY){
 					  <a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
 					}
 				</td>

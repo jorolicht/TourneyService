@@ -10,8 +10,8 @@ greeting                                              = Herzlich Willkommen!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05DE184
-  app.date                                            = 2022-12-28
+  app.version                                         = 2023-01DE185
+  app.date                                            = 2023-01-11
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -302,7 +302,7 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   tourney.error.privat                                = Bitte Sichtbarkeit angeben
 
   competition.status.-99                              = Status
-  competition.status.-1                               = ANMELDUNG
+  competition.status.-1                               = UNBEKANNG
   competition.status.0                                = STARTKLAR
   competition.status.1                                = VORRUNDE AUSLOSUNG
   competition.status.2                                = VORRUNDE EINGABE
@@ -313,6 +313,9 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   competition.status.7                                = ENDRUNDE AUSLOSUNG
   competition.status.8                                = ENDRUNDE EINGABE
   competition.status.9                                = ENDRUNDE BEENDET
+  competition.status.100                              = GESTARTET
+  
+
 
   competition.agegroup.1                              = Damen
   competition.agegroup.2                              = Herren
@@ -1097,7 +1100,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.card.cfg.compphase.lbl.Winset                     = Gewinnsätze
   dlg.card.cfg.compphase.btn.draw                       = START AUSLOSUNG
 
-  dlg.card.cfg.compphase.pants                          = Teilnehmer
+  dlg.card.cfg.compphase.pants                          = Auswahl Teilnehmer
   dlg.card.cfg.compphase.pants.select                   = Auswahl Teilnehmer
   dlg.card.cfg.compphase.tbl.hdr.no                     = #
   dlg.card.cfg.compphase.tbl.hdr.name                   = Name, Vorname

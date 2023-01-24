@@ -281,7 +281,6 @@ object Group {
       name
     }
   }
-
 }
 
 

@@ -5,18 +5,19 @@
  * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
  * 
  *@
+@import shared.model.CompPhase 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coId: Long, secId: Int, size: Int)(implicit ucc: UseCaseParam)
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
 
-<table @id(s"Draw_${coId}_${secId}")>
+<table @id(s"Draw_${coph.coId}_${coph.coPhId}")>
   <tr>
     <th><small class="font-weight-bold">@msg("table.pos")</small></th>
     <th>
       <div class="text-center">
-        <button data-coId='@coId' data-secId='@secId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+        <button data-coId='@coph.coId' data-cophId='@coph.coPhId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
           <i class="fa fa-refresh" aria-hidden="true"></i>
         </button>
       </div>
@@ -26,7 +27,7 @@
     <th><small class="font-weight-bold">@msg("table.ttr")</small></th>
   </tr>
 
-  @for(i <- 1 to size){
+  @for(i <- 1 to coph.size){
     <tr>
       <td rowspan="2"><div style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">@i</small></div></td>
       <td rowspan="2" contenteditable='true'>

@@ -3,8 +3,6 @@ package addon.test
 /*
 ** test -s compphase -n 1
 **
-**
-**
 */
 
 import org.rogach.scallop._
@@ -47,39 +45,35 @@ object AddonMain extends TestUseCase("AddonMain")
   with TourneySvc with LicenseSvc with AuthenticateSvc with WrapperSvc
 {
   
-  // Commands
+   /** log command
+    * 
+    */ 
+  def cmdLog(args: Array[String]) = {
 
-  @JSExport def showCompPhase()                   = AddonCmds.showCompPhase()
-  @JSExport def showTourney                       = AddonCmds.showTourney()
-  
- // Organize Competition tests
-  @JSExport def testOrgCompDraw(param: String)    = AddonOrgComp.testDraw(TNP("testDraw", param))
-  @JSExport def testOrgCompDrawKo(param: String)  = AddonOrgComp.testDrawKo(TNP("testDrawKo", param))
-  @JSExport def testOrgCompInputKo(param: String) = AddonOrgComp.testInputKo(TNP("testInputKo", param))
-  @JSExport def testMatchEncode(param: String)    = AddonOrgComp.testMatchEncode(TNP("testMatchEncode", param))
-
-  // Organize Competition Match tests
-  @JSExport def testMatchList(coId: String, coPhId: String) = AddonOrgComp.testMatchList("testMatchList", coId.toLong, coPhId.toInt)
-  @JSExport def testPlayerRun(coId: String, coPhId: String) = AddonOrgComp.testPlayerRun("testPlayerRun", coId.toLong, coPhId.toInt)
-
-
-  
-
-  /** execute command
-   * 
-   */ 
-  def cmdExecute(args: Array[String]) = {
-    try {
-      args(0) match {
-        case "load"            => AddonCmds.load(args(1))
-        case "getDebug"        => println(s"Debug Level: ${AppEnv.getDebugLevel.getOrElse("not set")}") 
-        case "setDebug"        => AppEnv.setDebugLevel(args(1))
-        case "testCompEncode"  => AddonComp.testEncode(args(1))
-        case "testShowSubMenu" => AddonSidebar.testShowSubMenu("testShowSubMenu", args(1))
+    class ConfLog(arguments: Seq[String]) extends ScallopConf(arguments) {
+      override def onError(e: Throwable): Unit = e match {
+        case _ => printHelp()
       }
+      //version("TourneyService 1.2.3 (c) 2022 Robert Lichtenegger")
+      banner("""Usage: log --level [off|error|warn|info|debug]
+                |setting the log level, output displayed on javascript console
+                |Options:
+                |""".stripMargin)
 
-    } catch { case _:Throwable => println(s"Exception cmdStart: ${args.mkString(" ")}")}
-  }  
+      val level = choice(name="level", choices= Seq("off", "error", "warn", "info", "debug"))
+      verify()
+    }    
+
+    val conf = new ConfLog(args)
+    val level = conf.level.getOrElse("show") 
+    level match {
+      case "error" | "warn" | "info" | "debug"  => AppEnv.setDebugLevel(level)
+      case "off"   => AppEnv.setDebugLevel("")
+      case "show"  => ()
+    }
+    println(s"Current LogLevel: ${AppEnv.getDebugLevel.getOrElse("UNKNOWN")}")
+  }
+
   
   /** test command
    * 
@@ -112,10 +106,68 @@ object AddonMain extends TestUseCase("AddonMain")
       case "compphase" => AddonCompPhase.execTest(number, param)
       case _           => ()
     }
+  }
 
+
+  /** show command
+   * 
+   */ 
+  def cmdShow(args: Array[String]) = {
+
+    class ConfShow(arguments: Seq[String]) extends ScallopConf(arguments) {
+
+      override def onError(e: Throwable): Unit = e match {
+        case _ => printHelp()
+      }
+
+      banner("""
+        |usage: show <command> [<args>]
+        |""".stripMargin)
+
+      footer("\n'show help lists available subcommands.\n")
+
+
+      val tourney = new Subcommand("tourney", "tourn") {
+        val toid    = opt[Long](name="toid", required = true)
+      }
+      val comp = new Subcommand("comp", "competition") {
+        val coid = opt[Long](name="coid", required = true)
+      }
+      val phase = new Subcommand("phase", "compphase") {
+        val coid = opt[Long](name="coid", required = true)
+        val phid = opt[Int](name="phid", required = true)
+      }      
+      addSubcommand(tourney)
+      addSubcommand(comp)
+      addSubcommand(phase)
+
+      verify()
+    }
+    
+    val conf   = new ConfShow(args)
+    conf.subcommand match {
+      case Some(conf.tourney) => {
+        val toId = conf.tourney.toid.getOrElse(0L)
+        println(s"subcommand tourney toid: ${toId}")
+        AddonCmds.showTourney(toId)
+      }  
+      case Some(conf.comp)    => {
+        val coId   = conf.phase.coid.getOrElse(0L)
+        println(s"subcommand comp coid: ${coId}")
+        AddonCmds.showCompetition(coId) 
+      }  
+      case Some(conf.phase)   => {
+        val coId   = conf.phase.coid.getOrElse(0L)
+        val coPhId = conf.phase.phid.getOrElse(0)
+        println(s"subcommand phase coid: ${coId} phid: ${coPhId}")
+        AddonCmds.showCompPhase(coId, coPhId) 
+      }  
+      case _                  => println(s"no subcommand")
+    }
   }
 
 
 
+ 
 }
 

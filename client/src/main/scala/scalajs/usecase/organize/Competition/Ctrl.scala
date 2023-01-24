@@ -59,9 +59,8 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
     action match {
 
       case "StartRound" => {
-        App.tourney.cophs((coId,coPhId)).setStatus(CPS_EIN)
-        setAttribute(gE(s"Input_${coId}_${coPhId}"), "contenteditable", "true")
-        setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo)
+        App.tourney.comps(coId).status = Competition.CS_RUN
+        App.tourney.cophs((coId, coPhId)).setStatus(CPS_EIN)
         App.execUseCase("OrganizeCompetitionInput", "", "")
       } // StartRound
 
@@ -108,10 +107,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
         debug("StartFollowing", s"coId: ${coId} coPhId: ${coPhId}")
       } // StartFollowing
 
-      case "DemoBtn"          => {
-        App.tourney.cophs((coId,coPhId)).demo = getCheckbox("DemoBtn")
-        setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo)
-      }  
+      case "DemoBtn"          => App.tourney.cophs((coId,coPhId)).demo = getCheckbox("DemoBtn")
 
       case "BadRequest" => error("Invalid Action", s"value: ${key} coId: ${coId} coPhId: ${coPhId}")
 

@@ -10,8 +10,8 @@ greeting                                              = Welcome!
   config.LogLevel                                     = debug
 
   app.mockup                                          = false
-  app.version                                         = 2022-05EN184
-  app.date                                            = 2022-12-28
+  app.version                                         = 2023-01EN185
+  app.date                                            = 2023-01-11
 
   app.url.home                                        = https://www.turnier-service.info
   app.url.doc                                         = https://turnier-service.org/handbook/
@@ -302,7 +302,7 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   tourney.error.privat                                = Please set visibility
 
   competition.status.-99                              = status
-  competition.status.-1                               = REGISTRATION
+  competition.status.-1                               = UNKNOWN
   competition.status.0                                = READY TO START
   competition.status.1                                = PRELIMINARY DRAW
   competition.status.2                                = PRELIMINARY RESULT ENTRY
@@ -313,6 +313,7 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   competition.status.7                                = FINAL DRAW
   competition.status.8                                = FINAL RESULT ENTRY
   competition.status.9                                = FINAL ROUND FINISHED
+  competition.status.100                              = RUNNING
 
   competition.agegroup.1                              = Women
   competition.agegroup.2                              = Gentlemen
@@ -374,6 +375,7 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   competition.phase.7                                 = KO-INTERMEDIATE ROUND
   competition.phase.8                                 = KO FINAL
   competition.phase.9                                 = KO-TROSTRUNDE
+
 
   competition.phase.status.0                          = UNKNOWN
   competition.phase.status.1                          = DRAW
@@ -1097,7 +1099,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.card.cfg.compphase.lbl.Winset                       = Winning Sets
   dlg.card.cfg.compphase.btn.draw                         = START DRAW
 
-  dlg.card.cfg.compphase.pants                            = Participants
+  dlg.card.cfg.compphase.pants                            = Select Participants
   dlg.card.cfg.compphase.pants.select                     = Select Participants
   dlg.card.cfg.compphase.tbl.hdr.no                       = #
   dlg.card.cfg.compphase.tbl.hdr.name                     = Name, Firstname

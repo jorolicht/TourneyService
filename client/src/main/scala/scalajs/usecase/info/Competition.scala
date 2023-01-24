@@ -46,7 +46,7 @@ object InfoCompetition extends UseCase("InfoCompetition")
 
     (for {  
       c       <- tourney.comps.values
-      players  = if (c.status > CS_RESET) tourney.pl2co.values.filter(_.coId == c.id).filter(_.status >= Pant.REDY).toSeq else tourney.pl2co.values.filter(_.coId == c.id).toSeq
+      players  = if (c.status > CS_REDY) tourney.pl2co.values.filter(_.coId == c.id).filter(_.status >= Pant.REDY).toSeq else tourney.pl2co.values.filter(_.coId == c.id).toSeq
     } yield {
       info("viewComp", s"ID: ${c.id}")
       val cnt = players.filter(_.status > 0).length
