@@ -69,9 +69,9 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   private def setClass(name: String, value: Int) = {
     value match {
-      case  1 => setAttribute(name, "class", "fa fa-sort-asc")
-      case -1 => setAttribute(name, "class", "fa fa-sort-desc")
-      case  _ => setAttribute(name, "class", "fa fa-sort")
+      case  1 => setAttribute(gE(name,ucp), "class", "fa fa-sort-asc")
+      case -1 => setAttribute(gE(name,ucp), "class", "fa fa-sort-desc")
+      case  _ => setAttribute(gE(name,ucp), "class", "fa fa-sort")
     }  
   }
 

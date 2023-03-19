@@ -11,14 +11,14 @@
 <td contenteditable='false' class="border-bottom border-top pl-1 pr-1 text-center">-</td>
 <td contenteditable='false' class="border-bottom border-right border-top pr-2 text-left"><small data-game_@gameNo='nameB'></small></td>
 <td contenteditable='false' class="border-bottom border-right border-top text-center" data-game_@gameNo='gameNo'>@gameNo</td>
-<td class="border text-center" style='font-size:small;' contenteditable='true' data-game_@gameNo='info'></td>
+<td class="border text-center" style='font-size:small;' data-game_@gameNo='info'></td>
 <td contenteditable='false' class="border text-center"></td>
-<td id='Playfield_@{coId}_@{coPhId}_@{gameNo}' class="border text-center" contenteditable='true' data-game_@gameNo='playfield'></td>
+<td id='Playfield_@{coId}_@{coPhId}_@{gameNo}' class="border text-center" data-game_@gameNo='playfield'></td>
 <td contenteditable='false' class="border text-center"></td>
 @for(i <- 0 to (winSets-1)*2){
-  <td width='30px' class="border text-center" data-result_@gameNo='result' data-game_@gameNo='ball_@(i+1)'  contenteditable='true' style='font-size:small;'></td>
+  <td width='30px' class="border text-center" data-input_@gameNo='' data-game_@gameNo='ball_@(i+1)' style='font-size:small;'></td>
 }
-<td class="border text-center" data-result_@gameNo='result' data-game_@gameNo='sets' contenteditable='true'></td>
+<td class="border text-center" data-input_@gameNo='' data-game_@gameNo='sets'></td>
 <td contenteditable='false' class="text-center ml-1 mr-1">
   <button id='SaveBtn_@{coId}_@{coPhId}_@{gameNo}' data-game_@gameNo='save'  data-coId='@coId' data-coPhId='@coPhId' data-game='@gameNo' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  @actionEvent("SaveMatchResult", "onclick")>@msg_("std.btn.save")</button> 
 </td>

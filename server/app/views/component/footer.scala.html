@@ -20,16 +20,11 @@
   <div class="container">
     <div class="text-center">
       <small>
-        <a id="APP__FooterGerman" href="/setLang?lang=de">
-          <img src="/assets/img/germany-flag-icon-32.png" height="20px"/> 
-        </a>
-        <a id="APP__FooterEnglish" href="/setLang?lang=en">
-          <img src="/assets/img/united-kingdom-flag-icon-32.png" height="20px"/> 
-        </a>
-
-        @getMsg("copyright1")&nbsp;<a href="#" @eventUseCase("HomeMain", "Console", "")>&copy;</a>&nbsp;@getMsg("copyright2")
-        <a title="@getMsg("impressum")" href="#" @eventUseCase("HomeMain", "Content", "/content/impressum.md")>@getMsg("impressum")</a>
-        <a title="@getMsg("dataprotection")" href="#" @eventUseCase("HomeMain", "Content", "/content/dataprotection.md")>@getMsg("dataprotection")</a>
+        <a id="APP__FooterGerman" href="/setLang?lang=de"><img src="/assets/img/germany-flag-icon-32.png" height="20px"/></a>
+        <a id="APP__FooterEnglish" href="/setLang?lang=en"><img src="/assets/img/united-kingdom-flag-icon-32.png" height="20px"/></a>
+        @getMsg("copyright1")&nbsp;<a href='#' onclick='Start.console(); false'>&copy;</a>&nbsp;@getMsg("copyright2")
+        <a title="@getMsg("impressum")" @eventUseCase("HomeMain", "Content", "/content/impressum.md")>@getMsg("impressum")</a>
+        <a title="@getMsg("dataprotection")" @eventUseCase("HomeMain", "Content", "/content/dataprotection.md")>@getMsg("dataprotection")</a>
       </small>
     </div>
   </div>

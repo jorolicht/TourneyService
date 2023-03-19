@@ -387,10 +387,6 @@ object Crypto {
   def getEParam(paramMap: HashMap[String,String], key: String, default: Boolean): Either[Error, Boolean] = 
     try Right(paramMap(key).toBoolean) catch { case _: Throwable =>  Left(Error("err0142.crypto.Boolean", key)) } 
 
-  def genUUID() : String = {
-    UUID.randomUUID().toString()
-  }
-
-
+  def genUUID() : String = UUID.randomUUID().toString()
 
 }

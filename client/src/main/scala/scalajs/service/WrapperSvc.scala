@@ -59,20 +59,11 @@ trait WrapperSvc {
    * @return either an error or a string in json-format
    */
   def getJson(route: String, params: String="") : Future[Either[Error, String]] = {
-    val papas = if (params=="") s"version=${AppEnv.getVersion()}" else s"version=${AppEnv.getVersion()}&${params}"
-    val path = s"${route}?params=${enc(papas)}"
-
-    Ajax.get(path).map(_.responseText)
+    Ajax.get(genPath(route, params)).map(_.responseText)
       .map(content => Right(content))
       .recover({
-        case dom.ext.AjaxException(req) => {
-          if (Error.valid(req.responseText)) {
-            Left( Error.decode(req.responseText, s"text: ${req.status} ${req.responseText.take(40)} path: ${path}", "getJson") )
-          } else {
-            Left( Error("err0168.ajax.getJson",  s"status: ${req.status} statusText: ${req.statusText} path: ${path} action: getJson") )
-          }          
-        }
-        case _: Throwable               => Left( Error("err0007.ajax.getJson", path, "unspecified exception", "getJson") ) 
+        case dom.ext.AjaxException(req) => Left(Error.decodeWithDefault(Error("err0000.communication.error"), req.responseText, s"${route} / ${params}/ ${req.statusText} / ${req.responseText}", "getJson")) 
+        case _: Throwable               => Left(Error.decodeWithDefault(Error("err0000.communication.error"), "", s"${genPath(route,params)} / request status and text unknown", "getJson")) 
     })
   }
 
@@ -93,39 +84,31 @@ trait WrapperSvc {
   /** postJson - basic routine for a POST request 
    *
    */ 
-  def postJson(route: String, params: String, data: String="", 
-               contType: String = "text/plain; charset=utf-8"): Future[Either[Error, String]] = {
+  def postJson(route: String, params: String, data: String="", contType: String = "text/plain; charset=utf-8"): Future[Either[Error, String]] = {
+    //Helper.info("postJson", s"route: ${route}  params: ${params} \n data: ${data} \n Csrf-Token: ${AppEnv.getCsrf}")
+    Ajax.post(genPath(route,params), data, headers = Map("Content-Type"->s"${contType}", "Csrf-Token" -> AppEnv.getCsrf))
+      .map(_.responseText).map(content => Right(content))
+      .recover({
+        // Recover from a failed error code into a successful future
+        case dom.ext.AjaxException(req) => Left(Error.decodeWithDefault(Error("err0000.communication.error"), req.responseText, s"${route} / ${params}/ ${req.statusText} / ${req.responseText}", "postJson"))  
+        case _: Throwable               => Left(Error.decodeWithDefault(Error("err0000.communication.error"), "", s"${route} / ${params}/ request status and text unknown", "postJson"))    
+      })
+  }
 
+
+  def postForm(route: String, params: String, formData: dom.FormData): Future[Either[Error, String]] = {
+    Ajax.post(genPath(route,params), formData, headers = Map("Csrf-Token" -> AppEnv.getCsrf))
+      .map(_.responseText).map(content => Right(content))
+      .recover({
+        // Recover from a failed error code into a successful future
+        case dom.ext.AjaxException(req) => Left(Error.decodeWithDefault(Error("err0000.communication.error"), req.responseText, s"${route} / ${req.statusText} / ${req.responseText}", "postForm"))
+        case _: Throwable               => Left(Error.decodeWithDefault(Error("err0000.communication.error"), "", s"${route} / request status and text unknown", "postForm"))
+      })
+  }
+
+  def genPath(route: String, params: String): String = {
     val papas = if (params=="") s"version=${AppEnv.getVersion()}" else s"version=${AppEnv.getVersion()}&${params}"
-    val path = s"${route}?params=${enc(papas)}"
-
-    Helper.info("postJson", s"route: ${route}  params: ${params} \n data: ${data} \n Csrf-Token: ${AppEnv.getCsrf}")
-    Ajax.post(path, data, headers = Map("Content-Type"->s"${contType}", "Csrf-Token" -> AppEnv.getCsrf))
-      .map(_.responseText).map(content => Right(content))
-      .recover({
-        // Recover from a failed error code into a successful future
-        case dom.ext.AjaxException(req) => {
-          if (req.statusText == "") {
-            Left(Error("err0000.communication.error")) 
-          } else {
-            Helper.error("postJson", s"statusText: ${req.statusText}  response: ${req.responseText}") 
-            Left(Error.decode(req.responseText, s"text: ${req.statusText.take(40)} route: ${route} params: ${params} " , "postJson"))
-          }
-        }      
-        case _: Throwable               => Left( Error("err0008.ajax.postJson", path, "unspecified exception", "postJson") )    
-      })
-  }
-
-
-  def postForm(route: String, formData: dom.FormData): Future[Either[Error, String]] = {
-    Ajax.post(route, formData, headers = Map("Csrf-Token" -> AppEnv.getCsrf))
-      .map(_.responseText).map(content => Right(content))
-      .recover({
-        // Recover from a failed error code into a successful future
-        case dom.ext.AjaxException(req) => if (req.statusText == "") Left(Error("err0000.communication.error")) else Left(Error.decode(req.statusText, s"text: ${req.statusText.take(40)} route: ${route}", "postForm"))
-        case _: Throwable               => Left( Error("err0009.ajax.postForm", route, "unspecified exception", "postForm") )   
-      })
-  }
-
+    s"${route}?params=${enc(papas)}"
+  } 
 
 }  

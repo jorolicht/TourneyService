@@ -59,7 +59,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(1)
+        App.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         println(s"SUCCESS: test_0")
       }
@@ -79,7 +79,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(2)
+        App.setCurCoId(2)
         
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         println(s"SUCCESS: test_0")
@@ -105,7 +105,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(2)
+        App.setCurCoId(2)
         val coPhIdPrev = 0 
         var coId = 2
 
@@ -151,7 +151,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(2)
+        App.setCurCoId(2)
         val coId   = 2
         val coPhId = 1
 
@@ -177,16 +177,14 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
           case Left(err)   => error("startCompPhaseDlg", s"error message: ${err}")
           case Right((coph, pantResult)) => {
             //set pant status in participant 2 competition mapping
-            
-            // pantResult.foreach { x => 
-            //   println(s"${x.name} [${x.club}] ${x.rating}  ${pantMap(SNO(x.sno))._1}  grId: ${pantMap(SNO(x.sno))._2} pos: ${pantMap(SNO(x.sno))._3}    ") 
-            // }
+            pantResult.foreach { x => 
+              println(s"SNO: ${x.sno}  [${x.club}] ${x.rating}  ${pantMap(SNO(x.sno))._1}  grId: ${pantMap(SNO(x.sno))._2} pos: ${pantMap(SNO(x.sno))._3}    ") 
+            }
             val pantsWithGroupInfo = pantResult.map(x => (x, (pantMap(SNO(x.sno))._1, pantMap(SNO(x.sno))._2, pantMap(SNO(x.sno))._3, pantMap(SNO(x.sno))._4))).sortBy(x=>(x._2._3,-x._2._4))
             val (pants, drawInfo) = pantsWithGroupInfo.unzip
             coph.drawWithGroupInfo(pants, drawInfo, App.tourney.comps(coId).typ)
 
-            //coph.drawOnRanking(pantResult, App.tourney.comps(coId).typ)
-            //coph.status = CompPhase.CPS_AUS  
+            App.setCurCoPhId(coId, coph.coPhId)
             App.execUseCase("OrganizeCompetitionDraw", "", "")
 
 

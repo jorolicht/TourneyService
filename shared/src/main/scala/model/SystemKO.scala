@@ -1,16 +1,18 @@
 package shared.model
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 
+import shared.utils._
 import shared.utils.Constants._
 import shared.model.CompPhase._
 import shared.model.MEntry
 import shared.model.ParticipantEntry
 import shared.model.Utility._
 
-class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: Int) {
+class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int = 0) {
   var pants    = ArrayBuffer.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
   var results  = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
   var sno2pos  = scala.collection.mutable.Map[String, Int]()
@@ -59,23 +61,80 @@ class KoRound(val size: Int,  val rnds: Int, var name: String, val noWinSets: In
     } catch { case _: Throwable => "?" } 
   }
 
-
   def validPos(pos: (Int, Int)): Boolean = validPos(pos._1,pos._2)
   def validPos(rnd: Int, mano: Int): Boolean = {
     (rnd >= 0 & rnd <= rnds & mano > 0 & mano <= scala.math.pow(2,scala.math.max(rnd-1,0)).toInt) 
   }
 
-  def init(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Boolean = 
-    if (participants.size != size) { 
-      false 
+
+  def setDraw(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
+    if (participants.size != size) {
+      Left(Error("???"))
     } else {
       pants    = participants
       drawInfo = dInfo
-      // initialize sno mapping 
-      sno2pos = scala.collection.mutable.Map[String, Int]()
-      for (i <- 0 to size-1) sno2pos += (pants(i).sno -> i) 
-      true 
+      Right(size)
     }
+  }
+
+  def initDraw(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
+    def changeUpDown(invert: Boolean, value: Boolean): Boolean = if (invert) !value else value
+
+    size = KoRound.getSize(participants.size)
+    rnds = KoRound.getNoRounds(size)
+
+    if (size ==0 || rnds == 0) {
+      Left(Error("???"))
+    } else {
+      // draw => map pants (sorted by results) to ko-tree
+      // position of best placed participants follows the following scheme: up/down/down/up/up/down/down
+      // position of 2nd best is in the opposite part
+      // 0. step initialize up down scheme ULLUULLUULL and
+      //    setting positions     
+      val upDownScheme = List.fill(size/4)(List(true, false, false, true)).flatten.toArray
+      val settingPositions = KoRound.genSettingPositions(size)
+
+      // 1. step generate upDownMap grId/pos -> Up/Down
+      //    [GroupName, GroupId, GroupPos, RankValue]
+      val upDownMap = HashMap[ (Int,Int), Boolean]()
+      val minPos = dInfo.minBy(_._3)._3
+
+      dInfo.zip(upDownScheme).foreach { case (item, updo) => if (item._3 == minPos) upDownMap += ((item._2, minPos) -> updo) } 
+      dInfo.zip(upDownScheme).foreach { case (item, updo) => 
+        if (!upDownMap.contains((item._2, minPos))) {
+          upDownMap += ((item._2, item._3) -> updo); println(s"Error: upDownMap does not contain all values e.g. ${item._2} ${minPos}")  
+        } else {
+          upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
+        }
+      } 
+
+      // 2. step generate initial drawing
+      //val pantsWithDrawInfo = pants.zip(drawInfo).map(x => (x, upDownMap((x._2._2,x._2._3))))
+      val pantsWithDInfo = participants.zip(dInfo)
+      pants              = ArrayBuffer.fill(size) (ParticipantEntry.bye("")) 
+      drawInfo           = ArrayBuffer.fill(size) ("", 0, 0, 0) 
+
+      // 3. step split pants into up and down positions
+      val (upList, downList) = pantsWithDInfo.partition(x => upDownMap((x._2._2,x._2._3))       )
+      
+      for (i <- 0 until size) {
+        val pos = settingPositions(i+1)
+        val up  = (pos <= size/2)
+        if (up && upList.size > 0)    { pants(pos-1) = upList(0)._1; drawInfo(pos-1) = upList(0)._2; upList.remove(0) }  
+        if (!up && downList.size > 0) { pants(pos-1) = downList(0)._1;  drawInfo(pos-1) = downList(0)._2;  downList.remove(0) }
+      }
+
+      // Error check, all participants set?
+      if (upList.size > 0 || downList.size > 0) {
+        Left(Error("???"))
+      } else {  
+        // initialize sno mapping 
+        sno2pos = scala.collection.mutable.Map[String, Int]()
+        for (i <- 0 to size-1) sno2pos += (pants(i).sno -> i) 
+        Right(size) 
+      }
+    }
+  }  
 
   override def toString() = {
     val str = new StringBuilder(s"  KO-Runde size:${size} rounds:${rnds} noWinSets:${noWinSets}\n")
@@ -219,7 +278,7 @@ object KoRound {
       case e if  5 to   8 contains e => 3
       case f if  3 to   4 contains f => 2
       case g if  1 to   2 contains g => 1
-      case _                           => 0
+      case _                         => 0
     }
   }
 
@@ -237,8 +296,13 @@ object KoRound {
     }
   } 
 
+  def getMatchesPerRound(rnd: Int): Int = {
+    rnd match { case 7 => 64; case 6 => 32; case 5 => 16; case 4 => 8; case 3 => 4; case 2 => 2; case 1|0 => 1; case _ => 0 }
+  } 
+
+
   def fromTx(tx: KoRoundTx): KoRound = {
-    val kr = new KoRound(tx.size, tx.rnds, tx.name, tx.noWinSets)
+    val kr = new KoRound(tx.size, tx.name, tx.noWinSets, tx.rnds)
 
     // add players
     for ((plentry, count) <- tx.pants.zipWithIndex) {
@@ -273,10 +337,6 @@ case class KoRoundTx (
   val noWinSets: Int,
   val pants:     List[ParticipantEntry],
   val results:   List[ResultEntry]
-
-
-  // var players:   List[ParticipantEntry] = List[ParticipantEntry](),
-  // var results:   List[ResultEntry] = List[ResultEntry]()
 )
 
 object KoRoundTx {

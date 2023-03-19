@@ -129,7 +129,7 @@ case class MEntryKo(
   var stNoA:  String,                     //(1) participant A start number
   var stNoB:  String,                     //(2) participant B start number
   
-  var round:  Int,                        //(3) (KO-Round (7 ... 0) for 128-field/7,64-field/6 ... Final/1, 3rdPlace/0 
+  var round:  Int,                        //(3) (KO-Round (7 ... 0) for 128-field/7, 64-field/6 ... Final/1, 3rdPlace/0 
   var maNo:   Int,                        //(4) Match number within round
   var winPos: String,                     //(5) Next position of winner within match array (gameNo, matchNo within Round, intRound, pos(0/1))
   var looPos: String,                     //(6) Next position of looser within match array
@@ -175,6 +175,55 @@ case class MEntryKo(
     if (lPos.size == 4) (lPos(0), lPos(3)) else (0,0)
   }
 
+  def setWinLoo() = {
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
+    val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
+    val nextPos    = (maNo + 1) % 2
+    round match {
+      case x if x > 2  => { winPos = s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}"; looPos = "" }
+      case 2           => { 
+        winPos = s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}"
+        looPos = s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}"        
+      }
+      case _           => { winPos = ""; looPos = "" } 
+    }
+  } 
+
+  def getWinLoo(round: Int, gameNo: Int, maNo: Int): (String,String) = {
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
+    val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
+    val nextPos    = (maNo + 1) % 2
+    round match {
+      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", "")
+      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}")        
+      case _           => ("","")
+    }
+  } 
+
+
+
+}
+
+
+object MEntryKo {
+  def getWinLooSingleKo(round: Int, gameNo: Int, maNo: Int): (String,String) = {
+    val rndSize    = if (round >=2) scala.math.pow(2,round-1).toInt else 1
+    val nextGameNo = gameNo + rndSize - maNo + (maNo + 1) / 2
+    val nextPos    = (maNo + 1) % 2
+    round match {
+      case x if x > 2  => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", "")
+      case 2           => (s"${nextGameNo}·${(maNo + 1)/2}·${round - 1}·${nextPos}", s"${nextGameNo+1}·${(maNo + 1)/2}·${round - 2}·${nextPos}")        
+      case _           => ("","")
+    }
+  } 
+
+  def init(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, stNoA: String, stNoB: String, gameNo: Int, round: Int, maNo: Int,
+            winPos: String, looPos: String, status: Int, sets: (Int,Int), winSets: Int,
+            playfield: String="", info: String="", startTime: String="", endTime: String="", result: String = "") = {
+              val wl = getWinLooSingleKo(round, gameNo, maNo)
+              MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, wl._1, wl._2, 
+                       playfield, info, startTime, endTime, status, sets, winSets, result)
+            }
 }
 
 
@@ -230,6 +279,7 @@ case class MEntryGr(
   def getTrigger()                = getMDIntArr(trigger)   
   def getDepend()                 = getMDIntArr(depend)
   def hasDepend                   = (depend != "")
+
 }
 
 
@@ -281,7 +331,7 @@ object MEntry {
   val MS_FIN   =  2   // finished with winner
   val MS_FIX   =  3   // finished with fixed winner (bye ...)
   val MS_DRAW  =  4   // finished with no winner
-  val MS_UNKN  = 99   // finished with no winner
+  val MS_UNKN  = 99   // finished with no winner or error
 
   // list of player currently playing in (coId, coIdPh, gameNo)
   val playing: Map[Long, HashSet[(Long,Int,Int)]] = Map()

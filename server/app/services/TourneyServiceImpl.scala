@@ -65,6 +65,17 @@ class TourneyServiceImpl @Inject()()(  implicit
       }  
     }
 
+  /** setPlayerLicence - sets new licence to player
+   */
+  def setPlayerLicence(plId: Long, licence: String)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => { 
+        trny.players(plId).setLicenceNr(licence)
+        Right(trny.players(plId))
+      }  
+    }
+
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
@@ -549,7 +560,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           
           // delete playfield, ma.playfield contains playfield code
           trny.playfields = trny.playfields.filter( _._2.code != ma.playfield)
-          trny.cophs((ma.coId, ma.coPhId)).setMatch(ma)
+          trny.cophs((ma.coId, ma.coPhId)).setModel(ma)
           //logger.info(s"setMatch after: ${trny.cophs}")
           trigger(trny, trigCmd)
           Right(true)
@@ -569,7 +580,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           ma <- mas
         } yield {
           if (trny.cophs.isDefinedAt((ma.coId, ma.coPhId))) {
-            trny.cophs((ma.coId, ma.coPhId)).setMatch(ma)
+            trny.cophs((ma.coId, ma.coPhId)).setModel(ma)
             1
           }  
         }  
@@ -767,15 +778,18 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
       }
     }
 
+  /** updTournCTT sets tourney information from ClickTT
+    * 
+    */     
+  def updTournCTT(ctt: CttTournament, toId: Long)(implicit  msgs: Messages, tse :TournSVCEnv): Future[Either[Error,Seq[(Long, Int)]]] =
+    TIO.update(ctt, toId)
+
   /** addTournCTT sets tourney information from ClickTT
     * 
     */     
-  def addTournCTT(ctt: CttTournament, orgDir: String, organizer: String, sDate: Int=0, eDate: Int=0,
-                  contact: String = "lastname·firstname·phone·email",
-                  address: String = "description·country·zip·city·street")(implicit  msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Tourney]] =
-  {
-    TIO.update(ctt, orgDir, organizer, sDate, eDate, contact, address)
-  }                
+  def addTournCTT(ctt: CttTournament, orgDir: String, organizer: String)(implicit  msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Tourney]] = 
+    TIO.add(ctt, orgDir, organizer)
+
                   
   // setTournAddress   
   def setTournAddress(toId: Long, addr: Address): Future[Either[Error, Address]] = 

@@ -26,10 +26,9 @@ object DlgInput extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgInput", "dlg.input", "DlgInput", "dlginput", scalajs.AppEnv.getMessage _ )
-  private def load() = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgInput().toString)
 
   def show(title: String, btnName: String, ucName: String) : Unit = {
-    load()
+    loadModal(html.DlgInput())
     $("#APP__DlgInput").modal("show")
     setInput("UseCase", ucName)
 

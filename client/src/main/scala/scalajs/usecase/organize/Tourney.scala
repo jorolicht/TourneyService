@@ -59,6 +59,8 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
         tournBases = trnys
         //debug("update", s"TournBases: ${tournBases}")
         setHtml("TourneyCard", html.TourneyCard(toId, trnys).toString)
+
+        selTableRow(uc(s"TableRow_${toId}"))
         setViewTournBase(App.tourney)
       }  
     }
@@ -85,15 +87,15 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
             // want update tournament/event ?           
             DlgBox.showStd(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
               Seq("cancel", "update", "new"),0,true).map { result => result match {
-                case 2 => doUpload(key, App.getTourneyStartDate(), App.getTourneyEndDate())
-                case 3 => doUpload(key, 0, 0) 
+                case 2 => doCttUpload(UploadModeUpdate)
+                case 3 => doCttUpload(UploadModeNew) 
                 case _ => debug("buttonUpload", "cancel")
               }}         
           } else {
             // want create new tournament ?
             DlgBox.showStd(getMsg("upload.msgbox.header"),getMsg("upload.msgbox.body2"), Seq("no", "yes"),0,true)
               .map { result => result match {
-                case 2 => doUpload(key, 0, 0) 
+                case 2 => doCttUpload(UploadModeNew) 
                 case _ => debug("buttonUpload", "cancel")
               }}                        
           }
@@ -109,7 +111,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
         } else if (App.tourney.getToId == 0) {
           setHtmlVisible("UploadError", true, getMsg("upload.notTournSel")) 
         } else {
-          doUpload(key, App.getTourneyStartDate(), App.getTourneyEndDate())
+          doUpload(key)
         }
       }
 
@@ -118,7 +120,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
         val fName   = getInput("Input" + key, "")
         if (fName == "") setHtmlVisible("UploadError", true, getMsg("upload.noFile")) else { 
           setHtmlVisible("UploadError", false)
-          doUpload(key, App.getTourneyStartDate(), App.getTourneyEndDate())
+          doUpload(key)
         }  
       }
 
@@ -182,11 +184,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
             }
           }
         }
-      } 
-      
-
-
-
+      }
 
       case _          => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
     }
@@ -195,26 +193,54 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
 
 
   // doUpload create new tournament/event if toId equals 0  
-  def doUpload(upType: String, sdate: Int, edate: Int)  = {
+  def doUpload(upType: String)  = {
     
     // perform upload of tourney information file (xml, markdown, or image)
     val fileForm = dom.document.getElementById(getId("UploadForm" + "_" + upType)).asInstanceOf[dom.raw.HTMLFormElement]
     val formData = new dom.FormData(fileForm)
       
-    formData.append("toId",   App.tourney.getToId) 
-    formData.append("uptype", upType)
-    formData.append("sdate",  sdate.toString)
-    formData.append("edate",  edate.toString)
+    // formData.append("toId",   App.tourney.getToId) 
+    // formData.append("uptype", upType)
+    // formData.append("sdate",  sdate.toString)
+    // formData.append("edate",  edate.toString)
       
     DlgSpinner.show(0, getMsg("upload.spinner")) 
     
-    uploadFile(formData).map {
-      case Left(err)  => DlgSpinner.show(2, getMsg("upload.error.0")) 
-      case Right(res) => if (res) DlgSpinner.show(1, getMsg("upload.ok.1")) else DlgSpinner.show(1, getMsg("upload.ok.0"))
+    uploadFile(App.tourney.getToId, App.tourney.startDate, upType, formData).map {
+      case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
+      case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
     } 
   }
 
 
+  // doUpload create new tournament/event if toId equals 0  
+  def doCttUpload(upMode: Int)  = {
+    import shared.utils.Constants._
+    
+    // perform upload of tourney information file (xml, markdown, or image)
+    val fileForm = dom.document.getElementById(getId("UploadForm" + "_" + ULD_CLICKTT)).asInstanceOf[dom.raw.HTMLFormElement]
+    val formData = new dom.FormData(fileForm)
+      
+    DlgSpinner.show(0, getMsg("upload.spinner")) 
+
+    upMode match {
+      case UploadModeUpdate => {
+        updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
+          case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
+          case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
+        } 
+      }
+      case UploadModeNew    => {
+        newCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
+          case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
+          case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
+        } 
+      }
+
+    }
+    
+
+  }
 
 
   // ***

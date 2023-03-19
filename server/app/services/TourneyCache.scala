@@ -258,65 +258,165 @@ object TIO {
   /** update - tourney configuration from CTT participant XML-file
    *           add tourney with competitions, players and clubs 
    */
-  def update(ctt: CttTournament, orgDir: String, organizer: String, sDate: Int, eDate: Int, contact: String, address: String)
-            (implicit ec: ExecutionContext, env: Environment, tonyDao: TourneyDAO, msgs : Messages): Future[Either[Error, Tourney]] = 
+  def update(cttTrny: CttTournament, toId: Long)
+            (implicit  ec: ExecutionContext, env: Environment, cfg: Configuration, tony: TourneyDAO): Future[Either[Error,Seq[(Long, Int)]]] = 
+    get(toId).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => if (date2Int(cttTrny.startDate) != trny.startDate) Left(Error("err0205.upload.file.startDate")) else {
+        import scala.collection.mutable.ArrayBuffer
+        // update Pant2Comp database
+        // Step 1: delete/remove all ident info in Pant2Comp database
+        // Repeat Step 2-3 for all competitions, if competition matches
+        // Return error for competitions with no matching CTT-Competition
+        // Step 2: - generate licence -> ident info map 
+        //         - generate lastname, firstname -> licence map
+        //         - update licence info for every player who has not yet a licence number
+        //Step 3: for every Pant2Comp entry update ident
+        //
+
+        // Step 0: initialize result
+        val result = new ArrayBuffer[(Long, Int)]
+
+        // Step 1 - Remove all ident values from Pant2Comp database entries
+        trny.pl2co.foreach(_._2.ident = "") 
+
+        for ((coId, comp) <- trny.comps) {
+          // get approbriate competition
+          val cttCompList = cttTrny.competitions.filter( _.matchWith(comp.getAgeGroup, comp.typ, comp.getRatingLowLevel, comp.getRatingUpperLevel, comp.getRatingRemark, comp.startDate) )
+          if (cttCompList.size != 1) { 
+            result += ((coId, -1))
+          } else {
+            val cttComp = cttCompList.head
+            val name2person    = new HashMap[String, ArrayBuffer[(String,Int,String)]]()
+            val licence2player = new HashMap[String, String]().withDefaultValue("")
+
+            // generate licence2player 
+            for (pl <- cttComp.players) {
+              val lic = pl.persons.map(p => p.licenceNr).mkString("·")
+              licence2player(lic) = pl.id 
+            }
+
+            // generate name2person(licence)
+            for (pl <- cttComp.players; pe <- pl.persons) {
+              val name = s"${pe.lastname}·${pe.firstname}"
+              if (!name2person.isDefinedAt(name)) {
+                name2person(name) = ArrayBuffer((pe.clubName, pe.birthyear.toIntOption.getOrElse(0), pe.licenceNr)) 
+              } else {
+                name2person(name) += ((pe.clubName, pe.birthyear.toIntOption.getOrElse(0), pe.licenceNr))
+              }          
+            }
+            
+            // update pl2co database, count number of entryies with ctt identifier
+            var cnt = 0
+            comp.typ match {
+
+              case Competition.CT_SINGLE =>
+                trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
+                  val plId    = entry.getSingleId
+                  // update licence if necessary
+                  trny.players(plId).updLicenseNr(name2person)
+                  entry.ident = licence2player(trny.players(plId).getLicenceNr)
+                  if (entry.ident != "") cnt = cnt + 1
+                }}
+
+              case Competition.CT_DOUBLE =>
+                trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
+                  val plIds  = entry.getDoubleId
+                  // update licence if necessary
+                  trny.players(plIds._1).updLicenseNr(name2person)
+                  trny.players(plIds._2).updLicenseNr(name2person)
+                  val (lic1, lic2)   = (trny.players(plIds._1).getLicenceNr, trny.players(plIds._2).getLicenceNr)
+                  entry.ident = if (licence2player.isDefinedAt(s"${lic1}·${lic2}")) licence2player(s"${lic1}·${lic2}") else licence2player(s"${lic2}·${lic1}")
+                  if (entry.ident != "") cnt = cnt + 1  
+                }}
+
+              case _ => logger.info(s"coId: ${coId} with competition typ: ${comp.typ} not supported" ) 
+
+            } // ent match competition typ
+
+            // update result info
+            result += ((coId, cnt))
+
+          } // valid coId
+        }   // for every defined competition
+
+        // return result list
+        Right(result.toSeq)
+      }  
+    }            
+
+
+  /** add - tourney configuration from CTT participant XML-file
+   *        add tourney with competitions, players and clubs 
+   */
+  def add(ctt: CttTournament, orgDir: String, organizer: String, 
+          contact: String = "lastname·firstname·phone·email",
+          address: String = "description·country·zip·city·street")
+         (implicit ec: ExecutionContext, env: Environment, cfg: Configuration, tonyDao: TourneyDAO, msgs : Messages): Future[Either[Error, Tourney]] = 
   {
-    val startDate = if (sDate==0) date2Int(ctt.startDate) else sDate
-    val endDate   = if (eDate==0) date2Int(ctt.endDate)  else eDate
+    val startDate = date2Int(ctt.startDate) 
+    val endDate   = date2Int(ctt.endDate)  
 
-    val tb = TournBase(ctt.name, organizer, orgDir, startDate, endDate, ctt.ident, 
-                       TTY_TT, true, contact, address, 0)
-    tonyDao.insertOrUpdate(tb).map { tony => 
-      if (tony.id > 0) {
-        tourney(tony.id) = Tourney.init(tony)
-        for((club,i) <- ctt.getClubs.zipWithIndex) {
-          tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
-          tourney(tony.id).club2id(club.name) = (i+1)
-          // generate hash value
-          tourney(tony.id).club2id(Crypto.genHashClub(club)) = (i+1)
-          tourney(tony.id).clubIdMax = i+1
-        }
-        for((person,i) <- ctt.getPersons.zipWithIndex) {
-          val pl =  CttService.cttPers2Player(person)
-          tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName))
-          // generate hash value
-          tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
-          tourney(tony.id).license2id(pl.getLicenceNr) = i+1
-          tourney(tony.id).playerIdMax = i+1
-        }
+    val tb = TournBase(ctt.name, organizer, orgDir, startDate, endDate, ctt.ident, TTY_TT, true, contact, address, 0)
 
-        for((co,i) <- ctt.competitions.zipWithIndex) { 
-          val comp = CttService.cttComp2Comp(co)
-          tourney(tony.id).comps(i+1) = comp.copy(id=i+1)
-          //tourney(tony.id).coName2id(comp.hash) = i+1
-          // generate hash value
-          tourney(tony.id).comp2id(Crypto.genHashComp(comp)) = i+1          
-          tourney(tony.id).compIdMax = i+1
-
-          // ctt players map to pl2co or do2co entries. 
-          comp.typ match {
-            case 1 => 
-              for(pls <- co.players) if (pls.persons.length == 1) {
-                val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
-                tourney(tony.id).pl2co((plId.toString, i+1)) =  Pant2Comp(plId.toString, i+1, pls.id, "",0)
-              }
-            case 2 => 
-              for(pls <- co.players) if (pls.persons.length == 2) {
-                val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
-                val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
-                val sno = plId1.toString + "·" + plId2.toString
-                tourney(tony.id).pl2co((sno, i+1)) =  Pant2Comp(sno, i+1, pls.id, "",0)
-              }
-            case _                   => logger.info(s"insert error: invalid competition typ")
+    tonyDao.findByPathDate(orgDir, startDate).flatMap {
+      case Some(a) => { 
+        logger.error(s"add CttTourney failed, tourney with this start date: ${startDate}  already exists.")
+        Future(Left(Error("err0206.upload.file.sDateExists"))) 
+      }
+      case None    => tonyDao.insertOrUpdate(tb).map { tony => 
+        if (tony.id > 0) {
+          tourney(tony.id) = Tourney.init(tony)
+          for((club,i) <- ctt.getClubs.zipWithIndex) {
+            tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
+            tourney(tony.id).club2id(club.name) = (i+1)
+            // generate hash value
+            tourney(tony.id).club2id(Crypto.genHashClub(club)) = (i+1)
+            tourney(tony.id).clubIdMax = i+1
           }
-        } 
+          for((person,i) <- ctt.getPersons.zipWithIndex) {
+            val pl =  CttService.cttPers2Player(person)
+            tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName))
+            // generate hash value
+            tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
+            tourney(tony.id).license2id(pl.getLicenceNr) = i+1
+            tourney(tony.id).playerIdMax = i+1
+          }
 
-        tourney(tony.id).backupTime = clock.millis()
-        tourney(tony.id).accessTime = clock.millis()
-        tourney(tony.id).writeTime  = clock.millis()
-        Right(tourney(tony.id))
-      } else {
-        Left(Error("err0083.database.insert"))
+          for((co,i) <- ctt.competitions.zipWithIndex) { 
+            val comp = CttService.cttComp2Comp(co)
+            tourney(tony.id).comps(i+1) = comp.copy(id=i+1)
+            //tourney(tony.id).coName2id(comp.hash) = i+1
+            // generate hash value
+            tourney(tony.id).comp2id(Crypto.genHashComp(comp)) = i+1          
+            tourney(tony.id).compIdMax = i+1
+
+            // ctt players map to pl2co or do2co entries. 
+            comp.typ match {
+              case 1 => 
+                for(pls <- co.players) if (pls.persons.length == 1) {
+                  val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
+                  tourney(tony.id).pl2co((plId.toString, i+1)) =  Pant2Comp(plId.toString, i+1, pls.id, "",0)
+                }
+              case 2 => 
+                for(pls <- co.players) if (pls.persons.length == 2) {
+                  val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
+                  val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
+                  val sno = plId1.toString + "·" + plId2.toString
+                  tourney(tony.id).pl2co((sno, i+1)) =  Pant2Comp(sno, i+1, pls.id, "",0)
+                }
+              case _                   => logger.info(s"insert error: invalid competition typ")
+            }
+          } 
+
+          tourney(tony.id).backupTime = clock.millis()
+          tourney(tony.id).accessTime = clock.millis()
+          tourney(tony.id).writeTime  = clock.millis()
+          save(tony.id)
+          Right(tourney(tony.id))
+        } else {
+          Left(Error("err0083.database.insert"))
+        }
       }
     }
   }

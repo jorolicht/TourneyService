@@ -41,7 +41,6 @@ object AppEnv extends BasicHtml
   var logger:Logger = org.scalajs.logging.NullLogger
   var messages      = Map[String,Map[String,String]]()
   var prompt        = scala.collection.mutable.ArrayBuffer[String]()
-  val coPhIdMap     = scala.collection.mutable.Map[Long, Int]()
   var lang          = "de"
   def msgs          = messages(lang)
   var userCtx       = Session.get(true)
@@ -118,23 +117,18 @@ object AppEnv extends BasicHtml
   def isAdmin()      : Boolean = { userCtx.admin }
   def getCsrf()      : String  = csrf
 
-  def getCoId: Long       = { status.coId }
-  def setCoId(coId: Long) = { status.coId = coId }
+
   def getToId: Long       = { status.toId }
   def setToId(toId: Long) = { 
     status.toId = toId
     ctrlSidebar(status)
     if (toId!=0) {
-      setHeadline(App.getTourneyName, App.getCompName(AppEnv.getCoId)) 
+      setHeadline(App.getTourneyName, App.getCompName()) 
     } else {
       setHeadline()
     }
-  }  
+  }
 
-  def setCoPhId(coId: Long, cophId: Int) = coPhIdMap(coId) = cophId
-
-
-  
   def setStatus(name: String, param: String, info: String) = { status.ucName = name; status.ucParam = param; status.ucInfo = info }
   def getStatus  = status
   def saveStatus = status.save

@@ -21,6 +21,7 @@ trait TourneyService {
   // Player Interface
   def addPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
   def setPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
+  def setPlayerLicence(plId: Long, licence: String)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
   
   def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]]
   def delPlayers(tse: TournSVCEnv): Future[Either[Error, Int]]
@@ -114,9 +115,8 @@ trait TourneyService {
   def syncTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
 
   def setTournBase(tb: TournBase)(implicit tse :TournSVCEnv): Future[Either[Error, Tourney]]
-  def addTournCTT(ctt: CttTournament, orgDir: String, organizer: String, sDate: Int=0, eDate: Int=0,
-                  contact: String = "lastname·firstname·phone·email",
-                  address: String = "description·country·zip·city·street")(implicit  msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Tourney]]
+  def addTournCTT(ctt: CttTournament, orgDir: String, organizer: String)(implicit msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Tourney]]
+  def updTournCTT(ctt: CttTournament, toId: Long)(implicit msgs: Messages, tse :TournSVCEnv): Future[Either[Error,Seq[(Long, Int)]]] 
 
   def setTournAddress(toId: Long, address: Address): Future[Either[Error, Address]]
   def setTournContact(toId: Long, contact: Contact): Future[Either[Error, Contact]]
@@ -127,7 +127,6 @@ trait TourneyService {
   def getTournPlayers(toId: Long): Future[Either[Error, Seq[Player]]]
   def getTournClubs(toId: Long):   Future[Either[Error, Seq[Club]]]
   
-
 
   // Management Interface
   def isAllowed(toId: Long, orgDir: String): Future[Either[Error, Boolean]] 

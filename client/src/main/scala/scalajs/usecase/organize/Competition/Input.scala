@@ -96,8 +96,13 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             }
         }
         if (inputOk) {
-          val gameUpdateList = coPhase.setMatchPropagate(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game))  
-          for (game <- gameUpdateList) { setMatchView(rowBase, coId, coPhId, game)(coPhase) }
+          coPhase.inputMatch(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game))  
+          val gameUpdateList = coPhase.propMatch(game) 
+
+          //val gameUpdateList = coPhase.setMatchPropagate(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game)) 
+
+
+          for (game <- gameUpdateList) { setMatchView(coPhase, rowBase, game) }
         } else {
           error("actionEvent", s"SaveMatchResult -> input not OK: ${err}")
         }
@@ -110,7 +115,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val rowBase  = getRowBase(coId, coPhId) 
  
         val gameUpdateList = coPhase.resetMatchPropagate(game)
-        for (g <- gameUpdateList) setMatchView(rowBase, coId, coPhId, g)(coPhase)
+        for (g <- gameUpdateList) setMatchView(coPhase, rowBase, g)
         debug("actionEvent", s"DeleteMatchResult -> delete ${game} refresh: ${gameUpdateList.toString} status: ${coPhase.getStatusTxt}") 
       }
 
@@ -119,7 +124,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val rowBase         = getRowBase(coId, coPhId) 
 
         val gameUpdateList  = coPhase.resetAllMatches()
-        for (g <- gameUpdateList) setMatchView(rowBase, coId, coPhId, g)(coPhase)
+        for (g <- gameUpdateList) setMatchView(coPhase, rowBase, g)
         debug("actionEvent", s"DeleteAll -> game update list: ${gameUpdateList.toString} status: ${coPhase.getStatusTxt}") 
       }
 
@@ -272,7 +277,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
         } 
       }  
-      case CPT_KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo])
+      case CPT_KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo], coPhase.status)
 
       case _ =>  {
         setHtml(getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
@@ -283,42 +288,36 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     // STATUS dependend settings
     val editible = (coPhase.status == CompPhase.CPS_EIN | coPhase.status == CompPhase.CPS_FIN)
     setAttribute(gE(s"Input_${coId}_${coPhId}"), "contenteditable", editible.toString)
-    setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo & editible)
+    setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo)
+    setDisabled(gE(s"InputDemoBtn_${coId}_${coPhId}"), !editible)
   }
 
 
   /** setMatchStatus set status for different kind of matches
    *  currently only group- and ko-matches
    */ 
-  def setMatchView(rowBase: HTMLElement, coId: Long, coPhId: Int, game: Int)(implicit coPhase: CompPhase) = {
+  def setMatchView(coPhase: CompPhase, rowBase: HTMLElement, game: Int) = {
     val row = rowBase.querySelector(s"[data-game_${game}='row']").asInstanceOf[HTMLElement] 
     val m = coPhase.getMatch(game)
-    setMatchViewContent(row, m) 
+    setMatchViewContent(row, m, coPhase.status) 
   }        
 
 
   //
   //  GROUP-SECTION
-  //
-  def setGrMatch2(coId: Long, coPhId: Int, elem: HTMLElement, m: MEntryGr)(implicit coPhase: CompPhase) = {
-    val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
-    elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
-      coId, coPhId, grpName, wgw, m.gameNo, coPhase.noWinSets).toString
-    setMatchViewContent(elem, m) 
-  }
-  
+  //  
   def setGrMatch(coph: CompPhase, elem: HTMLElement, m: MEntryGr) = {
     val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
     elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
       coph.coId, coph.coPhId, grpName, wgw, m.gameNo, coph.noWinSets).toString
-    setMatchViewContent(elem, m) 
+    setMatchViewContent(elem, m, coph.status) 
   }
 
 
   //
   //  setMatchViewContent
   //
-  def setMatchViewContent(row: HTMLElement, m: MEntry)  = {
+  def setMatchViewContent(row: HTMLElement, m: MEntry, status: Int)  = {
     import shared.model.MEntry._
     implicit val trny = App.tourney
 
@@ -332,7 +331,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     val gameNo     = row.querySelector(s"[data-game_${m.gameNo}='gameNo']").asInstanceOf[HTMLElement]    
     val saveBtn    = row.querySelector(s"[data-game_${m.gameNo}='save']").asInstanceOf[HTMLElement]
     val deleteBtn  = row.querySelector(s"[data-game_${m.gameNo}='delete']").asInstanceOf[HTMLElement]
-    val resultElts = row.querySelectorAll(s"[data-result_${m.gameNo}='result']")
+    val inputElts = row.querySelectorAll(s"[data-input_${m.gameNo}]")
 
     setHtml(nameA, SNO(m.stNoA).getName(m.coTyp, getMsg("bye")))
     setHtml(nameB, SNO(m.stNoB).getName(m.coTyp, getMsg("bye")))
@@ -347,7 +346,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       if (i<balls.length) setHtml(elem, balls(i)) else setHtml(elem, "")
     }    
 
-    println(s"Set match view: ${m.gameNo} ${MEntry.statusInfo(m.status)}")
+    // disable buttons if status is not CPS_EIN or CPS_FIN
+    val disBtn = if (status == CompPhase.CPS_UNKN || status == CompPhase.CPS_AUS) true else false
+    //println(s"Set match view: ${m.gameNo} ${MEntry.statusInfo(m.status)}")
+
     // set editible, color and buttons    
     gameNo.classList.remove("text-success")
     gameNo.classList.remove("text-danger")
@@ -361,32 +363,32 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     m.status match {
       case MS_MISS  => {
         gameNo.classList.add("text-danger")
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
-        setDisabled(saveBtn, true); setDisabled(deleteBtn, true)
+        inputElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        setDisabled(saveBtn, true || disBtn ); setDisabled(deleteBtn, true)
       }
       case MS_BLOCK => {
         gameNo.classList.add("text-danger")
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
-        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)
+        inputElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        setDisabled(saveBtn, false || disBtn ); setDisabled(deleteBtn, true)
       } 
       case MS_READY => {
         gameNo.classList.add("text-success")
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"true"))
-        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)         
+        inputElts.map(_.asInstanceOf[HTMLElement].removeAttribute("contenteditable"))
+        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, true)         
       } 
       case MS_RUN   => {
         gameNo.classList.add("text-primary")
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"true"))
-        setDisabled(saveBtn, false); setDisabled(deleteBtn, true)     
+        inputElts.map(_.asInstanceOf[HTMLElement].removeAttribute("contenteditable"))
+        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, true)     
       } 
       case MS_FIN   => {
         gameNo.classList.add("text-dark")
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        inputElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
         row.classList.add("bg-light")
-        setDisabled(saveBtn, true); setDisabled(deleteBtn, false)        
+        setDisabled(saveBtn, true); setDisabled(deleteBtn, false || disBtn)        
       } 
       case MS_FIX   => {
-        resultElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
+        inputElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
         row.classList.add("bg-secondary")
         row.classList.add("text-white")
         setDisabled(saveBtn, true); setDisabled(deleteBtn, true)      
@@ -449,6 +451,5 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     dom.window.setTimeout(() => { btn.style.backgroundColor=bgC }, 100)
     btn.click()
   }
-
 
 }

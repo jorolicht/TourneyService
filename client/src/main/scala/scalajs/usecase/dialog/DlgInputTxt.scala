@@ -27,7 +27,6 @@ object DlgInputTxt extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("DlgInputTxt", "dlg.input.txt", "DlgInputTxt", "dlginputtxt", scalajs.AppEnv.getMessage _ ) 
-  private def load() = if (!checkId("DlgInputTxt")(UCP())) insertHtml("APP__Load", "afterbegin", html.DlgInputTxt().toString)(UCP())
 
   /**
    * show - load twirl template and show it 
@@ -49,7 +48,7 @@ object DlgInputTxt extends BasicHtml
       }
     }  
     
-    load()
+    loadModal(html.DlgInputTxt())
 
     // initialize values
     setHtml("Header", header)

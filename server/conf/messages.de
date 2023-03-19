@@ -6,118 +6,118 @@ greeting                                              = Herzlich Willkommen!
 ###
 # App Main Messages / Configuration Issues
 ###
-  config.cookie.confirmation                          = false
-  config.LogLevel                                     = debug
+config.cookie.confirmation                          = false
+config.LogLevel                                     = debug
 
-  app.mockup                                          = false
-  app.version                                         = 2023-01DE185
-  app.date                                            = 2023-01-11
+app.mockup                                          = false
+app.version                                         = 2023-02DE190
+app.date                                            = 2023-02-22
 
-  app.url.home                                        = https://www.turnier-service.info
-  app.url.doc                                         = https://turnier-service.org/handbook/
-  app.url.download                                    = https://turnier-service.org/download/   
+app.url.home                                        = https://www.turnier-service.info
+app.url.doc                                         = https://turnier-service.org/handbook/
+app.url.download                                    = https://turnier-service.org/download/   
 
-  app.error                                           = Upps ... wir konnten leider genau diese eine Seite nicht liefern. 
-  app.error.tip                                       = Bitte Ruhe bewahren, eventuell Kaffee holen und Eingabe neu überdenken.
-  app.srv.error                                       = Upps ... das sieht nach einem Server- oder Programmierfehler aus. 
-  app.srv.error.tip                                   = Bitte Ruhe bewahren, eventuell Kaffee holen und Verantwortliche freundlich informieren.
-  app.lang                                            = de    
-  app.title                                           = Turnierservice
-  app.ping                                            = Ping von IP-Adresse {0} mit Lizenz: {1}
-  app.test                                            = Sprache {0} ist de ... #'ÄöüÜl@%&?ß!^^°
-  app.emailhelp                                       = Bitte gültige E-Mail-Adresse eingeben
-#END App Main Messages
+app.error                                           = Upps ... wir konnten leider genau diese eine Seite nicht liefern. 
+app.error.tip                                       = Bitte Ruhe bewahren, eventuell Kaffee holen und Eingabe neu überdenken.
+app.srv.error                                       = Upps ... das sieht nach einem Server- oder Programmierfehler aus. 
+app.srv.error.tip                                   = Bitte Ruhe bewahren, eventuell Kaffee holen und Verantwortliche freundlich informieren.
+app.lang                                            = de    
+app.title                                           = Turnierservice
+app.ping                                            = Ping von IP-Adresse {0} mit Lizenz: {1}
+app.test                                            = Sprache {0} ist de ... #'ÄöüÜl@%&?ß!^^°
+app.emailhelp                                       = Bitte gültige E-Mail-Adresse eingeben
+
 
 ###
 # Header and Footer
 ###
-  app.header.title                                    = <strong>&nbsp;Turnierservice</strong>
-  app.header.title.club                               = <strong>&nbsp;Turnierservice</strong> - {0}
-  app.header.title.playfields                         = <strong>&nbsp;{0}</strong> - {1}
-  app.header.title.demo.playfields                    = <strong>&nbsp;TTC DEMO e.V.</strong> - Demo Turnier
+app.header.title                                    = <strong>&nbsp;Turnierservice</strong>
+app.header.title.club                               = <strong>&nbsp;Turnierservice</strong> - {0}
+app.header.title.playfields                         = <strong>&nbsp;{0}</strong> - {1}
+app.header.title.demo.playfields                    = <strong>&nbsp;TTC DEMO e.V.</strong> - Demo Turnier
 
-  app.header.manager                                  = TURNIERLEITUNG
-  app.header.login                                    = LOGIN
-  app.header.logout                                   = LOGOUT
-  app.header.loginInfo                                = User:
-  app.header.club                                     = Verein
-  app.header.club.error                               = Verein/unknown
-  app.header.register                                 = REGISTRIERUNG
-  app.header.download                                 = DOWNLOAD
-  app.header.handbook                                 = HANDBUCH
-  app.header.register                                 = REGISTRIERUNG
-  app.header.demo                                     = DEMO
-  app.header.configuration                            = EINSTELLUNGEN
+app.header.manager                                  = TURNIERLEITUNG
+app.header.login                                    = LOGIN
+app.header.logout                                   = LOGOUT
+app.header.loginInfo                                = User:
+app.header.club                                     = Verein
+app.header.club.error                               = Verein/unknown
+app.header.register                                 = REGISTRIERUNG
+app.header.download                                 = DOWNLOAD
+app.header.handbook                                 = HANDBUCH
+app.header.register                                 = REGISTRIERUNG
+app.header.demo                                     = DEMO
+app.header.configuration                            = EINSTELLUNGEN
 
 
-  app.footer.copyright1                               = Copyright
-  app.footer.copyright2                               = ClApLiMa (Cloud-Application Lifecycle Management)
-  
-  app.footer.impressum                                = Impressum
-  app.footer.dataprotection                           = Datenschutz
-  app.footer.author                                   = Autor: {0}
-  app.footer.changedate                               = Letzte Änderung: {0} 
-#END Header and Footer
+app.footer.copyright1                               = Copyright
+app.footer.copyright2                               = ClApLiMa (Cloud-Application Lifecycle Management)
+
+app.footer.impressum                                = Impressum
+app.footer.dataprotection                           = Datenschutz
+app.footer.author                                   = Autor: {0}
+app.footer.changedate                               = Letzte Änderung: {0} 
+
 
 ###
 # Sidebar labels an titles
 ###
-  sidebar.label.HomeSearch                            = Turniersuche
-  sidebar.label.InfoEnabled                           = TurnierInfo
-  sidebar.label.InfoDisabled                          = TurnierInfo
-  sidebar.label.InfoSchedule                          = Ausschreibung
-  sidebar.label.InfoCompetition                       = Wettbewerbe
-  sidebar.label.InfoPlayer                            = Teilnehmer
-  sidebar.label.InfoResult                            = Ergebnisse
-  sidebar.label.InfoPlayfield                         = Tischbelegung
-  sidebar.label.InfoCertificate                       = Urkunden
-  sidebar.label.OrganizeTourney                       = Turniere
-  sidebar.label.OrganizeCompetition                   = Wettbewerbe
-  sidebar.label.OrganizePlayer                        = Spieler
-  sidebar.label.OrganizePlayfield                     = Tischbelegung
-  sidebar.label.OrganizeCertificate                   = Urkunden
-  sidebar.label.OrganizeReport                        = Berichte
-  sidebar.label.Admin                                 = Administration
-  sidebar.label.AdminLicense                          = Lizenz
-  sidebar.label.AdminDatabase                         = Database
-  sidebar.label.AdminReport                           = Berichte
-  sidebar.label.OrganizeCompetitionCtrl               = Steuerung
-  sidebar.label.OrganizeCompetitionDraw               = Auslosung
-  sidebar.label.OrganizeCompetitionInput              = Eingabe
-  sidebar.label.OrganizeCompetitionView               = Anzeige  
+sidebar.label.HomeSearch                            = Turniersuche
+sidebar.label.InfoEnabled                           = TurnierInfo
+sidebar.label.InfoDisabled                          = TurnierInfo
+sidebar.label.InfoSchedule                          = Ausschreibung
+sidebar.label.InfoCompetition                       = Wettbewerbe
+sidebar.label.InfoPlayer                            = Teilnehmer
+sidebar.label.InfoResult                            = Ergebnisse
+sidebar.label.InfoPlayfield                         = Tischbelegung
+sidebar.label.InfoCertificate                       = Urkunden
+sidebar.label.OrganizeTourney                       = Turniere
+sidebar.label.OrganizeCompetition                   = Wettbewerbe
+sidebar.label.OrganizePlayer                        = Spieler
+sidebar.label.OrganizePlayfield                     = Tischbelegung
+sidebar.label.OrganizeCertificate                   = Urkunden
+sidebar.label.OrganizeReport                        = Berichte
+sidebar.label.Admin                                 = Administration
+sidebar.label.AdminLicense                          = Lizenz
+sidebar.label.AdminDatabase                         = Database
+sidebar.label.AdminReport                           = Berichte
+sidebar.label.OrganizeCompetitionCtrl               = Steuerung
+sidebar.label.OrganizeCompetitionDraw               = Auslosung
+sidebar.label.OrganizeCompetitionInput              = Eingabe
+sidebar.label.OrganizeCompetitionView               = Anzeige  
 
-  sidebar.title.HomeSearch                            = Turniersuche
-  sidebar.title.Info                                  = Turnier-Information
-  sidebar.title.InfoDisabled                          = Turnier-Information erfordert Turnierauswahl
-  sidebar.title.InfoSchedule                          = Turnierausschreibung
-  sidebar.title.InfoCompetition                       = Wettbewerbe
-  sidebar.title.InfoPlayer                            = Turnierteilnehmer
-  sidebar.title.InfoResult                            = Ergebnisse
-  sidebar.title.InfoPlayfield                         = Tischbelegung
-  sidebar.title.InfoCertificate                       = Spielerplatzierung und Urkundendruck
-  sidebar.title.OrganizeTourney                       = Turnierauswahl - Turnierleitung-Homepage
-  sidebar.title.OrganizeCompetition                   = Auswahl der Wettbewerbe eines Turniers
-  sidebar.title.OrganizePlayer                        = Spieler (Anmeldung, Warteliste)
-  sidebar.title.OrganizePlayfield                     = Tischbelegung verwalten
-  sidebar.title.OrganizeCertificate                   = Urkunden verwalten
-  sidebar.title.OrganizeReport                        = Berichte und Reports
-  sidebar.title.Admin                                 = Administration
-  sidebar.title.AdminLicense                          = Lizenzverwaltung
-  sidebar.title.AdminDatabase                         = Datenverwaltung
-  sidebar.title.AdminReport                           = Berichte und Reports
-#END Sidebar
+sidebar.title.HomeSearch                            = Turniersuche
+sidebar.title.Info                                  = Turnier-Information
+sidebar.title.InfoDisabled                          = Turnier-Information erfordert Turnierauswahl
+sidebar.title.InfoSchedule                          = Turnierausschreibung
+sidebar.title.InfoCompetition                       = Wettbewerbe
+sidebar.title.InfoPlayer                            = Turnierteilnehmer
+sidebar.title.InfoResult                            = Ergebnisse
+sidebar.title.InfoPlayfield                         = Tischbelegung
+sidebar.title.InfoCertificate                       = Spielerplatzierung und Urkundendruck
+sidebar.title.OrganizeTourney                       = Turnierauswahl - Turnierleitung-Homepage
+sidebar.title.OrganizeCompetition                   = Auswahl der Wettbewerbe eines Turniers
+sidebar.title.OrganizePlayer                        = Spieler (Anmeldung, Warteliste)
+sidebar.title.OrganizePlayfield                     = Tischbelegung verwalten
+sidebar.title.OrganizeCertificate                   = Urkunden verwalten
+sidebar.title.OrganizeReport                        = Berichte und Reports
+sidebar.title.Admin                                 = Administration
+sidebar.title.AdminLicense                          = Lizenzverwaltung
+sidebar.title.AdminDatabase                         = Datenverwaltung
+sidebar.title.AdminReport                           = Berichte und Reports
+
 
 ###
 # Usecase: HomeMain
 ###
-  home.main.LoginRequired                             = Login erforderlich!
-  home.main.UnknownPage                               = Seite konnte leider nicht gefunden werden!        
-  home.main.Welcome                                   = Herzlich Willkommen!
-  home.main.GoodBye                                   = Bye!  
-  home.main.Error                                     = Ein Fehler ist aufgetreten!
-  home.main.Cookie                                    = Ohne Cookies geht leider nichts!
-  home.main.prompt                                    = Eingabe Kommando:
-#END HomeMain        
+home.main.LoginRequired                             = Login erforderlich!
+home.main.UnknownPage                               = Seite konnte leider nicht gefunden werden!        
+home.main.Welcome                                   = Herzlich Willkommen!
+home.main.GoodBye                                   = Bye!  
+home.main.Error                                     = Ein Fehler ist aufgetreten!
+home.main.Cookie                                    = Ohne Cookies geht leider nichts!
+home.main.prompt                                    = Eingabe Kommando:
+       
 
 ###
 # Usecase HomeError
@@ -1278,7 +1278,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0125.setContentMD                                = Fehler beim Lesen des Markdown-Dokuments: {0}
   err0126.fileNotAvailable                            = Datei {0} nicht verfügbar
   err0127.svc.delPlayfield                            = Service delPlayfield code {0} nicht mehr registriert
-  err0128.upload.file                                 = ClickTT Teilnehmerdatei konnte nicht geladen werden, Grund: {0} 
+  err0128.upload.file                                 = Datei konnte nicht hochgeladen werden, Grund: {0} 
   err0129.access.admin                                = Sorry keine Administrationsrechte 
   err0130.ctrl.uploadLic                              = Kontrollerfehler in Routine uploadLic
   err0131.login.emailnotfound                         = Kein Verein mit Organisator {0} registriert
@@ -1337,7 +1337,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
   err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
   err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
-  err0185.ctrl.decode.setPant2Comps            = Fehler in Routine setPant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
+  err0185.ctrl.decode.setPant2Comps                   = Fehler in Routine setPant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
   err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
   err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
   err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
@@ -1351,5 +1351,14 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0196.msg.addCompPhase.config                     = Ungültige (keine) Konfiguration ausgewählt
   err0197.msg.initGrMatches.generating                = Interner Fehler, Spiele konnten nicht entsprechend dem Spielplan generiert werden
   err0198.getArrayBuffer                              = Lokaler Speicher konnte nicht gelesen werden {0}
+  err0199.upload.file.tourneyId                       = Fehler beim Hochladen einer Datei: Ungültige Turnier-ID, bitte zuvor ein Turnier auswählen.
+  err0200.upload.file.limit                           = Fehler beim Hochladen einer Datei: Datei zu groß
+  err0201.upload.file.notsupported                    = Fehler beim Hochladen einer Datei: Dateityp wird nicht unterstützt
+  err0202.upload.file.orgId                           = Fehler beim Hochladen einer Datei: fehlende Berechtigung
+  err0203.upload.file.command                         = Fehler beim Hochladen einer Datei: ungültiges Kommando
+  err0204.upload.file.mode                            = Fehler beim Hochladen einer Datei: ungültige Kommando-Option
+  err0205.upload.file.startDate                       = Fehler beim Hochladen einer Datei: clickTT-Startdatum passt nicht zu Turnierstartdatum
+  err0206.upload.file.sDateExists                     = Fehler beim Hochladen einer Datei: Turnier mit dem clickTT-Startdatum existiert bereits (Aktualisierung?).   
+  err0207.genCttResult                                = (Kommunikations-)Fehler beim Generieren der ClickTT-Ergebnisdatei.
 
 #END Error Codes/Messages

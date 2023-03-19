@@ -63,16 +63,18 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
   // show results of ko round
   def showKoResult(coId: Long, coPhId: Int, koRound: KoRound) = {
     import scalajs.usecase.component.BasicHtml._
-    debug("showKoResult", s"APP__GrRound_${coId}_${coPhId}")
+    debug("showKoResult", s"coId: ${coId} coPhId: ${coPhId}")
     for (index <- 0 to koRound.size-2) {
       val result     = koRound.results(index) 
       val rnd        = result.pos._1
       val game       = result.pos._2
+
       val playerName = {
         if      (result.sets._1 == koRound.noWinSets) { koRound.getPlayerKoViewName(result.sno._1) } 
         else if (result.sets._2 == koRound.noWinSets) { koRound.getPlayerKoViewName(result.sno._2)} 
         else                                          { "&nbsp;" } 
       }
+
 
       // propagate result to next position of player
       if (result.valid) {

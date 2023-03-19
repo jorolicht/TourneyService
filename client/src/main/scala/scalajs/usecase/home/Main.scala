@@ -36,10 +36,7 @@ object HomeMain extends UseCase("HomeMain")
   def render(ucParam: String = "", ucInfo: String = "", reload: Boolean=false) = {
     ucParam match {
       case "None"              => { }
-      case "Console"           => Console.prompt(getMsg("prompt")).map {
-        case Left(err)  => println("invalid command/cancel")
-        case Right(cmd) => Console.execute(cmd)
-      }
+
       case "Content"           => setContent(ucInfo)
       case "Error"             => setMainContent(clientviews.home.html.Error(ucInfo).toString)
       case "ErrorCode"         => setMainContent(clientviews.home.html.Error(getError(ucInfo)).toString)

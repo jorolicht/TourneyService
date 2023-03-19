@@ -12,7 +12,7 @@
 
 @(coph: CompPhase)(implicit ucc: UseCaseParam)
 
-<table @id(s"Draw_${coph.coId}_${coph.coPhId}")>
+<table id='Draw_@{coph.coId}_@{coph.coPhId}'>
   <tr>
     <th><small class="font-weight-bold">@msg("table.pos")</small></th>
     <th>

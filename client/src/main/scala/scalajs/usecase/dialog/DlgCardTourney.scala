@@ -35,7 +35,6 @@ object DlgCardTourney  extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgCardTourney", "dlg.card.tourney", "DlgCardTourney", "dlgcardtourney", scalajs.AppEnv.getMessage _ )
-  private def load(text: String)  = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", text)
  
   @JSExport
   def actionEvent(key: String, elem: raw.HTMLElement, event: Event) = {
@@ -55,7 +54,7 @@ object DlgCardTourney  extends BasicHtml
     setInput("OrgDir", tB.orgDir)
     setInput("Organizer", tB.organizer)
     setInput("Name", tB.name)
-    setAttribute("Name", "autocomplete", "off")
+    setAttribute(gE("Name", ucp), "autocomplete", "off")
    
     setDateTimePicker("StartDate", AppEnv.getLang, int2ymd(tB.startDate) )
     setDateTimePicker("EndDate", AppEnv.getLang, int2ymd(tB.endDate))
@@ -71,7 +70,7 @@ object DlgCardTourney  extends BasicHtml
     mode match {
       case "edit" => {
         setVisible("BtnClose", false); setVisible("BtnSave", true); setVisible("BtnCancel", true)
-        setAttribute("StartDate", "readonly", "readonly")
+        setAttribute(gE("StartDate", ucp), "readonly", "readonly")
         setBooleanOption("Visibility", Some(tB.privat))
         setIntOption("Typ", Some(tB.typ))
       }  
@@ -149,7 +148,7 @@ object DlgCardTourney  extends BasicHtml
       }
     }
     
-    load(html.DlgCardTourney().toString)
+    loadModal(html.DlgCardTourney(), ucp)
     setHtml("Header", getMsg(s"${dlgMode}.hdr"))
     set(dlgMode, tournBase)
 

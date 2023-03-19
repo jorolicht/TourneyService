@@ -4,7 +4,8 @@ import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
 import shared.utils.{ Error, Return }
 import shared.utils.Routines._
-
+import collection.mutable.ArrayBuffer
+import collection.mutable.HashMap
 
 /* Player in                               
  *  Verbindung von firstname, lastname, birthyear, licence-nr ist eindeutig.
@@ -98,6 +99,24 @@ case class Player(
 
   def getBirthyear()    = if (birthyear == 0) None else Some(birthyear)
   def getBYearStr() = if (birthyear == 0) "" else birthyear.toString
+
+
+  def updLicenseNr(name2person: HashMap[String, ArrayBuffer[(String, Int, String)]]) = {
+    if (getLicenceNr == "") {
+      val name = s"${lastname}·${firstname}"
+      if (name2person.isDefinedAt(name)) {
+        val cylArray = (name2person(name)) 
+        if (cylArray.length == 1) { 
+          println("Update LicenseNr")
+          setLicenceNr(cylArray(0)._3) 
+        } else {
+          cylArray.foreach { elem => if (elem._1 == clubName) setLicenceNr(elem._3) }
+        } 
+      }
+    }
+  }
+
+
   
 }
 

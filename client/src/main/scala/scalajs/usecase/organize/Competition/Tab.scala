@@ -44,11 +44,11 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
   def render(section: String = "", ucInfo: String = "", update: Boolean=false) = {
     selSection = section
     
-    val coId = AppEnv.getCoId
+    val coId = App.getCurCoId
 
     // get available competition phases and selected phase otherwise 0 (competition not yet started)
     val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
-    var coPhId = if (coPhNameIds.length > 0) AppEnv.coPhIdMap.getOrElse(coId, coPhNameIds.head._2) else 0
+    var coPhId = App.getCurCoPhId
 
     debug("render", s"coId: ${coId} coPhId: ${coPhId} section: ${selSection}")
 
@@ -131,7 +131,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     }  
 
     // remember selection
-    AppEnv.coPhIdMap(coId) = coPhId     
+    App.setCurCoPhId(coId, coPhId)    
     section match {
       case "Ctrl"  => OrganizeCompetitionCtrl.setPage(coPhase)
       case "Draw"  => OrganizeCompetitionDraw.setPage(coId, coPhId)

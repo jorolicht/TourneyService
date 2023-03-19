@@ -31,6 +31,7 @@ import scalajs.usecase.home._
 import scalajs.usecase._
 import scalajs.service._
 
+import scalajs.usecase.organize.OrganizeTourney
 
 @JSExportTopLevel("App")
 object App extends BasicHtml
@@ -434,16 +435,21 @@ object App extends BasicHtml
 
   def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
 
-  /** Tourney getter
-   *
+  /** 
+   * Tourney getter and setter 
    */
-  def getDefaultCompName(): String = getCompName(AppEnv.getCoId) 
-  def getCompName(coId: Long) : String = if (tourney.comps.isDefinedAt(coId)) tourney.comps(coId).name else ""
+  def getCompName(coId: Long=0) = tourney.getCompName(coId)
+  def getCurCoId                = tourney.getCurCoId
+  def getCurCoPhId              = tourney.getCurCoPhId
 
-  def getTourneyName(): String = tourney.name
-  def getTourneyOrgDir()    : String  = { tourney.orgDir }
-  def getTourneyOrganizer() : String  = { tourney.organizer }
-  def getTourneyStartDate() : Int     = { tourney.startDate }
-  def getTourneyEndDate()   : Int     = { tourney.endDate }
+  def getTourneyName()          = tourney.name
+  def getTourneyOrgDir()        = tourney.orgDir 
+  def getTourneyOrganizer()     = tourney.organizer 
+  def getTourneyStartDate()     = tourney.startDate
+  def getTourneyEndDate()       = tourney.endDate
 
+  def setCurCoId(coId: Long)                 = tourney.setCurCoId(coId)
+  def resetCurCoId                           = tourney.setCurCoId(0)
+
+  def setCurCoPhId(coId: Long, coPhId: Int)  = tourney.setCurCoPhId(coId, coPhId) 
 }

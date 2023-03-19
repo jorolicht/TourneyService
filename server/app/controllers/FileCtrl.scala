@@ -58,7 +58,7 @@ class FileCtrl @Inject()
 
   def downloadFile(params: String="") = Action.async { implicit request =>
     val msgs:  Messages   = messagesApi.preferred(request)
-    val ctx =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
+    val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     val param  = Crypto.encParam(params)
 
     val toId  = param("toId").toLong
@@ -127,9 +127,9 @@ class FileCtrl @Inject()
 
 
 
-   /**  genCertFile - generates a certificate for a user 
-    *                 in directeory public/content/clubs/<club>/certs/certificate_<toId>_<coId>_<sno>.html
-    */
+  /**  genCertFile - generates a certificate for a user 
+   *                 in directeory public/content/clubs/<club>/certs/certificate_<toId>_<coId>_<sno>.html
+   */
   def genCertFile(params: String) = Action.async { implicit request: Request[AnyContent] =>
     import shared.utils.Constants._
     //import java.nio.charset.StandardCharsets
@@ -167,112 +167,178 @@ class FileCtrl @Inject()
     */
   def uploadFile(params: String="") = Action.async(parse.multipartFormData) { implicit request =>
     val msgs:  Messages   = messagesApi.preferred(request)
-    val param     = request.body.asFormUrlEncoded
-    val toId      = param("toId").mkString.toLong
-    val uptype    = param("uptype").mkString.toInt
-    val sdate     = param("sdate").mkString.toInt
-    val edate     = param("edate").mkString.toInt
-    val ctx       = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
 
+    // verify necessary parameters
+    val (pMap, toId, sDate, upType) = (for {
+      pM     <- Crypto.encEParam(params)
+      toId   <- Crypto.getEParam(pM, "toId", 0L)
+      sDate  <- Crypto.getEParam(pM, "sDate")
+      upType <- Crypto.getEParam(pM, "upType")
+    } yield { (pM, toId, sDate, upType) }) match {
+      case Left(err)  => (new scala.collection.mutable.HashMap[String, String], 0L, "", "")
+      case Right(res) => (res._1, res._2, res._3, res._4)  
+    }
+
+    val ctx           = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
     implicit val tse  = TournSVCEnv(toId, ctx.orgDir, true)
+    
+    logger.info(s"uploadFile: toId:${toId} upType: ${upType} orgDir: ${ctx.orgDir}")
+    
+    // set content (club specific) and tourney directories 
+    val tourneyDir = s"${env.rootPath}${File.separator}db${File.separator}Tourneys${File.separator}${ctx.orgDir}"
+    val contentDir = s"${env.rootPath}${File.separator}public${File.separator}content${File.separator}clubs${File.separator}${ctx.orgDir}"
 
-    // generate path if necessary
     if (ctx.orgId <= 0) {
-      Future( BadRequest(Error("err0128.upload.file", "invalid orgId").encode) )
-    } else {  
-      val baseDir = s"${env.rootPath}${File.separator}db${File.separator}Tourneys${File.separator}${ctx.orgDir}"
-      val contentDir = s"${env.rootPath}${File.separator}public${File.separator}content${File.separator}clubs${File.separator}${ctx.orgDir}"
-      logger.info(s"upload: (${uptype}/${ctx.orgDir}/${sdate}/${edate})")
-      Files.createDirectories(Paths.get(s"${baseDir}${File.separator}tmp${File.separator}"))
+      Future( BadRequest(Error("err0202.upload.file.orgId").encode) )
+    } else {
+      // generate path if necessary     
+      Files.createDirectories(Paths.get(s"${tourneyDir}${File.separator}tmp${File.separator}"))
       
       request.body.file("file").map { file => 
           // only get the last part of the filename
           // otherwise someone can send a path like ../../home/foo/bar.txt 
           // to write to other files on the system
+
           val filename    = Paths.get(file.filename).getFileName
+          val tmpFilename = s"${tourneyDir}${File.separator}tmp${File.separator}${filename}"
           val fileSize    = file.fileSize
           val UploadSizeLimit = 3000000
-          if (fileSize > UploadSizeLimit) {
-            Future( BadRequest(Error("err0128.upload.file", "fileSize").encode) )
-          } else {
-            file.ref.copyTo(Paths.get(s"${baseDir}${File.separator}tmp${File.separator}${filename}"), replace = true)
-            Future( BadRequest(Error("err0128.upload.file", "fileSize").encode) )
-            //processUpload(ctx.orgDir, ctx.organizer, baseDir, contentDir, s"${baseDir}${File.separator}tmp${File.separator}${filename}", uptype, sdate, edate, toId )
+          if   (fileSize > UploadSizeLimit) { Future( BadRequest(Error("err0200.upload.file.limit").encode) ) } 
+          else {
+            file.ref.copyTo(Paths.get(s"${tourneyDir}${File.separator}tmp${File.separator}${filename}"), replace = true)
+            //Future( BadRequest(Error("err0128.upload.file", "fileSize").encode) )
+            processUpload(ctx.orgDir, ctx.organizer, tourneyDir, contentDir, tmpFilename, upType, toId, sDate)
           }
       }.getOrElse { 
-          Future( BadRequest(shared.utils.Error("err0128.upload.file","file Command").encode) ) 
+          Future( BadRequest(shared.utils.Error("err0203.upload.file.command").encode) ) 
       }
-
-
-
     } 
   }  
 
 
-  def processUpload(orgDir: String, organizer: String, baseDir: String, 
-                    contentDir: String, filename: String, utype: Int, sDate: Int, eDate:Int, toId: Long)
+  def processUpload(orgDir: String, organizer: String, tourneyDir: String, contentDir: String, filename: String, upType: String, toId: Long, sDate: String)
                    (implicit msgs: Messages, tse : TournSVCEnv): Future[play.api.mvc.Result] = {
-  
-                 
-
-    // matchExtension - check whether required upload type
-    //                  matches with its extension
-    def matchExtension(ext: String, uloadTyp: Int): Boolean = {
-      uloadTyp match {
-        case 1 => (ext == "xml") 
-        case 2 => (ext == "md") 
-        case 3 => (ext == "png") | (ext == "jpg") | (ext == "gif") 
-        case 4 => (ext == "png")
-        case 5 => (ext == "csv")
-        case 6 => (ext == "png")
-        case _ => false
-      }
-    }
+    import shared.utils.Constants._  
 
     val fNameArr = filename.split("\\.")
     val fExt     = if (fNameArr.length > 1) fNameArr(fNameArr.length-1).toLowerCase else ""
     
-    if (!matchExtension(fExt, utype)) {
-      Future( BadRequest(Error("err0128.upload.file", "Dateityp wird nicht unterstützt").encode) )
+    if (!checkUploadExt(fExt, upType)) {
+      Future( BadRequest(Error("err0201.upload.file.notsupported").encode) )
     } else {
-      utype match {
-        case 1 => {
-          val desFN = s"${baseDir}/${sDate}_participants.xml"
-          Files.copy(Paths.get(filename), Paths.get(desFN), StandardCopyOption.REPLACE_EXISTING)
-          tsv.addTournCTT(CttService.load(desFN), orgDir, organizer, sDate, eDate).map { 
-            case Left(err)   => BadRequest(err.encode)
-            case Right(trny) => Ok(trny.encode())
-          }  
-        }
-
-        case 2 => { // invitation file
-          Files.copy(Paths.get(filename), Paths.get(s"${baseDir}/${sDate}_invitation.md"), StandardCopyOption.REPLACE_EXISTING)
+      upType match {
+        case ULD_INVIT => { // invitation file
+          Files.copy(Paths.get(filename), Paths.get(s"${tourneyDir}/${sDate}_invitation.md"), StandardCopyOption.REPLACE_EXISTING)
           Future(Ok(Return(true).encode))
         }
-        case 3 => { // logo picture/file
-          val desFN = s"${baseDir}/logo.${fExt}"
+        case ULD_LOGO => { // logo picture/file
+          val desFN = s"${tourneyDir}/logo.${fExt}"
           Files.copy(Paths.get(filename), Paths.get(desFN), StandardCopyOption.REPLACE_EXISTING)
           Future(Ok(Return(true).encode))   
         }
-        case 4 => { // certificate picture/file
-          val desFN  = Paths.get(s"${baseDir}${File.separator}${sDate}_certificate.${fExt}")
+        case ULD_CERT => { // certificate picture/file
+          val desFN  = Paths.get(s"${tourneyDir}${File.separator}${sDate}_certificate.${fExt}")
           val contFN = Paths.get(s"${contentDir}${File.separator}certificate.${fExt}")
 
           Files.copy(Paths.get(filename), desFN, StandardCopyOption.REPLACE_EXISTING)
           Files.copy(Paths.get(filename), contFN, StandardCopyOption.REPLACE_EXISTING)
           Future(Ok(Return(true).encode))   
         }
-        
-        case 6 => { // club banner  picture/file
+        case ULD_RESULT => { // 
+          Future(Ok(Return(true).encode))   
+        }
+        case ULD_BANNER => { // club banner  picture/file
           val contFN = Paths.get(s"${contentDir}${File.separator}banner.${fExt}")
           Files.copy(Paths.get(filename), contFN, StandardCopyOption.REPLACE_EXISTING)
           Future(Ok(Return(true).encode))   
         }
-
         case _ =>  Future( BadRequest(Error("err0128.upload.file", "invalid extension type").encode) )
       }
     }
   }
+
+
+  /**  sendCttFile calculate file name (for saveing) from additional
+    *  parameter "uptype"
+    */
+  def sendCttFile(params: String="") = Action.async(parse.multipartFormData) { implicit request =>
+    import shared.utils.Constants._ 
+    
+    val msgs:  Messages   = messagesApi.preferred(request)
+
+    //logger.info(s"sendCttFile")
+
+    // verify necessary parameters
+    val (pMap, toId, sDate, mode) = (for {
+      pM     <- Crypto.encEParam(params)
+      toId   <- Crypto.getEParam(pM, "toId", 0L)
+      sDate  <- Crypto.getEParam(pM, "sDate")
+      mode   <- Crypto.getEParam(pM, "mode", 0)
+    } yield { (pM, toId, sDate, mode) }) match {
+      case Left(err)  => (new scala.collection.mutable.HashMap[String, String], 0L, "", 0)
+      case Right(res) => (res._1, res._2, res._3, res._4)  
+    }
+
+    val ctx           = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
+    implicit val tse  = TournSVCEnv(toId, ctx.orgDir, true)
+    
+    logger.info(s"sendCttFile: toId:${toId} mode: ${mode} orgDir: ${ctx.orgDir}")
+    
+    // set content (club specific) and tourney directories 
+    val tourneyDir = s"${env.rootPath}${File.separator}db${File.separator}Tourneys${File.separator}${ctx.orgDir}"
+    val contentDir = s"${env.rootPath}${File.separator}public${File.separator}content${File.separator}clubs${File.separator}${ctx.orgDir}"
+
+    if (ctx.orgId <= 0) {
+      Future( BadRequest(Error("err0202.upload.file.orgId").encode) )
+    } else {
+      // generate path if necessary     
+      Files.createDirectories(Paths.get(s"${tourneyDir}${File.separator}tmp${File.separator}"))
+      
+      request.body.file("file").map { file => 
+          // only get the last part of the filename
+          // otherwise someone can send a path like ../../home/foo/bar.txt 
+          // to write to other files on the system
+
+          val filename = Paths.get(file.filename).getFileName
+          val desFN    = s"${tourneyDir}/${sDate}_${toId}_participants.xml"
+          val fileSize = file.fileSize
+          val UploadSizeLimit = 3000000
+          if   (fileSize > UploadSizeLimit) { Future( BadRequest(Error("err0200.upload.file.limit").encode) ) } 
+          else {
+            file.ref.copyTo(Paths.get(desFN), replace = true)
+            mode match {
+              case UploadModeUpdate    => {
+                import upickle.default._
+                if (toId == 0) {
+                  Future(BadRequest(Error("err0199.upload.file.tourneyId").encode) )
+                } else {
+                  tsv.updTournCTT(CttService.load(desFN), toId).map { 
+                    case Left(err)     => BadRequest(err.encode)
+                    case Right(result) => Ok( write[Seq[(Long,Int)]] (result) ) 
+                  }    
+                }            
+              }
+
+              case UploadModeNew => { 
+                tsv.addTournCTT(CttService.load(desFN), ctx.orgDir, ctx.organizer).map { 
+                  case Left(err)   => BadRequest(err.encode)
+                  case Right(trny) => Ok(Return(trny.id).encode)
+                }
+              }
+              case _   => Future(BadRequest(Error("err0204.upload.file.mode").encode))
+            }
+          }
+      }.getOrElse { 
+          Future( BadRequest(shared.utils.Error("err0203.upload.file.command").encode) ) 
+      }
+    } 
+  }  
+
+
+
+
+
+
 
 
 }

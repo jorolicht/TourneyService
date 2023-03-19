@@ -55,7 +55,7 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
     } yield { (result, pw) }).value.map {
       case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(1)
+        App.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
 
         //val testTrny = Tourney.decode(encResult)
@@ -80,7 +80,7 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
     } yield { (result, pw) }).value.map {
       case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(1)
+        App.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         SUCCESS(tnp)
 
@@ -101,8 +101,8 @@ object AddonOrgComp extends TestUseCase("AddonOrgComp")
     } yield { (result, pw) }).value.map {
       case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        AppEnv.setCoId(1)
-        AppEnv.coPhIdMap(1) = 3
+        App.setCurCoId(1)
+        App.setCurCoPhId(1, 3)
         App.execUseCase("OrganizeCompetitionInput", "", "")
         SUCCESS(tnp)
       }

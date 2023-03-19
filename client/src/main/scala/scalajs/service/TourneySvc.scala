@@ -129,11 +129,27 @@ trait TourneySvc extends WrapperSvc
     Ajax.get(path).map( _.getAllResponseHeaders).map( content => Helper.debug("downloadFile", s"${content.take(20)}"))
   }
 
-  def uploadFile(formData: dom.FormData): Future[Either[Error, Boolean]] = 
-    postForm("/service/uploadFile", formData).map {
+  def uploadFile(toId: Long, sDate: Int, upType: String, formData: dom.FormData): Future[Either[Error, Long]] = 
+    postForm("/service/uploadFile", s"toId=${toId}&sDate=${sDate}&upType=${upType}",formData).map {
       case Left(err)  => Left(err.add("uploadFile"))
-      case Right(res) => Return.decode2Boolean(res, "uploadFile")
+      case Right(res) => Return.decode2Long(res, "uploadFile")
     }
+
+  //Either[Error,Seq[(Long, Either[Error, Int])]]  
+  def updCttFile(toId: Long, sDate: Int, formData: dom.FormData): Future[Either[Error,Seq[(Long, Int)]]] = {
+    import upickle.default._
+    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&mode=${Constants.UploadModeUpdate}",formData).map {
+      case Left(err)  => Left(err.add("updCttFile"))
+      case Right(res) => Right(read[Seq[(Long, Int)]](res))
+    }
+  }  
+
+  def newCttFile(toId: Long, sDate: Int, formData: dom.FormData): Future[Either[Error, Long]] = 
+    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&mode=${Constants.UploadModeNew}",formData).map {
+      case Left(err)  => Left(err.add("newCttFile"))
+      case Right(res) => Return.decode2Long(res, "newCttFile")
+    }
+
 
   // file exists
   def fileExists(filePath: Array[String]): Future[Either[Error, Boolean]] = {
@@ -227,7 +243,6 @@ trait TourneySvc extends WrapperSvc
       case Left(err)    => Left(err.add("getTournClubs"))
       case Right(clubs) => Club.decSeq(clubs)
     }
-
 
 
   // find tourney basis informations by Name, Year and Type
@@ -443,6 +458,11 @@ trait TourneySvc extends WrapperSvc
       case Right(pl) => Player.decode(pl)
     }
 
+  def setPlayerLicence(plId: Long, licence: String): Future[Either[Error, Player]] = 
+    postAction("setPlayerLicence", App.tourney.id, s"plId=${plId}&licence=${licence}", "", true).map {
+      case Left(err) => Left(err)
+      case Right(pl) => Player.decode(pl)
+    }    
 
   //
   // MATCH Interface
@@ -480,6 +500,22 @@ trait TourneySvc extends WrapperSvc
       case Right(res) => Future(Right(res))
     }
 
+
+  //
+  //  ClickTT Interface
+  //
+  def genCttResult(): Future[Either[Error, Array[(Long, Map[Long, String])]]] = {
+    postAction("genCttResult", App.tourney.id, "", "").map {
+      case Left(err)     => Left(err.add("genCttResult"))
+      case Right(result) => {
+        try Right( read[Array[(Long, Map[Long, String])]](result) )  
+        catch { case _:Throwable => {
+          println(s"ERROR: genCttResult decoding result not possible: ${result.take(10)}")
+          Left(Error("err0207.genCttResult", "","","genCttResult")) 
+        }}        
+      }
+    }
+  }
 
 
 

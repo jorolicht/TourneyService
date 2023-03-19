@@ -14,9 +14,22 @@ package object Constants {
   val ULD_RESULT  = "UploadResult"      // Result file (TT format)
   val ULD_BANNER  = "UploadBanner"      // Club Banner
 
+  val UploadModeUnknown = 0
+  val UploadModeUpdate  = 1
+  val UploadModeNew     = 2
 
-  val PANT_SELECT_ALL = 3
-  val PANT_SELECT_WINNER = 2
-  val PANT_SELECT_LOOSER = 1
+  // checkUploadExt - check whether required upload type
+  //                  matches with its extension
+  def checkUploadExt(ext: String, uloadTyp: String): Boolean = {
+    uloadTyp match {
+      case ULD_CLICKTT => (ext == "xml") 
+      case ULD_INVIT   => (ext == "md") 
+      case ULD_LOGO    => (ext == "png") | (ext == "jpg") | (ext == "gif") 
+      case ULD_CERT    => (ext == "png")
+      case ULD_RESULT  => (ext == "csv")
+      case ULD_BANNER  => (ext == "png")
+      case _ => false
+    }
+  }
 
 }

@@ -57,6 +57,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
           val elem = drawElements.item(i).asInstanceOf[HTMLElement]
           (elem.getAttribute("data-drawPos").toInt, elem.innerText.toIntOption.getOrElse(0))
         }).unzip
+        println(s"${asign._1.mkString(",")} versus ${asign._2.mkString(", ")}")
         val diff = asign._1.toSet.diff(asign._2.toSet)
         if      (diff.size == 0) reassignDraw(App.tourney.cophs(coId, coPhId), asign._1.zip(asign._2).toMap)
         else if (diff.size == 1) DlgBox.showStd(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
@@ -88,16 +89,16 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       // update view
       val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
       coPhase.coPhTyp match {
-        case CPT_GR => {
-          setVisible(s"${coId}_${coPhId}", (coPhase.status == CompPhase.CPS_AUS) )(UCP("DrawStartBtn"))
-          updateGrView(base, coPhase.groups)
-        }
-
+        case CPT_GR => updateGrView(base, coPhase.groups)
         case CPT_KO => updateKoView(base, coPhase.ko)
         case CPT_SW => {}
         case _      => {}
       }    
     }
+
+    setVisible(gE(s"DrawStartBtn_${coId}_${coPhId}"), (coPhase.status == CompPhase.CPS_AUS))
+    setVisibleDataAttr("drawSelectField", (coPhase.status == CompPhase.CPS_AUS))
+    //setVisibleDataAttr("drawSelectField", false)
   }
 
   def setDrawPosition(elem: HTMLElement, pant: ParticipantEntry, pantPos: String="") = try {
@@ -110,6 +111,16 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     val drawPosElem = elem.querySelector(s"[data-drawPos]").asInstanceOf[HTMLElement]
     drawPosElem.innerHTML = getData(drawPosElem, "drawPos", "")
   } catch { case _: Throwable => error("setDrawPosition ", s"Pos: ${pantPos} Pant: ${pant.sno} ${pant.name} [${pant.club}]") }
+
+  def setDrawInfo(elem: HTMLElement, drawInfo: (String,Int,Int,Int)) = try {
+    val info = if (drawInfo._1 != "") s"${drawInfo._1}[${drawInfo._3}]" else ""
+    elem.querySelector(s"[data-drawInfo]").asInstanceOf[HTMLElement].innerHTML = info
+
+    // reset drawpos to original value    
+    val drawPosElem = elem.querySelector(s"[data-drawPos]").asInstanceOf[HTMLElement]
+    drawPosElem.innerHTML = getData(drawPosElem, "drawPos", "")
+  } catch { case _: Throwable => error("setDrawInfo ", s"Pos:") }
+
 
 
   def updateGrView(base: HTMLElement, groups: ArrayBuffer[Group]) =
@@ -124,6 +135,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     ko.pants.zipWithIndex.foreach { case (pant, index) => {
       val pantBase = base.querySelector(s"[data-pantPos='${index+1}']").asInstanceOf[HTMLElement]
       setDrawPosition(pantBase, pant, s"${index+1}")
+      setDrawInfo(pantBase, ko.drawInfo(index))
     }}
 
 
@@ -140,7 +152,18 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         updateGrView(base, coph.groups) 
         //pants.zipWithIndex.foreach { case (pant, index) => println(s"[${index}] ${pant.name} ${pant.club} ${pant.getRating}") }
       }
-      case CPT_KO => {} 
+      case CPT_KO => {
+        val pantsNew    = ArrayBuffer.fill[ParticipantEntry](coph.size) (ParticipantEntry("0", "", "", 0, (0,0)))
+        var drawInfoNew = ArrayBuffer.fill[(String, Int, Int, Int)](coph.size) (("",0,0,0))
+        coph.ko.pants.zipWithIndex.foreach { case (pant, index) =>
+          pantsNew(reassign(index+1)-1) = pant 
+          drawInfoNew(reassign(index+1)-1) = coph.ko.drawInfo(index) 
+        } 
+        coph.ko.setDraw(pantsNew, drawInfoNew) match {
+          case Left(err)   => println("Error setDraw")
+          case Right(res)  => updateKoView(base, coph.ko)
+        }
+      } 
       case _      => {}
     }
   }

@@ -15,7 +15,7 @@ trait AppHelperSvc {
   def getErrStack(err: shared.utils.Error): String = s"CallStack: ${err.callStack} -> ${AppEnv.getMessage(err.msgCode, err.in1, err.in2)}"
   
   // setHeadline - show tourney name and optional competition name if selected
-  def setHeadline(): Unit = setHeadline(App.getTourneyName, App.getCompName(AppEnv.getCoId))
+  def setHeadline(): Unit = setHeadline(App.getTourneyName, App.getCompName())
   def setHeadline(content: String = "", optContent: String =  ""): Unit = {
     if (content != "") {
       setHtml_(s"APP__Headline__Content", s"<strong>${content}</strong>" + { if (optContent != "") s"[${optContent}]" else "" })

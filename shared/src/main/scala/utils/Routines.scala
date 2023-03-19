@@ -60,6 +60,17 @@ package object Routines {
     }
   }
 
+  def parseStartTime(startDate: String): String = {
+    val datim1 = """(\d\d\d\d)-(\d\d)-(\d\d)[ ]*(\d\d):(\d\d)""".r
+    val datim2 = """(\d\d).(\d\d).(\d\d\d\d)[ ]*(\d\d):(\d\d)""".r
+    startDate match { 
+      case datim1(y,m,d,hh,mm) => s"${y}${m}${d}#${hh}${mm}"
+      case datim2(d,m,y,hh,mm) => s"${y}${m}${d}#${hh}${mm}"       
+      case                 _   => startDate
+    }
+  }
+
+
   def int2date(date: Int, lang: String, fmt:Int=0): String = {
     val moArDe = Array("","Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez")
     val moArEn = Array("","Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec")

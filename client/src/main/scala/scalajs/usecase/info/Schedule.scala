@@ -96,7 +96,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
   @JSExport
   def reset(): Boolean = {
     debug("reset", "register")
-    setAttribute("SignUp","disabled", "disabled")
+    setAttribute(gE("SignUp", ucp),"disabled", "disabled")
     setCheckbox("CheckConsent", false)
     false
   }  
@@ -151,7 +151,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
   @JSExport
   def onclickCheckConsent(elem: dom.raw.HTMLInputElement) = {
-    if (elem.checked) removeAttribute("SignUp","disabled") else setAttribute("SignUp","disabled","disabled")
+    if (elem.checked) removeAttribute(gE("SignUp", ucp), "disabled") else setAttribute(gE("SignUp", ucp),"disabled","disabled")
   } 
 
   @JSExport

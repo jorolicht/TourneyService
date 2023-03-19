@@ -28,14 +28,12 @@ object DlgShowError extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgShowError", "dlg.ShowError", "DlgShowError", "dlgshowerror", scalajs.AppEnv.getMessage _ )
-  private def load() = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgShowError().toString)
-
 
   // set dialog input fields
   def set(eList: List[Error]): Unit = {
     setHtml("Content", "")
     eList.foreach {
-      err => insertHtml("Content", "beforeend", s"""<p class="text-danger mb-0">${getError(err)}</p>""")
+      err => insertHtml(gE("Content",ucp), "beforeend", s"""<p class="text-danger mb-0">${getError(err)}</p>""")
     }
   }
   
@@ -55,7 +53,7 @@ object DlgShowError extends BasicHtml
       $(getId("Modal","#")).modal("hide")
     }
     
-    load()
+    loadModal(html.DlgShowError(), ucp)
     setHtml("Header", getMsg("hdr"))
     set(eList)
 

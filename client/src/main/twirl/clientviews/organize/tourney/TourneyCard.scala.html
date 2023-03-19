@@ -20,7 +20,7 @@
     <span class="tuse-font-1">@msg("noTourneys")</span>
   </div>
 }else{ 
-  <table @id("TourneyTbl") class="table table-sm small table-hover tuse-border mb-0">
+  <table @id("Table") class="table table-sm small table-hover tuse-border mb-0">
 		<tbody>
       <tr style="border-bottom:2px solid #ccc;">
         <td class="text-left tuse-height"><strong>@msg("tbl.hdr.date")</strong></td>
@@ -29,9 +29,9 @@
         <td class="text-center tuse-height"><strong>@msg("tbl.hdr.visible")</strong></td>
         <td class="text-right tuse-height"><strong>@msg("tbl.hdr.action")</strong></td>
       </tr>
-      <tr @id("TourneyDummy")></tr>
+      <tr @id("TableRow_Dummy")></tr>
       @for(tony <- tonys) {
-				<tr data-toId='@tony.id' @actionEvent("Select", "onclick") >	
+				<tr @id(s"TableRow_${tony.id}") data-toId='@tony.id' @actionEvent("Select", "onclick") >	
 					<td class="text-left tuse-height">@tony.getStartDate(msg_("app.lang"))</td>
 					<td class="text-left tuse-height">@tony.name</td>
 					<td class="text-left tuse-height">@msg_("tourney.typ." + tony.typ)</td>

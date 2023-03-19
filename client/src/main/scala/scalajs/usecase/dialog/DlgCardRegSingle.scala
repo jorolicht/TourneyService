@@ -41,7 +41,6 @@ object DlgCardRegSingle extends BasicHtml
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardRegSingle", "dlg.card.reg.single", "DlgCardRegSingle", "dlgcardregsingle", scalajs.AppEnv.getMessage _ )
   implicit var tourney = Tourney.init
-  private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgCardRegSingle().toString)
  
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
@@ -186,7 +185,7 @@ object DlgCardRegSingle extends BasicHtml
 
     
     tourney = trny
-    load()
+    loadModal(html.DlgCardRegSingle(),ucp)
     init(coId)
 
     // register routines for cancel and submit

@@ -40,8 +40,8 @@ lazy val server = (project in file("server")).
       "com.mohiva" %% "play-silhouette-persistence"          % "6.1.1",
       "com.mohiva" %% "play-silhouette-crypto-jca"           % "6.1.1",
       "com.mohiva" %% "play-silhouette-totp"                 % "6.1.1",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",  
-      "org.scala-lang.modules" %% "scala-xml"        % "1.2.0",  
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.2.0",  
+      "org.scala-lang.modules" %% "scala-xml"        % "2.1.0",  
         
       "com.typesafe.play" %% "play-slick"            % "4.0.2",
       "com.typesafe.play" %% "play-slick-evolutions" % "4.0.2",
@@ -62,7 +62,7 @@ lazy val server = (project in file("server")).
       "mysql"             %  "mysql-connector-java" % "8.0.18",    
       "com.vmunier"       %% "scalajs-scripts"      % "1.1.4",
       "org.typelevel"     %% "cats-core"            % "2.2.0",
-      "com.lihaoyi"       %% "upickle"              % "1.4.3",
+      "com.lihaoyi"       %% "upickle"              % "1.5.0",
       "com.chuusai"       %% "shapeless"            % "2.3.3",
       "org.mindrot"       %  "jbcrypt"              % "0.4",
       "com.lihaoyi"       %% "utest" % "0.7.9" % "test",
@@ -100,7 +100,7 @@ lazy val client = (project in file("client")).settings(
 //  scalaJSLinkerConfig ~= (_.withESFeatures(_.withUseECMAScript2015(false))),
   libraryDependencies ++= Seq(
     "org.scala-js"      %%% "scalajs-dom" % "1.1.0",
-    "com.lihaoyi"       %%% "upickle" % "1.4.3",
+    "com.lihaoyi"       %%% "upickle" % "1.5.0",
     "com.lihaoyi"       %%% "utest" % "0.7.9" % "test",
     "org.typelevel"     %%% "cats-core" % "2.2.0",
     "com.chuusai"       %%% "shapeless" % "2.3.3",

@@ -30,7 +30,6 @@ object DlgPrompt extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("DlgPrompt", "dlg.prompt", "DlgPrompt", "dlgprompt", scalajs.AppEnv.getMessage _ )
-  private def load() = if (!checkId("DlgPrompt")(UCP())) insertHtml_("APP__Load", "afterbegin", html.DlgPrompt().toString)
 
   var actionfunc: (String, HTMLElement, dom.Event)=>Unit = null
 
@@ -48,7 +47,7 @@ object DlgPrompt extends BasicHtml
     }  
 
 
-    load()
+    loadModal(html.DlgPrompt())
     actionfunc = afunc
 
     $("#DlgPrompt").on("shown.bs.modal", () => $("#DlgPrompt__Input").focus() )    

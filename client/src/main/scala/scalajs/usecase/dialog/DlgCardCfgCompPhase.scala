@@ -53,7 +53,6 @@ object DlgCardCfgCompPhase extends BasicHtml
     }
   } 
 
-
   implicit val ucp  = UseCaseParam("APP__DlgCardCfgCompPhase", "dlg.card.cfg.compphase", "DlgCardCfgCompPhase", "dlgcardcfgcompphase", scalajs.AppEnv.getMessage _ )
 
   var coId  = 0L
@@ -89,8 +88,8 @@ object DlgCardCfgCompPhase extends BasicHtml
       }
     }
     
-    // load modal dialog if necessary
-    if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.Main().toString)
+    // load modal dialog 
+    loadModal(html.Main(), ucp)
     coId = coIdInput
 
     pants       = pantsInput
@@ -141,7 +140,7 @@ object DlgCardCfgCompPhase extends BasicHtml
 
       case "Winners" =>  {
         val pantTbl = getElemById("PantTbl")
-        val winner  = getCheckbox("Winners")
+        val winner  = getCheckbox(gE("Winners", ucp))
 
         qualifyMode = ite(winner, QualifyTyp.Winner, QualifyTyp.Looser)
         pants.foreach { pant => 

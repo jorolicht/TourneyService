@@ -39,11 +39,7 @@ object DlgSpinner extends BasicHtml
 
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgSpinner", "dlg.spinner", "DlgSpinner", "dlgspinner", scalajs.AppEnv.getMessage _ ) 
-
-  private def load = if ($(getIdHa("Modal")).length <= 0) {
-    $("#APP__DlgLoadOnDemand").append(clientviews.dialog.html.DlgSpinner().toString)
-  }
-
+ 
   /** Handles spinner dialog
    *
    *  @param  cmd   0 - show dialog with message
@@ -54,7 +50,7 @@ object DlgSpinner extends BasicHtml
    *  @return Unit change spinner html element
    */  
   def show(cmd: Int, msg: String) = {
-    load
+    loadModal(clientviews.dialog.html.DlgSpinner(), ucp)
     cmd match {
       case 0 => 
         $(getIdHa("Type")).removeClass("border-danger border-success border-5")

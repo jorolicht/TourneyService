@@ -26,6 +26,7 @@ import shared.utils.UseCaseParam
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 
+case class TNP(name: String, param: String)
 
 /** UseCase - based on name, definition of several basic artefacts
  *  

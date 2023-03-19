@@ -38,21 +38,20 @@ object DlgCardComp extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgCardComp", "dlg.card.comp", "DlgCardComp", "dlgcardcomp", scalajs.AppEnv.getMessage _ )
-  private def load() = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgCardComp().toString)
  
   @JSExport
   def actionEvent(key: String, elem: raw.HTMLElement, event: Event) = {
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
       case "NameCompose"  => { 
-        if (getCheckbox("NameCompose")) {  
+        if (getCheckbox(gE("NameCompose", ucp))) {  
           val typ = getInput("typ", 0)
           setInput("name", getInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
                                + getInput("Class", getMsg("plh.Class")) + "·" 
                                + BasicHtml.getMsg_("competition.typ."+typ) )
-          setAttribute("name", "readonly", "true")                     
+          setAttribute(gE("name", ucp), "readonly", "true")                     
         } else {
-          removeAttribute("name", "readonly") 
+          removeAttribute(gE("name", ucp), "readonly") 
           setInput("name", getInput("name").replace("·", " "))
         }
       } 
@@ -88,7 +87,7 @@ object DlgCardComp extends BasicHtml
 
     val comp = Competition(getData("Form","id", 0L), getData("Form","hashKey",""), 
                            getInput("name", ""), getInput("typ", 0),
-                           Competition.parseStartTime(getInput("startTime", "")),
+                           parseStartTime(getInput("startTime", "")),
                            getInput("status", CS_UNKN), getData("Form", "options", ""))
     // set optional values                       
     comp.setAgeGroup(getInput("AgeGroup", ""))
@@ -103,26 +102,26 @@ object DlgCardComp extends BasicHtml
   def setInput(comp: Competition, trny: Tourney, lang: String, mode: DlgOption.Value): Unit = {
         
     // setting data-foo
-    setData("Form", "id", comp.id)
-    setData("Form", "hashKey", comp.hashKey)
-    setData("Form", "name", comp.name)
-    setData("Form", "typ", comp.typ) 
-    setData("Form", "options", comp.options)
+    setData(gE("Form", ucp), "id", comp.id)
+    setData(gE("Form", ucp), "hashKey", comp.hashKey)
+    setData(gE("Form", ucp), "name", comp.name)
+    setData(gE("Form", ucp), "typ", comp.typ) 
+    setData(gE("Form", ucp), "options", comp.options)
 
     // set start date and time
     if (mode == DlgOption.New) {
       setDateTimePicker("startTime", lang, int2ymd(trny.startDate), (12, 0))
-      setData("Form", "status", CS_UNKN)
+      setData(gE("Form", ucp), "status", CS_UNKN)
     } else {
       val (year, month, day, hour, minute) = ymdHM(comp.startDate)
       setDateTimePicker("startTime", lang, (year, month, day), (hour, minute))
-      setData("Form", "status", comp.status)
+      setData(gE("Form", ucp), "status", comp.status)
     }
 
     setInput("coId", if (comp.id==0) "X" else comp.id.toString)
     setInput("name", comp.name)
 
-    setAttribute("name", "autocomplete", "off")
+    setAttribute(gE("name", ucp), "autocomplete", "off")
     setInput("status", comp.status.toString)
     setInput("AgeGroup", comp.getAgeGroup)
     setInput("TTRFrom", comp.getFromTTR)
@@ -182,7 +181,7 @@ object DlgCardComp extends BasicHtml
       }
     }
     
-    load()
+    loadModal(html.DlgCardComp(), ucp)
     setInput(comp, trny, lang, mode)
 
     // register routines for cancel and submit

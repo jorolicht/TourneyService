@@ -22,10 +22,11 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   
   var matches      = ArrayBuffer[MEntry]()
   var mFinished    = 0
+  var mFix         = 0
   var mTotal       = 0
     
   var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
-  var ko           = new KoRound(0, 0, "", 0)  // ko games of ghe competition (only ko rounds)
+  var ko           = new KoRound(0, "", 0)  // ko games of ghe competition (only ko rounds)
 
   //*****************************************************************************
   // Status Routines
@@ -87,8 +88,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     */
 
   def drawWithGroupInfo(pants: ArrayBuffer[ParticipantEntry], drawInfo: ArrayBuffer[(String, Int, Int, Int)], compTyp: Int): Either[Error, Boolean] = {
-    def changeUpDown(invert: Boolean, value: Boolean): Boolean = if (invert) !value else value
-
     coPhCfg match {
       case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => { 
         noPlayers = pants.size
@@ -97,79 +96,20 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
       case CPC_KO | CPC_SW  => {
         noPlayers = pants.size
         size = KoRound.getSize(noPlayers)
-        ko = new KoRound(size, KoRound.getNoRounds(noPlayers), name, noWinSets)
-
-
-        // draw => map pants (sorted by results) to ko-tree
-        // position of best placed participants follows the following scheme: up/down/down/up/up/down/down
-        // position of 2nd best is in the opposite part
-        // 0. step initialize up down scheme ULLUULLUULL and
-        //    setting positions     
-        val upDownScheme = List.fill(size/4)(List(true, false, false, true)).flatten.toArray
-        val settingPositions = KoRound.genSettingPositions(size)
-
-        // 1. step generate upDownMap grId/pos -> Up/Down
-        //    [GroupName, GroupId, GroupPos, RankValue]
-        val upDownMap = HashMap[ (Int,Int), Boolean]()
-        val minPos = drawInfo.minBy(_._3)._3
-
-        drawInfo.zip(upDownScheme).foreach { case (item, updo) => 
-          if (item._3 == minPos) {
-            upDownMap += ((item._2, minPos) -> updo)
-          } else if (!upDownMap((item._2, minPos))) {
-            upDownMap += ((item._2, item._3) -> updo); println("Error: upDownMap does not contain all values")  
-          } else {
-            upDownMap += ( (item._2, item._3) -> changeUpDown( (item._3-minPos)%2 == 1, upDownMap((item._2, minPos))) )   
+        ko = new KoRound(size, name, noWinSets)
+        ko.initDraw(pants, drawInfo) match {
+          case Left(err) => println(s"${err}"); Left(err)
+          case Right(s)  => {
+            initKoMatches(compTyp) match {
+              case Left(err)  => println("Error initKoMatches"); Left(err)
+              case Right(res) => {
+                setStatus(CPS_AUS)
+                mTotal = matches.size
+                mFix   = res
+                Right(true)
+              }
+            }  
           }
-        } 
-
-        println(s"Input: ----------------------------------------")
-        var cnt = 1
-        pants.zip(drawInfo).foreach { x => 
-          println(s"${cnt}  -> ${x._1.name} Group: ${x._2._1} GroupId: ${x._2._2} Pos: ${x._2._3} updown: ${upDownMap((x._2._2,x._2._3))}")
-          cnt = cnt + 1
-        }
-
-        // 2. step generate initial drawing
-        //val pantsWithDrawInfo = pants.zip(drawInfo).map(x => (x, upDownMap((x._2._2,x._2._3))))
-        val pantsWithDrawInfo = pants.zip(drawInfo)
-        val pantsRes     = ArrayBuffer.fill(size) (ParticipantEntry("0", "", "", 0, (0,0))) 
-        val drawInfoRes  = ArrayBuffer.fill(size) ("",0,0,0) 
-
-        // 3. step split pants into up and down positions
-        val (upList, downList) = pantsWithDrawInfo.partition(x => upDownMap((x._2._2,x._2._3))       )
-       
-        for (i <- 0 until size) {
-          val pos = settingPositions(i+1)
-          val up  = (pos <= size/2)
-          if (up && upList.size > 0) {
-            pantsRes(pos-1)    = upList(0)._1
-            drawInfoRes(pos-1) = upList(0)._2
-            upList.remove(0)
-          }  
-          if (!up && downList.size > 0) {
-            pantsRes(pos-1)    = downList(0)._1
-            drawInfoRes(pos-1) = downList(0)._2
-            downList.remove(0)
-          }
-        }
-
-        // Error check, all participants set?
-        if (upList.size > 0 || downList.size > 0) println("Error: upDownList size > 0")
-
-        // println(s"PANTS: ----------------------------------------")
-        // var cnt4 = 1
-        // pantsRes.foreach { x => 
-        //   println(s"${cnt4}  -> ${x.name}") 
-        //   cnt4 = cnt4 + 1
-        // }        
-
-        
-        if (ko.init(pantsRes, drawInfoRes)) {
-          setStatus(CPS_AUS)
-          Right(true)
-        } else {
-          Left(Error("???"))
         }
       }  
       case _          => Left(Error("???"))
@@ -240,11 +180,50 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }
   } 
 
+  def initKoMatches(coTyp: Int): Either[Error, Int] = {
+    matches = ArrayBuffer[MEntry]()
+    var err      = Error.dummy
+    var gameNo   = 0
+    var byeCount = 0
+
+    for (r <- ko.rnds to 0 by -1) {
+      for (m <- 1 to KoRound.getMatchesPerRound(r)) {
+        gameNo = gameNo + 1
+        if (r == ko.rnds) {
+          // first/highest round initialize with participants
+          val pantNo = (m-1)*2
+          val byeStatus = (SNO.isBye(ko.pants(pantNo).sno), SNO.isBye(ko.pants(pantNo+1).sno))
+          val mtch = byeStatus match {
+            case (false, false) => MEntryKo.init(coId, coTyp, coPhId, coPhTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_READY, (0,0), noWinSets)
+            case (false, true)  => {
+              byeCount = byeCount +1
+              MEntryKo.init(coId, coTyp, coPhId, coPhTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_FIX, (noWinSets, 0), noWinSets)
+            }  
+            case (true, false)  => {
+              byeCount = byeCount +1
+              MEntryKo.init(coId, coTyp, coPhId, coPhTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_FIX, (0, noWinSets), noWinSets)
+            }
+            case (true, true)   => {
+              err = Error("??? invalid ko match")
+              MEntryKo.init(coId, coTyp, coPhId, coPhTyp, ko.pants(pantNo).sno, ko.pants(pantNo+1).sno, gameNo, r, m, "","", MEntry.MS_UNKN, (0,0), noWinSets)
+            }  
+          }
+          matches += mtch
+        } else {
+          matches += MEntryKo.init(coId, coTyp, coPhId, coPhTyp, "", "", gameNo, r, m, "","", MEntry.MS_MISS, (0,0), noWinSets)
+        }
+      }
+    }
+
+   
+    // propagate bye matches
+    for (g <- 1 to KoRound.getMatchesPerRound(ko.rnds)) { val x = propMatch(g) }
+    if (err.isDummy) Right(byeCount) else Left(err)
+  }
 
   //*****************************************************************************
   // Match Routines
   //*****************************************************************************
-
   def existsMatchNo(matchNo: Int): Boolean = (matchNo>0) && (matchNo <= matches.size)
 
   def depFinished(gameNo: Int, coPhTyp: Int): Boolean = {
@@ -270,8 +249,8 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   }
 
 
-  // setMatch 
-  def setMatch(m: MEntry): Unit = {  
+  // setModel enter result into the corresponding model 
+  def setModel(m: MEntry): Unit = {  
     matches(m.gameNo-1) = m
     m.coPhTyp match {
       case CPT_GR => {
@@ -296,18 +275,25 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }
   }
   
-  
-  def setMatchPropagate(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): List[Int] = { 
-    import scala.collection.mutable.ListBuffer
-    
-    val triggerList = ListBuffer[Int](gameNo)
+
+
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String) = {
     val m = getMatch(gameNo)
     m.setSets(sets)
     m.setResult(result)
     m.setInfo(info)
     m.setPlayfield(playfield)
     m.setStatus(depFinished(gameNo, m.coPhTyp))
-    setMatch(m)
+    setModel(m)
+    setStatus() 
+  }
+
+
+  def propMatch(gameNo: Int): List[Int] = { 
+    import scala.collection.mutable.ListBuffer
+    
+    val triggerList = ListBuffer[Int](gameNo)
+    val m = getMatch(gameNo)
 
     // propagate changes to dependend matches
     // set trigger list for relevant matches
@@ -317,7 +303,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         // set status for every match to be triggered
         val trigger = m.asInstanceOf[MEntryGr].getTrigger
         for (g <- trigger) { 
-          setMatch(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
+          setModel(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
           triggerList.append(g) 
         }
       }
@@ -326,18 +312,17 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
         // propagate winner
         if (existsMatchNo(gWin) && m.finished) { 
-          setMatch(getMatch(gWin).setPant(pWin, m.getWinner).setStatus(true))
+          setModel(getMatch(gWin).setPant(pWin, m.getWinner).setStatus(true))
           triggerList.append(gWin)
         }  
         // propagate looser i.e. 3rd place match
         val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
         if (existsMatchNo(gLoo) && m.finished) {
-          setMatch(getMatch(gLoo).setPant(pLoo, m.getLooser).setStatus(true))
+          setModel(getMatch(gLoo).setPant(pLoo, m.getLooser).setStatus(true))
           triggerList.append(gLoo)
         }
       }
     }
-
     setStatus() 
     triggerList.toList
   }
@@ -353,7 +338,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   
   def resetMatch(gameNo: Int): Unit = {
     matches(gameNo-1).reset()
-    setMatch(matches(gameNo-1))
+    setModel(matches(gameNo-1))
   }
 
   def resetAllMatches(): List[Int] = {
@@ -388,18 +373,18 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
       case CPT_GR => {
         println(s"Match 1: ${m}")
 
-        setMatch(m.setStatus(depFinished(gameNo, m.coPhTyp)))
+        setModel(m.setStatus(depFinished(gameNo, m.coPhTyp)))
         println(s"Match 2: ${matches(m.gameNo-1)}")
         // set status for every match to be triggered
         val trigger = m.asInstanceOf[MEntryGr].getTrigger
         for (g <- trigger) { 
-          setMatch(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
+          setModel(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
           triggerList.append(g)
         }  
       }
 
       case CPT_KO => {
-        setMatch(m.setStatus(true))      
+        setModel(m.setStatus(true))      
         // propagate deletion of that position
         val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
         println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
@@ -648,6 +633,15 @@ object CompPhase {
 
     val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, tx.coPhCfg, tx.coPhTyp, tx.status, tx.demo, tx.size, tx.noPlayers, tx.noWinSets) 
     cop.matches = tx.matches.map(x=>x.decode)
+    cop.mTotal  = cop.matches.size
+
+    val (fin,fix) = cop.matches.foldLeft((0,0))( (x,m) => {
+      val fin = if (m.finished) 1 else 0 
+      val fix = if (m.status == MEntry.MS_FIX) 1 else 0 
+      (x._1 + fin, x._2 + fix)
+    })
+    cop.mFinished = fin
+    cop.mFix      = fix
 
     cop.coPhTyp match {
       case CPT_GR  => {

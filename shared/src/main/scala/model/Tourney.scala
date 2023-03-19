@@ -68,7 +68,7 @@ case class Tourney(
   var accessTime:  Long = 0L
   var backupTime:  Long = 0L
   var writeTime:   Long = 0L  
-
+  var curCoId:     Long = 0L 
  
   def encode(version: Int = Tourney.defaultEncodingVersion): String = {
     version match {
@@ -240,12 +240,6 @@ case class Tourney(
     }  
   }
   
-
-  /** getCompName - get name of competition
-   * 
-   */ 
-  def getCompName(coId: Long): String = if (comps.isDefinedAt(coId)) comps(coId).name else ""
-
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
@@ -433,7 +427,30 @@ case class Tourney(
     for (coPhId <- coPhIds) yield { cophs((coId, coPhId)).name }  
   } 
 
-  def getCompPhaseName(coId: Long, coPhId: Int): String = cophs((coId, coPhId)).name
+  def getCompPhaseName(coId: Long, coPhId: Int): String = {
+    if (cophs.isDefinedAt((coId, coPhId))) { cophs((coId, coPhId)).name }
+    else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "" }
+  }
+
+  def getCompName(coId: Long=0L) = {
+    val effCoId = if (coId == 0) curCoId else coId
+    if (comps.isDefinedAt(effCoId)) { comps(effCoId).name } 
+    else { println(s"ERROR: getCompName(${effCoId}) doesn't exist"); "" }
+  } 
+
+
+  //
+  //  Mgmt Routines
+  // 
+  def getCurCoId: Long                      = curCoId
+  def getCurCoPhId: Int                     = if (comps.isDefinedAt(curCoId)) comps(curCoId).getCurCoPhId else 0
+
+  def setCurCoId(coId: Long)                = { curCoId = coId }
+  def setCurCoPhId(coId: Long, coPhId: Int) = {
+    if (comps.isDefinedAt(coId)) { comps(coId).setCurCoPhId(coPhId) }
+    else { println(s"ERROR: setCurCoPhId(${coId}) doesn't exist") }
+  }  
+
 
   //
   // print readable tourney - for debug purposes

@@ -18,7 +18,7 @@
 
 @grpContent(g: Group, gPos:Int, tdSuffix: String) = @{ Html(s"""
   <td rowspan="2" style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">${g.drawPos+gPos}</small></td>
-  <td rowspan="2" contenteditable='true' style="width:30px; font-size:small;" 
+  <td rowspan="2" data-drawSelectField='${gPos}'  contenteditable='true' style="width:30px; font-size:small;" 
       data-drawPos='${g.drawPos+gPos}' class="border-top border-bottom border-right text-center p-1 font-weight-bold text-info">${g.drawPos+gPos}
   </td>
   <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-name='${g.drawPos+gPos}'>${g.pants(gPos).name}</small></td>

@@ -41,6 +41,8 @@ case class Competition(
   var status:       Int,         // -1=WEB/SELF REGISTRATION, 0=READY, 1=RUNNING 
   var options:      String = "" 
 
+ 
+
   /** 
     values encoded within options for table tennis
     options(0)  => ageGroup:         String eg. Damen, Herren, Mädchen, Jungen, Schüler, ...
@@ -57,14 +59,19 @@ case class Competition(
     options(11) => manFinRank:       String
   */
 ) {
+  // mapping of licence to player identification accoridng to clickTT participant list
+  // currently only for single player 
+  var cttLic2player: Map[String, String] = Map().withDefaultValue("")
 
-  def setTyp(value : String): Unit = value.toLowerCase match {
-    case "einzel" | "single" => typ = 1
-    case "doppel" | "double" => typ = 2
-    case "mixed"             => typ = 3
-    case "team"              => typ = 4
-    case _                   => typ = 0
+  def getTyp(value: String): Int = value.toLowerCase match {
+    case "einzel" | "single" => 1
+    case "doppel" | "double" => 2
+    case "mixed"             => 3
+    case "team"              => 4
+    case _                   => 0
   } 
+
+  def setTyp(value : String)= { typ = getTyp(value) }
 
   def getOptStr(index: Int): String   = getMDStr(options, index) 
   def getOptInt(index: Int): Int      = getMDInt(options, index)
@@ -84,6 +91,7 @@ case class Competition(
   def getFinRndMod: String     = getMDStr(options,10);  def setFinRndMod(value:String)      = { options = setMD(options, value, 10) }
   def getManFinRank: String    = getMDStr(options,11);  def setManFinRank(value:String)     = { options = setMD(options, value, 11) }
   def getWebRegister: Boolean  = getMDBool(options,12); def setWebRegister(value:Boolean)   = { options = setMD(options, value, 12) }
+  def getCurCoPhId: Int        = getMDInt(options,13);  def setCurCoPhId(value:Int)         = { options = setMD(options, value, 13) }
 
   // formatTime - depending on local
   // 0 - date and time
@@ -143,6 +151,14 @@ case class Competition(
   def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.status.${status}",Seq())
   def getTypName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.typ.${typ}",Seq())
 
+  def matchClickTT(ageGroup: String, ttrFrom: String, ttrTo: String, ttrRemark: String, cttType: String): Boolean = {
+    getAgeGroup.toLowerCase     == ageGroup.toLowerCase && 
+    getRatingRemark.toLowerCase == ttrRemark.toLowerCase &&
+    getRatingLowLevel           == ttrFrom.toIntOption.getOrElse(0) &&
+    getRatingUpperLevel         == ttrTo.toIntOption.getOrElse(0) &&
+    typ                         == getTyp(cttType)
+  } 
+
 }                                                               
 
 object Competition {
@@ -177,17 +193,6 @@ object Competition {
   def tupled = (this.apply _).tupled
   def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
   def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
-
-
-  def parseStartTime(startDate: String): String = {
-    val datim1 = """(\d\d\d\d)-(\d\d)-(\d\d)[ ]*(\d\d):(\d\d)""".r
-    val datim2 = """(\d\d).(\d\d).(\d\d\d\d)[ ]*(\d\d):(\d\d)""".r
-    startDate match { 
-      case datim1(y,m,d,hh,mm) => s"${y}${m}${d}#${hh}${mm}"
-      case datim2(d,m,y,hh,mm) => s"${y}${m}${d}#${hh}${mm}"       
-      case                 _   => startDate
-    }
-  }
 
   def ct2Name(x: Int): String = {
     x match {

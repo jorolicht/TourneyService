@@ -39,7 +39,6 @@ object DlgCardPlayer extends BasicHtml
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardPlayer", "dlg.card.player", "DlgCardPlayer", "dlgcardplayer", scalajs.AppEnv.getMessage _ )
   implicit var tourney = Tourney.init
-  private def load()   = if (!checkId("Modal")) insertHtml_("APP__Load", "afterbegin", html.DlgCardPlayer().toString)
  
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
@@ -115,9 +114,9 @@ object DlgCardPlayer extends BasicHtml
 
     // setting invisible data
     if (inVisible) {
-      setData("Form", "id", player.id)
-      setData("Form", "hashKey", player.hashKey)
-      setData("Form", "options", player.options)
+      setData(gE("Form", ucp), "id", player.id)
+      setData(gE("Form", ucp), "hashKey", player.hashKey)
+      setData(gE("Form", ucp), "options", player.options)
     }      
     // setting visible data
     setInput("Name", player.getName(1))
@@ -192,7 +191,7 @@ object DlgCardPlayer extends BasicHtml
       }
     }
     
-    load()
+    loadModal(html.DlgCardPlayer(), ucp)
     set(plId, coId, trny, mode)
 
     // register routines for cancel and submit

@@ -225,7 +225,6 @@ class TourneyDAO @Inject()(
     db.run(action)
   }
   
-  
 
   /**
     * List all the events in the database.
