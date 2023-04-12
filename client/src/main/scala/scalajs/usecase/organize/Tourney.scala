@@ -85,7 +85,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
           setHtmlVisible("UploadError", false)
           if (App.tourney.getToId != 0 ) {
             // want update tournament/event ?           
-            DlgBox.showStd(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
+            DlgBox.standard(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
               Seq("cancel", "update", "new"),0,true).map { result => result match {
                 case 2 => doCttUpload(UploadModeUpdate)
                 case 3 => doCttUpload(UploadModeNew) 
@@ -93,7 +93,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
               }}         
           } else {
             // want create new tournament ?
-            DlgBox.showStd(getMsg("upload.msgbox.header"),getMsg("upload.msgbox.body2"), Seq("no", "yes"),0,true)
+            DlgBox.standard(getMsg("upload.msgbox.header"),getMsg("upload.msgbox.body2"), Seq("no", "yes"),0,true)
               .map { result => result match {
                 case 2 => doCttUpload(UploadModeNew) 
                 case _ => debug("buttonUpload", "cancel")
@@ -177,7 +177,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
         val toId = getData(elem, "toId", 0L)
         event.stopPropagation()
         if (toId == App.tourney.getToId & toId != 0) {
-          confirmDlg(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)).map { _ =>
+          DlgBox.confirm(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)).map { _ =>
             delTourney(toId).map { 
               case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
               case Right(res) => { App.resetLocalTourney(); render() }
@@ -204,11 +204,11 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
     // formData.append("sdate",  sdate.toString)
     // formData.append("edate",  edate.toString)
       
-    DlgSpinner.show(0, getMsg("upload.spinner")) 
+    DlgSpinner.start( getMsg("upload.spinner")) 
     
     uploadFile(App.tourney.getToId, App.tourney.startDate, upType, formData).map {
-      case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
-      case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
+      case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
+      case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
     } 
   }
 
@@ -221,19 +221,19 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
     val fileForm = dom.document.getElementById(getId("UploadForm" + "_" + ULD_CLICKTT)).asInstanceOf[dom.raw.HTMLFormElement]
     val formData = new dom.FormData(fileForm)
       
-    DlgSpinner.show(0, getMsg("upload.spinner")) 
+    DlgSpinner.start( getMsg("upload.spinner")) 
 
     upMode match {
       case UploadModeUpdate => {
         updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
-          case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
+          case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
+          case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
         } 
       }
       case UploadModeNew    => {
         newCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getMsg("upload.error.0")) 
-          case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}")
+          case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
+          case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
         } 
       }
 

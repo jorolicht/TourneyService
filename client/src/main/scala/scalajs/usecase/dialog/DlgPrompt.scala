@@ -37,20 +37,20 @@ object DlgPrompt extends BasicHtml
     val p = Promise[Either[String, String]]()
     val f = p.future
   
-    def dialogBoxCancel() = if (!p.isCompleted) { p success Left("CANCEL"); ; $("#DlgPrompt").modal("hide") }
+    def dialogBoxCancel() = if (!p.isCompleted) { p success Left("CANCEL"); ; $("#DlgPrompt__Modal").modal("hide") }
 
     def dialogBoxClick(e: Event) = {     
       if (!p.isCompleted) { 
         p success Right(getInput("DlgPrompt__Input", "")(UCP()))
-        $("#DlgPrompt").modal("hide") 
+        $("#DlgPrompt__Modal").modal("hide") 
       }
     }  
 
 
-    loadModal(html.DlgPrompt())
+    loadModal(html.DlgPrompt(), "DlgPrompt__Modal")
     actionfunc = afunc
 
-    $("#DlgPrompt").on("shown.bs.modal", () => $("#DlgPrompt__Input").focus() )    
+    $("#DlgPromp__Modal").on("shown.bs.modal", () => $("#DlgPrompt__Input").focus() )    
     $("[id=DlgPrompt__Close]").click((e: Event)  => dialogBoxCancel()) 
     $("[id=DlgPrompt__Start]").click((e: Event)  => dialogBoxClick(e)) 
     
@@ -62,25 +62,27 @@ object DlgPrompt extends BasicHtml
         e.preventDefault()
         if (!p.isCompleted) { 
           p success Right(getInput("DlgPrompt__Input", "")(UCP()))
-          $("#DlgPrompt").modal("hide") 
+          $("#DlgPrompt__Modal").modal("hide") 
         }
       }
 
       if (Seq(38).contains(e.keyCode.toInt)) {
         e.preventDefault()
+        println("KEY UPPP")
         afunc("Up", elem, e)
       }
       
       if (Seq(40).contains(e.keyCode.toInt)) {
         e.preventDefault()
+        println("KEY DOWN")
         afunc("Down", elem, e)
       }
     }
 
-    $("#DlgPrompt").modal("show")
-    setHtml("DlgPrompt__Title", title)(UCP())
-    setInput("DlgPrompt__Input", initValue)(UCP())
-    $("#DlgPrompt").on("hide.bs.modal", () => dialogBoxCancel())
+    $("#DlgPrompt__Modal").modal("show")
+    setHtml("Title", title)
+    setInput("Input", initValue)
+    $("#DlgPrompt__Modal").on("hide.bs.modal", () => dialogBoxCancel())
     f
   }
 

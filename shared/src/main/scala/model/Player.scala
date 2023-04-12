@@ -100,7 +100,6 @@ case class Player(
   def getBirthyear()    = if (birthyear == 0) None else Some(birthyear)
   def getBYearStr() = if (birthyear == 0) "" else birthyear.toString
 
-
   def updLicenseNr(name2person: HashMap[String, ArrayBuffer[(String, Int, String)]]) = {
     if (getLicenceNr == "") {
       val name = s"${lastname}·${firstname}"
@@ -116,8 +115,6 @@ case class Player(
     }
   }
 
-
-  
 }
 
 object Player {

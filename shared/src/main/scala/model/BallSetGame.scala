@@ -25,16 +25,16 @@ package object Utility {
   def invBall(x: String) = { x(0) match { case '-' => x.substring(1); case '+' => "-" + x.substring(1); case _ => "-" + x } } 
 
   def getBallFromStr(b: String):(Int,Int) = {
-    if (b == "")                      { (-1,-1)
-    } else if (b == "+0" | b == "0") { (11,0)
-    } else if (b == "-0")             { (0,11)
-    } else { b.toIntOption.getOrElse(0) match {  
+    if      (b == "")              (-1,-1)  
+    else if (b == "+0" | b == "0") (11,0) 
+    else if (b == "-0")            (0,11)  
+    else b.toIntOption.getOrElse(0) match {  
       case a if   10 to 500 contains a => (a+2, a)
       case b if    1 to   9 contains b => (11, b)
       case c if   -9 to  -1 contains c => (-c, 11)
       case d if -500 to -10 contains d => (-d, 2 - d) 
       case _                           => (-1,-1)
-    }}
+    }
   }
 
   def getBalls(balls: Array[String], noSets: Int): (Int, Int) = {

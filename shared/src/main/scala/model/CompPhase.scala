@@ -25,7 +25,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   var mFix         = 0
   var mTotal       = 0
     
-  var groups       = ArrayBuffer[Group]()      // groups of the competition (only gr rounds)
+  var groups       = ArrayBuffer[Group]()   // groups of the competition (only gr rounds)
   var ko           = new KoRound(0, "", 0)  // ko games of ghe competition (only ko rounds)
 
   //*****************************************************************************
@@ -399,6 +399,62 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     setStatus() 
     triggerList.toList
   }
+
+
+  // Example Match Entry for ClickTT
+  // <match nr="1" 
+  //   group="Gruppe A" 
+  //   scheduled="" 
+  //   player-a="PLAYER257" player-b="PLAYER256" 
+  //   set-a-1="2"  set-a-2="11" set-a-3="4"  set-a-4="11" set-a-5="11" set-a-6="0" set-a-7="0" 
+  //   set-b-1="11" set-b-2="0"  set-b-3="11" set-b-4="3"  set-b-5="3"  set-b-6="0" set-b-7="0" 
+  //   sets-a="3" matches-a="1" games-a="39" 
+  //   sets-b="2" matches-b="0" games-b="28" />
+
+  def getMatchesXML(sno2Id: Map[String,String]): String = {
+    val result = new StringBuilder("")
+    matches.foreach { m => if (m.countable) {
+      val playerA = sno2Id.getOrElse(m.stNoA,"")
+      val playerB = sno2Id.getOrElse(m.stNoB,"")
+      
+      if (playerA != "" && playerB != "") {
+        val group = name + " " + getMatchName(m)
+        val setsAB = m.sets
+        val setA=Array(0,0,0,0,0,0,0)
+        val setB=Array(0,0,0,0,0,0,0)
+        for ((ballsAB, index) <- m.getBalls.zip(Stream from 0)) {
+          setA(index) = ballsAB._1
+          setB(index) = ballsAB._2
+        }
+        val matchesAB = if (setsAB._1 > setsAB._2) (1,0) else if (setsAB._2 > setsAB._1) (0,1) else (0,0)
+        val xmlString = s"""<match group="${group}" scheduled="" player-a="${playerA}" player-b="${playerB}"
+                            | set-a-1="${setA(0)}"  set-a-2="${setA(1)}" set-a-3="${setA(2)}"  set-a-4="${setA(3)}" set-a-5="${setA(4)}" set-a-6="${setA(5)}" set-a-7="${setA(6)}"
+                            | set-b-1="${setB(0)}"  set-b-2="${setB(1)}" set-b-3="${setB(2)}"  set-b-4="${setB(3)}" set-b-5="${setB(4)}" set-b-6="${setB(5)}" set-b-7="${setB(6)}"
+                            | sets-a="${setsAB._1}" matches-a="${matchesAB._1}" games-a="${setA.sum}"
+                            | sets-b="${setsAB._2}" matches-b="${matchesAB._2}" games-b="${setB.sum}" />""".stripMargin('|')
+        result.append(xmlString)
+      }  
+    }}
+    result.toString()
+  }
+
+  def getMatchName(m: MEntry): String = {
+    m.coPhTyp match {
+      case CPT_GR => groups(m.asInstanceOf[MEntryGr].grId).name
+      case CPT_KO => m.asInstanceOf[MEntryKo].round match {
+        case 7 => "Round of 128"
+        case 6 => "Round of 64"
+        case 5 => "Round of 32"
+        case 4 => "Round of 16"
+        case 3 => "Quarter-final"
+        case 2 => "Semi-final"
+        case 1 => "Final"
+        case 0 => "Place 3"
+        case _ => ""
+      }
+      case _ => ""
+    }  
+  }  
 
   // calculate players position within competition phase
   def calcModel(grId: Int = -1): Boolean = {

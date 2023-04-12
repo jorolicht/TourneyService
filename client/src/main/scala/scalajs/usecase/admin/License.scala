@@ -51,7 +51,7 @@ object AdminLicense extends UseCase("AdminLicense")
     val clubId   = Try { $(getIdHa("FormClubId") ).value.asInstanceOf[String].toInt } getOrElse { 0 }
     val clubName = Try { $(getIdHa("FormClub") ).value.asInstanceOf[String] } getOrElse { "unknown Club" }
     if (clubId != 0) {
-      DlgBox.showStd(getMsg("delete.header"), getMsg("delete.body", s"${clubName}"), 
+      DlgBox.standard(getMsg("delete.header"), getMsg("delete.body", s"${clubName}"), 
                   Seq("cancel","ok"))
         .map { _ match {
           case 2 => deleteLicense(clubId).map { _ =>
@@ -62,7 +62,7 @@ object AdminLicense extends UseCase("AdminLicense")
           }
         }}
     } else {
-      DlgBox.showStd(getMsg("delete.header"), getMsg("delete.body.error"), Seq("ok"))
+      DlgBox.standard(getMsg("delete.header"), getMsg("delete.body.error"), Seq("ok"))
         .map { _ match { case _ => debug("delete", "OK") }}
     }
   }
@@ -77,7 +77,7 @@ object AdminLicense extends UseCase("AdminLicense")
     val updates  = if (updval == "1") true else false
 
     if (clubId != 0) {
-    //   DlgBox.showStd(getMsg("update.header"), getMsg("update.body", s"${clubName}"), Seq("cancel", "ok"))
+    //   DlgBox.standard(getMsg("update.header"), getMsg("update.body", s"${clubName}"), Seq("cancel", "ok"))
     //     .map { _ match {
     //       case 2 => updLicense(clubId, name, email, updates ).map { _ =>
     //         getLicenses.map { lics =>
@@ -87,7 +87,7 @@ object AdminLicense extends UseCase("AdminLicense")
     //       }
     //     }}
     // } else {
-    //   DlgBox.showStd(getMsg("update.header"), getMsg("update.body.error"), Seq("ok"))
+    //   DlgBox.standard(getMsg("update.header"), getMsg("update.body.error"), Seq("ok"))
     //     .map { _ match { case _ => debug("update", "OK") }}
     }
   }

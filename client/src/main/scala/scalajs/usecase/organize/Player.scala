@@ -191,7 +191,7 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
       case        _ => ("UNKNOWN","message","")
     }
 
-    DlgBox.showStd(dlgMsg._1, dlgMsg._2, Seq("cancel", "no", "yes"),0,true)
+    DlgBox.standard(dlgMsg._1, dlgMsg._2, Seq("cancel", "no", "yes"),0,true)
       .map { res => res match {
         case 1 => debug("confirm", "cancel"); false
         case 2 => debug("confirm", "no"); true

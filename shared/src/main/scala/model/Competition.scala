@@ -157,7 +157,7 @@ case class Competition(
     getRatingLowLevel           == ttrFrom.toIntOption.getOrElse(0) &&
     getRatingUpperLevel         == ttrTo.toIntOption.getOrElse(0) &&
     typ                         == getTyp(cttType)
-  } 
+  }
 
 }                                                               
 

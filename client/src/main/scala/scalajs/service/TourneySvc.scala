@@ -19,6 +19,7 @@ import upickle.default._
 
 import shared.utils._
 import shared.utils.Routines._
+import shared.utils.Constants._
 import shared.model._
 import shared.model.Competition._
 import scalajs.usecase.Helper
@@ -123,10 +124,20 @@ trait TourneySvc extends WrapperSvc
   }  
 
 
-  def downloadFile(dType: Int): Unit = {
-    val path = s"/service/downloadFile?toId=${App.tourney.id}&dType=${dType}"
+  def downloadFile(dloType: DownloadType.Value): Future[Either[Error, (String,String)]] = {
+    val path  = genPath("/service/downloadFile", s"toId=${App.tourney.id}&dType=${dloType.id}")
     Helper.debug("downloadFile", s"path: ${path}")
-    Ajax.get(path).map( _.getAllResponseHeaders).map( content => Helper.debug("downloadFile", s"${content.take(20)}"))
+    Ajax.get(path).map( response => { 
+      val respText = response.responseText 
+      val contDisp = getHdrParam(response.getResponseHeader("content-disposition"))
+      val fName = contDisp("filename")
+      Helper.debug("download", s"responseText: ${respText} filename: ${fName} ")
+      Right((fName,respText))
+    }).recover({
+        // Recover from a failed error code into a successful future
+        case dom.ext.AjaxException(req) => Left(Error.decodeWithDefault(Error("err0000.communication.error"), req.responseText, s"${req.statusText} / ${req.responseText}", "downloadFile"))
+        case _: Throwable               => Left(Error.decodeWithDefault(Error("err0000.communication.error"), "", "request status and text unknown", "downloadFile"))
+    })
   }
 
   def uploadFile(toId: Long, sDate: Int, upType: String, formData: dom.FormData): Future[Either[Error, Long]] = 
@@ -504,11 +515,18 @@ trait TourneySvc extends WrapperSvc
   //
   //  ClickTT Interface
   //
-  def genCttResult(): Future[Either[Error, Array[(Long, Map[Long, String])]]] = {
+  def genCttResult(): Future[Either[Error, Array[ (Long, Either[Error, (List[String],List[String]) ]) ] ]] = {
     postAction("genCttResult", App.tourney.id, "", "").map {
       case Left(err)     => Left(err.add("genCttResult"))
       case Right(result) => {
-        try Right( read[Array[(Long, Map[Long, String])]](result) )  
+        try {
+          val decodeResult = read[Array[ (Long, Either[String, (List[String], List[String])]) ]] (result)
+          val finalResult= decodeResult.map { entry => entry._2 match {
+            case Left(errString) => (entry._1, Left(Error.decode(errString, "", "genCttResult")))
+            case Right(snoList)  => (entry._1, Right(snoList)) 
+          }}
+          Right( finalResult ) 
+        }   
         catch { case _:Throwable => {
           println(s"ERROR: genCttResult decoding result not possible: ${result.take(10)}")
           Left(Error("err0207.genCttResult", "","","genCttResult")) 

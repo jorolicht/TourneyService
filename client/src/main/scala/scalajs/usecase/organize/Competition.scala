@@ -158,7 +158,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         val coName = App.tourney.comps(coId).name
 
         event.stopPropagation()
-        DlgBox.showStd(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coName), Seq("cancel", "ok")).map { _ match {
+        DlgBox.standard(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coName), Seq("cancel", "ok")).map { _ match {
           case 2 => delComp(coId).map { 
             case Left(err)  => DlgInfo.show("FEHLER", getError(err), "danger")
             case Right(res) => {  
@@ -241,8 +241,8 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           val paName = SNO(sno).getName(comp.typ)(App.tourney)
 
           val confirm = comp.typ match {
-            case CT_SINGLE => confirmDlg(getMsg("confirm.single.delete.hdr"), getMsg("confirm.single.delete.msg", paName, coName))
-            case CT_DOUBLE => confirmDlg(getMsg("confirm.double.delete.hdr"), getMsg("confirm.double.delete.msg", paName, coName))
+            case CT_SINGLE => DlgBox.confirm(getMsg("confirm.single.delete.hdr"), getMsg("confirm.single.delete.msg", paName, coName))
+            case CT_DOUBLE => DlgBox.confirm(getMsg("confirm.double.delete.hdr"), getMsg("confirm.double.delete.msg", paName, coName))
             case _         => error("update", s"competition typ not yet supported"); Future(false)
           }
           confirm.map { _ match {

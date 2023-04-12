@@ -152,14 +152,19 @@ class BasicHtml
     catch { case _: Throwable => false }
   }
 
+
+
   def loadModal[C](text: C, ucp: UseCaseParam) = if (!checkId("Modal", ucp)) text match {
     case _:String => insertHtml(gE("APP__Load"), "afterbegin", text.asInstanceOf[String])
     case _        => insertHtml(gE("APP__Load"), "afterbegin", text.toString) 
   }
-  def loadModal[C](text: C, prefix: String="")  = if (!checkId("Modal", prefix)) text match {
+  def loadModal[C](text: C, id: String="")  = if (!checkId(id,"")) text match {
     case _:String => insertHtml(gE("APP__Load"), "afterbegin", text.asInstanceOf[String])
     case _        => insertHtml(gE("APP__Load"), "afterbegin", text.toString) 
   }
+
+
+
 
   def ite[T](cond: Boolean, valA: T, valB:T): T = if (cond) valA else valB
   def ucpId(id: String)(implicit ucp: UseCaseParam): String = if (ucp.idBase == "") id else s"${ucp.idBase}__${id}"
@@ -655,12 +660,7 @@ class BasicHtml
     """.stripMargin('|')
   }
 
-   // confirm dialog
-  def confirmDlg(title: String, msg: String): Future[Boolean] =
-    scalajs.usecase.dialog.DlgBox.showStd(title, msg, Seq("cancel", "ok")).map { _ match {
-     case 2 => true
-     case _ => false
-    }}
+
 
   def doTry(msg: String)(op: => Unit) = {
     try op catch { case _: Throwable => Helper.error("doTry", msg) }

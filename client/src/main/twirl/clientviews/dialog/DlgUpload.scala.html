@@ -8,21 +8,21 @@
 @msg(name: String) = @{ if (msgs.isDefinedAt(mPref + "." + name)) msgs(mPref + "." + name) else mPref + "." + name }
 
 <!--  START Modal Dialog for file upload -->    
-<div class="modal fade" id='@id("Modal")' tabindex="-1" role="dialog">
+<div @id("Modal") class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
     
       <div class="modal-header">
-        <h5 id='@id("Header")' class="modal-title"></h5>
+        <h5 @id("Header") class="modal-title"></h5>
         <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
       </div>
       
       <div class="modal-body">  
-        <p id='@id("Body")' class="small"></p>
+        <p @id("Body") class="small"></p>
         <div class="form-input">
           <form method="post" enctype="multipart/form-data" id="@id("Form")">
              <div class="form-group">
-                <input id='@id("Input")' type="file" class="form-control-file border" name="file" onChange="DlgUpload.validate(this);"/>
+                <input @id("Input") type="file" class="form-control-file border" name="file" onChange="DlgUpload.validate(this);"/>
              </div>                        
           </form>
         </div>       
@@ -30,7 +30,7 @@
  
        <div class="modal-footer">
         <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">@msg("button.cancel")</button>
-        <button id="@id("ButtonSubmit")" onclick="DlgUpload.submit()" class="btn btn-secondary btn-sm disabled" type="button">@msg("button.submit")</button> 
+        <button @id("ButtonSubmit") onclick="DlgUpload.submit()" class="btn btn-secondary btn-sm disabled" type="button">@msg("button.submit")</button> 
       </div>
            
     </div>

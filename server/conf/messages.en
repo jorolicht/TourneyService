@@ -11,7 +11,7 @@ config.LogLevel                                     = debug
 
 app.mockup                                          = false
 app.version                                         = 2023-02EN190
-app.date                                            = 2023-02-22
+app.date                                            = 2023-04-11
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -426,6 +426,7 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   certificate.locationdate                            = {0}, the {1}
 
   download.typ.1                                      = TourneyRegistrations.csv
+  download.typ.2                                      = ClickTT_Result.xml
 #END General Labels
 
 
@@ -1359,6 +1360,8 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0205.upload.file.startDate                       = Upload error: start date of clickTT data do not fit to tourney data
   err0206.upload.file.sDateExists                     = Upload error: tourney with click TT start date exists already (update?).
   err0207.genCttResult                                = (Communicaiton-)error while generating ClickTT result file.
-
+  err0208.genCttResult.noMatchingComp                 = Error generating ClickTT result file, no appropriate competition found
+  err0209.genCttResult.moreMatchingComps              = Error generating ClickTT result file, no clear competition assignment  
+  err0210.downloadFile.invalidType                    = Error invalid download file 
 
 #END error codes / messages

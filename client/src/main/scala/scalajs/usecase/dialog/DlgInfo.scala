@@ -28,10 +28,9 @@ object DlgInfo extends BasicHtml
   this: BasicHtml =>
   implicit val ucp = UseCaseParam("APP__DlgInfo", "dlg.info", "DlgInfo", "dlginfo", scalajs.AppEnv.getMessage _ )
 
-  private def load = if (getTextContent("Content").length <= 0) setHtml_("APP__DlgInfo__Load", html.DlgInfo().toString)
-
   def show(title: String, body: String, alertTyp: String="success") : Unit = {
-    load
+    loadModal(html.DlgInfo(), ucp)
+
     $("#APP__DlgInfo").modal("show")
     alertTyp match {
       case "danger"  => removeClass("Content", "border-success", "border-secondary"); addClass("Content", "border-danger")

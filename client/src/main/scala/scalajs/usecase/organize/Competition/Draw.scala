@@ -60,8 +60,8 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         println(s"${asign._1.mkString(",")} versus ${asign._2.mkString(", ")}")
         val diff = asign._1.toSet.diff(asign._2.toSet)
         if      (diff.size == 0) reassignDraw(App.tourney.cophs(coId, coPhId), asign._1.zip(asign._2).toMap)
-        else if (diff.size == 1) DlgBox.showStd(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
-        else                     DlgBox.showStd(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
+        else if (diff.size == 1) DlgBox.standard(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
+        else                     DlgBox.standard(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
       } 
       case "Start"   => {
         App.tourney.cophs((coId,coPhId)).setStatus(CPS_EIN)

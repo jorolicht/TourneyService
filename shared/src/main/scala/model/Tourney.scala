@@ -432,10 +432,22 @@ case class Tourney(
     else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "" }
   }
 
+  def getCompPhaseMatches(coId: Long, coPhId: Int): String = {
+    val sno2clickTTId = pl2co.filter( _._1._2 == coId).map (elt => elt._2.sno -> elt._2.ident)
+    if (cophs.isDefinedAt((coId, coPhId))) cophs((coId, coPhId)).getMatchesXML(sno2clickTTId) else ""
+  }
+
   def getCompName(coId: Long=0L) = {
     val effCoId = if (coId == 0) curCoId else coId
     if (comps.isDefinedAt(effCoId)) { comps(effCoId).name } 
     else { println(s"ERROR: getCompName(${effCoId}) doesn't exist"); "" }
+  } 
+
+  def getCompMatches(coId: Long) = {
+    val result = new StringBuilder("<matches>")
+    cophs.filter(_._1._1==coId).foreach { elem => result.append(getCompPhaseMatches(elem._1._1, elem._1._2)) }
+    result.append("</matches>")
+    result.toString()
   } 
 
 

@@ -332,16 +332,17 @@ class PostActionCtrl @Inject()
             case Left(err)  => (0, 0, false)
             case Right(res) => (res._1, res._2, true)  
           }
-          if (valid) {
-            tsv.addTournCTT(CttService.load("", reqData), orgDir, organizer).map { 
-              case Left(err)   => BadRequest(err.add("addTournCTT").encode) 
-              case Right(trny) => tsv.saveTourney(trny.id) match {
-                case Left(err)  => BadRequest(err.encode)
-                case Right(res) => Ok(trny.encode())
-              }
-            }  
-          } else {
-            Future(BadRequest(Error("err0047.post.addTournCTT").encode))
+          if (!valid) Future(BadRequest(Error("err0047.post.addTournCTT").encode)) else {
+            CttService.load("", reqData) match { 
+              case Left(err)      => Future(BadRequest(err.add("addTournCTT").encode)) 
+              case Right(cttTrny) => tsv.addTournCTT(cttTrny, orgDir, organizer).map { 
+                case Left(err)   => BadRequest(err.add("addTournCTT").encode) 
+                case Right(trny) => tsv.saveTourney(trny.id) match {
+                  case Left(err)  => BadRequest(err.encode)
+                  case Right(res) => Ok(trny.encode())
+                }
+              } 
+            }       
           }
         }     
       } 
@@ -412,7 +413,6 @@ class PostActionCtrl @Inject()
       //
       // PLAYER Routines
       //
-
       // addPlayer adds a player to the database
       case "addPlayer" => {
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "addPlayer").encode)) else {
@@ -434,13 +434,7 @@ class PostActionCtrl @Inject()
             case Right(pl)    => Ok(pl.encode)
           }
         }  
-      }  
-
-    //     def setPlayerLicence(plId: Long, licence: String): Future[Either[Error, Player]] = 
-    // postAction("setPlayerLicence", App.tourney.id, s"plId=${plId}&licence=${licence}", "", true).map {
-    //   case Left(err) => Left(err)
-    //   case Right(pl) => Player.decode(pl)
-    // } 
+      } 
 
 
       //
@@ -448,14 +442,34 @@ class PostActionCtrl @Inject()
       //
       case "genCttResult" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
         import scala.collection.mutable.ArrayBuffer
+        import scala.xml.transform.RewriteRule
+        import scala.xml.transform.RuleTransformer
+
         tsv.getTourney(toId).map {
-          case Left(err)   => { logger.error(s"genCttResult: ${err.encode}" ); BadRequest(err.add("getCttResult").encode) }
+          case Left(err)   => { logger.error(s"genCttResult: ${err.encode}" ); BadRequest(err.add("genCttResult").encode) }
           case Right(trny) => {
             val tourneyDir = s"${env.rootPath}${File.separator}db${File.separator}Tourneys${File.separator}${ctx.orgDir}"
-            val cttFN = s"${tourneyDir}/${trny.startDate}_${toId}_participants.xml"
-            val cttTrny = CttService.load(cttFN)
-            logger.info(s"postAction genCttResult: ${cttFN}" ) 
-            Ok(  write[Array[(Long, Map[Long, String])]](genCttMapping(trny, cttTrny)))
+            val cttFN    = s"${tourneyDir}/${trny.startDate}_${toId}_participants.xml"
+            val cttResFN = s"${tourneyDir}/${trny.startDate}_${toId}_result.xml"
+
+            val clickTTNode = MyXML.loadFile(cttFN)
+            val cttTrny = CttService.readCttTourney(clickTTNode)
+            var resClickTTNode = clickTTNode.head
+            val coPlMapping = genCttMapping(trny, cttTrny)
+            coPlMapping.foreach { elem => {
+              elem._2 match {
+                case Left(err)     => logger.info(s"genCttResult -> coId ${elem._1} ${err}") 
+                case Right(plList) => {
+                  val co = trny.comps(elem._1)
+                  val matches = scala.xml.XML.loadString(trny.getCompMatches(co.id))   
+                  val rwRule = new tourn.services.AddMatches(matches, co.getAgeGroup, co.typ, co.getRatingLowLevel, co.getRatingUpperLevel, co.getRatingRemark, co.startDate)
+                  val addRule = new scala.xml.transform.RuleTransformer(rwRule)
+                  resClickTTNode = addRule.transform(resClickTTNode).head
+                } 
+              }
+            }}
+            MyXML.saveClickTT(resClickTTNode, cttResFN)
+            Ok( write[ Array[(Long,   Either[String, (List[String], List[String]) ])] ] (coPlMapping) )
           }
         }
       }  
@@ -479,11 +493,13 @@ class PostActionCtrl @Inject()
   }
 
   
-  //generate Ctt Mapping
-  def genCttMapping(trny: Tourney, cttTrny: CttTournament): Array[(Long, Map[Long, String])] = {
+  // generate Ctt Mapping
+  // returns for every competiion either error or two list (tupel) of mapped and not mapped players
+
+  def genCttMapping(trny: Tourney, cttTrny: CttTournament): Array[(Long, Either[String, (List[String], List[String])])] = {
 
     import scala.collection.mutable.{ HashMap, ArrayBuffer }      
-    val result = new ArrayBuffer[(Long, Either[Error, Int])]
+    val result = new ArrayBuffer[(Long, Either[String, (List[String], List[String])])]
 
     // reset ident settings
     trny.pl2co.foreach(_._2.ident = "") 
@@ -491,9 +507,11 @@ class PostActionCtrl @Inject()
     for ((coId, comp) <- trny.comps) {
       // get approbriate competition
       val cttCompList = cttTrny.competitions.filter( _.matchWith(comp.getAgeGroup, comp.typ, comp.getRatingLowLevel, comp.getRatingUpperLevel, comp.getRatingRemark, comp.startDate) )
-      if (cttCompList.size != 1) { 
-        result += ((coId, Left(Error("xxx"))))
-      } else {
+      if (cttCompList.size == 0) { 
+        result += ( (coId, Left(Error("err0208.genCttResult.noMatchingComp").encode)) )
+      } else if (cttCompList.size > 1) {
+        result += ( (coId, Left(Error("err0209.genCttResult.moreMatchingComps").encode)) )
+      } else {  
         val cttComp = cttCompList.head
         val name2person    = new HashMap[String, ArrayBuffer[CttPerson]]()
         val licence2player = new HashMap[String, String]()
@@ -520,7 +538,6 @@ class PostActionCtrl @Inject()
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
               val plId    = entry.getSingleId
               val lic     = trny.players(plId).getLicenceNr
-              // TODO try to get licence with name
               entry.ident = licence2player(lic)
             }}
 
@@ -529,10 +546,6 @@ class PostActionCtrl @Inject()
               val plIds  = entry.getDoubleId
               val lic1   = trny.players(plIds._1).getLicenceNr
               val lic2   = trny.players(plIds._2).getLicenceNr
-              
-              // TODO try to get licence with name
-              // if (lic1 != "") ...
-              // if (lic2 != "") ...
 
               entry.ident = 
                 if (licence2player.isDefinedAt(s"${lic1}·${lic2}")) {
@@ -542,20 +555,22 @@ class PostActionCtrl @Inject()
                 } else { ""}  
             }}
 
-          case _                     => logger.info(s"coId: ${coId} with competition typ: ${comp.typ} not supported" ) 
+          case _ => logger.info(s"coId: ${coId} with competition typ: ${comp.typ} not supported" ) 
         }
 
+        val okMissList = trny.pl2co.filter(_._1._2==coId).partition( _._2.ident!="") 
+        val okList   = okMissList._1.map( _._2.sno).toList
+        val missList = okMissList._2.map( _._2.sno).toList
+
+        result += ((coId, Right( (okList, missList) )))
       } // valid coId
     } 
 
-    trny.pl2co.foreach { case (key, entry) => {
-      logger.info(s"coId: ${entry.coId} sno: ${entry.sno} ident: ${entry.ident}" ) 
-    }}
-   
-
-    Array( (1L, Map(1L->"xx")), (2L,Map(2L->"zz")))
-
-    
+    // trny.pl2co.foreach { case (key, entry) => {
+    //   logger.info(s"coId: ${entry.coId} sno: ${entry.sno} ident: ${entry.ident}" ) 
+    // }}
+    result.to(Array)
+    //Array( (1L, Left(Error("Competition not found").encode)), (2L, Right(List(177L, 188L))) )
   }
 
 }

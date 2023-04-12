@@ -72,7 +72,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
           getMsg("delete.one", App.tourney.getCompPhaseName(coId, coPhId))
         }  
 
-        DlgBox.showStd(getMsg("delete.confirm"), msg, Seq("cancel", "yes"),0,true).map { res => res match {
+        DlgBox.standard(getMsg("delete.confirm"), msg, Seq("cancel", "yes"),0,true).map { res => res match {
           case 2 => {
             App.tourney.delCompPhase(coId, coPhId)
             App.tourney.delCompPhases(coId, followingCoPhs)
@@ -91,7 +91,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
           getMsg("reset.one", App.tourney.getCompPhaseName(coId, coPhId))
         }  
 
-        DlgBox.showStd(getMsg("reset.confirm"), msg, Seq("cancel", "yes"),0,true).map { res => res match {
+        DlgBox.standard(getMsg("reset.confirm"), msg, Seq("cancel", "yes"),0,true).map { res => res match {
           case 2 => {
             App.tourney.getCompPhaseName(coId, coPhId)
             App.tourney.getCompPhaseNames(coId, followingCoPhs)

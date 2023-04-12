@@ -150,12 +150,12 @@ object AddonMain extends TestUseCase("AddonMain")
     conf.subcommand match {
       case Some(conf.tourney) => {
         val toId = conf.tourney.toid.getOrElse(0L)
-        println(s"subcommand tourney toid: ${toId}")
+        println(s"subcommand tourney toId: ${toId}")
         showTourney(toId)
       }  
       case Some(conf.comp)    => {
         val coId   = conf.phase.coid.getOrElse(0L)
-        println(s"subcommand comp coid: ${coId}")
+        println(s"subcommand comp coId: ${coId}")
         if (!App.tourney.comps.contains(coId)) {
           error("showCompetition", s"competition coId: ${coId} not found")
         } else {
@@ -191,7 +191,7 @@ object AddonMain extends TestUseCase("AddonMain")
               |   Options:
               |""".stripMargin)
 
-      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog", "ctt"))
+      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog", "ctt", "download"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")
       verify()
@@ -207,6 +207,7 @@ object AddonMain extends TestUseCase("AddonMain")
       case "dialog"    => AddonDialog.execTest(number, param)
       case "compphase" => AddonCompPhase.execTest(number, param)
       case "ctt"       => AddonCtt.execTest(number, param)
+      case "download"  => AddonDownload.execTest(number, param)
       case _           => ()
     }
   }
@@ -266,8 +267,6 @@ object AddonMain extends TestUseCase("AddonMain")
   }
 
 
-
-
   @JSExport
   def console() = prompt(getMsgPref("home.main","prompt")).map {
     case Left(err)  => println("invalid command/cancel")
@@ -302,7 +301,6 @@ object AddonMain extends TestUseCase("AddonMain")
     }
 
     val initVal = if (pHistory.length > 0) { pPosition = 0; pHistory(0) } else { pPosition = -1; "" }  
-
     DlgPrompt.show(title, initVal, actionEvent) map {
       case Left(err)    => Left(err)
       case Right(input) => {
@@ -343,8 +341,6 @@ object AddonMain extends TestUseCase("AddonMain")
       } 
     }
   }
-
-
 
  
 }

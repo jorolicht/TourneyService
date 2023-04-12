@@ -1,4 +1,4 @@
-package addon.test
+
 
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
@@ -38,7 +38,7 @@ import scalajs.service._
 import scalajs.{ App, AppEnv }
 
 
-object AddonOrgComp extends TestUseCase("AddonOrgComp") 
+object AddonDraw extends TestUseCase("AddonDraw") 
   with TourneySvc with LicenseSvc with AuthenticateSvc with WrapperSvc
 {
 

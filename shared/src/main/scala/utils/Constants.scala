@@ -18,6 +18,12 @@ package object Constants {
   val UploadModeUpdate  = 1
   val UploadModeNew     = 2
 
+  object DownloadType extends Enumeration { 
+    val UNKNOWN   = Value
+    val REGISTER  = Value
+    val CTTResult = Value
+  }
+
   // checkUploadExt - check whether required upload type
   //                  matches with its extension
   def checkUploadExt(ext: String, uloadTyp: String): Boolean = {

@@ -111,4 +111,13 @@ trait WrapperSvc {
     s"${route}?params=${enc(papas)}"
   } 
 
+  def getHdrResponse(headers: String): Map[String, String] = {
+    headers.split('\n').map( _.split(':') match { case Array(x,y) => x.toLowerCase.trim -> y.trim }).toMap
+  }
+
+  def getHdrParam(header: String): Map[String, String] = {
+    header.split(';').map( _.split('=') match { case Array(x,y) => x.trim -> y.trim; case Array(x) => x.trim -> "" } ).toMap
+  }  
+
+
 }  

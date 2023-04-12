@@ -94,10 +94,10 @@ object AddonCtt extends UseCase("AddonCtt")
                                 dom.raw.BlobPropertyBag("text/plain"))
         formData.append("file", data, "participant.xml") 
 
-        DlgSpinner.show(0, "Start Transfer") 
+        DlgSpinner.start( "Start Transfer") 
         updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => println(s"${err}"); DlgSpinner.show(2, getError(err)) 
-          case Right(res) => DlgSpinner.show(1, s"TourneyId: ${res}") 
+          case Left(err)  => println(s"${err}"); DlgSpinner.error( getError(err)) 
+          case Right(res) => DlgSpinner.result( s"TourneyId: ${res}") 
         }
       }
     }
@@ -126,11 +126,11 @@ object AddonCtt extends UseCase("AddonCtt")
                                 dom.raw.BlobPropertyBag("text/plain"))
         formData.append("file", data, "participant.xml") 
 
-        DlgSpinner.show(0, "Start Transfer") 
+        DlgSpinner.start("Start Transfer") 
         newCttFile(0L, sDate, formData).map {
-          case Left(err)   => println(s"${err}"); DlgSpinner.show(2, getError(err)) 
+          case Left(err)   => println(s"${err}"); DlgSpinner.error( getError(err)) 
           case Right(toId) => {
-            DlgSpinner.show(1, s"TourneyId: ${toId}") 
+            DlgSpinner.result(s"TourneyId: ${toId}") 
             App.loadRemoteTourney(toId).map {
               case Left(err)  => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${getError(err)}")
               case Right(res) => {         
@@ -151,18 +151,29 @@ object AddonCtt extends UseCase("AddonCtt")
     import cats.data.EitherT
     import cats.implicits._ 
     
-    val sDate = text.toIntOption.getOrElse(19000101)
+    val toId = text.toLongOption.getOrElse(185L)
+
     
-    println(s"---> Start Test: generate CTT result file")
+    println(s"---> Start Test: generate CTT result file for toId: ${toId}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
       coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      result    <- EitherT(App.loadRemoteTourney(toId))
     } yield { (pw) }).value.map {
       case Left(err)  => dom.window.alert(s"ERROR: authentication failed with: ${getError(err)}")
       case Right(res) => {
         genCttResult.map {
           case Left(err)     => println(s"ERROR: genCttResult with: ${getError(err)}")
-          case Right(result) => println(s"RESULT: ${result.mkString(",")}")
+          case Right(resArr) => {
+            resArr.foreach { entry => entry._2 match {
+              case Left(err)      => println(s"CoId: ${entry._1} Error: ${err}")
+              case Right(snoLists) => 
+                println("----------------------------------------------------------")
+                println(s"CoId: ${entry._1}   okList: ${snoLists._1}")  
+                println(s"CoId: ${entry._1} missList: ${snoLists._2}") 
+            }}
+
+          }  
         }
       }
     }
@@ -180,7 +191,7 @@ object AddonCtt extends UseCase("AddonCtt")
     println(s"---> Start Test: generate CTT result file")
     genCttResult.map {
       case Left(err)     => println(s"ERROR: genCttResult with: ${getError(err)}")
-      case Right(result) => println(s"RESULT: ${result.mkString(",")}")
+      case Right(result) => println(s"RESULT: ${result}")
     }
   }
 
@@ -200,7 +211,7 @@ object AddonCtt extends UseCase("AddonCtt")
       case Right(res)   => genCttResult.map {
         case Left(err)     => println(s"ERROR: genCttResult with: ${getError(err)}")
         case Right(result) => {
-          result.foreach(elem => { println(s"coId: ${elem._1}");  println(s"mapping: ${elem._2.mkString(",")}") })
+          result.foreach(elem => { println(s"coId: ${elem._1}");  println(s"mapping: ${elem._2}") })
         }  
       }
     }

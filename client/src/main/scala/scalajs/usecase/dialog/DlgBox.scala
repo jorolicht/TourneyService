@@ -51,23 +51,25 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        $(getIdHa("Modal")).modal("hide")
+        $("#APP__DlgBox__Modal").modal("hide")
       }         
     }
     
+
     setHtml("Load", html.DlgBox(header, body, buttons, defaultButton, sameSize))
 
-    $(getIdHa("Modal")).modal("show")
-    $(getIdHa("Modal")).on("hide.bs.modal", () => dialogBoxCancel())
+    $("#APP__DlgBox__Modal").modal("show")
+    $("#APP__DlgBox__Modal").on("hide.bs.modal", () => dialogBoxCancel())
     $("[id^=APP__DlgBox__Click_]").click((e: Event)  => dialogBoxClick(e)) 
     f
   }
 
 
  /**
-   * show - load twirl template and show it with message ids
+   * standard - load twirl template and show it with message ids
+   *            return according to buttons seqeuence 1,2,3, ... 
    */
-  def showStd(header: String, body: String, buttons: Seq[String], defaultButton: Int=0, sameSize: Boolean=false): Future[Int] = {
+  def standard(header: String, body: String, buttons: Seq[String], defaultButton: Int=0, sameSize: Boolean=false): Future[Int] = {
     val p = Promise[Int]()
     val f = p.future
   
@@ -85,16 +87,25 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        $(getIdHa("Modal")).modal("hide")
+        $("#APP__DlgBox__Modal").modal("hide")
       }         
     }
     
     setHtml("Load", html.DlgBoxStd(header, body, buttons, defaultButton, true))
-    $(getIdHa("Modal")).modal("show")
-    $(getIdHa("Modal")).on("hide.bs.modal", () => dialogBoxCancel())
+    $("#APP__DlgBox__Modal").modal("show")
+    $("#APP__DlgBox__Modal").on("hide.bs.modal", () => dialogBoxCancel())
     $("[id^=APP__DlgBox__Click_]").click((e: Event)  => dialogBoxClick(e)) 
     f
   }
+
+ /**
+   * confirm - shows title and msg 
+   *           return true or false
+   */
+  def confirm(title: String, msg: String): Future[Boolean] = standard(title, msg, Seq("cancel", "ok")).map { _ match {
+    case 2 => true
+    case _ => false
+  }}
 
 }
   

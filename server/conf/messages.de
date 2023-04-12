@@ -11,7 +11,7 @@ config.LogLevel                                     = debug
 
 app.mockup                                          = false
 app.version                                         = 2023-02DE190
-app.date                                            = 2023-02-22
+app.date                                            = 2023-04-11
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -427,6 +427,7 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   certificate.locationdate                            = {0}, den {1}
 
   download.typ.1                                      = TurnierAnmeldungen.csv
+  download.typ.2                                      = ClickTT_Result.xml
 #END General Labels 
 
 
@@ -1360,5 +1361,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0205.upload.file.startDate                       = Fehler beim Hochladen einer Datei: clickTT-Startdatum passt nicht zu Turnierstartdatum
   err0206.upload.file.sDateExists                     = Fehler beim Hochladen einer Datei: Turnier mit dem clickTT-Startdatum existiert bereits (Aktualisierung?).   
   err0207.genCttResult                                = (Kommunikations-)Fehler beim Generieren der ClickTT-Ergebnisdatei.
+  err0208.genCttResult.noMatchingComp                 = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen passenden Wettbewerb gefunden
+  err0209.genCttResult.moreMatchingComps              = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen eindeutigen Wettbewerb gefunden
+  err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp 
 
 #END Error Codes/Messages
