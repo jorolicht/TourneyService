@@ -59,8 +59,8 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
     action match {
 
       case "StartRound" => {
-        App.tourney.comps(coId).status = Competition.CS_RUN
-        App.tourney.cophs((coId, coPhId)).setStatus(CPS_EIN)
+        App.tourney.comps(coId).status = CompStatus.RUN
+        App.tourney.cophs((coId, coPhId)).setStatus(CompPhaseStatus.EIN)
         App.execUseCase("OrganizeCompetitionInput", "", "")
       } // StartRound
 
@@ -131,19 +131,19 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
     initContent(coId, coPhId, ctrlBase, clientviews.organize.competition.ctrl.html.CtrlCard(coId, coPhId).toString)
         
     // set status
-    setHtml(s"Status_${coph.coId}_${coph.coPhId}", getMsgPref("competition.phase.status", s"${coph.status}"))
-    setHtml(s"Config_${coph.coId}_${coph.coPhId}", coph.getDescription(BasicHtml.getMsg_)) 
+    setHtml(s"Status_${coph.coId}_${coph.coPhId}", getMsg(s"competition.phase.status${coph.status}"))
+    setHtml(s"Config_${coph.coId}_${coph.coPhId}", coph.getDescription(getMsg_)) 
     setHtml(s"Finished_${coph.coId}_${coph.coPhId}", getMsg("finished", s"${coph.mFinished}", s"${coph.mTotal}")) 
 
     // set action buttons
-    setActionBtn(coId, coPhId, "StartRound", coph.status == CPS_AUS)
-    setActionBtn(coId, coPhId, "ResetRound", !(coph.status == CPS_AUS))
+    setActionBtn(coId, coPhId, "StartRound", coph.status == CompPhaseStatus.AUS)
+    setActionBtn(coId, coPhId, "ResetRound", !(coph.status == CompPhaseStatus.AUS))
     setActionBtn(coId, coPhId, "DeleteRound", true)
     setCheckbox("DemoBtn", coph.demo)
 
     coPhCfg match {
       case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45| CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => {
-        setActionBtn(coId, coPhId, "StartFollowing", !(coph.status == CPS_AUS))
+        setActionBtn(coId, coPhId, "StartFollowing", !(coph.status == CompPhaseStatus.AUS))
       }
 
       case CPC_KO => {   }
@@ -159,8 +159,8 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
 
   def checkPantEntry(sno: String, coId: Long, checked: Boolean): Unit = {
     val status = App.tourney.pl2co((sno, coId)).status
-    if (status == Pant.REDY || status == Pant.SIGN) {
-      App.tourney.pl2co((sno, coId)).status = if (checked) Pant.REDY else Pant.SIGN 
+    if (status == PantStatus.REDY || status == PantStatus.REGI) {
+      App.tourney.pl2co((sno, coId)).status = if (checked) PantStatus.REDY else PantStatus.REGI 
     }
   }
 

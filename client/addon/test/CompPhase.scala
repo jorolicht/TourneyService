@@ -111,10 +111,10 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
 
         // initialize participants to be shown 
         // only participants with status signed or ready
-        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.SIGN || x2.status == Pant.REDY } map { x =>
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == PantStatus.PEND.id || x2.status == PantStatus.REDY.id } map { x =>
           val sno = SNO(x._2.sno) 
           val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
-          val enabled = (x._2.status == Pant.REDY)
+          val enabled = (x._2.status == PantStatus.REDY.id)
           // show name, club name and ttr value
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled, if(enabled) QualifyTyp.Winner else QualifyTyp.Looser ) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))

@@ -8,7 +8,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Routines._
 import shared.model.MEntryGr
-import shared.model.ParticipantEntry
+import shared.model.PantEntry
 import shared.model.Utility._
 
 
@@ -56,7 +56,7 @@ object GroupEntry {
  * val tup2     = """\((\d+),(\d+)\)""".r 
  */
 class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSets: Int) {
-  var pants      = Array.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0)))                      
+  var pants      = Array.fill[PantEntry](size) (PantEntry("0", "", "", 0, (0,0)))                      
   val results    = Array.fill[GroupEntry](size, size) (GroupEntry(false, (0,0), (0,0), (0,0), Array("")))
   var points     = Array.ofDim[(Int, Int)](size)
   var sets       = Array.ofDim[(Int, Int)](size)
@@ -69,7 +69,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   var occu: Map[String, Int] = Map[String, Int]().withDefaultValue(0)
 
   // add participant
-  def addPant(pant: ParticipantEntry, avgPantRating: Int) = {
+  def addPant(pant: PantEntry, avgPantRating: Int) = {
     pants(fillCnt) = pant
     fillCnt = fillCnt +  1
     if (pant.club != "") occu(pant.club) = occu(pant.club) + 1
@@ -83,7 +83,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     for (pant <- pants) { if (pant.club != "") occu(pant.club) = occu(pant.club) + 1 }
   }
 
-  def init(pls: List[ParticipantEntry]): Boolean = if (pls.length == size) { pants = pls.toArray; true } else false
+  def init(pls: List[PantEntry]): Boolean = if (pls.length == size) { pants = pls.toArray; true } else false
 
   override def toString() = {
     val str = new StringBuilder(s"  Group ${name} (Id:${grId}/Size:${size}/Quali:${quali}) WinSets: ${noWinSets}\n")
@@ -291,7 +291,7 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var pants:     Array[ParticipantEntry] = Array[ParticipantEntry](),
+  var pants:     Array[PantEntry] = Array[PantEntry](),
   var results:   Array[ResultEntry]      = Array[ResultEntry]()
 ) 
 

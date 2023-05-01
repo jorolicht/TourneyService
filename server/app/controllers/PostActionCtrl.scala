@@ -128,7 +128,7 @@ class PostActionCtrl @Inject()
           data    <- EitherT(Future( encEParam(reqData)))
           player  <- EitherT(Future( Player.decode(data("player")) ))
           pl      <- EitherT(tsv.addPlayer(player))
-          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))))
+          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, getParam(pMap, "coId", 0L), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id)))))
         } yield { (pl, result) }).value.map {
           case Left(err)  => BadRequest(err.add("regSingle").encode)
           case Right(res) => Ok(Return(res._1.id).encode) 
@@ -143,7 +143,7 @@ class PostActionCtrl @Inject()
           pl2  <- EitherT(Future( Player.decode(data("player2")) ))
           p1   <- EitherT(tsv.setPlayer(pl1))
           p2   <- EitherT(tsv.setPlayer(pl2))
-          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, getParam(pMap, "coId", 0L), getParam(pMap, "status", -1))) )
+          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, getParam(pMap, "coId", 0L), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id)))) )
         } yield { (p1.id, p2.id) }).value.map { 
           case Left(err)  => BadRequest(err.add("regDouble").encode)
           case Right(res) => Ok(write(res)) 
@@ -159,7 +159,7 @@ class PostActionCtrl @Inject()
       // def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
       case "setPantStatus" => {
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantStatus").encode)) else {
-          tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "status", 0)).map {
+          tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))).map {
             case Left(err)  => BadRequest(err.encode)
             case Right(res) => Ok(Return(res).encode)
           }
@@ -169,8 +169,11 @@ class PostActionCtrl @Inject()
       // setPantBulkStatus sets the status of a participant within a competition, returns number of affected
       // def setPantBulkStatus(coId: Long, List[(String, Int)]): Future[Either[Error, Int]]
       case "setPantBulkStatus" => {
+        implicit val pStatusReadWrite: upickle.default.ReadWriter[PantStatus.Value] =
+          upickle.default.readwriter[Int].bimap[PantStatus.Value](x => x.id, PantStatus(_))
+
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantBulkStatus").encode)) else {
-          val pantStatus = read[List[(String,Int)]](reqData)
+          val pantStatus = read[List[(String, PantStatus.Value)]](reqData)
           logger.warn(s"setPantBulkStatus => pants status: ${pantStatus}") 
           tsv.setPantBulkStatus(getParam(pMap, "coId", 0L), pantStatus).map {
             case Left(err)  => BadRequest(err.encode)
@@ -389,7 +392,7 @@ class PostActionCtrl @Inject()
       case "setCompStatus"  => {
         import shared.model.Competition._
         if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          tsv.setCompStatus(getParam(pMap, "coId", -1L), getParam(pMap, "status", CS_UNKN) ).map {
+          tsv.setCompStatus(getParam(pMap, "coId", -1L), CompStatus(getParam(pMap, "status", CompStatus.UNKN.id)) ).map {
             case Left(err)   => { logger.error(s"setComp: ${err.encode}" ); BadRequest(err.add("setCompStatus").encode) }
             case Right(res)  => Ok(Return(res).encode)
           } 
@@ -449,8 +452,8 @@ class PostActionCtrl @Inject()
           case Left(err)   => { logger.error(s"genCttResult: ${err.encode}" ); BadRequest(err.add("genCttResult").encode) }
           case Right(trny) => {
             val tourneyDir = s"${env.rootPath}${File.separator}db${File.separator}Tourneys${File.separator}${ctx.orgDir}"
-            val cttFN    = s"${tourneyDir}/${trny.startDate}_${toId}_participants.xml"
-            val cttResFN = s"${tourneyDir}/${trny.startDate}_${toId}_result.xml"
+            val cttFN    = s"${tourneyDir}${File.separator}${trny.startDate}_${toId}_participants.xml"
+            val cttResFN = s"${tourneyDir}${File.separator}${trny.startDate}_${toId}_result.xml"
 
             val clickTTNode = MyXML.loadFile(cttFN)
             val cttTrny = CttService.readCttTourney(clickTTNode)
@@ -534,14 +537,14 @@ class PostActionCtrl @Inject()
         
         // update pl2co database
         comp.typ match {
-          case Competition.CT_SINGLE =>
+          case CompTyp.SINGLE =>
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
               val plId    = entry.getSingleId
               val lic     = trny.players(plId).getLicenceNr
               entry.ident = licence2player(lic)
             }}
 
-          case Competition.CT_DOUBLE =>
+          case CompTyp.DOUBLE =>
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
               val plIds  = entry.getDoubleId
               val lic1   = trny.players(plIds._1).getLicenceNr

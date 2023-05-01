@@ -17,7 +17,7 @@ import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom
 import upickle.default._
 
 import shared.model._
-import shared.model.Pant
+import shared.model.PantStatus
 import shared.model.Competition._
 import shared.model.CompPhase._
 import shared.utils.Routines._
@@ -65,12 +65,12 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     // set play card and select competition
     if (coId > 0) {
       val comp = App.tourney.comps(coId)
-      setDisabled("BtnStartCompetition", comp.status > CPC_INIT)
+      setDisabled("BtnStartCompetition", comp.status > CompStatus.READY)
       selTableRow(uc(coId.toString))
       comp.typ match {
-        case CT_SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(coId), comp.status <= CPC_INIT)) 
-        case CT_DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(coId), comp.status <= CPC_INIT)) 
-        case _         => error("update", s"competition typ not yet supported") 
+        case CompTyp.SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(App.tourney, coId), comp.status <= CompStatus.READY)) 
+        case CompTyp.DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(App.tourney, coId), comp.status <= CompStatus.READY)) 
+        case _              => error("update", s"competition typ not yet supported") 
       }
       collapse("CompCard", false)
       //showSBMenu("OrganizeCompetition")
@@ -111,10 +111,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
         // initialize participants to be shown 
         // only participants with status signed or ready
-        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == Pant.SIGN || x2.status == Pant.REDY } map { x =>
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == PantStatus.REGI || x2.status == PantStatus.REDY } map { x =>
           val sno = SNO(x._2.sno) 
           val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
-          val enabled = (x._2.status == Pant.REDY)
+          val enabled = (x._2.status == PantStatus.REDY)
           // show name, club name and ttr value
           PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled) 
         }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
@@ -123,11 +123,11 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           case Left(err)   => error("startCompetitionDlg", s"error message: ${err}")
           case Right((coph, pantResult)) => {
             //set pant status in participant 2 competition mapping
-            for ((key, pEntry) <- App.tourney.pl2co) { if (key._2 == coId && pEntry.status == Pant.REDY) pEntry.status == Pant.SIGN }
-            pantResult.foreach { x => App.tourney.pl2co((x.sno, coId)).status = Pant.REDY }
+            for ((key, pEntry) <- App.tourney.pl2co) { if (key._2 == coId && pEntry.status == PantStatus.REDY) pEntry.status == PantStatus.REGI }
+            pantResult.foreach { x => App.tourney.pl2co((x.sno, coId)).status = PantStatus.REDY }
             
             App.setCurCoPhId(coId, coph.coPhId)
-            App.tourney.comps(coId).status = Competition.CS_RUN
+            App.tourney.comps(coId).status = CompStatus.RUN
             coph.drawOnRanking(pantResult, App.tourney.comps(coId).typ)
             //coph.status = CompPhase.CPS_AUS  
             App.execUseCase("OrganizeCompetitionDraw", "", "")
@@ -219,13 +219,13 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       case "CheckParticipant"      => { 
         val coId = App.getCurCoId
         val sno  = getData(elem, "sno", "")
-        val status = if (elem.asInstanceOf[dom.raw.HTMLInputElement].checked) 1 else 0 
+        val status = if (elem.asInstanceOf[dom.raw.HTMLInputElement].checked) PantStatus.REDY else PantStatus.REGI 
         setPantStatus(coId, sno, status).map { 
           case Left(err)  => DlgShowError.show(List(err)) 
           case Right(res) => {
             // set statistic/numbers
             val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
-            val (total, activ) = (p2c.length, p2c.filter(_.status > Pant.SIGN).length )
+            val (total, activ) = (p2c.length, p2c.filter(_.status > PantStatus.REGI).length )
             setHtml(s"Counter_${coId}", s"${total}/${activ}")           
           }
         }
@@ -241,9 +241,9 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
           val paName = SNO(sno).getName(comp.typ)(App.tourney)
 
           val confirm = comp.typ match {
-            case CT_SINGLE => DlgBox.confirm(getMsg("confirm.single.delete.hdr"), getMsg("confirm.single.delete.msg", paName, coName))
-            case CT_DOUBLE => DlgBox.confirm(getMsg("confirm.double.delete.hdr"), getMsg("confirm.double.delete.msg", paName, coName))
-            case _         => error("update", s"competition typ not yet supported"); Future(false)
+            case CompTyp.SINGLE => DlgBox.confirm(getMsg("confirm.single.delete.hdr"), getMsg("confirm.single.delete.msg", paName, coName))
+            case CompTyp.DOUBLE => DlgBox.confirm(getMsg("confirm.double.delete.hdr"), getMsg("confirm.double.delete.msg", paName, coName))
+            case _              => error("update", s"competition typ not yet supported"); Future(false)
           }
           confirm.map { _ match {
             case true  =>  delPant2Comp(coId, sno).map { 
@@ -263,9 +263,9 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       //def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, (Player, Int)]] = {
       case "RegParticipant"    => {    
         App.tourney.comps(App.getCurCoId).typ match {
-          case CT_SINGLE => regSingle(App.tourney, App.getCurCoId, AppEnv.getLang)
-          case CT_DOUBLE => regDouble(App.tourney, App.getCurCoId, AppEnv.getLang)
-          case _         => error("update", s"competition typ not yet supported") 
+          case CompTyp.SINGLE => regSingle(App.tourney, App.getCurCoId, AppEnv.getLang)
+          case CompTyp.DOUBLE => regDouble(App.tourney, App.getCurCoId, AppEnv.getLang)
+          case _              => error("update", s"competition typ not yet supported") 
         }  
       } 
 
@@ -309,7 +309,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
     DlgCardRegDouble.show(coId, tourney, lang).map {
       case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
       case Right((plId1, plId2, status)) => {
-        setPant2Comp(Pant2Comp.double(plId1, plId2, coId, status)) map {
+        setPant2Comp(Pant2Comp.double(plId1, plId2, coId, PantStatus(status))) map {
           case Left(err)  => DlgShowError.show(List(err))
           case Right(p2c) => {
             info("RegDouble", s"success: ${p2c}")
@@ -327,7 +327,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
    * 
    */
   def startCompPhaseDlg(coId: Long, baseCoPhId: Int, qualify: QualifyTyp.Value, pants: ArrayBuffer[PantSelect])
-                         (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[ParticipantEntry]) ]] = {
+                         (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[PantEntry]) ]] = {
 
 
     import cats.data.EitherT

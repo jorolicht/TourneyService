@@ -58,7 +58,7 @@ object AddonComp extends UseCase("AddonComp")
     //                      val status: Int, var enabled: Boolean, 
     //                      var size: Int, var noPlayers: Int, noWinSets: Int = 3)
 
-        val coPhGr = new CompPhase("TestGroup", 3L, 2, 99, CPT_GR, 5, true, 7, 7, 3)
+        val coPhGr = new CompPhase("TestGroup", 3L, 2, 99, CompPhaseTyp.GR, CompPhaseStatus.FIN, true, 7, 7, 3)
         // val initGrRes  = coPhGr.init( ArrayBuffer(
         //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
         //   ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
@@ -72,7 +72,7 @@ object AddonComp extends UseCase("AddonComp")
 
         //case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
-        val coPhKO = new CompPhase("TestKO", 3L, 4, 99, CPT_KO, 4, true, 8, 7, 3)
+        val coPhKO = new CompPhase("TestKO", 3L, 4, 99, CompPhaseTyp.KO, CompPhaseStatus.DEP, true, 8, 7, 3)
         // val initKORes  = coPhKO.init( ArrayBuffer(
         //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
         //   ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),

@@ -2,7 +2,7 @@
  * Organize Tourney Upload Card
  *@
 @import shared.model.TournBase 
-@import shared.utils.Constants._ 
+@import shared.utils._ 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._  
 @import clientviews.component.helper.html._
@@ -11,18 +11,18 @@
 @(lang: String)(implicit ucc: UseCaseParam)
 
 <!-- Upload Card for general and tourney specific files -->
-@content(name: String, uldType: String)(implicit ucc: UseCaseParam) = {
+@content(name: String, uplType: UploadType.Value)(implicit ucc: UseCaseParam) = {
   <div>
-    <form @id("UploadForm" + "_" + uldType) method="post" enctype="multipart/form-data">
+    <form @id(s"UploadForm_${uplType.id}") method="post" enctype="multipart/form-data">
       <div class="d-flex justify-content-between">
         <div class="mt-2">
           <h6>@name</h6> 
         </div>
         <div>
-          <input @id("Input" + uldType) type="file" class="form-control-file form-control-sm" name="file" @actionEvent("UploadChange", "onchange")>
+          <input @id(s"Input_${uplType.id}") type="file" class="form-control-file form-control-sm" name="file" @actionEvent("UploadChange", "onchange")>
         </div>
         <div class="mt-1">
-           @actionButton(uldType, "upload.submit", "btn-outline-secondary btn-xs")
+           @actionButton(s"UploadType_${uplType.id}", "upload.submit", "btn-outline-secondary btn-xs")
         </div>
       </div>  
     </form>
@@ -30,8 +30,8 @@
 }
 
 <small @id("UploadError") style="display:none" class="form-text text-white bg-danger pl-2 mb-2">Error</small>
-@radioCard(ULD_CLICKTT, "TourneyUpload", "upload.typ.clicktt",    content(msg("upload.info.clicktt"),    ULD_CLICKTT))
-@radioCard(ULD_INVIT,   "TourneyUpload", "upload.typ.invitation", content(msg("upload.info.invitation"), ULD_INVIT))
-@radioCard(ULD_LOGO,    "TourneyUpload", "upload.typ.clublogo",   content(msg("upload.info.clublogo"),   ULD_LOGO))
-@radioCard(ULD_CERT,    "TourneyUpload", "upload.typ.certpic",    content(msg("upload.info.certpic"),    ULD_CERT))
-@radioCard(ULD_BANNER,  "TourneyUpload", "upload.typ.clubbanner", content(msg("upload.info.clubbanner"), ULD_BANNER))
+@radioCard("ClickTT", "TourneyUpload", "upload.typ.clicktt",    content(msg("upload.info.clicktt"),     UploadType.ClickTT))
+@radioCard("Invite",  "TourneyUpload", "upload.typ.invitation", content(msg("upload.info.invitation"),  UploadType.Invite))
+@radioCard("Logo",    "TourneyUpload", "upload.typ.clublogo",   content(msg("upload.info.clublogo"),    UploadType.Logo))
+@radioCard("Cert",    "TourneyUpload", "upload.typ.certpic",    content(msg("upload.info.certpic"),     UploadType.Cert))
+@radioCard("Banner",  "TourneyUpload", "upload.typ.clubbanner", content(msg("upload.info.clubbanner"),  UploadType.Banner))

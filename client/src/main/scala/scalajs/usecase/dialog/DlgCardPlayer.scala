@@ -1,10 +1,5 @@
 package scalajs.usecase.dialog
 
-// Start TestCases
-// DlgCardPlayer: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardPlayer&ucInfo=View
-//                http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardPlayer&ucInfo=New
-//                http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardPlayer&ucInfo=Edit
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -26,7 +21,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player }
+import shared.model.{ Tourney, Player, SexTyp }
 import shared.utils._
 import shared.utils.Constants._
 import clientviews.dialog.html
@@ -94,7 +89,7 @@ object DlgCardPlayer extends BasicHtml
       case Right(res) => lfid = res
     }
     
-    var inValue = Player(11l,"",33L,"xxx","Rob","Licht",1963,"xx@xx", 0," ")
+    var inValue = Player(11l,"",33L,"xxx","Rob","Licht",1963,"xx@xx", SexTyp.UNKN, " ")
 
     /* read relevant input and verify it */
     if (eList.length > 0) Left(eList.toList) else Right(inValue)
@@ -106,10 +101,10 @@ object DlgCardPlayer extends BasicHtml
     val player = if (plId != 0) trny.players(plId) else Player.init
 
     // set the radio button for gender
-    def setGender(gender: Int) = gender match {
-      case 1 => { setRadioBtn("GenderFemale", true);  setRadioBtn("GenderMale", false); setRadioBtn("GenderNone", false) }
-      case 2 => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", true);  setRadioBtn("GenderNone", false) }
-      case _ => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", false); setRadioBtn("GenderNone", true)  }
+    def setGender(gender: SexTyp.Value) = gender match {
+      case SexTyp.FEMALE => { setRadioBtn("GenderFemale", true);  setRadioBtn("GenderMale", false); setRadioBtn("GenderNone", false) }
+      case SexTyp.MALE   => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", true);  setRadioBtn("GenderNone", false) }
+      case SexTyp.UNKN   => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", false); setRadioBtn("GenderNone", true)  }
     }
 
     // setting invisible data

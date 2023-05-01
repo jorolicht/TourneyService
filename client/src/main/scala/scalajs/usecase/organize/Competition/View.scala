@@ -44,17 +44,17 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
       val elem    = getElemById_(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val coPhTyp = coPhase.coPhTyp
       coPhTyp match {
-        case CPT_GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))
-        case CPT_KO => setHtml(elem, clientviews.organize.competition.view.html.KoCard(coId, coPhId, coPhase.ko))
-        case CPT_SW => setHtml(elem, "input for switz-system")
+        case CompPhaseTyp.GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))
+        case CompPhaseTyp.KO => setHtml(elem, clientviews.organize.competition.view.html.KoCard(coId, coPhId, coPhase.ko))
+        case CompPhaseTyp.SW => setHtml(elem, "input for switz-system")
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
     }
     // update page
     coPhase.coPhTyp match {
-      case CPT_KO => showKoResult(coId, coPhId, coPhase.ko)      
-      case CPT_GR => for (grp <- coPhase.groups ) showGrResult(coId, coPhId, grp)
-      case CPT_SW => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
+      case CompPhaseTyp.KO => showKoResult(coId, coPhId, coPhase.ko)      
+      case CompPhaseTyp.GR => for (grp <- coPhase.groups ) showGrResult(coId, coPhId, grp)
+      case CompPhaseTyp.SW => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
       case _      => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
     }
   }

@@ -30,13 +30,13 @@ case class SNO(value: String) {
   }
 
   // getInfo returns tuple (SNO.value, Name, Club, TTR)
-  def getInfo(coTyp: Int)(implicit trny: Tourney): (String, String, String, Int) = {
+  def getInfo(coTyp: CompTyp.Value)(implicit trny: Tourney): (String, String, String, Int) = {
     coTyp match {
-       case CT_SINGLE => getSinglePlayer() match {
+       case CompTyp.SINGLE => getSinglePlayer() match {
          case Left(err)       => ("", "", "", 0)
          case Right(p)        => (value, p.getName(), p.clubName, p.getRating)
        }
-       case CT_DOUBLE => getDoublePlayers() match {
+       case CompTyp.DOUBLE => getDoublePlayers() match {
          case Left(err)       => ("", "", "", 0)
          case Right((p1, p2)) => (value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2))
        }
@@ -45,35 +45,34 @@ case class SNO(value: String) {
   }
 
   // getPantEntry returns Participant Entry
-  def getPantEntry(coId: Long, place: (Int,Int) = (0,0))(implicit trny: Tourney): ParticipantEntry = {
+  def getPantEntry(coId: Long, place: (Int,Int) = (0,0))(implicit trny: Tourney): PantEntry = {
     trny.comps(coId).typ match {
-       case CT_SINGLE => getSinglePlayer() match {
-         case Left(err)       => ParticipantEntry(value, "", "", 0, (0,0)) 
-         case Right(p)        => ParticipantEntry(value, p.getName(), p.clubName, p.getRating, place)
+       case CompTyp.SINGLE => getSinglePlayer() match {
+         case Left(err)       => PantEntry(value, "", "", 0, (0,0)) 
+         case Right(p)        => PantEntry(value, p.getName(), p.clubName, p.getRating, place)
        }
-       case CT_DOUBLE => getDoublePlayers() match {
-         case Left(err)       => ParticipantEntry(value, "", "", 0, (0,0)) 
-         case Right((p1, p2)) => ParticipantEntry(value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2), place)
+       case CompTyp.DOUBLE => getDoublePlayers() match {
+         case Left(err)       => PantEntry(value, "", "", 0, (0,0)) 
+         case Right((p1, p2)) => PantEntry(value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2), place)
        }
-       case _         => ParticipantEntry(value, "", "", 0, (0,0))    
+       case _         => PantEntry(value, "", "", 0, (0,0))    
     }
   }  
 
 
-
   // getName returns name for all types of participants
-  def getName(coTyp: Int, byeName: String="")(implicit trny: Tourney): String  = {
+  def getName(coTyp: CompTyp.Value, byeName: String="")(implicit trny: Tourney): String  = {
     if (value == "") {
       ""
     } else if (byeName != "" & isBye()) { 
       byeName
     } else {
       coTyp match {
-        case CT_SINGLE => getSinglePlayer() match {
+        case CompTyp.SINGLE => getSinglePlayer() match {
           case Left(err)       => ""
           case Right(p)        => p.getName()
         }
-        case CT_DOUBLE => getDoublePlayers() match {
+        case CompTyp.DOUBLE => getDoublePlayers() match {
           case Left(err)       => ""
           case Right((p1, p2)) => p1.getDoubleName(p2)
         }

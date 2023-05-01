@@ -11,7 +11,7 @@ config.LogLevel                                     = debug
 
 app.mockup                                          = false
 app.version                                         = 2023-02DE190
-app.date                                            = 2023-04-11
+app.date                                            = 2023-04-15
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -490,6 +490,8 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.tourney.upload.typ.result                    = Ergebnisdatei
   
   organize.tourney.btn.upload.submit                    = ÜBERTRAGEN
+  organize.tourney.btn.download.submit                  = DOWNLOAD
+
   organize.tourney.upload.info.clicktt                  = ClickTT Teilnehmer Datei (XML-File)
   organize.tourney.upload.info.invitation               = Turnierausschreibung (in Markdown Format)
   organize.tourney.upload.info.clublogo                 = Club Logo (Format: png | Höhe: 60px | Breite: 90px)
@@ -514,6 +516,9 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.tourney.download.notify.info                 = Download Liste der Anmeldungen in CSV-Format (Dateiname: Anmeldungen.csv)
   organize.tourney.download.notify.filename             = Anmeldungen.csv
   organize.tourney.download.notify.filehdr              = StartNr, Name, Vorname, TTR, Verein, Wettbewerb
+  organize.tourney.download.clickTT.list                = ClickTT Ergebnisdatei
+  organize.tourney.download.clickTT.info                = ClickTT Ergebnisdatei: <date>_<id>_Result.xml zum Hochladen der Ergebnisse in clickTT
+
   organize.tourney.dlg.error                            = Fehler beim Ausführen der Turnieraktion
 #END Organize Tourney
 
@@ -978,6 +983,10 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.box.cookietitle                                 = Ja, auch diese Webseite verwendet Cookies.
   dlg.box.cookiemessage                               = Wir verwenden Cookies nur intern in unserer Web-Applikation für den Sessionstatus und um Inhalte zu personalisieren. Wir geben keine Informationen über die Verwendung unserer Webseite an Dritte weiter. Wenn Sie unsere Webseite weiterhin nutzen wollen, müssen Sie auf OK drücken und geben damit die Einwilligung zu unseren Cookies. Falls Sie keine Cookies wollen, schließen Sie einfach das Browserfenster, ansonsten werden Sie auf unsere statische Web-Seite weitergeleitet.
 
+  dlg.box.save.verify.hdr                             = Dateisicherung bestätigen
+  dlg.box.save.verify.msg                             = Soll die Datei {0} im Download-Bereich gesichert werden? 
+
+
   dlg.ShowError.hdr                                   = Eingaben überprüfen
 
   dlg.card.tourney.new.hdr                               = Eingabe Turnierdaten 
@@ -1036,6 +1045,9 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   dlg.emailplayer.btn.no                              = NEIN
 
   dlg.input.btn.exec                                  = EXECUTE
+  
+  dlg.info.download.error.hdr                         = Download-Fehler
+
 #END Dialogs
 
 
@@ -1363,6 +1375,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0207.genCttResult                                = (Kommunikations-)Fehler beim Generieren der ClickTT-Ergebnisdatei.
   err0208.genCttResult.noMatchingComp                 = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen passenden Wettbewerb gefunden
   err0209.genCttResult.moreMatchingComps              = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen eindeutigen Wettbewerb gefunden
-  err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp 
+  err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp
+  err0211.downloadFile.missingResultFile              = Fehler beim Lesen der Ergebnisdatei: {0}
 
 #END Error Codes/Messages

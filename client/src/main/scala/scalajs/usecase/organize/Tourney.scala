@@ -1,9 +1,5 @@
 package scalajs.usecase.organize
 
-// Start TestCases
-// http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeTourney
-
-
 import scala.concurrent._
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -13,15 +9,13 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
 
-import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
-import org.scalajs.dom.ext._             // import stmt sequence is important
+
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 import org.scalajs.dom.raw.{ Event, HTMLInputElement, HTMLFormElement } // for ScalaJs bindings
 
-import upickle.default._
-
 import shared.utils._
 import shared.model._
+import shared.model.PantStatus
 import shared.model.Tourney._
 import shared.model.Competition._
 import shared.utils.Constants._ 
@@ -72,241 +66,233 @@ object OrganizeTourney extends UseCase("OrganizeTourney")
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     showResult(false)
+
     key match {
       case "UploadChange" => setHtmlVisible("UploadError", false)
-      case "Download"     => {
-
-      }  
-      // Upload ClickTT File
-      case ULD_CLICKTT    => {
-        val fName   = getInput("Input" + key, "")
-        // debug("actionEvent", s"Upload fName: ${fName} uldType: ${key}")
-        if (fName == "") setHtmlVisible("UploadError", true, getMsg("upload.noFile")) else { 
-          setHtmlVisible("UploadError", false)
-          if (App.tourney.getToId != 0 ) {
-            // want update tournament/event ?           
-            DlgBox.standard(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
-              Seq("cancel", "update", "new"),0,true).map { result => result match {
-                case 2 => doCttUpload(UploadModeUpdate)
-                case 3 => doCttUpload(UploadModeNew) 
-                case _ => debug("buttonUpload", "cancel")
-              }}         
-          } else {
-            // want create new tournament ?
-            DlgBox.standard(getMsg("upload.msgbox.header"),getMsg("upload.msgbox.body2"), Seq("no", "yes"),0,true)
-              .map { result => result match {
-                case 2 => doCttUpload(UploadModeNew) 
-                case _ => debug("buttonUpload", "cancel")
-              }}                        
-          }
-        }  
-      }
-
-      // Upload invitation file
-      case ULD_INVIT  => {
-        val fName   = getInput("Input" + key, "")
-        // debug("actionEvent", s"Upload fName: ${fName} uldType: ${key}")
-        if (fName == "") {
-          setHtmlVisible("UploadError", true, getMsg("upload.noFile")) 
-        } else if (App.tourney.getToId == 0) {
-          setHtmlVisible("UploadError", true, getMsg("upload.notTournSel")) 
-        } else {
-          doUpload(key)
-        }
-      }
-
-      // Upload logo, cert or banner
-      case ULD_LOGO | ULD_CERT | ULD_BANNER => {
-        val fName   = getInput("Input" + key, "")
-        if (fName == "") setHtmlVisible("UploadError", true, getMsg("upload.noFile")) else { 
-          setHtmlVisible("UploadError", false)
-          doUpload(key)
-        }  
-      }
-
-      // Click on new tourney button
-      case "New"   => {
-        DlgCardTourney.show("new", TournBase("", AppEnv.getOrganizer, AppEnv.getOrgDir, getNow(), getNow(), "", TTY_UNKN, true, "", "" , 0L)).map {
-          case Left(err) => {} // only cancel as error DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-          case Right(tb) => addTournBase(tb).map {
-            case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-            case Right(trny) => App.setLocalTourney(trny); update()
-          }
-        }  
-      }
-
-      // Click edit button on list
-      case "Edit"   => {
-        event.stopPropagation()
-        val toId = getData(elem, "toId", 0L)
-        if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("edit", App.tourney.getBase()).map {
-          case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-          case Right(tB)  => setTournBase(tB).map {
-            case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-            case Right(trny) => App.setLocalTourney(trny); update()
-          }  
+      
+      case s"DownloadType_$id"    => {
+        val dloType = DownloadType(id.toIntOption.getOrElse(0))
+        dloType match {
+          case DownloadType.ClickTT => println("Download ClickTT"); actionDownloadClickTT()
+          case DownloadType.Player  => println("Download Player");  actionDownloadPlayer() 
+          case DownloadType.UNKNOWN => println("Download UNKNOWN") 
         }
       } 
 
-      // Click edit button on list
-      case "View"   => {
-        event.stopPropagation()
-        val toId = getData(elem, "toId", 0L)
-        if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("view", App.tourney.getBase()).map {
-          case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-          case Right(tB)  => setTournBase(tB).map {
-            case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-            case Right(trny) => App.setLocalTourney(trny); update()
-          }  
-        }
-      }        
-
-      // Select new tourney on list
-      case "Select"   => { 
-        val toId = getData(elem, "toId", 0L) 
-        if (getData(elem, "toId", 0L) != App.tourney.getToId) {
-          App.loadRemoteTourney(getData(elem, "toId", 0L)).map {
-            case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-            case Right(res) => highlight(elem)
-          }
-        }
+      // do file upload depending on upload type
+      case s"UploadType_$id"    => {
+        val uplType = UploadType(id.toIntOption.getOrElse(0))
+        val fName   = getInput(s"Input_${uplType.id}", "")
+        uplType match {
+          case UploadType.ClickTT => println("Upload ClickTT"); actionUploadClickTT(fName) 
+          case UploadType.Invite  => println("Upload Invite");  actionUploadInvite(fName) 
+          case UploadType.Logo    => println("Upload Logo");    actionUploadGeneric(fName, uplType)
+          case UploadType.Cert    => println("Upload Cert");    actionUploadGeneric(fName, uplType)
+          case UploadType.Banner  => println("Upload Banner");  actionUploadGeneric(fName, uplType)
+          case UploadType.UNKNOWN => println("Upload UNKNOWN")
+        }   
       }  
 
-      // Click dustbin on list
-      case "Delete"   => { 
+          // do file upload depending on upload type
+      case s"TourneyAction_$id"    => {
+        val trnyActionType = TourneyAction(id.toIntOption.getOrElse(0))
         val toId = getData(elem, "toId", 0L)
         event.stopPropagation()
-        if (toId == App.tourney.getToId & toId != 0) {
-          DlgBox.confirm(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)).map { _ =>
-            delTourney(toId).map { 
-              case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-              case Right(res) => { App.resetLocalTourney(); render() }
-            }
-          }
-        }
+        trnyActionType match {
+          case TourneyAction.New     => println("Tourney Action New");    actionTourneyNew() 
+          case TourneyAction.Edit    => println("Tourney Action Edit");   actionTourneyEdit(toId) 
+          case TourneyAction.View    => println("Tourney Action View");   actionTourneyView(toId)
+          case TourneyAction.Delete  => println("Tourney Action Delete"); actionTourneyDelete(toId)
+          case TourneyAction.Select  => println("Tourney Action Select"); actionTourneySelect(toId, elem)
+          case TourneyAction.UNKNOWN => println("Tourney Action Unknown")
+        }   
       }
 
       case _          => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
     }
   }
-  
 
 
-  // doUpload create new tournament/event if toId equals 0  
-  def doUpload(upType: String)  = {
-    
-    // perform upload of tourney information file (xml, markdown, or image)
-    val fileForm = dom.document.getElementById(getId("UploadForm" + "_" + upType)).asInstanceOf[dom.raw.HTMLFormElement]
-    val formData = new dom.FormData(fileForm)
-      
-    // formData.append("toId",   App.tourney.getToId) 
-    // formData.append("uptype", upType)
-    // formData.append("sdate",  sdate.toString)
-    // formData.append("edate",  edate.toString)
-      
-    DlgSpinner.start( getMsg("upload.spinner")) 
-    
-    uploadFile(App.tourney.getToId, App.tourney.startDate, upType, formData).map {
-      case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
-      case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
-    } 
+  /**
+   ** Action Routines
+   */
+
+  // Click edit button on list
+  def actionTourneyEdit(toId: Long) = {
+    if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("edit", App.tourney.getBase()).map {
+      case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Right(tB)  => setTournBase(tB).map {
+        case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+        case Right(trny) => App.setLocalTourney(trny); update()
+      }  
+    }
+  } 
+
+
+  // Click viewbutton on list
+  def actionTourneyView(toId: Long) = {
+    if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("view", App.tourney.getBase()).map {
+      case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Right(tB)  => setTournBase(tB).map {
+        case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+        case Right(trny) => App.setLocalTourney(trny); update()
+      }  
+    }
   }
 
 
-  // doUpload create new tournament/event if toId equals 0  
-  def doCttUpload(upMode: Int)  = {
-    import shared.utils.Constants._
-    
-    // perform upload of tourney information file (xml, markdown, or image)
-    val fileForm = dom.document.getElementById(getId("UploadForm" + "_" + ULD_CLICKTT)).asInstanceOf[dom.raw.HTMLFormElement]
-    val formData = new dom.FormData(fileForm)
-      
-    DlgSpinner.start( getMsg("upload.spinner")) 
-
-    upMode match {
-      case UploadModeUpdate => {
-        updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
-          case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
-        } 
+  // Select new tourney on list
+  def actionTourneySelect(toId: Long, elem: dom.raw.HTMLElement) = 
+    if (toId != App.tourney.getToId) {
+      App.loadRemoteTourney(toId).map {
+        case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+        case Right(res) => highlight(elem)
       }
-      case UploadModeNew    => {
-        newCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => println(s"${err}"); DlgSpinner.error( getMsg("upload.error.0")) 
-          case Right(res) => DlgSpinner.result(s"TourneyId: ${res}")
-        } 
-      }
-
     }
     
 
+  // Click dustbin on list
+  def actionTourneyDelete(toId: Long) = { 
+    if (toId == App.tourney.getToId & toId != 0) {
+      DlgBox.confirm(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)).map { _ =>
+        delTourney(toId).map { 
+          case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+          case Right(res) => { App.resetLocalTourney(); render() }
+        }
+      }
+    }
   }
 
 
-  // ***
-  // Usecase: Organize Tourney DOWNLOAD
-  // ***
+  // Click on new tourney button
+  def actionTourneyNew() = 
+    DlgCardTourney.show("new", TournBase("", AppEnv.getOrganizer, AppEnv.getOrgDir, getNow(), getNow(), "", TourneyTyp.UNKN.id, true, "", "" , 0L)).map {
+      case Left(err) => {} // only cancel as error DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Right(tb) => addTournBase(tb).map {
+        case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+        case Right(trny) => App.setLocalTourney(trny); update()
+      }
+    }  
 
-  // buttonDownloadNotifyList - click on download button
-  @JSExport
-  def buttonDownloadNotifyList() = {
-    debug("buttonDownloadNotifyList", "click")
 
-    val bPB  = Map("type" -> "text/comma-separated-values").asInstanceOf[js.Dictionary[js.Any]]
-    val blob = new dom.Blob(js.Array(genNotificationList), bPB.asInstanceOf[dom.raw.BlobPropertyBag])
+  // perform upload of clickTT file, either update or new
+  def actionUploadClickTT(fName: String) = 
+    if (fName == "") setHtmlVisible("UploadError", true, getMsg("upload.noFile")) else { 
+      setHtmlVisible("UploadError", false)
+      if (App.tourney.getToId != 0 ) {
+        // want update tournament/event ?           
+        DlgBox.standard(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
+          Seq("cancel", "update", "new"),0,true).map { result => result match {
+            case 2 => doUpload(UploadType.ClickTT, UploadMode.Update)
+            case 3 => doUpload(UploadType.ClickTT, UploadMode.New) 
+            case _ => debug("buttonUpload", "cancel")
+          }}         
+      } else {
+        // want create new tournament ?
+        DlgBox.standard(getMsg("upload.msgbox.header"),getMsg("upload.msgbox.body2"), Seq("no", "yes"),0,true)
+          .map { result => result match {
+            case 2 => doUpload(UploadType.ClickTT, UploadMode.New) 
+            case _ => debug("buttonUpload", "cancel")
+          }}                        
+      }
+    } 
 
-    val anchor = dom.document.createElement("a").asInstanceOf[dom.html.Anchor]
-    val href   = dom.raw.URL.createObjectURL(blob)
-    anchor.href = href
-    $(anchor).attr("download",getMsg("download.notify.filename"))
-    dom.document.body.appendChild(anchor)
-    anchor.click()
-    dom.document.body.removeChild(anchor)
-    dom.raw.URL.revokeObjectURL(href)
+  def actionUploadGeneric(fName: String, uplType: UploadType.Value) = 
+    if (fName.isEmpty()) setHtmlVisible("UploadError", true, getMsg("upload.noFile")) else { 
+      setHtmlVisible("UploadError", false)
+      doUpload(uplType, UploadMode.UNKNOWN)
+    }  
+    
+  def actionUploadInvite(fName: String) =   
+    if (fName.isEmpty())                   { setHtmlVisible("UploadError", true, getMsg("upload.noFile"))      } 
+    else if (App.tourney.getToId == 0) { setHtmlVisible("UploadError", true, getMsg("upload.notTournSel")) } 
+    else { setHtmlVisible("UploadError", false);  doUpload(UploadType.Invite, UploadMode.UNKNOWN)          }
+
+
+  // buttonDownloadPlayer returns list of players/participants
+  def actionDownloadPlayer() = {
+    val fName = getMsg("download.notify.filename")
+    DlgBox.saveStringAsFile(
+      getMsg_("dlg.box.save.verify.hdr"), 
+      getMsg_("dlg.box.save.verify.msg", fName), 
+      getMsg("download.notify.filename"),
+      genPlayerList
+    )
+  }  
+
+
+  // actionDownloadClickTT returns XMLresult file for clickTT
+  def actionDownloadClickTT() = {
+    startSpinner()
+    downloadFile(DownloadType.ClickTT).map {
+      case Left(err)  => stopSpinner(); DlgInfo.show(getMsg_("dlg.info.download.error.hdr"), getError(err), "danger") 
+      case Right(res) => stopSpinner(); DlgBox.saveStringAsFile(getMsg_("dlg.box.save.verify.hdr"), getMsg_("dlg.box.save.verify.msg", res._1), res._1,  res._2)
+    }
   }
 
-     
-  /** genNotificationList
+
+  /**
+   ** Helper Routines
+   */
+
+  // doUpload upload a file 
+  def doUpload(uplType: UploadType.Value, uplMode: UploadMode.Value)  = {
+    import shared.utils.Constants._
+    
+    // perform upload of tourney information file (xml, markdown, or image)
+    val formData = new dom.FormData(gE(s"UploadForm_${uplType.id}", ucp).asInstanceOf[HTMLFormElement])
+      
+    startSpinner()
+    uplType match {
+      case UploadType.ClickTT => uplMode match {
+        case UploadMode.Update => updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
+          case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
+          case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+        } 
+        case UploadMode.New    => newCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
+          case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
+          case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+        } 
+        case UploadMode.UNKNOWN => stopSpinner(); println("Unknown upload mode")
+      }
+      case _ => uploadFile(App.tourney.getToId, App.tourney.startDate, uplType, formData).map {
+        case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
+        case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+      }
+    }
+  }
+
+  /** genPlayerList
    *  returns Sequence of Players
    */
-  def genNotificationList() : String = {
-    val buf = new StringBuffer(getMsg("download.notify.filehdr"))
-    buf.append("\n")
+  def genPlayerList() : String = {
+    val buf = new StringBuffer(getMsg("download.notify.filehdr") + "\n")
 
     val tourney = App.tourney
     val player  = App.tourney.players
     for {
       co    <- tourney.comps.values
-      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= Pant.SICO)
+      plco  <- tourney.pl2co.values.filter(_.coId==co.id).filter(_.status >= PantStatus.REGI)
     } yield {
-      if (co.typ == CT_SINGLE) {
+      if (co.typ == CompTyp.SINGLE) {
         buf.append(s"${plco.sno},${player(plco.getPlayerId).lastname},${player(plco.getPlayerId).firstname},${player(plco.getPlayerId).getTTR},${player(plco.getPlayerId).clubName},${co.name}\n")
       }  
     }
     buf.toString
   }  
 
-  /** highlight selected element
-   * 
-   */ 
+
+  // highlight selected element
   def highlight(elem: dom.raw.HTMLElement) = {
-    
+    import org.querki.jquery._ 
     $(elem).addClass("bg-secondary").siblings().removeClass("bg-secondary")
     $(elem).addClass("text-white").siblings().removeClass("text-white")
   }
 
-  /** setViewTournBase set the view of the base part of the tourney
-   * 
-   */ 
+  // setViewTournBase set the view of the base part of the tourney
   def setViewTournBase(trny: Tourney): Unit = {
     import shared.utils.Routines._
-
-    if (trny.id == 0) {
-      collapse("TourneyCard", true)
-    } else {
-      collapse("TourneyCard", false)
-    }
+    collapse("TourneyCard", trny.id == 0)
   }
-
 
 }

@@ -2,6 +2,7 @@
  * Template for drawing groups
  *@
 @import shared.model.CompPhase
+@import shared.model.CompPhaseStatus
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
@@ -24,7 +25,7 @@
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr")</small></th>
       <th colspan='3'>
-        @if(coph.status == CompPhase.CPS_AUS) {
+        @if(coph.status == CompPhaseStatus.AUS) {
           <button id='DrawStartBtn__@{coph.coId}_@{coph.coPhId}' data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' 
             class='btn btn-outline-secondary btn-xxs ml-1 mr-1' @actionEvent("Start", "onclick")>@msg_("std.btn.start")
           </button> 

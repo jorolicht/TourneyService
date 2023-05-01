@@ -32,9 +32,7 @@
 <div class="card mt-2">
 	<div class="tuse-card-header">		
 		<div class="float-left mt-2">  
-				<a @Html(collapse("WaitCard"))>
-				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("wait.hdr")</h6>
-			</a> 
+			<a @Html(collapse("WaitCard"))><h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("wait.hdr")</h6></a> 
 		 </div>
 	</div>
 	<div @id("WaitCard") class="tuse-card-body pb-2 collapse"></div>
@@ -43,9 +41,7 @@
 <div class="card mt-2">
 	<div class="tuse-card-header">		
 		<div class="float-left mt-2">  
-			<a @Html(collapse("RejectCard"))>
-				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("reject.hdr")</h6>
-			</a> 
+			<a @Html(collapse("RejectCard"))><h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("reject.hdr")</h6></a> 
 		</div>
 	</div>
 	<div @id("RejectCard") class="tuse-card-body pb-2 collapse"></div>

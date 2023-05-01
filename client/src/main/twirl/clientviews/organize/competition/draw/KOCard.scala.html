@@ -6,7 +6,8 @@
  *@
 @import scala.collection.mutable.ArrayBuffer
 @import shared.model.CompPhase
-@import shared.model.ParticipantEntry 
+@import shared.model.CompPhaseStatus
+@import shared.model.PantEntry 
 @import shared.model.KoRound  
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
@@ -61,7 +62,7 @@
 """) } 
 
 
-@koEntry(pant: ParticipantEntry, dInfo:(String,Int,Int,Int), pos: Int, up: String, down: String ) = @{ 
+@koEntry(pant: PantEntry, dInfo:(String,Int,Int,Int), pos: Int, up: String, down: String ) = @{ 
   val grpInfo = if(dInfo._1!= "") s"${dInfo._1}[${dInfo._3}]" else ""     
   Html(s""" 
     <tr data-pantPos='${pos}' data-sno='${pant.sno}'>
@@ -99,7 +100,7 @@
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr") </small></th>
       <th><small class="font-weight-bold ml-1 mr-1">Group[Pos]</small></th>
       <th colspan='3'>
-        @if(coph.status == CompPhase.CPS_AUS) {
+        @if(coph.status == CompPhaseStatus.AUS) {
           <button id='DrawStartBtn__@{coph.coId}_@{coph.coPhId}' data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' 
             class='btn btn-outline-secondary btn-xxs ml-1 mr-1' @actionEvent("Start", "onclick")>@msg_("std.btn.start")
           </button> 

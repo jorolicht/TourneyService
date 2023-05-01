@@ -21,16 +21,12 @@ import scalajs.service._
 import scalajs.{ App, AppEnv }
 import shared.model.CompPhase._
 import shared.model.Competition._
-import shared.model.{ Tourney, Competition }
+import shared.model.{ Tourney, Competition, CompTyp, CompStatus }
 import shared.utils._
 import shared.utils.Routines._
 import clientviews.dialog.html
 import _root_.org.w3c.dom.html.HTMLSelectElement
 
-// Start TestCases
-// DlgCardPlayer Edit: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=Edit
-// DlgCardPlayer Show: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=Show
-// DlgCardPlayer New:  http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardComp&ucInfo=New
 
 @JSExportTopLevel("DlgCardComp")
 object DlgCardComp extends BasicHtml 
@@ -48,7 +44,7 @@ object DlgCardComp extends BasicHtml
           val typ = getInput("typ", 0)
           setInput("name", getInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
                                + getInput("Class", getMsg("plh.Class")) + "·" 
-                               + BasicHtml.getMsg_("competition.typ."+typ) )
+                               + getMsg_("competition.typ."+typ) )
           setAttribute(gE("name", ucp), "readonly", "true")                     
         } else {
           removeAttribute(gE("name", ucp), "readonly") 
@@ -70,9 +66,9 @@ object DlgCardComp extends BasicHtml
     
     var eList = ListBuffer[Error]()
 
-    if (comp.name.length <= 2 )  { eList += Error("dlg.card.comp.hlp.name");   markInput("name", Option(true))   }
-    if (comp.typ == CT_UNKN )    { eList += Error("dlg.card.comp.hlp.typ");    markInput("typ", Option(true))    }
-    if (comp.status == CS_UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput("status", Option(true)) }
+    if (comp.name.length <= 2 )          { eList += Error("dlg.card.comp.hlp.name");   markInput("name", Option(true))   }
+    if (comp.typ == CompTyp.UNKN )       { eList += Error("dlg.card.comp.hlp.typ");    markInput("typ", Option(true))    }
+    if (comp.status == CompStatus.UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput("status", Option(true)) }
     if (!comp.validateDate(trny.startDate, trny.endDate)) { 
       eList += Error("dlg.card.comp.hlp.startTime"); markInput("startTime", Option(true)) 
     }
@@ -86,9 +82,9 @@ object DlgCardComp extends BasicHtml
   def getInput(): Competition = {
 
     val comp = Competition(getData("Form","id", 0L), getData("Form","hashKey",""), 
-                           getInput("name", ""), getInput("typ", 0),
+                           getInput("name", ""), CompTyp(getInput("typ", 0)),
                            parseStartTime(getInput("startTime", "")),
-                           getInput("status", CS_UNKN), getData("Form", "options", ""))
+                           CompStatus(getInput("status", CompStatus.UNKN.id)), getData("Form", "options", ""))
     // set optional values                       
     comp.setAgeGroup(getInput("AgeGroup", ""))
     comp.setRatingRemark(getInput("Class", ""))
@@ -111,11 +107,11 @@ object DlgCardComp extends BasicHtml
     // set start date and time
     if (mode == DlgOption.New) {
       setDateTimePicker("startTime", lang, int2ymd(trny.startDate), (12, 0))
-      setData(gE("Form", ucp), "status", CS_UNKN)
+      setData(gE("Form", ucp), "status", CompStatus.UNKN.id)
     } else {
       val (year, month, day, hour, minute) = ymdHM(comp.startDate)
       setDateTimePicker("startTime", lang, (year, month, day), (hour, minute))
-      setData(gE("Form", ucp), "status", comp.status)
+      setData(gE("Form", ucp), "status", comp.status.id)
     }
 
     setInput("coId", if (comp.id==0) "X" else comp.id.toString)
@@ -139,7 +135,7 @@ object DlgCardComp extends BasicHtml
     setInputFields(mode == DlgOption.View)
     setVisible("Compose", mode != DlgOption.View)
     setVisible("Optional", mode != DlgOption.View)
-    if (comp.status > CPC_INIT) setDisabled("status", true)
+    if (comp.status > CompStatus.READY) setDisabled("status", true)
   }
 
   // setButton

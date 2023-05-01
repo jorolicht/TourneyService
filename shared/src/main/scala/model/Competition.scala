@@ -32,43 +32,25 @@ import shared.utils.Constants._
  */
 
 case class Competition(      
-  val id:           Long,        // auto increment primary key
-  val hashKey:      String,      // hashKey to unique identify competition (name and typ to be unique)
-  val name:         String,      // if empty initialised with ageGroup, ratingRemark, compType                     
-  var typ:          Int,         // 0=UNDEFINED 1=EINZEL, 2=DOPPEL, 3=MIXED, 4=TEAM 
-  val startDate:    String,      // Format: yyyymmdd#hhmm
-                                 // Format: "dd.MM.yyyy HH:mm" or "yyyy-dd-MM HH:mm"
-  var status:       Int,         // -1=WEB/SELF REGISTRATION, 0=READY, 1=RUNNING 
-  var options:      String = "" 
-
- 
-
-  /** 
-    values encoded within options for table tennis
-    options(0)  => ageGroup:         String eg. Damen, Herren, Mädchen, Jungen, Schüler, ...
-    options(1)  => ratingRemark:     String
-    options(2)  => ratingLowLevel:   Int                           
-    options(3)  => ratingUpperLevel: Int
-    options(4)  => sex:              Int (0= undefined,  1=Männer, 2=Frauen, 3=egal)
-    options(5)  => maxPerson:        Int  
-    options(6)  => entryFee:         String                           
-    options(7)  => ageFrom:          String                           
-    options(8)  => ageTo:            String                                  
-    options(9)  => preRndMod:        String                               
-    options(10) => finRndMod:        String                                      
-    options(11) => manFinRank:       String
-  */
+  val id:           Long,             // auto increment primary key
+  val hashKey:      String,           // hashKey to unique identify competition (name and typ to be unique)
+  val name:         String,           // if empty initialised with ageGroup, ratingRemark, compType                     
+  var typ:          CompTyp.Value,    // 0=UNDEFINED 1=EINZEL, 2=DOPPEL, 3=MIXED, 4=TEAM 
+  val startDate:    String,           // Format: yyyymmdd#hhmm
+                                      // Format: "dd.MM.yyyy HH:mm" or "yyyy-dd-MM HH:mm"
+  var status:       CompStatus.Value, // 0=READY, 100=RUNNING 
+  var options:      String = ""
 ) {
   // mapping of licence to player identification accoridng to clickTT participant list
   // currently only for single player 
   var cttLic2player: Map[String, String] = Map().withDefaultValue("")
 
-  def getTyp(value: String): Int = value.toLowerCase match {
-    case "einzel" | "single" => 1
-    case "doppel" | "double" => 2
-    case "mixed"             => 3
-    case "team"              => 4
-    case _                   => 0
+  def getTyp(value: String) = value.toLowerCase match {
+    case "einzel" | "single" => CompTyp.SINGLE
+    case "doppel" | "double" => CompTyp.DOUBLE
+    case "mixed"             => CompTyp.MIXED
+    case "team"              => CompTyp.TEAM
+    case _                   => CompTyp.UNKN
   } 
 
   def setTyp(value : String)= { typ = getTyp(value) }
@@ -115,11 +97,7 @@ case class Competition(
     val (year, month, day, hour, minute) = ymdHM(startDate)
     val sDate = year * 10000 + month * 100 + day
     sDate >= trnyStart & (trnyEnd==0 | sDate <= trnyEnd)
-  }  
-
-  // getStartDate - depending on local
-  //def getStartDate() = Competition.getStartDate(startDate)
-
+  }
 
   // Name composed from type, agegroup, ....
   // Name containing middle dot
@@ -162,48 +140,17 @@ case class Competition(
 }                                                               
 
 object Competition {
+  implicit val compStatusReadWrite: upickle.default.ReadWriter[CompStatus.Value] =
+    upickle.default.readwriter[Int].bimap[CompStatus.Value](x => x.id, CompStatus(_))
+
+  implicit val compTypReadWrite: upickle.default.ReadWriter[CompTyp.Value] =
+    upickle.default.readwriter[Int].bimap[CompTyp.Value](x => x.id, CompTyp(_))
+
   implicit def rw: RW[Competition] = macroRW
 
-  // competition type
-  val CT_UNKN   = 0
-  val CT_SINGLE = 1
-  val CT_DOUBLE = 2
-  val CT_MIXED  = 3
-  val CT_TEAM   = 4
-
-
-  // Competition Status
-  val CS_UNKN  =  -1 // unknown status
-  val CS_REDY  =   0 // Ready / RESET
-  val CS_RUN   = 100 // RUNNING  
-  
-  // Competition Status (old values)
-  val CS_VRAUS = 1   // Auslosung der Vorrunde
-  val CS_VREIN = 2   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_VRFIN = 3   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
-
-  val CS_ZRAUS = 4   // Auslosung der Zwischenrunde
-  val CS_ZREIN = 5   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_ZRFIN = 6   // Zwischenrunde beendet, Auslosung ER kann erfolgen
-  
-  val CS_ERAUS = 7   // Auslosung der Endrunde
-  val CS_EREIN = 8   // Auslosung erfolgt, Eingabe der Ergebnisse
-  val CS_ERFIN = 9   // Endrunde beendet ...
-
   def tupled = (this.apply _).tupled
-  def init             = new Competition(0L, "", "",  CT_UNKN, "", CS_UNKN, "")
-  def get(name: String)= new Competition(0L, "", name,  CT_UNKN, "", CS_UNKN, "")
-
-  def ct2Name(x: Int): String = {
-    x match {
-      case CT_UNKN   => "unknown"
-      case CT_SINGLE => "EINZEL"
-      case CT_DOUBLE => "DOPPEL"
-      case CT_MIXED  => "MIXED"
-      case CT_TEAM   => "TEAM"      
-      case _         => "unknown"
-    }
-  }
+  def init             = new Competition(0L, "", "",  CompTyp.UNKN, "", CompStatus.UNKN, "")
+  def get(name: String)= new Competition(0L, "", name,  CompTyp.UNKN, "", CompStatus.UNKN, "")
 
   def decode(s: String): Either[shared.utils.Error, Competition] = {
     try Right(read[Competition](s))
@@ -214,5 +161,30 @@ object Competition {
     try Right( read[Seq[Competition]](comps))
     catch { case _: Throwable => Left(Error("err0061.decode.Competitions", comps.take(20), "", "Competition.deqSeq")) }
   }
+}
 
+object CompTyp extends Enumeration {
+  val UNKN   = Value(0, "UNKN")
+  val SINGLE = Value(1, "SINGLE") 
+  val DOUBLE = Value(2, "DOUBLE")    
+  val MIXED  = Value(3, "MIXED")         
+  val TEAM   = Value(4, "TEAM")
+}  
+
+object CompStatus extends Enumeration {
+  val UNKN   = Value( -1, "UNKN")
+  val READY  = Value(  0, "READY") 
+  val RUN    = Value(100, "RUN")  
+
+  val VRAUS  = Value(  1, "VRAUS")   // Auslosung der Vorrunde       
+  val VREIN  = Value(  2, "VREIN")   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val VRFIN  = Value(  3, "VRFIN")   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
+
+  val ZRAUS  = Value(  4, "ZRAUS")   // Auslosung der Zwischenrunde      
+  val ZREIN  = Value(  5, "ZREIN")   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val ZRFIN  = Value(  6, "ZRFIN")   // Zwischenrunde beendet, Auslosung ER kann erfolgen
+
+  val ERAUS  = Value(  7, "ERAUS")   // Auslosung der Endrunde   
+  val EREIN  = Value(  8, "EREIN")   // Auslosung erfolgt, Eingabe der Ergebnisse
+  val ERFIN  = Value(  9, "ERFIN")   // Endrunde beendet ... 
 }

@@ -9,11 +9,11 @@ import shared.utils._
 import shared.utils.Constants._
 import shared.model.CompPhase._
 import shared.model.MEntry
-import shared.model.ParticipantEntry
+import shared.model.PantEntry
 import shared.model.Utility._
 
 class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int = 0) {
-  var pants    = ArrayBuffer.fill[ParticipantEntry](size) (ParticipantEntry("0", "", "", 0, (0,0))) 
+  var pants    = ArrayBuffer.fill[PantEntry](size) (PantEntry("0", "", "", 0, (0,0))) 
   var results  = Array.fill[ResultEntry](size) (ResultEntry(false, (0,0), ("0","0"), (0,0), Array[String]() ))
   var sno2pos  = scala.collection.mutable.Map[String, Int]()
 
@@ -67,7 +67,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
   }
 
 
-  def setDraw(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
+  def setDraw(participants: ArrayBuffer[PantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
     if (participants.size != size) {
       Left(Error("???"))
     } else {
@@ -77,7 +77,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
     }
   }
 
-  def initDraw(participants: ArrayBuffer[ParticipantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
+  def initDraw(participants: ArrayBuffer[PantEntry], dInfo: ArrayBuffer[(String, Int, Int, Int)]): Either[Error, Int] = {
     def changeUpDown(invert: Boolean, value: Boolean): Boolean = if (invert) !value else value
 
     size = KoRound.getSize(participants.size)
@@ -111,7 +111,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
       // 2. step generate initial drawing
       //val pantsWithDrawInfo = pants.zip(drawInfo).map(x => (x, upDownMap((x._2._2,x._2._3))))
       val pantsWithDInfo = participants.zip(dInfo)
-      pants              = ArrayBuffer.fill(size) (ParticipantEntry.bye("")) 
+      pants              = ArrayBuffer.fill(size) (PantEntry.bye("")) 
       drawInfo           = ArrayBuffer.fill(size) ("", 0, 0, 0) 
 
       // 3. step split pants into up and down positions
@@ -150,7 +150,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
   // toTx convert KoRound to transfer representation
   def toTx(): KoRoundTx = {
     val koResults = if (size > 0) results.toList else List[ResultEntry]()
-    val koPants = if (size > 0) pants.toList else List[ParticipantEntry]()
+    val koPants = if (size > 0) pants.toList else List[PantEntry]()
     KoRoundTx(size, rnds, name, noWinSets, koPants, koResults)
   }
 
@@ -335,7 +335,7 @@ case class KoRoundTx (
   val rnds:      Int,
   val name:      String,
   val noWinSets: Int,
-  val pants:     List[ParticipantEntry],
+  val pants:     List[PantEntry],
   val results:   List[ResultEntry]
 )
 

@@ -1,14 +1,16 @@
 @*
  * Template Organize Register
- * input Sequence of Player (no, id, name, clubname, status, coName, coId, coTyp, coStatus, email) 
+ * input Sequence of Player (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) 
  *@
-
+@import shared.model.PantStatus
+@import shared.model.CompTyp
+@import shared.model.CompStatus
 @import shared.model.CompPhase._ 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(players: Seq[(Long, String, String, String, Int, String, Long, Int, Int, String)])(implicit ucc: UseCaseParam)
+@(players: Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)])(implicit ucc: UseCaseParam)
 @getNameWithClub(name:String,club:String) = @{ s"${name}[${club}]"}
 
 @if(players.isEmpty) {
@@ -29,19 +31,19 @@
 			<tr @id("WaitDummy") ></tr>
 			@for(player <- players) {	
 				<tr>
-					<td class="text-left tuse-height"><strong>@player._2</strong></td>
+					<td class="text-left tuse-height"><strong>@player._1</strong></td>
 					<td class="text-left tuse-height">
-						@if(player._10!="") { <a href="mailto:@player._10"><i class="fa fa-envelope-o"></i></a> }
+						@if(player._9!="") { <a href="mailto:@player._9"><i class="fa fa-envelope-o"></i></a> }
 					</td>
-					<td class="text-left tuse-height">@getNameWithClub(player._3,player._4)</td>
-					<td class="text-left tuse-height">@player._6</td>
+					<td class="text-left tuse-height">@getNameWithClub(player._2, player._3)</td>
+					<td class="text-left tuse-height">@player._5</td>
 					<td class="text-center tuse-height">
-						@button("wait.btn.accept","","btn-xs","SetStatus", player._7.toString, player._2.toString, "PLS_SIGN")
-						@button("wait.btn.reject","","btn-xs","SetStatus", player._7.toString, player._2.toString, "PLS_RJEC")
+						@button("wait.btn.accept","","btn-xs","SetStatus", player._6.toString, player._2, "PLS_SIGN")
+						@button("wait.btn.reject","","btn-xs","SetStatus", player._6.toString, player._2, "PLS_RJEC")
 					</td>
 					<td class="text-right tuse-height">
-						<input class="form-check-input" type="checkbox" value="" @onclick("PlayerActiv",player._7.toString,player._2) 
-					  	@if(player._9>CPC_INIT){disabled="disabled"} >
+						<input class="form-check-input" type="checkbox" value="" @onclick("PlayerActiv",player._6.toString, player._1) 
+					  	@if(player._8>CompStatus.READY){disabled="disabled"} >
 					</td>
 				</tr>		      
 			}

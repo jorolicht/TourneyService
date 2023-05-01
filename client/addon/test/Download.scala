@@ -25,7 +25,7 @@ import scalajs.service._
 import scalajs.{ App, AppEnv }
 import org.w3c.dom.html.HTMLAnchorElement
 
-
+@JSExportTopLevel("StartDownload")
 object AddonDownload extends UseCase("AddonDownload") 
   with TourneySvc with AuthenticateSvc with WrapperSvc
 {
@@ -40,10 +40,12 @@ object AddonDownload extends UseCase("AddonDownload")
   }
 
   def test_0(param: String) = {
+    import org.querki.jquery._ 
     import cats.data.EitherT
     import cats.implicits._     
     import scalajs.usecase.dialog.DlgSpinner
     import scalajs.usecase.dialog.DlgBox
+    import scalajs.usecase.dialog.DlgInfo
     import shared.utils.Constants._
 
     val toId = param.toLongOption.getOrElse(185L)
@@ -56,20 +58,14 @@ object AddonDownload extends UseCase("AddonDownload")
       result    <- EitherT(App.loadRemoteTourney(toId))
     } yield { (pw) }).value.map {
       case Left(err)  => dom.window.alert(s"ERROR: authentication failed with: ${getError(err)}")
-      case Right(res) => { 
-        DlgSpinner.start("Start Transfer")
-        downloadFile(DownloadType.CTTResult).map {
-          case Left(err)  => DlgSpinner.error("Fehler")  
-          case Right(res) => DlgBox.standard("Bestätigung Speichern ...", s"Soll die Ergebnisdatei ${res._1} gespeichert werden", Seq("no", "yes"), 1, true). map {
-            case 2 => {
-              DlgSpinner.close()
-              println(s"downloafFile => RESULT fName: ${res._1} content: ${res._2.take(100)}")
-            }   
-            case _ => {
-              DlgSpinner.close()
-              println(s"downloafFile => Abbruch")
-            }
-          }
+      case Right(res) => {
+        startSpinner()
+        downloadFile(DownloadType.ClickTT).map {
+          case Left(err)  => stopSpinner(); DlgInfo.show(getMsg_("dlg.info.download.error.hdr"), getError(err), "danger") 
+          case Right(res) => {
+            stopSpinner()
+            DlgBox.saveStringAsFile(getMsg_("dlg.box.save.verify.hdr"), getMsg_("dlg.box.save.verify.msg", res._1), res._1,  res._2)
+          }  
         }
       }
     }
@@ -98,9 +94,6 @@ object AddonDownload extends UseCase("AddonDownload")
       }  
       case _ => debug("confirm", "unknown"); false
     }}
-
-
   }
-
 
 }

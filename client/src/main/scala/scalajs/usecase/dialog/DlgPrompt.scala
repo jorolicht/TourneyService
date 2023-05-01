@@ -37,15 +37,8 @@ object DlgPrompt extends BasicHtml
     val p = Promise[Either[String, String]]()
     val f = p.future
   
-    def dialogBoxCancel() = if (!p.isCompleted) { p success Left("CANCEL"); ; $("#DlgPrompt__Modal").modal("hide") }
-
-    def dialogBoxClick(e: Event) = {     
-      if (!p.isCompleted) { 
-        p success Right(getInput("DlgPrompt__Input", "")(UCP()))
-        $("#DlgPrompt__Modal").modal("hide") 
-      }
-    }  
-
+    def dialogBoxCancel() = if (!p.isCompleted) p success Left("CANCEL")
+    def dialogBoxClick(e: Event) = if (!p.isCompleted) p success Right(getInput("DlgPrompt__Input", "")(UCP()))
 
     loadModal(html.DlgPrompt(), "DlgPrompt__Modal")
     actionfunc = afunc
@@ -60,21 +53,18 @@ object DlgPrompt extends BasicHtml
       if (Seq(13).contains(e.keyCode.toInt)) {
         // ENTER KEY
         e.preventDefault()
-        if (!p.isCompleted) { 
-          p success Right(getInput("DlgPrompt__Input", "")(UCP()))
-          $("#DlgPrompt__Modal").modal("hide") 
-        }
+        if (!p.isCompleted) p success Right(getInput("DlgPrompt__Input", "")(UCP()))
       }
 
       if (Seq(38).contains(e.keyCode.toInt)) {
         e.preventDefault()
-        println("KEY UPPP")
+        //println("KEY UPPP")
         afunc("Up", elem, e)
       }
       
       if (Seq(40).contains(e.keyCode.toInt)) {
         e.preventDefault()
-        println("KEY DOWN")
+        //println("KEY DOWN")
         afunc("Down", elem, e)
       }
     }
@@ -83,7 +73,10 @@ object DlgPrompt extends BasicHtml
     setHtml("Title", title)
     setInput("Input", initValue)
     $("#DlgPrompt__Modal").on("hide.bs.modal", () => dialogBoxCancel())
-    f
+    f.map {
+      case Left(err)  => $("#DlgPrompt__Modal").modal("hide"); Left(err)
+      case Right(res) => $("#DlgPrompt__Modal").modal("hide"); Right(res)
+    }
   }
 
 

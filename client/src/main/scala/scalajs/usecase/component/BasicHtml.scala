@@ -92,7 +92,7 @@ object BasicHtml {
     catch { case _: Throwable => Helper.error("removeClass", s"id: ${elemId} class: ${_class}") } 
   }
 
-  def getMsg_(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
+  
 }
 
 class BasicHtml
@@ -636,12 +636,13 @@ class BasicHtml
   def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = {
     if (key.startsWith("_")) AppEnv.getMessage(key.substring(1), args: _*) else AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
   }
-  
-  def getMsgPref(prefix: String, key: String, args: String*): String = {
-    if (prefix == "") AppEnv.getMessage(key, args: _*) else AppEnv.getMessage(prefix + "." + key, args: _*)
-  }
 
-  //def getError(err: shared.utils.Error) = AppEnv.getMessage(err.msgCode, err.in1, err.in2)
+  def getMsg_(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
+
+
+  // def getMsgPref(prefix: String, key: String, args: String*): String = {
+  //   if (prefix == "") AppEnv.getMessage(key, args: _*) else AppEnv.getMessage(prefix + "." + key, args: _*)
+  // }
 
   def setMainContent[C](content: C): Unit = content match {
     case _:play.twirl.api.Html => document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString
@@ -650,6 +651,8 @@ class BasicHtml
       
   def disProp(visible: Boolean): String = if (visible) "block" else "none"
 
+  def startSpinner() = BasicHtml.addClass_("APP__Spinner", "spinner-grow")
+  def stopSpinner()  = BasicHtml.removeClass_("APP__Spinner", "spinner-grow") 
 
     // showAlert  
   def showAlert(text: String): String = {

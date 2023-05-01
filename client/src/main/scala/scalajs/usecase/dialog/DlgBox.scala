@@ -107,5 +107,22 @@ object DlgBox extends BasicHtml
     case _ => false
   }}
 
+  def saveStringAsFile(msgTitel: String, msgBody: String, fName: String, content: String): Unit= {   
+    import js.JSConverters._ 
+    import org.scalajs.dom.raw.HTMLAnchorElement
+    
+    val data = new dom.Blob(content.toJSArray.asInstanceOf[scala.scalajs.js.Array[scala.scalajs.js.Any]], dom.raw.BlobPropertyBag("text/plain"))
+    var url = dom.raw.URL.createObjectURL(data)
+
+    getElemById_("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
+    setAttribute(gE("APP__Download"), "download", fName)
+
+    standard(msgTitel, msgBody, Seq("cancel", "yes"),0,true).map { _ match {
+      case 1 => debug("saveStringAsFile", "cancel file save"); false
+      case 2 => gE("APP__Download").asInstanceOf[HTMLAnchorElement].click() 
+      case _ => debug("saveStringAsFile", "unknown dialog box option"); false
+    }}
+  }
+
 }
   

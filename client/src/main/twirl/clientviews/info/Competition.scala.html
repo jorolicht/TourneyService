@@ -1,11 +1,13 @@
 @*
  * Template User Info List Competitions
  *@
+@import shared.model.CompTyp 
+@import shared.model.CompStatus
 @import shared.model.Competition._ 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 
-@(comps: Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)])(implicit ucp: UseCaseParam)
+@(comps: Seq[(Long, String, String, String, CompTyp.Value, String, Int, Int, CompStatus.Value, String, String)])(implicit ucp: UseCaseParam)
 
 @if(comps.isEmpty) {  
   <div class="alert alert-info text-center" role="alert">
@@ -27,7 +29,7 @@
           <td class="text-left tuse-height">@co._10</td>
           <td class="text-left tuse-height">@co._11</td>
           <td class="text-center tuse-height">@co._7</td>
-          @if(co._9 != CS_REDY){
+          @if(co._9 != CompStatus.READY){
             <td class="text-right tuse-height">@msg_(s"competition.status.${co._9}")</td>  
           } else {
             <td class="text-right tuse-height"></td> 

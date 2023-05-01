@@ -1,10 +1,5 @@
 package scalajs.usecase.dialog
 
-// Start TestCases
-// DlgCardTourney Edit: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardTourney&ucInfo=Edit
-// DlgCardTourney Show: http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardTourney&ucInfo=Show
-// DlgCardTourney New:  http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardTourney&ucInfo=New
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -122,7 +117,7 @@ object DlgCardTourney  extends BasicHtml
     if (eList.length > 0) {
       Left(eList.toList)
     } else {
-      Right(TournBase(name, organizer, orgDir, startDate, endDate, "", typ.getOrElse(-1), privat.getOrElse(true), contact.encode, addr.encode, id))
+      Right(TournBase(name, organizer, orgDir, startDate, endDate, "", typ.getOrElse(0), privat.getOrElse(true), contact.encode, addr.encode, id))
     }
   }
 

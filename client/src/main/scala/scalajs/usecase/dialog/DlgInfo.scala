@@ -31,7 +31,7 @@ object DlgInfo extends BasicHtml
   def show(title: String, body: String, alertTyp: String="success") : Unit = {
     loadModal(html.DlgInfo(), ucp)
 
-    $("#APP__DlgInfo").modal("show")
+    $("#APP__DlgInfo__Modal").modal("show")
     alertTyp match {
       case "danger"  => removeClass("Content", "border-success", "border-secondary"); addClass("Content", "border-danger")
       case "success" => removeClass("Content", "border-danger", "border-secondary"); addClass("Content", "border-success")

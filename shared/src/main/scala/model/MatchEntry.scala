@@ -2,15 +2,16 @@ package shared.model
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
+import shared.model.CompPhaseTyp
 import shared.model.CompPhase._
 import shared.utils.Routines._
 import shared.utils.{ Error, Return }
 
 trait MEntry {
   def coId: Long 
-  def coTyp: Int 
+  def coTyp: CompTyp.Value 
   def coPhId: Int
-  def coPhTyp: Int
+  def coPhTyp: CompPhaseTyp.Value
   def stNoA: String
   def stNoB: String
   def round: Int
@@ -120,14 +121,14 @@ trait MEntry {
 }
 
 
-case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, 
+case class MEntryBase(coId: Long, coTyp: CompTyp.Value, coPhId: Int, coPhTyp: CompPhaseTyp.Value, 
                       var gameNo: Int=0, round: Int=0, var playfield:String="", var status:Int=0,
                       var info: String="", var sets: (Int,Int) =(0,0), var result:String="",
                       val winSets: Int=0, var stNoA: String="", var stNoB: String=""  ) 
   extends MEntry { 
 
-  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, "")
-  def encode: String = s"""{  "coId":${coId}, "coTyp":${coTyp}, "coPhId":${coPhId}, "coPhTyp":${coPhTyp}, "content"="^_" } """
+  def toTx = MEntryTx(coId, coTyp.id, coPhId, coPhTyp.id, "")
+  def encode: String = s"""{  "coId":${coId}, "coTyp":${coTyp.id}, "coPhId":${coPhId}, "coPhTyp":${coPhTyp.id}, "content"="^_" } """
   override def toString(): String = s"""  Base-Match"""
 
   def setPantA(sNoA: String) = stNoA = sNoA
@@ -144,9 +145,9 @@ case class MEntryBase(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int,
 
 case class MEntryKo(
   val coId: Long,                         // competition identifier
-  val coTyp: Int,                         // competition typ, e.g. CT_SINGLE, CT_DOUBLE
+  val coTyp: CompTyp.Value,                         // competition typ, e.g. CT_SINGLE, CT_DOUBLE
   val coPhId: Int,                        // competition phase identifier
-  val coPhTyp: Int,                       // competition phase system, eg. CPT_GR, CPT_KO
+  val coPhTyp: CompPhaseTyp.Value,        // competition phase system, eg. CPT_GR, CPT_KO
   var gameNo: Int,                        //(0) game number within phase
   
   var stNoA:  String,                     //(1) participant A start number
@@ -170,8 +171,8 @@ case class MEntryKo(
                                           //     TT MATCH: <ball1> . <ball2> . <3> . <set4> ...
 
 ) extends MEntry {
-  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
+  def toTx = MEntryTx(coId, coTyp.id, coPhId, coPhTyp.id, s"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp.id},"coPhId":${coPhId},"coPhTyp":${coPhTyp.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${maNo}^${winPos}^${looPos}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
@@ -238,21 +239,20 @@ object MEntryKo {
     }
   } 
 
-  def init(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, stNoA: String, stNoB: String, gameNo: Int, round: Int, maNo: Int,
+  def init(coId: Long, coTyp: CompTyp.Value, coPhId: Int, coPhTyp: CompPhaseTyp.Value, stNoA: String, stNoB: String, gameNo: Int, round: Int, maNo: Int,
             winPos: String, looPos: String, status: Int, sets: (Int,Int), winSets: Int,
             playfield: String="", info: String="", startTime: String="", endTime: String="", result: String = "") = {
               val wl = getWinLooSingleKo(round, gameNo, maNo)
-              MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, wl._1, wl._2, 
-                       playfield, info, startTime, endTime, status, sets, winSets, result)
+              MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, wl._1, wl._2, playfield, info, startTime, endTime, status, sets, winSets, result)
             }
 }
 
 
 case class MEntryGr(
   val coId:      Long,                   // competition identifier
-  val coTyp:     Int,                    // competition typ, e.g. CT_SINGLE, CT_DOUBLE
+  val coTyp:     CompTyp.Value,                    // competition typ, e.g. CT_SINGLE, CT_DOUBLE
   val coPhId:    Int,                    // competition phase identifier
-  val coPhTyp:   Int,                    // competition phase system, eg. CPT_GR, CPT_KO
+  val coPhTyp:   CompPhaseTyp.Value,     // competition phase system, eg. CPT_GR, CPT_KO
   var gameNo:    Int,                    //(0) game number within phase
   
   var stNoA:     String,                 //(1) participant A start number
@@ -278,8 +278,8 @@ case class MEntryGr(
                                          //     TT MATCH: <ball1> . <ball2> .  ...
 ) extends MEntry {
 
-  def toTx = MEntryTx(coId, coTyp, coPhId, coPhTyp, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
-  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp},"coPhId":${coPhId},"coPhTyp":${coPhTyp},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
+  def toTx = MEntryTx(coId, coTyp.id, coPhId, coPhTyp.id, s"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_")
+  def encode: String = s"""{"coId":${coId},"coTyp":${coTyp.id},"coPhId":${coPhId},"coPhTyp":${coPhTyp.id},"content":"${gameNo}^${stNoA}^${stNoB}^${round}^${grId}^${wgw._1}^${wgw._2}^${depend}^${trigger}^${playfield}^${info}^${startTime}^${endTime}^${status}^${sets._1}^${sets._2}^${winSets}^${result}^_"}"""
   override def toString(): String = s"""
       |  Group-Match: ${wgw._1}-${wgw._2} SnoA: ${stNoA} - SnoB: ${stNoB} 
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
@@ -305,32 +305,33 @@ case class MEntryGr(
 
 
 object MEntryGr {
-   def init(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, gameNo: Int, stNoA: String, stNoB: String, round: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
+   def init(coId: Long, coTyp: CompTyp.Value, coPhId: Int, coPhTyp: CompPhaseTyp.Value, gameNo: Int, stNoA: String, stNoB: String, round: Int, grId: Int, wgw: (Int,Int), winSets: Int) = {
      MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, wgw, "_default_", "", "", "", "", "", 0, (0,0), winSets, "")
    }
 }
 
 case class MEntryTx(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, content: String) {
   def decode: MEntry = {
-    coPhTyp match {
-      case CPT_GR => {
+    val cophtype = CompPhaseTyp(coPhTyp)
+    cophtype match {
+      case CompPhaseTyp.GR => {
       try { 
           val m = content.split("\\^")
           val (gameNo,     stNoA, stNoB, round,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =
               (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5).toInt, m(6).toInt, m(7),   m(8),    m(9),      m(10), m(11),    m(12),   m(13).toInt, m(14).toInt, m(15).toInt, m(16).toInt, m(17))
-          MEntryGr(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
-        } catch { case _: Throwable => MEntryGr(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,(0,0),"","","","","","", 0,(0,0),0, "") }
+          MEntryGr(coId, CompTyp(coTyp), coPhId, cophtype, gameNo, stNoA, stNoB, round, grId, (wgw1,wgw2), depend, trigger, playfield, info, startTime, endTime, status, (sets1,sets2), winSets, result)
+        } catch { case _: Throwable => MEntryGr(coId, CompTyp(coTyp), coPhId, cophtype, 0, "", "", 0, 0, (0,0), "", "", "", "", "", "", 0, (0,0), 0, "") }
       }
-      case CPT_KO => {
+      case CompPhaseTyp.KO => {
         try { 
           val m = content.split("\\^")
           val (gameNo,     stNoA, stNoB, round,      maNo,       winPos, looPos, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,    result) =
               (m(0).toInt, m(1),  m(2),  m(3).toInt, m(4).toInt, m(5),   m(6),   m(7),      m(8), m(9),      m(10),   m(11).toInt, m(12).toInt, m(13).toInt, m(14).toInt, m(15))
-          MEntryKo(coId, coTyp, coPhId, coPhTyp, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, 
+          MEntryKo(coId, CompTyp(coTyp), coPhId, cophtype, gameNo, stNoA, stNoB, round, maNo, winPos, looPos, playfield, info, 
                    startTime, endTime, status, (sets1,sets2), winSets, result)
-        } catch { case _: Throwable => MEntryKo(coId, coTyp, coPhId, coPhTyp,0,"","",0,0,"","","","","","",0,(0,0),0,"") }
+        } catch { case _: Throwable => MEntryKo(coId, CompTyp(coTyp), coPhId, cophtype, 0, "", "", 0, 0, "", "", "", "", "", "", 0, (0,0), 0, "") }
       }   
-      case _      => MEntryBase(coId, coTyp, coPhId, coPhTyp)
+      case _      => MEntryBase(coId, CompTyp(coTyp), coPhId, cophtype)
     }
   }
 }
@@ -395,12 +396,12 @@ object MEntry {
   } 
 
 
-  def isPlayerRunning(snoA: String, snoB: String, coTyp: Int): Boolean = {
+  def isPlayerRunning(snoA: String, snoB: String, coTyp: CompTyp.Value): Boolean = {
     import shared.model.Competition._
     coTyp match {
-      case CT_SINGLE => getPlayerRunning(SNO.plId(snoA), SNO.plId(snoB))
+      case CompTyp.SINGLE => getPlayerRunning(SNO.plId(snoA), SNO.plId(snoB))
 
-      case CT_DOUBLE => {
+      case CompTyp.DOUBLE => {
         val idAs = getMDLongArr(snoA)
         val idBs = getMDLongArr(snoB)
         getPlayerRunning(idAs(0), idAs(1)) | getPlayerRunning(idBs(0), idBs(1))
@@ -413,11 +414,11 @@ object MEntry {
     import shared.utils.Routines._
     val gaId = (m.coId, m.coPhId, m.gameNo)
     m.coTyp match {
-      case CT_SINGLE => {
+      case CompTyp.SINGLE => {
         if (run) addPlayerRunning(SNO.plId(m.stNoA), gaId) else removePlayerRunning(SNO.plId(m.stNoA), gaId)
         if (run) addPlayerRunning(SNO.plId(m.stNoB), gaId) else removePlayerRunning(SNO.plId(m.stNoB), gaId)
       }
-      case CT_DOUBLE => {
+      case CompTyp.DOUBLE => {
         val idAs = getMDLongArr(m.stNoA)
         val idBs = getMDLongArr(m.stNoB)
         if (run) addPlayerRunning(idAs(0), gaId) else removePlayerRunning(idAs(0), gaId)

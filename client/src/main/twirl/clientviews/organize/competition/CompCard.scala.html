@@ -3,9 +3,9 @@
  *@
 
 @import shared.utils.twirlhelper._ 
-@import shared.utils.UseCaseParam  
+@import shared.utils.UseCaseParam
+@import shared.model.CompStatus 
 @import shared.model.Competition
-@import shared.model.Competition._
 @import clientviews.component.helper.html._
 
 @* 
@@ -48,18 +48,18 @@
 				<td @id(s"Status_${co._1.id}") class="text-right tuse-height">@co._1.getStatusName(msg_)</td>
 				<td class="text-center tuse-height"> 
 					<div class="form-check-inline">
-						@if(co._1.status==Competition.CS_REDY){
+						@if(co._1.status==CompStatus.READY){
 						  <input data-coId='@co._1.id' class="form-check-input" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(co._1.getWebRegister) >
 						}	
 					</div>
 				</td>
 				<td class="text-right tuse-height">
-					@if(co._1.status==Competition.CS_REDY){
+					@if(co._1.status==CompStatus.READY){
 					  <a @id("icon.edit") @tit("edit") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
 					}
 					<a @tit("view") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
 					<a @tit("delete") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
-					@if(co._1.status==Competition.CS_REDY){
+					@if(co._1.status==CompStatus.READY){
 					  <a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
 					}
 				</td>

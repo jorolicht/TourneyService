@@ -11,7 +11,7 @@ config.LogLevel                                     = debug
 
 app.mockup                                          = false
 app.version                                         = 2023-02EN190
-app.date                                            = 2023-04-11
+app.date                                            = 2023-04-15
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -490,6 +490,8 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.tourney.upload.typ.result                    = Result File
   
   organize.tourney.btn.upload.submit                    = SUBMIT
+  organize.tourney.btn.download.submit                  = DOWNLOAD
+
   organize.tourney.upload.info.clicktt                  = ClickTT Participant File (XML file)
   organize.tourney.upload.info.invitation               = Tournament Announcement (markdown format)
   organize.tourney.upload.info.clublogo                 = Club Logo (Format: png | Height: 60px | Width: 90px)
@@ -514,6 +516,9 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.tourney.download.notify.info                 = Download list of registrations in CSV format (file name: Registrations.csv)
   organize.tourney.download.notify.filename             = Registrations.csv
   organize.tourney.download.notify.filehdr              = Start number, surname, first name, TTR, club, competition
+  organize.tourney.download.clicktt.list                = ClickTT Result File
+  organize.tourney.download.clicktt.info                = ClickTT Result File <date>_<id>_Result.xml to use for import results on clickTT
+
   organize.tourney.dlg.error                            = Error executing tourney action
 #END Organize Tourney
 
@@ -980,6 +985,9 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.box.cookietitle                                 = Yes, this website also uses cookies.
   dlg.box.cookiemessage                               = We only use cookies internally in our web application for the session status and to personalize content. We do not pass on any information about the use of our website to third parties. If you want to continue using our website, you have to press OK and thereby give your consent to our cookies. If you do not want cookies, simply close the browser window, otherwise you will be redirected to our static website.
 
+  dlg.box.save.verify.hdr                             = Save Confirmation 
+  dlg.box.save.verify.msg                             = Save file {0} in download area? 
+
   dlg.ShowError.hdr                                   = Check your input
 
   dlg.card.tourney.new.hdr                               = Input - Basic Tourney Data 
@@ -1037,6 +1045,9 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   dlg.emailplayer.btn.no                              = NO
 
   dlg.input.btn.exec                                  = EXECUTE
+
+  dlg.info.download.error.hdr                         = Download-Error
+
 #END dialogs
 
 ###
@@ -1363,5 +1374,6 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0208.genCttResult.noMatchingComp                 = Error generating ClickTT result file, no appropriate competition found
   err0209.genCttResult.moreMatchingComps              = Error generating ClickTT result file, no clear competition assignment  
   err0210.downloadFile.invalidType                    = Error invalid download file 
+  err0211.downloadFile.missingResultFile              = Error reading result file: {0}
 
 #END error codes / messages

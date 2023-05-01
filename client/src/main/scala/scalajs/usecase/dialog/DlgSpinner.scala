@@ -20,11 +20,13 @@ object DlgSpinner extends BasicHtml
    *  close with no message
    */  
   def start(msg: String) = {
+    println("DlgSpinner.start")
     loadModal(clientviews.dialog.html.DlgSpinner(), ucp)
+    $("#APP__DlgSpinner__Modal").modal("show")
     removeClass("Type", "border-danger", "border-success", "border-5")
     addClass("Type", "border-secondary")
     setHtml("Content", msg)
-    $("#APP__DlgSpinner__Modal").modal("show")
+    
   }  
 
   def error(msg: String) = {
@@ -42,6 +44,7 @@ object DlgSpinner extends BasicHtml
   }    
 
   def close() = {
+    $("#APP__DlgSpinner__Modal").modal("hide")
     println("Close Modal")
     removeClass("Type", "border-secondary")
     $("#APP__DlgSpinner__Modal").modal("hide")

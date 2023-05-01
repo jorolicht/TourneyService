@@ -219,7 +219,7 @@ object TIO {
         tony.insertOrUpdate(tb).map { tb => Right(tb.id == trny.id) }
         trny.name    = tb.name
         trny.endDate = tb.endDate
-        trny.typ     = tb.typ
+        trny.typ     = TourneyTyp(tb.typ)
         trny.privat  = tb.privat
 
         (for {
@@ -310,7 +310,7 @@ object TIO {
             var cnt = 0
             comp.typ match {
 
-              case Competition.CT_SINGLE =>
+              case CompTyp.SINGLE =>
                 trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
                   val plId    = entry.getSingleId
                   // update licence if necessary
@@ -319,7 +319,7 @@ object TIO {
                   if (entry.ident != "") cnt = cnt + 1
                 }}
 
-              case Competition.CT_DOUBLE =>
+              case CompTyp.DOUBLE =>
                 trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
                   val plIds  = entry.getDoubleId
                   // update licence if necessary
@@ -357,7 +357,7 @@ object TIO {
     val startDate = date2Int(ctt.startDate) 
     val endDate   = date2Int(ctt.endDate)  
 
-    val tb = TournBase(ctt.name, organizer, orgDir, startDate, endDate, ctt.ident, TTY_TT, true, contact, address, 0)
+    val tb = TournBase(ctt.name, organizer, orgDir, startDate, endDate, ctt.ident, TourneyTyp.TT.id, true, contact, address, 0)
 
     tonyDao.findByPathDate(orgDir, startDate).flatMap {
       case Some(a) => { 
@@ -390,20 +390,21 @@ object TIO {
             // generate hash value
             tourney(tony.id).comp2id(Crypto.genHashComp(comp)) = i+1          
             tourney(tony.id).compIdMax = i+1
-
+            val coId = tourney(tony.id).compIdMax 
             // ctt players map to pl2co or do2co entries. 
             comp.typ match {
-              case 1 => 
+              case CompTyp.SINGLE => 
                 for(pls <- co.players) if (pls.persons.length == 1) {
                   val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
-                  tourney(tony.id).pl2co((plId.toString, i+1)) =  Pant2Comp(plId.toString, i+1, pls.id, "",0)
+                  val sPant = Pant2Comp.single(plId, coId, PantStatus.REGI)
+                  tourney(tony.id).pl2co((sPant.sno, coId)) = sPant
                 }
-              case 2 => 
+              case CompTyp.DOUBLE => 
                 for(pls <- co.players) if (pls.persons.length == 2) {
                   val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
                   val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
-                  val sno = plId1.toString + "·" + plId2.toString
-                  tourney(tony.id).pl2co((sno, i+1)) =  Pant2Comp(sno, i+1, pls.id, "",0)
+                  val dPant = Pant2Comp.double(plId1, plId2, coId, PantStatus.REGI)
+                  tourney(tony.id).pl2co((dPant.sno, coId)) =  dPant
                 }
               case _                   => logger.info(s"insert error: invalid competition typ")
             }

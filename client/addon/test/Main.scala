@@ -268,7 +268,7 @@ object AddonMain extends TestUseCase("AddonMain")
 
 
   @JSExport
-  def console() = prompt(getMsgPref("home.main","prompt")).map {
+  def console() = prompt(getMsg_("home.main.prompt")).map {
     case Left(err)  => println("invalid command/cancel")
     case Right(cmd) => execute(cmd)
   } 

@@ -26,14 +26,13 @@ trait ViewServices {
  /** genSingleTblData
    *  returns Sequence of Single Participants (sno, lastname, firstname, clubname, birthyear, status) 
    */
-  def genSingleTblData(coId: Long): Seq[(String, String, String, String, String, Int, Int)] = {
-    val tourney = App.tourney
-    val p2cs = if (coId > 0) tourney.pl2co.values.filter(_.coId == coId).toSeq else tourney.pl2co.values.toSeq
+  def genSingleTblData(trny: Tourney, coId: Long): Seq[(String, String, String, String, String, Int, Int)] = {
+    val p2cs = if (coId > 0) trny.pl2co.values.filter(_.coId == coId).toSeq else trny.pl2co.values.toSeq
     (for { p2ce <- p2cs } yield {
       val plId = p2ce.getPlayerId
-      if (tourney.players.contains(plId)) {
-        val player   = tourney.players(plId)
-        (p2ce.sno, player.lastname, player.firstname, player.getTTR, player.clubName, player.birthyear, p2ce.status)
+      if (trny.players.contains(plId)) {
+        val player   = trny.players(plId)
+        (p2ce.sno, player.lastname, player.firstname, player.getTTR, player.clubName, player.birthyear, p2ce.status.id)
       } else {
         ("0", "", "", "", "", 0, 0)
       }
@@ -43,20 +42,15 @@ trait ViewServices {
   /** genDoubleTblData
    *  returns Sequence of Double Participants (sno, firstname1, firstname2, clubname1, clubname2, status) 
    */
-  def genDoubleTblData(coId: Long): Seq[(String, String, String, String, String, Int)] = {
-    val tourney = App.tourney
-    val p2cs = if (coId > 0) tourney.pl2co.values.filter(_.coId == coId).toSeq else tourney.pl2co.values.toSeq
+  def genDoubleTblData(trny: Tourney, coId: Long): Seq[(String, String, String, String, String, Int)] = {
+    val p2cs = if (coId > 0) trny.pl2co.values.filter(_.coId == coId).toSeq else trny.pl2co.values.toSeq
     (for {
       p2ce <- p2cs
     } yield {
-       val plId1 = p2ce.getPlayerId1
-       val plId2 = p2ce.getPlayerId2
-       if (tourney.players.contains(plId1) & tourney.players.contains(plId2)) {
-        (p2ce.sno, 
-        tourney.players(plId1).lastname, 
-        tourney.players(plId2).lastname, 
-        tourney.players(plId1).clubName,
-        tourney.players(plId2).clubName, p2ce.status)
+       val (plId1,plId2) = p2ce.getDoubleId
+
+       if (trny.players.contains(plId1) & trny.players.contains(plId2)) {
+        (p2ce.sno, trny.players(plId1).lastname, trny.players(plId2).lastname, trny.players(plId1).clubName, trny.players(plId2).clubName, p2ce.status.id)
        } else {
         ("0·0", "", "", "", "", 0)
        }
@@ -64,34 +58,7 @@ trait ViewServices {
   }
     
 
- /** view4PlayerRegister
-   *  returns Sequence of Player (id, name, clubname, status, coName, coId, coTyp, coStatus, email) 
-   */
-  def view4PlayerRegister(): Seq[(Long, String, String, String, Int, String, Long, Int, Int, String)] = {
-    val tourney = App.tourney
-    
-    // list for single players
-    val pList = (for {
-      p2ce  <- tourney.pl2co.values.toSeq
-      comp   = tourney.comps(p2ce.coId) 
-    } yield {
-      if (comp.typ == 1) {
-        val pl1 = tourney.players(p2ce.getPlayerId)
-        (pl1.id, pl1.id.toString, 
-         s"${pl1.lastname} , ${pl1.firstname}", 
-         pl1.clubName, p2ce.status, 
-         comp.name, comp.id, comp.typ, comp.status, pl1.email)
-      } else {
-        val pl1 = tourney.players(p2ce.getPlayerId1)
-        val pl2 = tourney.players(p2ce.getPlayerId2)
-        (pl1.id * 1000000 + pl2.id, s"${pl1.id}/${pl2.id}", 
-         s"${pl1.lastname}/${pl2.lastname}", 
-         s"${pl1.clubName}/${pl2.clubName}", p2ce.status,
-         comp.name, comp.id, comp.typ, comp.status, pl1.email)
-      }
-    }).toSeq
-    pList
-  }
+
 
 
   /** list all competition and the corresponding players
@@ -99,14 +66,14 @@ trait ViewServices {
    */
   def viewPlacements(): Seq[(Long, String, Seq[(Int, String, String, String, String)])] = {
 
-    def getPlacements(coId: Long, cTyp: Int, tourney: Tourney): Seq[(Int, String, String, String, String)] = {
+    def getPlacements(coId: Long, cTyp: CompTyp.Value, tourney: Tourney): Seq[(Int, String, String, String, String)] = {
       (for {
         (sno_coId, pa2co) <- App.tourney.pl2co
       } yield {
         //debug(s"viewPlacments: ${sno_coId} ${tourney.comps(sno_coId._2).name}")
         if (sno_coId._2 == coId) {
           cTyp match {
-             case CT_SINGLE => {
+             case CompTyp.SINGLE => {
                val plId = pa2co.getSingleId
                /*
                debug(s"viewPlacments0: ${plId.toString}")
@@ -121,7 +88,7 @@ trait ViewServices {
                 tourney.players(plId).clubName,
                 pa2co.sno)
              }
-             case CT_DOUBLE | CT_MIXED => {
+             case CompTyp.DOUBLE | CompTyp.MIXED => {
                val (plId1, plId2) = pa2co.getDoubleId
 
                Helper.debug("getPlacements", s"double: ${plId1.toString}  ${plId2.toString}")
@@ -130,8 +97,8 @@ trait ViewServices {
                 s"${tourney.players(plId1).clubName}/${tourney.players(plId2).clubName}",
                 pa2co.sno)
              }
-             case CT_TEAM => (0, "0", "", "", "0")
-             case _       => (0, "0", "", "", "0")
+             case CompTyp.TEAM => (0, "0", "", "", "0")
+             case _            => (0, "0", "", "", "0")
           }
         } else {
           (0, "0", "", "", "0")
@@ -143,7 +110,7 @@ trait ViewServices {
     (for {  
       (coId, comp) <- App.tourney.comps
     } yield { 
-      if (comp.status == CS_ERFIN) {
+      if (comp.status == CompStatus.ERFIN) {
         (coId, comp.name, getPlacements(coId, comp.typ, App.tourney))
       } else {
         (coId, comp.name, Seq())

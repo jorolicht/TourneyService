@@ -29,7 +29,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player, Pant }
+import shared.model.{ Tourney, Player, PantStatus }
 import shared.utils._
 import clientviews.dialog.html
 
@@ -65,6 +65,7 @@ object DlgCardRegSingle extends BasicHtml
    */ 
   def validate(coId: Long)(implicit trny: Tourney): Either[List[Error], (Player, Int)] = {
     import shared.model.Player
+    import shared.model.SexTyp
     import shared.model.Club
     import shared.utils.Routines._
     import scala.collection.mutable.ListBuffer
@@ -76,7 +77,7 @@ object DlgCardRegSingle extends BasicHtml
 
     val bYear  = getInput("Year", 0)
     val status = getRadioBtn("PlayerStatus", -1)
-    val gender = getRadioBtn("Gender", 0) 
+    val gender = SexTyp(getRadioBtn("Gender", SexTyp.UNKN.id)) 
 
     debug("validate", s"status: ${status}")
 
@@ -158,7 +159,7 @@ object DlgCardRegSingle extends BasicHtml
     setClubList(trny)
     setPlayerView("","", 0L)(trny)
 
-    setRadioBtnByValue("PlayerStatus", Pant.REDY.toString)
+    setRadioBtnByValue("PlayerStatus", PantStatus.REDY.toString)
     setHtml("Class", trny.getCompName(coId))
   }
   

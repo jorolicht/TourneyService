@@ -38,7 +38,7 @@ case class Tourney(
   val startDate:  Int, 
   var endDate:    Int, 
   var ident:      String, 
-  var typ:        Int, 
+  var typ:        TourneyTyp.Value, 
   var privat:     Boolean                               = true, 
   var contact:    Contact                               = Contact("","","",""), 
   var address:    Address                               = Address("","","","",""), 
@@ -91,7 +91,7 @@ case class Tourney(
   def toJson(ident: Int): String = write[Tourney](this, ident)
   def isDummy() = (id == 0L)
   def getToId() = this.id
-  def getBase() = TournBase(name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact.encode, address.encode, id)
+  def getBase() = TournBase(name, organizer, orgDir, startDate, endDate, ident, typ.id, privat, contact.encode, address.encode, id)
   def getStartDate(lang: String, fmt:Int=0): String = int2date(startDate, lang, fmt)
 
    
@@ -110,10 +110,11 @@ case class Tourney(
     val res = for { p2c  <- pl2co.values } yield { 
       if (p2c.coId == coId)  {
         comps(coId).typ match {
-          case 1 => ( players(p2c.getPlayerId).getClub(), players(p2c.getPlayerId).getName() )
-          case 2 => {
-            ( s"${players(p2c.getPlayerId1).getClub()}/${players(p2c.getPlayerId2).getClub()}", 
-              s"${players(p2c.getPlayerId1).lastname}/${players(p2c.getPlayerId2).lastname}" ) 
+          case CompTyp.SINGLE => ( players(p2c.getPlayerId).getClub(), players(p2c.getPlayerId).getName() )
+          case CompTyp.DOUBLE => {
+            val (id1,id2) = p2c.getDoubleId
+            ( s"${players(id1).getClub()}/${players(id2).getClub()}", 
+              s"${players(id1).lastname}/${players(id2).lastname}" ) 
           }
           case _ => ("","")
         }
@@ -205,10 +206,10 @@ case class Tourney(
    *
    */ 
   def getCompCnt(co: Competition): (Int, Int) = co.typ match {    
-    case Competition.CT_SINGLE | Competition.CT_DOUBLE => {
+    case CompTyp.SINGLE | CompTyp.DOUBLE => {
       val pl2cos   = pl2co.values.filter(_.coId==co.id).toSeq
       val cnt      = pl2cos.length
-      val cntActiv = pl2cos.filter(_.status > 0).length
+      val cntActiv = pl2cos.filter(_.status > PantStatus.REGI).length
       (cnt, cntActiv)
     }
     case _ => (0, 0)
@@ -231,7 +232,7 @@ case class Tourney(
     }
   }
 
-  def setCompStatus(coId: Long, status: Int): Either[Error, Boolean] = {
+  def setCompStatus(coId: Long, status: CompStatus.Value): Either[Error, Boolean] = {
     if (comps.isDefinedAt(coId)) { 
       comps(coId).status = status
       Right(true) 
@@ -356,7 +357,7 @@ case class Tourney(
   // PARTICIPANT ROUTINES
   //
 
-  def setPantStatus(coId: Long, sno: String, status: Int): Either[Error, Int] = {
+  def setPantStatus(coId: Long, sno: String, status: PantStatus.Value): Either[Error, PantStatus.Value] = {
     if ( pl2co.isDefinedAt((sno, coId)) ) { 
       pl2co((sno,coId)).status = status
       Right(status)
@@ -365,13 +366,13 @@ case class Tourney(
     }      
   }
 
-  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]):Either[Error, Int] = 
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, PantStatus.Value)]):Either[Error, Int] = 
     seqEither(for (p <- pantStatus) yield setPantStatus(coId, p._1, p._2)) match {
       case Left(err)  => Left(err)
-      case Right(res) => Right(pantStatus.filter(_._2>=Pant.REDY).length)
+      case Right(res) => Right(pantStatus.filter(_._2>=PantStatus.REDY).length)
     }
 
-  def getPant(coId: Long, sno: SNO): ParticipantEntry = sno.getPantEntry(comps(coId).typ)(this)
+  def getPant(coId: Long, sno: SNO): PantEntry = sno.getPantEntry(coId)(this)
 
   //
   // Competition Phase Routines
@@ -380,8 +381,8 @@ case class Tourney(
   /** getCompPhaseStatus returns status of the competition phase 
    *  otherwise undefined status
    */ 
-  def getCompPhaseStatus(coId: Long, coPhId: Int): Int = 
-    if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhase.CPS_UNKN } 
+  def getCompPhaseStatus(coId: Long, coPhId: Int): CompPhaseStatus.Value = 
+    if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhaseStatus.UNKN } 
 
   /** add a competition phase to a competition (start competition with first competition phase)
    *  or add an a new competition phase to an finished existing competition phase
@@ -512,16 +513,12 @@ case class Tourney(
 
 
 object Tourney {
+  implicit val tourneyTypReadWrite: upickle.default.ReadWriter[TourneyTyp.Value] =
+    upickle.default.readwriter[Int].bimap[TourneyTyp.Value](x => x.id, TourneyTyp(_))
+
   implicit def rw: RW[Tourney] = macroRW
-  def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", 0)
-  def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, tBase.typ)
-
-  // tourney type
-  val TTY_UNKN  = -1  // UNKNOWN
-  val TTY_ANY   =  0  // ANY
-  val TTY_TT    =  1  // Table Tennis 
-  val TTY_SK    =  2  // Schafkopf
-
+  def init                   = Tourney(0L, "", "", "dummy", 19700101, 19700101, "", TourneyTyp.UNKN)
+  def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, TourneyTyp(tBase.typ))
 
   val defaultEncodingVersion: Int = 1
   def decode(trnyStr: String): Either[Error, Tourney] = {
@@ -595,12 +592,22 @@ object Tourney {
   }
 }
 
-case class TourneyBaseData(id: Long, name: String, organizer: String, orgDir: String, 
-                           startDate: Int, endDate: Int, ident: String, typ: Int, 
-                           privat: Boolean, contact: Contact, address: Address)
-                           
-object TourneyBaseData {
-  implicit def rw: RW[TourneyBaseData] = macroRW
-}                        
-                           
+             
+
+object TourneyTyp extends Enumeration {
+
+  val UNKN = Value(0,  "UNKN")
+  val TT   = Value(1,  "Tabletennis")  // table tennis
+  val SK   = Value(2,  "Shephead")     // Schafkopf
+  val ANY  = Value(99, "ANY")          // waiting list 
+
+  // def apply(value: String): TourneyTyp.Value = {
+  //   value match {
+  //     case "TT"   => TourneyTyp(1)
+  //     case "SK"   => TourneyTyp(2)
+  //     case "ANY"  => TourneyTyp(99)
+  //     case _      => TourneyTyp(0)
+  //   }
+  // } 
+}
 

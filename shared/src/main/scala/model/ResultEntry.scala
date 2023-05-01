@@ -42,11 +42,11 @@ object ResultEntry {
 
   def fromMatchEntry(mEntry: MEntry): ResultEntry = {
     mEntry.coPhTyp match {
-      case CPT_GR => {
+      case CompPhaseTyp.GR => {
         val m = mEntry.asInstanceOf[MEntryGr]
         ResultEntry(m.status >= 2 & m.validSets(), m.wgw, (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
       }  
-      case CPT_KO => {
+      case CompPhaseTyp.KO => {
         val m = mEntry.asInstanceOf[MEntryKo]
         ResultEntry(m.status >= 2 & m.validSets(), (m.round, m.maNo), (m.stNoA,m.stNoB), m.sets, m.result.split('·'))
       }  

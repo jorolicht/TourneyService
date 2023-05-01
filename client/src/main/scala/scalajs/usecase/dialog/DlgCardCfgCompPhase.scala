@@ -25,7 +25,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, CompPhase, Player, SNO, Pant }
+import shared.model.{ Tourney, CompPhase, Player, SNO, PantStatus }
 import shared.model.CompPhase._
 import shared.utils._
 import clientviews.dialog.DlgCardCfgCompPhase.html

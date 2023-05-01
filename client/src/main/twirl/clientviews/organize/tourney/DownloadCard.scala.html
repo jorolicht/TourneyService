@@ -1,7 +1,8 @@
 @*
  * Organize Tourney Download Card
  *@
-@import shared.model.TournBase
+
+@import shared.utils._ 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
@@ -10,15 +11,16 @@
 @(toId: Long, lang: String)(implicit ucc: UseCaseParam)
 
 <!-- Download Card for general and tourney specific files -->
-@content(name: String)(implicit ucc: UseCaseParam) = {
+@content(name: String, dloType: DownloadType.Value)(implicit ucc: UseCaseParam) = {
   <div>
     <div class="float-left">
       @name
     </div>
     <div class="float-right">
-      @button("std.btn.download", "", "btn-sm", "DownloadNotifyList")
+      @actionButton(s"DownloadType_${dloType.id}", "download.submit", "btn-outline-secondary btn-xs")
     </div>
   </div>
 }
 
-@radioCard("DownloadNotifyList", "TourneyDownload", "download.notify.list", content(msg("download.notify.info")))
+@radioCard("DownloadPlayer", "TourneyDownload", "download.notify.list", content(msg("download.notify.info"), DownloadType.Player))
+@radioCard("DownloadClickTTResult", "TourneyDownload", "download.clickTT.list", content(msg("download.clickTT.info"), DownloadType.ClickTT))

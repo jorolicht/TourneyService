@@ -47,8 +47,8 @@ object InfoResult extends UseCase("InfoResult")
     debug("update",s"for ${coId} ${coPhId} ${grId}")
     val cphase = App.tourney.cophs((coId, coPhId))
     cphase.coPhTyp match {
-      case CPT_KO => showKoResult(cphase.coId, cphase.coPhId, cphase.ko) 
-      case CPT_GR => showGrResult(cphase.coId, cphase.coPhId, cphase.groups(grId-1))
+      case CompPhaseTyp.KO => showKoResult(cphase.coId, cphase.coPhId, cphase.ko) 
+      case CompPhaseTyp.GR => showGrResult(cphase.coId, cphase.coPhId, cphase.groups(grId-1))
       case _      => debug("update",s"error unknown competition type")
     }
   }
@@ -126,8 +126,8 @@ object InfoResult extends UseCase("InfoResult")
     debug("showTourneyResults", s"phases")
     for (coPhList <- coPhMapSeq.values; coPhase  <- coPhList) {
       // show results of every phase of every competition
-      if (coPhase.coPhTyp == CPT_KO) showKoResult(coPhase.coId, coPhase.coPhId, coPhase.ko)
-      if (coPhase.coPhTyp == CPT_GR) for (grp <- coPhase.groups ) showGrResult(coPhase.coId, coPhase.coPhId, grp)
+      if (coPhase.coPhTyp == CompPhaseTyp.KO) showKoResult(coPhase.coId, coPhase.coPhId, coPhase.ko)
+      if (coPhase.coPhTyp == CompPhaseTyp.GR) for (grp <- coPhase.groups ) showGrResult(coPhase.coId, coPhase.coPhId, grp)
     }
   } 
 }

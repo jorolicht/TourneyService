@@ -18,7 +18,8 @@ import upickle.default._
 
 import shared.utils._
 import shared.model._
-import shared.model.Pant
+import shared.model.PantStatus
+import shared.model.CompStatus
 import shared.utils.Routines._
 
 import scalajs.usecase.dialog._
@@ -34,7 +35,32 @@ import scalajs.{ App }
 object OrganizePlayer extends UseCase("OrganizePlayer")  
   with TourneySvc with ViewServices
 {
-  var player: Seq[(Long, String, String, String, Int, String, Long, Int, Int, String)] = Seq()
+  var player: Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)] = Seq()
+
+   /** view4PlayerRegister
+   *  returns Sequence of Player (id, name, clubname, status, coName, coId, coTyp, coStatus, email) 
+   */
+  def view4PlayerRegister(): Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)] = {
+    val tourney = App.tourney
+    
+    // list for single players
+    val pList = (for {
+      p2ce  <- tourney.pl2co.values.toSeq
+      comp   = tourney.comps(p2ce.coId) 
+    } yield {
+      if (comp.typ == 1) {
+        val pl1 = tourney.players(p2ce.getPlayerId)
+        (PantEntry.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status.id, comp.name, comp.id, comp.typ, comp.status, pl1.email)
+      } else {
+        val (plId1, plId2) = p2ce.getDoubleId
+        val (pl1,pl2) = (tourney.players(plId1), tourney.players(plId2))
+        //val pl2 = tourney.players(plId2)
+        (PantEntry.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status.id, comp.name, comp.id, comp.typ, comp.status, pl1.email)
+      }
+    }).toSeq
+    pList
+  }
+
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) =  { 
     setMainContent(clientviews.organize.html.Player())
@@ -44,16 +70,16 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     player = view4PlayerRegister()
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._5 >= Pant.SICO))) 
-    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._5 == Pant.WAIT))) 
-    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._5 == Pant.RJEC)))
+    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._4 >= PantStatus.REGI.id))) 
+    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._4 == PantStatus.WAIT.id))) 
+    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC.id)))
   
     // check if there are players with need signup commitment
-    setBadge(player.filter(_._5 == Pant.SICO).length)
+    setBadge(player.filter(_._4 == PantStatus.REGI.id).length)
   }       
 
   def setBadge(cnt: Int = (-1)) = {
-    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._5 == Pant.SICO).length else cnt    
+    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._5 == PantStatus.REGI).length else cnt    
     if (sicoCnt > 0) {
        // add badge if not already added, do it now
       setHtml("SidebarBadge", sicoCnt.toString)
@@ -76,16 +102,15 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   }
 
 
-  @JSExport
   def sortByName(): Unit = {
     val pList = getTextContent("SortByName") match {
-      case  "1" =>  { setHtml("SortByName","-1"); player.sortBy(_._3).reverse }  
+      case  "1" =>  { setHtml("SortByName","-1"); player.sortBy(_._2).reverse }  
       case "-1" =>  { setHtml("SortByName","0");  player.sortBy(_._1) } 
-      case   _  =>  { setHtml("SortByName","1");  player.sortBy( _._3) } 
+      case   _  =>  { setHtml("SortByName","1");  player.sortBy( _._2) } 
     }
     val pList2 = getTextContent("SortByComp") match {
-      case "-1"  => pList.sortBy(_._7).reverse
-      case  "1"  => pList.sortBy(_._7)
+      case "-1"  => pList.sortBy(_._6).reverse
+      case  "1"  => pList.sortBy(_._6)
       case   _   => pList
     }
     setHtml("MainCard", clientviews.organize.player.html.MainCard(pList2))
@@ -93,16 +118,15 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0) )
   } 
 
-  @JSExport
   def sortByComp(): Unit = {
     val pList = getTextContent("SortByComp") match {
-      case  "1" => { setHtml("SortByComp","-1"); player.sortBy(_._7).reverse }  
+      case  "1" => { setHtml("SortByComp","-1"); player.sortBy(_._6).reverse }  
       case "-1" => { setHtml("SortByComp","0"); player.sortBy(_._1) } 
-      case  _   => { setHtml("SortByComp","1"); player.sortBy(_._7) }        
+      case  _   => { setHtml("SortByComp","1"); player.sortBy(_._6) }        
     }
     val pList2 = getTextContent("SortByName") match {
-      case "-1" => pList.sortBy(_._3).reverse
-      case  "1" => pList.sortBy(_._3)
+      case "-1" => pList.sortBy(_._2).reverse
+      case  "1" => pList.sortBy(_._2)
       case    _ => pList
     }
     setHtml("MainCard", clientviews.organize.player.html.MainCard(pList2).toString)
@@ -110,13 +134,13 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0))
   }  
 
-  @JSExport
-  def sortByNo(): Unit = {
+
+  def sortBySNO(): Unit = {
     setHtml("SortByComp","0")
     setHtml("SortByName","0")
     val pList = getTextContent("SortByNo") match {
-      case "0"    =>  setHtml("SortByNo","1"); player.filter(_._5 > -2).sortBy(_._1)
-      case  _     =>  setHtml("SortByNo","0"); player.filter(_._5 > -2).sortBy(_._1).reverse
+      case "0"    =>  setHtml("SortByNo","1"); player.filter(_._4 >= PantStatus.REGI.id).sortBy(_._1)
+      case  _     =>  setHtml("SortByNo","0"); player.filter(_._4 >= PantStatus.REGI.id).sortBy(_._1).reverse
     }
 
     setHtml("MainCard", clientviews.organize.player.html.MainCard(pList).toString)
@@ -124,13 +148,13 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0))
   } 
 
-  @JSExport
+
   def sortByStatus(): Unit = {
     setHtml("SortByComp","0")
     setHtml("SortByName","0")
     val pList = getTextContent("SortByStatus") match {
-      case "0" =>  setHtml("SortByStatus","1"); player.sortBy(_._5)
-      case _   =>  setHtml("SortByStatus","0"); player.sortBy(_._5).reverse
+      case "0" =>  setHtml("SortByStatus","1"); player.sortBy(_._4)
+      case _   =>  setHtml("SortByStatus","0"); player.sortBy(_._4).reverse
     }
 
     setHtml("MainCard", clientviews.organize.player.html.MainCard(pList).toString)
@@ -141,29 +165,19 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   @JSExport
   def buttonSetStatus(coIdStr: String, sno: String, status: String): Unit = {
-    // get player ident from string
-    def getIds(s: String): (Long, Long) = {
-      if (s.contains("/")) {
-        val lArr = s.split("/")
-        ( lArr(0).toLongOption.getOrElse(0L), lArr(1).toLongOption.getOrElse(0L)  )
-      } else {
-        (s.toLongOption.getOrElse(0L), 0L)
-      }
-    }
 
-    def setPlayerStatusUpdate(coId: Long, sno: String, status: Int): Unit = {
+    def setPlayerStatusUpdate(coId: Long, sno: String, status: PantStatus.Value): Unit = {
       App.tourney.pl2co(sno, coId).status = status
       setPantStatus(coId, sno, status).map { _ => update() }
     }
 
     val coId = coIdStr.toLongOption.getOrElse(0L)
-    status match {
-      case "PLS_SIGN" => confirm(coId, sno, Pant.SIGN).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.SIGN) }
-      case "PLS_WAIT" => confirm(coId, sno, Pant.WAIT).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.WAIT) }
-      case "PLS_RJEC" => confirm(coId, sno, Pant.RJEC).map { if (_) setPlayerStatusUpdate(coId, sno, Pant.RJEC) }
-      case "PLS_REDY" => setPlayerStatusUpdate(coId, sno, Pant.REDY)
-      case "PLS_UNDO" => setPlayerStatusUpdate(coId, sno, Pant.SIGN)
-      case         _  => error("buttonSetStatus", s"error unknown status")
+    PantStatus(status) match {
+      case PantStatus.REGI => confirm(coId, sno, PantStatus.REGI).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.REGI) }
+      case PantStatus.WAIT => confirm(coId, sno, PantStatus.WAIT).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.WAIT) }
+      case PantStatus.RJEC => confirm(coId, sno, PantStatus.RJEC).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.RJEC) }
+      case PantStatus.REDY => setPlayerStatusUpdate(coId, sno, PantStatus.REDY)
+      case              _  => error("buttonSetStatus", s"error unknown status"); setPlayerStatusUpdate(coId, sno, PantStatus.UNKN)
     }
   }  
 
@@ -172,22 +186,31 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     buttonSetStatus(coIdStr, plIdStr, if (elem.checked) "PLS_REDY" else "PLS_UNDO")
   }
 
+  @JSExport
+  def onclickSort(elem: dom.raw.HTMLElement, sortByTyp: String): Unit = {
+    import shared.utils.PlayerSortTyp
+    PlayerSortTyp(sortByTyp.toIntOption.getOrElse(0)) match {
+      case PlayerSortTyp.SNO         => sortBySNO()
+      case PlayerSortTyp.Name        => sortByName()
+      case PlayerSortTyp.Competition => sortByComp()
+      case PlayerSortTyp.Status      => sortByStatus()
+      case PlayerSortTyp.UNKNOWN     => println(s"SortBy: unknown")
+    }
+  } 
+
+
 
   /** confirm - give optional feedback to user about new status
-   *          status: PLS_RJEC = -3  rejected
-   *                  PLS_WAIT = -2  waiting list
-   *                  PLS_SIGN =  0  signup confirmed
    */ 
-
-  def confirm(coId: Long, sno: String, status: Int): Future[Boolean] = {
+  def confirm(coId: Long, sno: String, status: PantStatus.Value): Future[Boolean] = {
     import scalajs.usecase.dialog.DlgBox
     val email     = App.tourney.players(getMDLongArr(sno)(0)).email
     val firstname = App.tourney.contact.firstname
 
     val dlgMsg = status match {
-      case Pant.RJEC => (getMsg("hdr.reject"),getMsg("body.reject"),getMsg("email.reject",email,firstname))
-      case Pant.WAIT => (getMsg("hdr.wait"),getMsg("body.wait"),getMsg("email.wait",email,firstname))
-      case Pant.SIGN => (getMsg("hdr.confirm"),getMsg("body.confirm"),getMsg("email.confirm",email,firstname))
+      case PantStatus.RJEC => (getMsg("hdr.reject"),getMsg("body.reject"),getMsg("email.reject",email,firstname))
+      case PantStatus.WAIT => (getMsg("hdr.wait"),getMsg("body.wait"),getMsg("email.wait",email,firstname))
+      case PantStatus.REGI => (getMsg("hdr.confirm"),getMsg("body.confirm"),getMsg("email.confirm",email,firstname))
       case        _ => ("UNKNOWN","message","")
     }
 

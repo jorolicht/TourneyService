@@ -16,7 +16,7 @@ import scala.concurrent._
 import scala.util.{Success, Failure}
 
 // tourney service client imports
-import shared.model.{ Tourney, TournBase, Player, Pant }
+import shared.model.{ Tourney, TournBase, Player, PantStatus, CompTyp, CompStatus }
 import shared.model.Competition._
 import shared.utils._
 
@@ -41,15 +41,15 @@ object InfoCompetition extends UseCase("InfoCompetition")
   /** list all competitions together with number of registered user and active user
    *  @return Info for Competition (id, name, age_group, rating_remark, type, start_date, #regUser, #activUser, status, options)
    */
-  def viewComp(lang: String): Seq[(Long, String, String, String, Int, String, Int, Int, Int, String, String)] = {
+  def viewComp(lang: String): Seq[(Long, String, String, String, CompTyp.Value, String, Int, Int, CompStatus.Value, String, String)] = {
     val tourney = App.tourney
 
     (for {  
       c       <- tourney.comps.values
-      players  = if (c.status > CS_REDY) tourney.pl2co.values.filter(_.coId == c.id).filter(_.status >= Pant.REDY).toSeq else tourney.pl2co.values.filter(_.coId == c.id).toSeq
+      players  = if (c.status > CompStatus.READY) tourney.pl2co.values.filter(_.coId == c.id).filter(_.status >= PantStatus.REDY).toSeq else tourney.pl2co.values.filter(_.coId == c.id).toSeq
     } yield {
       info("viewComp", s"ID: ${c.id}")
-      val cnt = players.filter(_.status > 0).length
+      val cnt = players.filter(_.status >= PantStatus.REGI).length
       (c.id, c.name, c.getAgeGroup, c.getRatingRemark, c.typ, c.formatTime(lang, 2), players.length, cnt, c.status, c.genRange, c.formatTime(lang, 1))
     }).toSeq.sortWith(_._5 > _._5).sortWith(_._6 < _._6)
   }

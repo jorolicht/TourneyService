@@ -186,7 +186,7 @@ class RemoteCtrl @Inject()
     implicit val tse   = TournSVCEnv(toId, ctx.orgDir, true)
 
     logger.info(s"setCompStatus toId:${toId} coId:${coId} status:${status} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
-    tsv.setCompStatus(coId, status).map {
+    tsv.setCompStatus(coId, CompStatus(status)).map {
       case Left(err)  => BadRequest(err.encode)
       case Right(res) => Ok(Return(res).encode)        
     }

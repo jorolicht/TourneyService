@@ -52,9 +52,9 @@ trait AppHelperSvc {
     val login = AppEnv.getOrgId > 0
     //debug("setHeader", s"runModeLocal: ${AppEnv.isRunModeLocal} login: ${login}")
     if (AppEnv.getOrganizer != "") { 
-      setHtml_("APP__Title", getMsg_("app.header.title.club", AppEnv.getOrganizer))
+      setHtml_("APP__Title", AppEnv.getMessage("app.header.title.club", AppEnv.getOrganizer))
     } else {
-      setHtml_("APP__Title", getMsg_("app.header.title",""))
+      setHtml_("APP__Title", AppEnv.getMessage("app.header.title",""))
     }  
     
     setVisible_("APP__Download", !AppEnv.isRunModeLocal)

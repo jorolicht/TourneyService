@@ -64,7 +64,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         else                     DlgBox.standard(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
       } 
       case "Start"   => {
-        App.tourney.cophs((coId,coPhId)).setStatus(CPS_EIN)
+        App.tourney.cophs((coId,coPhId)).setStatus(CompPhaseStatus.EIN)
         App.execUseCase("OrganizeCompetitionInput", "", "")        
       }
     }
@@ -80,28 +80,28 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       val coPhTyp = coPhase.coPhTyp
       // generate draw frame
       coPhTyp match {
-        case CPT_GR => setHtml(elem, clientviews.organize.competition.draw.html.GroupCard(coPhase))
-        case CPT_KO => setHtml(elem, clientviews.organize.competition.draw.html.KOCard(coPhase))
-        case CPT_SW => setHtml(elem, clientviews.organize.competition.draw.html.SwitzCard(coPhase))
+        case CompPhaseTyp.GR => setHtml(elem, clientviews.organize.competition.draw.html.GroupCard(coPhase))
+        case CompPhaseTyp.KO => setHtml(elem, clientviews.organize.competition.draw.html.KOCard(coPhase))
+        case CompPhaseTyp.SW => setHtml(elem, clientviews.organize.competition.draw.html.SwitzCard(coPhase))
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
     } else { 
       // update view
       val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
       coPhase.coPhTyp match {
-        case CPT_GR => updateGrView(base, coPhase.groups)
-        case CPT_KO => updateKoView(base, coPhase.ko)
-        case CPT_SW => {}
+        case CompPhaseTyp.GR => updateGrView(base, coPhase.groups)
+        case CompPhaseTyp.KO => updateKoView(base, coPhase.ko)
+        case CompPhaseTyp.SW => {}
         case _      => {}
       }    
     }
 
-    setVisible(gE(s"DrawStartBtn_${coId}_${coPhId}"), (coPhase.status == CompPhase.CPS_AUS))
-    setVisibleDataAttr("drawSelectField", (coPhase.status == CompPhase.CPS_AUS))
+    setVisible(gE(s"DrawStartBtn_${coId}_${coPhId}"), (coPhase.status == CompPhaseStatus.AUS))
+    setVisibleDataAttr("drawSelectField", (coPhase.status == CompPhaseStatus.AUS))
     //setVisibleDataAttr("drawSelectField", false)
   }
 
-  def setDrawPosition(elem: HTMLElement, pant: ParticipantEntry, pantPos: String="") = try {
+  def setDrawPosition(elem: HTMLElement, pant: PantEntry, pantPos: String="") = try {
     setData(elem, "sno", pant.sno)
     elem.querySelector(s"[data-name]").asInstanceOf[HTMLElement].innerHTML = pant.name
     elem.querySelector(s"[data-club]").asInstanceOf[HTMLElement].innerHTML = pant.club
@@ -141,10 +141,10 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
   // reassingDraw set new draw
   def reassignDraw(coph: CompPhase, reassign: Map[Int,Int])= {
-    val pants = Array.fill[ParticipantEntry](coph.size)(ParticipantEntry("0", "", "", 0, (0,0)))
+    val pants = Array.fill[PantEntry](coph.size)(PantEntry("0", "", "", 0, (0,0)))
     val base = getElemById_(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
     coph.coPhTyp match {
-      case CPT_GR => {
+      case CompPhaseTyp.GR => {
         coph.groups.foreach { g => 
           g.pants.zipWithIndex.foreach { case (pant, index) => pants(reassign(g.drawPos + index) - 1) = pant }
         }     
@@ -152,8 +152,8 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         updateGrView(base, coph.groups) 
         //pants.zipWithIndex.foreach { case (pant, index) => println(s"[${index}] ${pant.name} ${pant.club} ${pant.getRating}") }
       }
-      case CPT_KO => {
-        val pantsNew    = ArrayBuffer.fill[ParticipantEntry](coph.size) (ParticipantEntry("0", "", "", 0, (0,0)))
+      case CompPhaseTyp.KO => {
+        val pantsNew    = ArrayBuffer.fill[PantEntry](coph.size) (PantEntry("0", "", "", 0, (0,0)))
         var drawInfoNew = ArrayBuffer.fill[(String, Int, Int, Int)](coph.size) (("",0,0,0))
         coph.ko.pants.zipWithIndex.foreach { case (pant, index) =>
           pantsNew(reassign(index+1)-1) = pant 

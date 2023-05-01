@@ -18,18 +18,19 @@ import shared.utils.Constants._
 **  endDate (format yyyymmdd as Integer)
 **  and clickTTid 
 */
+
 case class TournBase(
   val name:      String, 
-  var organizer: String,          // name of the organizer (club or key word) of registered program/tourney user
-  val orgDir:    String,          // unified organizer name (used as directory)
+  var organizer: String,             // name of the organizer (club or key word) of registered program/tourney user
+  val orgDir:    String,             // unified organizer name (used as directory)
   val startDate: Int, 
   var endDate:   Int, 
-  var ident:     String,          // clickTTid 
-  val typ:       Int,             // 0 = unknown, 1 = Tischtennis, ...
-  var privat:    Boolean,         // privat tourneys are only seen by registered users
-  var contact:   String = "",     // lastname·firstname·phone·email
-  var address:   String = "",     // "description·country·zip·city·street"
-  val id:        Long = 0L        // autoincrement
+  var ident:     String,             // clickTTid 
+  val typ:       Int,                // 0 = unknown, 1 = Tischtennis, ...
+  var privat:    Boolean,            // privat tourneys are only seen by registered users
+  var contact:   String = "",        // lastname·firstname·phone·email
+  var address:   String = "",        // "description·country·zip·city·street"
+  val id:        Long = 0L           // autoincrement
 ) extends {
    
   def encode(): String = write[TournBase](this)
@@ -90,10 +91,14 @@ case class TournBase(
 object TournBase {
   // necessary workaround for slick
   val tupled = (this.apply _).tupled
+
+  implicit val tourneyTypReadWrite: upickle.default.ReadWriter[TourneyTyp.Value] =
+    upickle.default.readwriter[Int].bimap[TourneyTyp.Value](x => x.id, TourneyTyp(_))
+
   implicit def rw: RW[TournBase] = macroRW
 
-  def init(organizer: String, orgDir: String, date: Int, typ: Int) 
-    = new TournBase("", organizer, orgDir, date, 0, "", typ, true, "", "", 0L)
+  def init(organizer: String, orgDir: String, date: Int, typ: TourneyTyp.Value) 
+    = new TournBase("", organizer, orgDir, date, 0, "", typ.id, true, "", "", 0L)
 
   def decode(trnyStr: String): Either[Error, TournBase] = 
     if (trnyStr.length > 0 ){
@@ -110,3 +115,14 @@ object TournBase {
   }
 
 }
+
+
+case class TourneyBaseData(id: Long, name: String, organizer: String, orgDir: String, 
+                           startDate: Int, endDate: Int, ident: String, typ: TourneyTyp.Value, 
+                           privat: Boolean, contact: Contact, address: Address)
+                           
+object TourneyBaseData {
+  implicit val tourneyTypReadWrite: upickle.default.ReadWriter[TourneyTyp.Value] =
+    upickle.default.readwriter[Int].bimap[TourneyTyp.Value](x => x.id, TourneyTyp(_))
+  implicit def rw: RW[TourneyBaseData] = macroRW
+}  

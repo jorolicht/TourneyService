@@ -24,7 +24,7 @@ import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player, Pant }
+import shared.model.{ Tourney, Player, PantStatus }
 import shared.utils._
 import clientviews.dialog.html
 
@@ -99,7 +99,7 @@ object DlgCardRegDouble extends BasicHtml
     selCoId = coId
     setNameList("Name1", trny, coId, 0, 0)
     setNameList("Name2", trny, coId, 0, 0)
-    setRadioBtnByValue("PlayerStatus", Pant.REDY.toString)
+    setRadioBtnByValue("PlayerStatus", PantStatus.REDY.toString)
     setHtml("Class", trny.getCompName(coId))
   }
   

@@ -26,7 +26,7 @@ case class Player(
   val lastname:    String,
   val birthyear:   Int,                     // 0 => not specified
   var email:       String,
-  val sex:         Int,                     // 0 => not specified, 1 => female, 2 => male
+  val sex:         SexTyp.Value,            // 0 => not specified, 1 => female, 2 => male
   var options:     String = "_"             // separated List of optional parameters
 
 /*
@@ -118,12 +118,15 @@ case class Player(
 }
 
 object Player {
+  implicit val sextypReadWrite: upickle.default.ReadWriter[SexTyp.Value] =
+    upickle.default.readwriter[Int].bimap[SexTyp.Value](x => x.id, SexTyp(_))
+
   implicit def rw: RW[Player] = macroRW
   def tupled = (this.apply _).tupled
-  def init            = new Player(0L, "", 0L, "","","", 0, "", 0, "_")
-  def get()           = new Player(0L, "", 0L, "","","", 0, "", 0, "_")
-  def get(plId: Long) = new Player(plId, "", 0L, "", "", "", 0, "", 0, "_")
-  def get(lastname: String, firstname: String, clubName: String, birthyear: Int, email: String, sex: Int) = {
+  def init            = new Player(0L, "", 0L, "","","", 0, "", SexTyp.UNKN, "_")
+  def get()           = new Player(0L, "", 0L, "","","", 0, "", SexTyp.UNKN, "_")
+  def get(plId: Long) = new Player(plId, "", 0L, "", "", "", 0, "", SexTyp.UNKN, "_")
+  def get(lastname: String, firstname: String, clubName: String, birthyear: Int, email: String, sex: SexTyp.Value) = {
     new Player(0L, "", 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
   }
   def format(name: String, fmt: Int = 0) = {
@@ -168,4 +171,11 @@ object Player {
     catch { case _: Throwable => Left(Error("err0038.decode.Players", plStr.take(20), "", "Player.decSeq")) }
   } 
 
+}
+
+object SexTyp extends Enumeration {
+  val UNKN   = Value(0, "UNKN")
+  val FEMALE = Value(1, "FEMALE")
+  val MALE   = Value(2, "MALE")
+  
 }

@@ -1,12 +1,14 @@
 @*
  * Template Show Tourney Information
  *@
+@import shared.model.CompTyp
+@import shared.model.CompStatus
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._ 
  
-@(info: String, date: String, organizer: String, colist: Seq[(Long, String, Int, String, String, String, Int)])(implicit ucc: UseCaseParam)
-@coLiVal(id: Long, coTyp: Int) = @{ s"${id}__${coTyp}" }
+@(info: String, date: String, organizer: String, colist: Seq[(Long, String, CompTyp.Value, String, String, String, CompStatus.Value)])(implicit ucc: UseCaseParam)
+@coLiVal(id: Long, coTyp: CompTyp.Value) = @{ s"${id}__${coTyp.id}" }
 
 <div @id("RegisterCard") class="card mt-2">                                      
   <div class="tuse-card-header">
@@ -29,7 +31,7 @@
                 <select @id("Competition") class="custom-select-sm form-control form-control-sm"  onchange="InfoSchedule.verifyComp();">
                   <option value="0__unknown" selected>@msg("selcompetition")</option>
                   @for( co <- colist) {
-                    @if(-1 == co._7) { <option value='@coLiVal(co._1,co._3)'>@co._2 @co._5</option> }
+                    @if(co._7 == CompStatus.UNKN) { <option value='@coLiVal(co._1, co._3)'>@co._2 @co._5</option> }
                   } 
                 </select>
               </div>

@@ -65,7 +65,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     val (coId, coPhId) = (getData(elem,"coId",0L), getData(elem,"coPhId",0))
     val action = if (App.tourney.cophs.contains((coId, coPhId))) {
       val status = App.tourney.cophs((coId, coPhId)).getStatus
-      if (status == CompPhase.CPS_EIN || status == CompPhase.CPS_FIN) key else "BadRequest"
+      if (status == CompPhaseStatus.EIN || status == CompPhaseStatus.FIN) key else "BadRequest"
     } else {
       "BadRequest"
     }
@@ -236,10 +236,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       val maxRnd  = coPhase.getMaxRnds
       val winSets = coPhase.noWinSets
       coPhTyp match {
-        case CPT_GR => { 
+        case CompPhaseTyp.GR => { 
           setHtml(elem, clientviews.organize.competition.input.html.GroupCard(coId, coPhId, maxRnd, winSets))
         }  
-        case CPT_KO => {
+        case CompPhaseTyp.KO => {
           setHtml(elem, clientviews.organize.competition.input.html.KoCard(coId, coPhId, maxRnd, winSets))
           var gameNo = 0
           for (rnd <- maxRnd to 0 by -1) {
@@ -254,14 +254,14 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             }
           }
         }  
-        case CPT_SW => setHtml(elem, "input for sw-system")
+        case CompPhaseTyp.SW => setHtml(elem, "input for sw-system")
         case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
       }
     }
 
     // update page 
     coPhase.coPhTyp match {
-      case CPT_GR => {
+      case CompPhaseTyp.GR => {
         val matchMap = coPhase.matches.groupBy(mEntry=>mEntry.round)
         val maxRnd = coPhase.getMaxRnds
         for (rnd <- 1 to maxRnd) {
@@ -277,7 +277,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
         } 
       }  
-      case CPT_KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo], coPhase.status)
+      case CompPhaseTyp.KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo], coPhase.status)
 
       case _ =>  {
         setHtml(getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
@@ -286,7 +286,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }
     
     // STATUS dependend settings
-    val editible = (coPhase.status == CompPhase.CPS_EIN | coPhase.status == CompPhase.CPS_FIN)
+    val editible = (coPhase.status == CompPhaseStatus.EIN | coPhase.status == CompPhaseStatus.FIN)
     setAttribute(gE(s"Input_${coId}_${coPhId}"), "contenteditable", editible.toString)
     setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo)
     setDisabled(gE(s"InputDemoBtn_${coId}_${coPhId}"), !editible)
@@ -317,7 +317,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //
   //  setMatchViewContent
   //
-  def setMatchViewContent(row: HTMLElement, m: MEntry, status: Int)  = {
+  def setMatchViewContent(row: HTMLElement, m: MEntry, status: CompPhaseStatus.Value)  = {
     import shared.model.MEntry._
     implicit val trny = App.tourney
 
@@ -347,7 +347,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }    
 
     // disable buttons if status is not CPS_EIN or CPS_FIN
-    val disBtn = if (status == CompPhase.CPS_UNKN || status == CompPhase.CPS_AUS) true else false
+    val disBtn = if (status == CompPhaseStatus.UNKN || status == CompPhaseStatus.AUS) true else false
     //println(s"Set match view: ${m.gameNo} ${MEntry.statusInfo(m.status)}")
 
     // set editible, color and buttons    
@@ -402,8 +402,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   def getMatchRow(m: MEntry): HTMLElement = { 
     try {
       val tableElem = m.coPhTyp match {
-        case CPT_KO  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
-        case CPT_GR  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CompPhaseTyp.KO  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CompPhaseTyp.GR  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
         case _       => dom.document.createElement("div").asInstanceOf[HTMLElement] 
       }
       tableElem.querySelector(s"[data-game_${m.gameNo}='row']").asInstanceOf[HTMLElement]

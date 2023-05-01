@@ -15,8 +15,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent._
 import scala.util.{Success, Failure}
 
-import shared.model.{ TournBase, Player }
-import shared.model.Competition._
+import shared.model.{ TournBase, Player, PantStatus, CompTyp, SexTyp }
 import shared.utils.Routines._
 import shared.utils.Constants._ 
 import shared.utils._
@@ -56,7 +55,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       players = App.tourney.pl2co.toSeq.filter(_._2.coId == c.id)
     } yield {
       val cnt = c.typ match {
-        case 1|2 => players.filter(_._2.status >= 0).length
+        case CompTyp.SINGLE | CompTyp.DOUBLE => players.filter(_._2.status >= PantStatus.REGI).length
         case _ => 0
       }
       val cntVal = if (cnt > 0) cnt.toString else ""
@@ -180,7 +179,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       case _            => ("","") 
     }
     val pl = Player(0L,"",0L,getInput("PlayerClub",""),firstname,lastname,
-                    getInput("PlayerYear", 0), getInput("PlayerEmail",""),0,"_")
+                    getInput("PlayerYear", 0), getInput("PlayerEmail",""), SexTyp.UNKN, "_")
     pl.setTTR(getInput("PlayerTTR",""))
 
     val (coId, cTyp) = getInput("Competition","").split("__") match {
@@ -192,7 +191,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       case 1 => doRegSPlayer(coId, pl)
       case 2 => {
         val (lastname2, firstname2) = getInput("PlayerName2","").split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
-        val pl2 = Player(0L,"",0L,getInput("PlayerClub2",""),firstname2,lastname2,getInput("PlayerYear2",0),"",0,"_")
+        val pl2 = Player(0L,"",0L,getInput("PlayerClub2",""), firstname2, lastname2, getInput("PlayerYear2",0), "", SexTyp.UNKN, "_")
         pl2.setTTR(getInput("PlayerTTR2",""))
         doRegDPlayer(coId, pl, pl2)
       }
@@ -206,7 +205,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
   def getInvitation(): Future[Either[Error, String]] = {
     val converter = new Converter()
     // debug(s"getInvitation", "started")
-    getCfgFile(App.getTourneyOrgDir, App.getTourneyStartDate, ULD_INVIT).map {
+    getInvitation(App.getTourneyOrgDir, App.getTourneyStartDate).map {
       case Left(err)   =>  Left(err)
       case Right(content)  => {
         // convert markdown to html, hide metadata

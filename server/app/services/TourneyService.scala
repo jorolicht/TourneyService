@@ -48,8 +48,8 @@ trait TourneyService {
 
   def getPantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
   def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
-  def setPantStatus(coId: Long, sno: String, status: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  def setPantStatus(coId: Long, sno: String, status: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, PantStatus.Value]]
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, PantStatus.Value)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   //
   // Club Interface
@@ -78,7 +78,7 @@ trait TourneyService {
   def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[Competition]]]
   def addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]
 
-  def setCompStatus(coId: Long, status: Int)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
+  def setCompStatus(coId: Long, status: CompStatus.Value)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
   def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
   def setCompRatingUpperLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
 
@@ -87,7 +87,7 @@ trait TourneyService {
 
   def getComp(toId: Long, coId: Long): Future[Either[Error, Competition]]
   def getComps(toId: Long): Future[Either[Error, Seq[Competition]]]
-  def getCompStatus(toId: Long, coId: Long): Future[Either[Error, Int]]
+  def getCompStatus(toId: Long, coId: Long): Future[Either[Error, CompStatus.Value]]
   def getCompName(toId: Long, coId: Long): Future[Either[Error, String]]
 
   // Match Interface
@@ -126,6 +126,7 @@ trait TourneyService {
 
   def getTournPlayers(toId: Long): Future[Either[Error, Seq[Player]]]
   def getTournClubs(toId: Long):   Future[Either[Error, Seq[Club]]]
+  def getTournStartdate(toId: Long): Future[Either[Error, Int]]
   
 
   // Management Interface

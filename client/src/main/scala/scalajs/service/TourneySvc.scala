@@ -53,9 +53,9 @@ trait TourneySvc extends WrapperSvc
   }
 
 
-  // getCfgFile - either error or file content
-  def getCfgFile(orgDir: String, startDate: Integer, uldType: String): Future[Either[Error, String]] = {
-    val path = s"/service/getCfgFile?orgDir=${orgDir}&startDate=${startDate}&fileType=${uldType}" 
+  // getInvitation - either error or file content
+  def getInvitation(orgDir: String, startDate: Integer): Future[Either[Error, String]] = {
+    val path = s"/service/getInvitation?orgDir=${orgDir}&startDate=${startDate}" 
     //Helper.info("getCfgFile", s"path: ${path}")
     Ajax.get(path).map(_.responseText)
       .map(content => Right(content))
@@ -97,14 +97,14 @@ trait TourneySvc extends WrapperSvc
     val locdate    = AppEnv.getMessage("certificate.locationdate", tourney.address.city, int2date(tourney.startDate, AppEnv.lang))
 
     val (plName, clName) = tourney.comps(coId).typ match {
-      case CT_SINGLE => {
+      case CompTyp.SINGLE => {
         val plId = tourney.pl2co((sno,coId)).getPlayerId
         (s"${tourney.players(plId).firstname} ${tourney.players(plId).lastname}", s"${tourney.players(plId).clubName}")
       }
 
-      case CT_DOUBLE | CT_MIXED => {
-        val plId1 = tourney.pl2co((sno,coId)).getPlayerId1
-        val plId2 = tourney.pl2co((sno,coId)).getPlayerId2
+      case CompTyp.DOUBLE | CompTyp.MIXED => {
+        val (plId1, plId2) = tourney.pl2co((sno,coId)).getDoubleId
+
         //debug("printCert DOUBLE", s"${plId1} ${plId2}")
         (s"${tourney.players(plId1).lastname}/${tourney.players(plId2).lastname}", s"${tourney.players(plId1).clubName}/${tourney.players(plId2).clubName}")
       }
@@ -125,13 +125,12 @@ trait TourneySvc extends WrapperSvc
 
 
   def downloadFile(dloType: DownloadType.Value): Future[Either[Error, (String,String)]] = {
-    val path  = genPath("/service/downloadFile", s"toId=${App.tourney.id}&dType=${dloType.id}")
+    val path  = genPath("/service/downloadFile", s"toId=${App.tourney.id}&dloType=${dloType.id}")
     Helper.debug("downloadFile", s"path: ${path}")
     Ajax.get(path).map( response => { 
       val respText = response.responseText 
       val contDisp = getHdrParam(response.getResponseHeader("content-disposition"))
       val fName = contDisp("filename")
-      Helper.debug("download", s"responseText: ${respText} filename: ${fName} ")
       Right((fName,respText))
     }).recover({
         // Recover from a failed error code into a successful future
@@ -140,23 +139,23 @@ trait TourneySvc extends WrapperSvc
     })
   }
 
-  def uploadFile(toId: Long, sDate: Int, upType: String, formData: dom.FormData): Future[Either[Error, Long]] = 
-    postForm("/service/uploadFile", s"toId=${toId}&sDate=${sDate}&upType=${upType}",formData).map {
+  def uploadFile(toId: Long, sDate: Int, uplType: UploadType.Value, formData: dom.FormData): Future[Either[Error, Long]] = 
+    postForm("/service/uploadFile", s"toId=${toId}&sDate=${sDate}&uplType=${uplType.id}", formData).map {
       case Left(err)  => Left(err.add("uploadFile"))
       case Right(res) => Return.decode2Long(res, "uploadFile")
     }
 
   //Either[Error,Seq[(Long, Either[Error, Int])]]  
-  def updCttFile(toId: Long, sDate: Int, formData: dom.FormData): Future[Either[Error,Seq[(Long, Int)]]] = {
+  def updCttFile(toId: Long, sDate: Int, fData: dom.FormData): Future[Either[Error,Seq[(Long, Int)]]] = {
     import upickle.default._
-    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&mode=${Constants.UploadModeUpdate}",formData).map {
+    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&uplMode=${UploadMode.Update.id}",fData).map {
       case Left(err)  => Left(err.add("updCttFile"))
       case Right(res) => Right(read[Seq[(Long, Int)]](res))
     }
   }  
 
-  def newCttFile(toId: Long, sDate: Int, formData: dom.FormData): Future[Either[Error, Long]] = 
-    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&mode=${Constants.UploadModeNew}",formData).map {
+  def newCttFile(toId: Long, sDate: Int, fData: dom.FormData): Future[Either[Error, Long]] = 
+    postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&uplMode=${UploadMode.New.id}",fData).map {
       case Left(err)  => Left(err.add("newCttFile"))
       case Right(res) => Return.decode2Long(res, "newCttFile")
     }
@@ -285,8 +284,8 @@ trait TourneySvc extends WrapperSvc
   // 
 
   // set competition status
-  def setCompStatus(coId: Long, status: Int): Future[Either[Error, Boolean]] = 
-    postAction("setCompStatus", App.tourney.id, s"coId=${coId}&status=${status.toInt}", "", true).map { 
+  def setCompStatus(coId: Long, status: CompStatus.Value): Future[Either[Error, Boolean]] = 
+    postAction("setCompStatus", App.tourney.id, s"coId=${coId}&status=${status.id}", "", true).map { 
       case Left(err)  => Left(err.add("setCompStatus"))
       case Right(res) => Return.decode2Boolean(res, "setCompStatus")
     }
@@ -403,26 +402,30 @@ trait TourneySvc extends WrapperSvc
     }
 
   // setPantStatus set the status of a participants in a competition
-  def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]] = 
-    postAction("setPantStatus", App.tourney.id, s"coId=${coId}&sno=${sno}&status=${status.toString}","",true).map {
+  def setPantStatus(coId: Long, sno: String, status: PantStatus.Value): Future[Either[Error, PantStatus.Value]] = 
+    postAction("setPantStatus", App.tourney.id, s"coId=${coId}&sno=${sno}&status=${status.id}","",true).map {
       case Left(err)  => Left(err.add("setPantStatus"))
       case Right(res) => Return.decode2Int(res, "setPantStatus") match {
         case Left(err)     => Left(err)
-        case Right(status) => { App.tourneyUpdate = true; App.tourney.setPantStatus(coId, sno, status) }
+        case Right(status) => { App.tourneyUpdate = true; App.tourney.setPantStatus(coId, sno, PantStatus(status)) }
       }
     }
 
   // setPantBulkStatus set the status of all participants in a competition
   // returns number of updated entries
   // def setPantBulkStatus(coId: Long, List[(String, Int)]): Future[Either[Error, Int]]
-  def setPantBulkStatus(coId: Long, pantStatus: List[(String, Int)]): Future[Either[Error, Int]] = 
-    postAction("setPantBulkStatus", App.tourney.id, s"coId=${coId}", write(pantStatus),true).map {
+  def setPantBulkStatus(coId: Long, pantStatus: List[(String, PantStatus.Value)]): Future[Either[Error, Int]] = {
+    implicit val pStatusReadWrite: upickle.default.ReadWriter[PantStatus.Value] =
+      upickle.default.readwriter[Int].bimap[PantStatus.Value](x => x.id, PantStatus(_))
+   
+    postAction("setPantBulkStatus", App.tourney.id, s"coId=${coId}", write(pantStatus), true).map {
       case Left(err)  => Left(err.add("setPantBulkStatus"))
       case Right(res) => Return.decode2Int(res, "setPantStatus") match {
         case Left(err)  => Left(err)
         case Right(err) => { App.tourneyUpdate = true; App.tourney.setPantBulkStatus(coId, pantStatus) }
       }  
     }
+  }  
 
 
   //

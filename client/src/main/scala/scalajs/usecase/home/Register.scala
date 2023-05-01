@@ -115,7 +115,7 @@ object HomeRegister extends UseCase("HomeRegister")
             
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(BasicHtml.getMsg_("msg.processing","")).toString)
+            setHtml("Processing", clientviews.component.html.Spinner(getMsg_("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
             val result = (for {
               licIdCpn <- EitherT(requestLicense(licReq))
@@ -153,7 +153,7 @@ object HomeRegister extends UseCase("HomeRegister")
             val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.encode, pw.getBytes.toBase64, ctx("clubname").str, false, false)
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(BasicHtml.getMsg_("msg.processing","")).toString)
+            setHtml("Processing", clientviews.component.html.Spinner(getMsg_("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
 
             val result = (for {

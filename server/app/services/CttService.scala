@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.StringBuilder
 import play.api.i18n.Messages
-import shared.model. { Competition, Player, Club }
+import shared.model. { Competition, CompTyp, CompStatus, Player, Club, SexTyp }
 import shared.utils.Routines._
 
 
@@ -31,7 +31,7 @@ object CttPlayerType extends Enumeration {
   val single, double = Value
 }
 
-class AddMatches(mtchs: Node, ageGroup: String, coTyp: Int, ttrF: Int, ttrT: Int, ttrR: String, startTime: String) extends RewriteRule {
+class AddMatches(mtchs: Node, ageGroup: String, coTyp: CompTyp.Value, ttrF: Int, ttrT: Int, ttrR: String, startTime: String) extends RewriteRule {
   override def transform(n: Node): Seq[Node] = n match {
     case e: Elem if (e.label == "competition") => {
       val players = e \ "players"
@@ -104,22 +104,22 @@ class CttTournament(
 }
 
 class CttCompetition(
-                  val ageGroup:                 String, 
-                  val typVal:                   String, 
-                  val startDate:                String,
-                  var players:                  List[CttPlayer],
-                  val ttrFrom:                  String="",
-                  val ttrTo:                    String="",
-                  val ttrRemarks:               String="",
-                  var entryFee:                 String="",
-                  var ageFrom:                  String="",
-                  var ageTo  :                  String="",
-                  var sex    :                  String="",
-                  var preliminaryRoundPlaymode: String="",
-                  var finalRoundPlaymode:       String="",
-                  var maxPersons:               String="",
-                  var manualFinalRankings:      String=""
-                 ) {
+  val ageGroup:                 String, 
+  val typVal:                   String, 
+  val startDate:                String,
+  var players:                  List[CttPlayer],
+  val ttrFrom:                  String="",
+  val ttrTo:                    String="",
+  val ttrRemarks:               String="",
+  var entryFee:                 String="",
+  var ageFrom:                  String="",
+  var ageTo  :                  String="",
+  var sex    :                  String="",
+  var preliminaryRoundPlaymode: String="",
+  var finalRoundPlaymode:       String="",
+  var maxPersons:               String="",
+  var manualFinalRankings:      String=""
+) {
   def count = players.length
    
   override def toString: String = {
@@ -134,7 +134,7 @@ class CttCompetition(
 
   def getTyp = CttService.convCttTyp2CompTyp(typVal)
 
-  def matchWith(ageGrp: String, coTyp: Int, ttrF: Int, ttrT: Int, ttrR: String, startTime: String): Boolean = {
+  def matchWith(ageGrp: String, coTyp: CompTyp.Value, ttrF: Int, ttrT: Int, ttrR: String, startTime: String): Boolean = {
     (coTyp  == getTyp)                             && 
     (ttrF   == ttrFrom.toIntOption.getOrElse(0))   &&
     (ttrT   == ttrTo.toIntOption.getOrElse(0))     &&
@@ -176,17 +176,17 @@ object CttService  {
   } 
 
   def convCttTyp2CompTyp(compTyp: String) = compTyp.toLowerCase match {
-    case "einzel" | "single" => 1
-    case "doppel" | "double" => 2
-    case "mixed"             => 3
-    case "team"              => 4
-    case _                   => 5
+    case "einzel" | "single" => CompTyp.SINGLE
+    case "doppel" | "double" => CompTyp.DOUBLE
+    case "mixed"             => CompTyp.MIXED
+    case "team"              => CompTyp.TEAM
+    case _                   => CompTyp.UNKN
   } 
   
   // cttPers2Player convert ctt person to player
   //                ctt player is implemented by playerComp mapping table
   def cttPers2Player(cttp: CttPerson) : Player = {
-    val pl = new Player(0L, "", 0L, cttp.clubName, cttp.firstname, cttp.lastname, getBY(cttp.birthyear), "", cttp.sex, "_")
+    val pl = new Player(0L, "", 0L, cttp.clubName, cttp.firstname, cttp.lastname, getBY(cttp.birthyear), "", SexTyp(cttp.sex), "_")
 
     pl.setInternalNr(cttp.internalNr)
     pl.setLicenceNr(cttp.licenceNr)
@@ -212,7 +212,7 @@ object CttService  {
         s"${cttComp.ageGroup} ${cttComp.ttrRemarks} ${msg("competition.typ."+tVal)}"
       }
 
-    val co = new Competition(0L, "", name, tVal, parseStartTime(cttComp.startDate), 0, "_")
+    val co = new Competition(0L, "", name, tVal, parseStartTime(cttComp.startDate), CompStatus.READY, "_")
 
     co.setAgeGroup(cttComp.ageGroup)
     co.setRatingRemark(cttComp.ttrRemarks)
@@ -342,7 +342,7 @@ object CttService  {
     //   val res = addResults(clickTTdoc, <matches><match nr="3"/></matches>, "Herren")
     //   saveClickTT(res, "CTTResult.xml")
     def addResults(node: Node, matches: Node, 
-                   ageGroup: String, coTyp: Int, ttrF: Int, ttrT: Int, ttrR: String, startTime: String): scala.xml.Node = {
+                   ageGroup: String, coTyp: CompTyp.Value, ttrF: Int, ttrT: Int, ttrR: String, startTime: String): scala.xml.Node = {
       val rule = new RuleTransformer(new AddMatches(matches, ageGroup, coTyp, ttrF, ttrT, ttrR, startTime))
       rule.transform(node).head
     }  
