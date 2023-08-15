@@ -71,8 +71,8 @@ object DlgCardCfgCompPhase extends BasicHtml
     val p = Promise[Boolean]()
     val f = p.future
 
-    def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+    def cancel() = {   
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -82,8 +82,8 @@ object DlgCardCfgCompPhase extends BasicHtml
         case Right(res)   => {
           if (!p.isCompleted) p success res
           //disable modal first, then hide
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
+          offEvents(gE("Modal", ucp), "hide.bs.modal")
+          doModal(gE("Modal", ucp), "hide")
         }  
       }
     }
@@ -109,9 +109,9 @@ object DlgCardCfgCompPhase extends BasicHtml
     setMainView(size)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(x => Right(result)).recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
@@ -139,7 +139,7 @@ object DlgCardCfgCompPhase extends BasicHtml
       }
 
       case "Winners" =>  {
-        val pantTbl = getElemById("PantTbl")
+        val pantTbl = gE("PantTbl", ucp)
         val winner  = getCheckbox(gE("Winners", ucp))
 
         qualifyMode = ite(winner, QualifyTyp.Winner, QualifyTyp.Looser)
@@ -149,7 +149,7 @@ object DlgCardCfgCompPhase extends BasicHtml
         }
       }
 
-      case "Close"        => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+      case "Close"        => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
 
       case _              => {}
     }

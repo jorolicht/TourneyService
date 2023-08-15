@@ -69,7 +69,7 @@ object AddonCtt extends UseCase("AddonCtt")
     }
   }
 
-
+  // test -s ctt -n 1 -p 185
   def test_1(text: String) = {
     import scalajs.usecase.dialog.DlgSpinner
     import js.JSConverters._

@@ -26,8 +26,7 @@ import scalajs._
 
 
 @JSExportTopLevel("HomeLogin")
-object HomeLogin extends UseCase("HomeLogin") 
-   with AuthenticateSvc with AppHelperSvc
+object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc 
 {
   val ctx = LoginData.load
 
@@ -50,7 +49,7 @@ object HomeLogin extends UseCase("HomeLogin")
             App.setCurCoId(0)
             App.resetLocalTourney()
             setHeader()
-            ctrlSidebar(AppEnv.status)
+            AppEnv.ctrlSidebar(AppEnv.status)
             setMainContent(clientviews.home.html.Bye(getMsg("bye")).toString) 
           }
         }

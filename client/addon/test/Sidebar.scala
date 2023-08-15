@@ -44,7 +44,7 @@ object AddonSidebar extends TestUseCase("AddonSidebar")
     val liElem = document.querySelector(s"[data-sbentry='OrganizeCompetition']").asInstanceOf[HTMLElement]
     val anchorElem = liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement]
 
-    val ulElem = getElemById_("APP__Sidebar__OrganizeCompetition")
+    val ulElem = gE("APP__Sidebar__OrganizeCompetition")
 
     ulElem.classList.add("show")
     anchorElem.classList.remove("collapsed")

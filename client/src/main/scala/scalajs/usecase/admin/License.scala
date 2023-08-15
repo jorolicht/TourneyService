@@ -9,7 +9,7 @@ import scala.scalajs._
 import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
 import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
-import org.scalajs.dom.raw.{ Event, HTMLInputElement } // for ScalaJs bindings
+import org.scalajs.dom.raw.{ Event, HTMLElement, HTMLInputElement } // for ScalaJs bindings
 
 //import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -48,19 +48,17 @@ object AdminLicense extends UseCase("AdminLicense")
 
   @JSExport
   def buttonDelete() = {
-    val clubId   = Try { $(getIdHa("FormClubId") ).value.asInstanceOf[String].toInt } getOrElse { 0 }
-    val clubName = Try { $(getIdHa("FormClub") ).value.asInstanceOf[String] } getOrElse { "unknown Club" }
+    val clubId   = getInput("FormClubId", 0L) //Try { $(getIdHa("FormClubId") ).value.asInstanceOf[String].toInt } getOrElse { 0 }
+    val clubName = getInput("FormClub", "Club unknown") // Try { $(getIdHa("FormClub") ).value.asInstanceOf[String] } getOrElse { "unknown Club" }
     if (clubId != 0) {
-      DlgBox.standard(getMsg("delete.header"), getMsg("delete.body", s"${clubName}"), 
-                  Seq("cancel","ok"))
-        .map { _ match {
-          case 2 => deleteLicense(clubId).map { _ =>
-            getAllLicense.map { lics =>
-              setMainContent(clientviews.admin.html.LicenseTmpl(lics).toString)
-              togCollapse("Header","Body")
-            }
+      DlgBox.standard(getMsg("delete.header"), getMsg("delete.body", s"${clubName}"), Seq("cancel","ok")).map { _ match {
+        case 2 => deleteLicense(clubId).map { _ =>
+          getAllLicense.map { lics =>
+            setMainContent(clientviews.admin.html.LicenseTmpl(lics).toString)
+            togCollapse("Header","Body")
           }
-        }}
+        }
+      }}
     } else {
       DlgBox.standard(getMsg("delete.header"), getMsg("delete.body.error"), Seq("ok"))
         .map { _ match { case _ => debug("delete", "OK") }}
@@ -99,7 +97,16 @@ object AdminLicense extends UseCase("AdminLicense")
 
     debug("onclickSelect",s"License Nr: ${licId}")
 
-    $(s"[id^=${getId("License_")}]").removeClass("bg-secondary text-white")
+
+    //def getIdX(id: String, prefix: String = "")(implicit ucp: UseCaseParam) = { s"${prefix}${ucp.idBase}__${id}"}
+
+    //$(s"[id^=('${ucp.idBase}__License_')]").removeClass("bg-secondary text-white")
+
+    dom.document.querySelectorAll(s"[id^=('${ucp.idBase}__License_')]").map( x =>
+      removeClass(x.asInstanceOf[HTMLElement], "bg-secondary", "text-white") 
+    )  
+
+
     if (licId != 0) {
       $( ${getIdHa(s"License_${licIdStr}")}).addClass("bg-secondary text-white")
     } 

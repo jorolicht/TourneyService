@@ -59,23 +59,8 @@ class TourneyServiceImpl @Inject()()(  implicit
   def addPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => {
-        //logger.info(s"addPlayer: ${pl.lastname} ${pl.firstname} ${pl.clubName}  ${pl.getTTR}")
-        trny.addPlayer(pl, Crypto.genHashPlayer(pl))
-      }  
+      case Right(trny) => trny.addPlayer(pl)
     }
-
-  /** setPlayerLicence - sets new licence to player
-   */
-  def setPlayerLicence(plId: Long, licence: String)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
-    TIO.getTrny(tse, true).map {
-      case Left(err)   => Left(err)
-      case Right(trny) => { 
-        trny.players(plId).setLicenceNr(licence)
-        Right(trny.players(plId))
-      }  
-    }
-
 
   /** setPlayer updates existing player 
    *  if necessary creates new club entry
@@ -83,8 +68,15 @@ class TourneyServiceImpl @Inject()()(  implicit
   def setPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => trny.setPlayer(pl, Crypto.genHashPlayer(pl))
+      case Right(trny) => trny.setPlayer(pl)
     }
+
+  def setPlayer(plId: Long, license: CttLicense)(implicit tse: TournSVCEnv): Future[Either[Error, Player]] =
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.setPlayer(plId, license)
+    }
+
 
 
   /** updPlayers - adds all players to the tourney (and if necessary all clubs)
@@ -96,9 +88,9 @@ class TourneyServiceImpl @Inject()()(  implicit
         val (lefts, rights) = (for { player <- pls } yield {
           if (player.id == 0) { 
             logger.info(s"${player.lastname} ${player.firstname} ${player.clubName} ${player.getTTR} ")
-            trny.addPlayer(player, Crypto.genHashPlayer(player)) 
+            trny.addPlayer(player) 
           }
-          else { trny.setPlayer(player, Crypto.genHashPlayer(player)) }  
+          else { trny.setPlayer(player) }  
         }).partitionMap(identity)
         Right(rights)
       }
@@ -112,7 +104,7 @@ class TourneyServiceImpl @Inject()()(  implicit
         val plCnt = trny.players.size
         trny.playerIdMax = playerIdStart
         trny.players     = HashMap()
-        trny.license2id  = HashMap()
+        //trny.license2id  = HashMap()
         trny.player2id   = HashMap()
         trny.pl2co       = HashMap()
         Right(plCnt)
@@ -120,19 +112,19 @@ class TourneyServiceImpl @Inject()()(  implicit
     }
 
 
-  def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]] =
-    TIO.get(toId).map {
-      case Left(err)   => Left(err)
-      case Right(trny) => {
-        if (trny.players.isDefinedAt(plId)) { 
-          trny.players(plId).email = email
-          Right(trny.players(plId)) 
-        } else { 
-          Left(Error("err0024.svc.setPlayerEmail.notFound", plId.toString))
-        }
-      }  
-    }
- 
+  // def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]] =
+  //   TIO.get(toId).map {
+  //     case Left(err)   => Left(err)
+  //     case Right(trny) => {
+  //       if (trny.players.isDefinedAt(plId)) { 
+  //         trny.players(plId).email = email
+  //         Right(trny.players(plId)) 
+  //       } else { 
+  //         Left(Error("err0024.svc.setPlayerEmail.notFound", plId.toString))
+  //       }
+  //     }  
+  //   }
+
     
   //
   // Participant Routines
@@ -233,8 +225,6 @@ class TourneyServiceImpl @Inject()()(  implicit
       case Left(err)    => Left(err)
       case Right(trny)  => trny.setPantBulkStatus(coId, pantStatus)
     }  
-
-
 
 
   // 
@@ -643,6 +633,20 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   // 
   // Competition Phase Routines
   // 
+
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => {
+        trny.addCompPhase(coId, baseCoPhId, cfgWinner, coPhCfg, name, noWinSets) match {
+          case Left(err)   => Left(err)
+          case Right(coph) => {
+            if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
+            Right(coph)
+          }
+        }
+      }
+    }
 
   /** setCompPhase - set competition phases 
    */

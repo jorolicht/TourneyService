@@ -45,14 +45,12 @@ object UploadMode extends Enumeration {
 }
 
 object PlayerSortTyp extends Enumeration { 
-  val UNKNOWN     = Value  // 0
-  val SNO         = Value  // 1 
-  val Name        = Value  // 2
-  val Competition = Value  // 3 
-  val Status      = Value  // 4 
+  val UNKNOWN     = Value(-0, "UNKNOWN")    // 0
+  val SNO         = Value(1, "SNO")         // 1 
+  val Name        = Value(2, "Name")        // 2
+  val Competition = Value(3, "Competition") // 3 
+  val Status      = Value(4, "Status")      // 4 
 }
-
-
 
 
 package object Constants {

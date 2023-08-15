@@ -9,10 +9,10 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
 
-import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
-import org.scalajs.dom.ext._             // import stmt sequence is important
+//import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
+//import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
-import org.scalajs.dom.raw.{ Event, HTMLInputElement, HTMLFormElement } // for ScalaJs bindings
+import org.scalajs.dom.raw.{ Event, HTMLElement, HTMLInputElement, HTMLFormElement, HTMLTableRowElement } // for ScalaJs bindings
 
 import upickle.default._
 
@@ -35,34 +35,39 @@ import scalajs.{ App }
 object OrganizePlayer extends UseCase("OrganizePlayer")  
   with TourneySvc with ViewServices
 {
-  var player: Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)] = Seq()
+  var player: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)] = Seq()
+  var snoSortDirection = true
 
    /** view4PlayerRegister
-   *  returns Sequence of Player (id, name, clubname, status, coName, coId, coTyp, coStatus, email) 
+   *  returns Sequence of Player (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) 
    */
-  def view4PlayerRegister(): Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)] = {
+  def view4PlayerRegister(): Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)] = {
     val tourney = App.tourney
     
-    // list for single players
-    val pList = (for {
+    // list for single, double or mixed players
+    (for {
       p2ce  <- tourney.pl2co.values.toSeq
       comp   = tourney.comps(p2ce.coId) 
     } yield {
-      if (comp.typ == 1) {
-        val pl1 = tourney.players(p2ce.getPlayerId)
-        (PantEntry.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status.id, comp.name, comp.id, comp.typ, comp.status, pl1.email)
-      } else {
-        val (plId1, plId2) = p2ce.getDoubleId
-        val (pl1,pl2) = (tourney.players(plId1), tourney.players(plId2))
-        //val pl2 = tourney.players(plId2)
-        (PantEntry.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status.id, comp.name, comp.id, comp.typ, comp.status, pl1.email)
+      comp.typ match {
+        case CompTyp.SINGLE => {
+          val pl1 = tourney.players(p2ce.getPlayerId)
+          
+          (PantEntry.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, 0L, pl1.getLicense.value)
+        }
+        case CompTyp.DOUBLE | CompTyp.MIXED => {
+          val (plId1, plId2) = p2ce.getDoubleId
+          val (pl1, pl2) = (tourney.players(plId1), tourney.players(plId2))
+          (PantEntry.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
+        }
+        case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.UNKN, CompStatus.UNKN, "", 0L, 0L, "")
       }
     }).toSeq
-    pList
   }
 
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) =  { 
+    println("Start Player setMain Content")
     setMainContent(clientviews.organize.html.Player())
     update()
   }  
@@ -70,16 +75,17 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     player = view4PlayerRegister()
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._4 >= PantStatus.REGI.id))) 
-    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._4 == PantStatus.WAIT.id))) 
-    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC.id)))
+
+    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._4 >= PantStatus.REGI))) 
+    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._4 == PantStatus.WAIT))) 
+    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC)))
   
     // check if there are players with need signup commitment
-    setBadge(player.filter(_._4 == PantStatus.REGI.id).length)
+    //setBadge(player.filter(_._4 == PantStatus.REGI.id).length)
   }       
 
   def setBadge(cnt: Int = (-1)) = {
-    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._5 == PantStatus.REGI).length else cnt    
+    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._4 == PantStatus.REGI).length else cnt    
     if (sicoCnt > 0) {
        // add badge if not already added, do it now
       setHtml("SidebarBadge", sicoCnt.toString)
@@ -93,86 +99,86 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     setVisible("CardBadge", sicoCnt > 0)
   } 
 
-  private def setClass(name: String, value: Int) = {
-    value match {
-      case  1 => setAttribute(gE(name,ucp), "class", "fa fa-sort-asc")
-      case -1 => setAttribute(gE(name,ucp), "class", "fa fa-sort-desc")
-      case  _ => setAttribute(gE(name,ucp), "class", "fa fa-sort")
-    }  
+  private def toggleSortDirection(elem: HTMLElement) = {
+    if (elem.classList.contains("fa-sort")) {
+      elem.classList.remove("fa-sort")
+      elem.classList.add("fa-sort-asc")
+    } else if (elem.classList.contains("fa-sort-asc")) {
+      elem.classList.remove("fa-sort-asc")
+      elem.classList.add("fa-sort-desc")
+    } else if (elem.classList.contains("fa-sort-desc")) {
+      elem.classList.remove("fa-sort-desc")
+      elem.classList.add("fa-sort")      
+    }
+  }  
+
+  private def getSortDirection(elem: HTMLElement): Int = {
+    if (elem.classList.contains("fa-sort-asc"))        1
+    else if (elem.classList.contains("fa-sort-desc")) -1
+    else                                               0
   }
 
-
   def sortByName(): Unit = {
-    val pList = getTextContent("SortByName") match {
-      case  "1" =>  { setHtml("SortByName","-1"); player.sortBy(_._2).reverse }  
-      case "-1" =>  { setHtml("SortByName","0");  player.sortBy(_._1) } 
-      case   _  =>  { setHtml("SortByName","1");  player.sortBy( _._2) } 
-    }
-    val pList2 = getTextContent("SortByComp") match {
-      case "-1"  => pList.sortBy(_._6).reverse
-      case  "1"  => pList.sortBy(_._6)
-      case   _   => pList
-    }
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(pList2))
-    setClass("SortNameIcon", getTextContent("SortByName").toIntOption.getOrElse(0) )
-    setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0) )
+    toggleSortDirection(gE("SortName", ucp))
+    sortStatus(); sortComp(); sortName()
+    setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
   def sortByComp(): Unit = {
-    val pList = getTextContent("SortByComp") match {
-      case  "1" => { setHtml("SortByComp","-1"); player.sortBy(_._6).reverse }  
-      case "-1" => { setHtml("SortByComp","0"); player.sortBy(_._1) } 
-      case  _   => { setHtml("SortByComp","1"); player.sortBy(_._6) }        
-    }
-    val pList2 = getTextContent("SortByName") match {
-      case "-1" => pList.sortBy(_._2).reverse
-      case  "1" => pList.sortBy(_._2)
-      case    _ => pList
-    }
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(pList2).toString)
-    setClass("SortNameIcon", getTextContent("SortByName").toIntOption.getOrElse(0))
-    setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0))
+    toggleSortDirection(gE("SortComp", ucp))
+    sortName(); sortStatus(); sortComp()
+    setContent(clientviews.organize.player.html.ContentCard(player).toString)
   }  
 
-
   def sortBySNO(): Unit = {
-    setHtml("SortByComp","0")
-    setHtml("SortByName","0")
-    val pList = getTextContent("SortByNo") match {
-      case "0"    =>  setHtml("SortByNo","1"); player.filter(_._4 >= PantStatus.REGI.id).sortBy(_._1)
-      case  _     =>  setHtml("SortByNo","0"); player.filter(_._4 >= PantStatus.REGI.id).sortBy(_._1).reverse
+    val pList = if (snoSortDirection) {
+      player.filter(_._4 >= PantStatus.REGI).sortBy( x => if (x._11 == 0) x._10 else x._10 + 1000000 )
+    } else {
+      player.filter(_._4 >= PantStatus.REGI).sortBy( x => if (x._11 == 0) x._10 else x._10 + 1000000 ).reverse    
     }
-
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(pList).toString)
-    setClass("SortNameIcon", getTextContent("SortByName").toIntOption.getOrElse(0))
-    setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0))
+    snoSortDirection = !snoSortDirection
+    setContent(clientviews.organize.player.html.ContentCard(pList).toString)
   } 
-
 
   def sortByStatus(): Unit = {
-    setHtml("SortByComp","0")
-    setHtml("SortByName","0")
-    val pList = getTextContent("SortByStatus") match {
-      case "0" =>  setHtml("SortByStatus","1"); player.sortBy(_._4)
-      case _   =>  setHtml("SortByStatus","0"); player.sortBy(_._4).reverse
-    }
-
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(pList).toString)
-    setClass("SortNameIcon", getTextContent("SortByName").toIntOption.getOrElse(0))
-    setClass("SortCompIcon", getTextContent("SortByComp").toIntOption.getOrElse(0))
+    toggleSortDirection(gE("SortStatus", ucp))
+    sortName(); sortComp(); sortStatus()
+    setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
+  def sortName() = getSortDirection(gE("SortName", ucp)) match {
+    case -1 => player = player.sortBy(_._2.toLowerCase).reverse 
+    case  1 => player = player.sortBy(_._2.toLowerCase)
+    case  _ => {} 
+  }
+
+  def sortStatus() = getSortDirection(gE("SortStatus", ucp)) match {
+    case -1 => player = player.sortBy(_._4).reverse 
+    case  1 => player = player.sortBy(_._4)
+    case  _ => {} 
+  }  
+
+  def sortComp() = getSortDirection(gE("SortComp", ucp)) match {
+    case -1 => player = player.sortBy(_._5).reverse 
+    case  1 => player = player.sortBy(_._5)
+    case  _ => {} 
+  }    
+
+  def setContent(content: String) = {
+    val rows = gE("MainCard", ucp).querySelectorAll("tr[data-update]")
+    rows.map( row => row.parentNode.removeChild(row))
+    gE("PlayerDummy", ucp).asInstanceOf[HTMLTableRowElement].insertAdjacentHTML("afterend", content)
+  }
 
   @JSExport
-  def buttonSetStatus(coIdStr: String, sno: String, status: String): Unit = {
+  def buttonSetStatus(coId: Long, sno: String, status: PantStatus.Value): Unit = {
 
     def setPlayerStatusUpdate(coId: Long, sno: String, status: PantStatus.Value): Unit = {
       App.tourney.pl2co(sno, coId).status = status
       setPantStatus(coId, sno, status).map { _ => update() }
     }
 
-    val coId = coIdStr.toLongOption.getOrElse(0L)
-    PantStatus(status) match {
+    status match {
       case PantStatus.REGI => confirm(coId, sno, PantStatus.REGI).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.REGI) }
       case PantStatus.WAIT => confirm(coId, sno, PantStatus.WAIT).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.WAIT) }
       case PantStatus.RJEC => confirm(coId, sno, PantStatus.RJEC).map { if (_) setPlayerStatusUpdate(coId, sno, PantStatus.RJEC) }
@@ -182,22 +188,36 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   }  
 
   @JSExport
-  def onclickCheckActiv(elem: HTMLInputElement, coIdStr: String, plIdStr: String): Unit = {
-    buttonSetStatus(coIdStr, plIdStr, if (elem.checked) "PLS_REDY" else "PLS_UNDO")
+  def onchangeCheckActiv(elem: HTMLInputElement): Unit = {
+    val coId = getData(elem, "coId", 0L)
+    val sno  = getData(elem, "sno", "")
+    val status = if (elem.checked) PantStatus.REDY else PantStatus.REGI
+    setPantStatus(coId, sno, status).map { 
+      case Left(err)  => error("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno}") 
+      case Right(res) => info("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno}") 
+    }
   }
 
   @JSExport
   def onclickSort(elem: dom.raw.HTMLElement, sortByTyp: String): Unit = {
     import shared.utils.PlayerSortTyp
+    println(s"onclickSort ${sortByTyp}")
     PlayerSortTyp(sortByTyp.toIntOption.getOrElse(0)) match {
       case PlayerSortTyp.SNO         => sortBySNO()
       case PlayerSortTyp.Name        => sortByName()
-      case PlayerSortTyp.Competition => sortByComp()
-      case PlayerSortTyp.Status      => sortByStatus()
+      case PlayerSortTyp.Competition => sortByComp()    
+      case PlayerSortTyp.Status      => sortByStatus() 
       case PlayerSortTyp.UNKNOWN     => println(s"SortBy: unknown")
     }
   } 
 
+  @JSExport
+  def onclickEdit(elem: dom.raw.HTMLElement): Unit = {
+    val pl1 = getData(elem, "plId1", 0L)
+    val pl2 = getData(elem, "plId2", 0L)
+    println(s"PlayerIds: ${pl1} ${pl2}")
+    DlgCardPlayer.show(pl1, App.tourney)
+  } 
 
 
   /** confirm - give optional feedback to user about new status
@@ -211,7 +231,7 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
       case PantStatus.RJEC => (getMsg("hdr.reject"),getMsg("body.reject"),getMsg("email.reject",email,firstname))
       case PantStatus.WAIT => (getMsg("hdr.wait"),getMsg("body.wait"),getMsg("email.wait",email,firstname))
       case PantStatus.REGI => (getMsg("hdr.confirm"),getMsg("body.confirm"),getMsg("email.confirm",email,firstname))
-      case        _ => ("UNKNOWN","message","")
+      case               _ => ("UNKNOWN","message","")
     }
 
     DlgBox.standard(dlgMsg._1, dlgMsg._2, Seq("cancel", "no", "yes"),0,true)

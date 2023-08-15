@@ -19,7 +19,6 @@ import upickle.default._
 
 import shared.utils._
 import shared.model._
-import scalajs.usecase.Helper
 import scalajs._
 
 

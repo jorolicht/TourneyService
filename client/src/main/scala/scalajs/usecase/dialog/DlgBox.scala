@@ -114,7 +114,7 @@ object DlgBox extends BasicHtml
     val data = new dom.Blob(content.toJSArray.asInstanceOf[scala.scalajs.js.Array[scala.scalajs.js.Any]], dom.raw.BlobPropertyBag("text/plain"))
     var url = dom.raw.URL.createObjectURL(data)
 
-    getElemById_("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
+    gE("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
     setAttribute(gE("APP__Download"), "download", fName)
 
     standard(msgTitel, msgBody, Seq("cancel", "yes"),0,true).map { _ match {

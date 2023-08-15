@@ -26,7 +26,7 @@ import scalajs.{ App }
 // ***    
 @JSExportTopLevel("InfoCertificate")
 object InfoCertificate extends UseCase("InfoCertificate")  
-  with ViewServices with TourneySvc with AppHelperSvc
+  with ViewServices with TourneySvc 
 {
 
   def render(ucParam: String = "", ucInfo: String = "", reload: Boolean=false) = {

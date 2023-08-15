@@ -31,8 +31,7 @@ import scalajs.service._
 import scalajs.AppEnv
 
 @JSExportTopLevel("HomeRegister")
-object HomeRegister extends UseCase("HomeRegister") 
-   with LicenseSvc with AppHelperSvc
+object HomeRegister extends UseCase("HomeRegister") with LicenseSvc 
 {
   // val ctx = ujson.read(write(HomeRegisterCtx("","Otto", "", "robert.licht@icloud.com",57)))
   var ctx = RegisterData.load
@@ -334,15 +333,15 @@ object HomeRegister extends UseCase("HomeRegister")
 
       case _ => {
         if (full) {
-          removeClass("LicenseFull1","text-muted");  removeClass("LicenseFullX", "text-muted")
-          removeClass("LicenseFull1","bg-light");    removeClass("LicenseFullX", "bg-light")
-          addClass("LicenseFree1","text-muted");     addClass("LicenseFreeX","text-muted")
-          addClass("LicenseFree1","bg-light");       addClass("LicenseFreeX","bg-light")
+          removeClass(gE("LicenseFull1", ucp), "text-muted");  removeClass(gE("LicenseFullX", ucp), "text-muted")
+          removeClass(gE("LicenseFull1", ucp), "bg-light");    removeClass(gE("LicenseFullX", ucp), "bg-light")
+          addClass(gE("LicenseFree1", ucp), "text-muted");     addClass(gE("LicenseFreeX", ucp), "text-muted")
+          addClass(gE("LicenseFree1", ucp), "bg-light");       addClass(gE("LicenseFreeX", ucp), "bg-light")
         } else { 
-          addClass("LicenseFull1","bg-light");       addClass("LicenseFullX","bg-light")
-          addClass("LicenseFull1","text-muted");     addClass("LicenseFullX","text-muted")
-          removeClass("LicenseFree1","bg-light");    removeClass("LicenseFreeX","bg-light")
-          removeClass("LicenseFree1","text-muted");  removeClass("LicenseFreeX","text-muted")
+          addClass(gE("LicenseFull1", ucp), "bg-light");       addClass(gE("LicenseFullX", ucp), "bg-light")
+          addClass(gE("LicenseFull1", ucp), "text-muted");     addClass(gE("LicenseFullX", ucp), "text-muted")
+          removeClass(gE("LicenseFree1", ucp), "bg-light");    removeClass(gE("LicenseFreeX", ucp), "bg-light")
+          removeClass(gE("LicenseFree1", ucp), "text-muted");  removeClass(gE("LicenseFreeX", ucp), "text-muted")
         }
 
         setRadioBtn("FullSelect", full)

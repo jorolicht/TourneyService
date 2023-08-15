@@ -11,7 +11,7 @@ import scala.util.{Success, Failure }
 import scala.util.matching
 
 // tourney service imports
-import shared.utils._
+//import shared.utils._
 import shared.utils.Routines._
 
 import shared.model._
@@ -33,6 +33,7 @@ object AddonBasic extends UseCase("AddonBasic")
       case 0 => test_0(param)
       case 1 => test_1(param)
       case 2 => test_2()
+      case 3 => test_3(param)
       case _ => println("Invalid BASIC test option")
     }
   }
@@ -74,5 +75,25 @@ object AddonBasic extends UseCase("AddonBasic")
     println(fun(y))
     println(fun(z))
   }
+
+  // Test 3 - csv generating
+  def test_3(param: String) = {
+    import shared.utils.Routines._
+    import shared.utils.CSVConverter
+
+    case class CCTest(name: String, surname: String, age: Int, yNo: Boolean, id: Option[Int], height: Int, width: Long)
+    val input = s"""Robert·Lichtenegger·60·true··183·${param}"""
+    println(s"START Test Basic 3: CSV generating with long param ${param}")
+    
+    val cct = CSVConverter[CCTest].from(input).toEither match {
+      case Left(err)  => println(s"Read csv Failure: ${err}")
+      case Right(res) => println(s"Read csv Success: ${res}")
+    }
+
+    val cct2 = CCTest("Robert", "Lichtenegger", 63, false, Some(45), 99, 121L)
+    println(s"Generate csv: ${CSVConverter[CCTest].to(cct2)}")
+
+  }  
+
 
 }

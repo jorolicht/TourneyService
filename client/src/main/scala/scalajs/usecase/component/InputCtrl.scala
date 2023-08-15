@@ -24,16 +24,13 @@ import shared.utils.Error
 
 
 import scalajs.usecase.component.BasicHtml._
-import scalajs.usecase.Helper
 import scalajs.service._
-import scalajs.{ App }
+import scalajs.{ App, AppEnv }
 
 
 @JSExportTopLevel("InputCtrl")
-object InputCtrl extends BasicHtml
-  with TourneySvc with AppHelperSvc
+object InputCtrl extends BasicHtml with TourneySvc 
 {
-
   /**  redirect
    *  
    */ 
@@ -93,10 +90,10 @@ object InputCtrl extends BasicHtml
           // when folded do nothing (usecase "HomeMain", "None")
           if (!node.classList.contains("show")) { 
             val nAttribute = node.getAttribute(s"data-sbredir-${ucName}") 
-            Helper.info("eventSidebar", s"ucName: ${ucName} nAttribute: $nAttribute not show/hide") 
+            AppEnv.info("eventSidebar", s"ucName: ${ucName} nAttribute: $nAttribute not show/hide") 
             nAttribute
           } else{
-            Helper.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir} show")  
+            AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir} show")  
             ucName
           } 
         } catch  { case _: Throwable => { 
@@ -105,7 +102,7 @@ object InputCtrl extends BasicHtml
           "HomeMain"  
         }}
       } else {
-        Helper.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir}")  
+        AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir}")  
         ucName
       }
     App.execUseCase(effUcName, effUcParam, effUcInfo)
@@ -131,7 +128,7 @@ object InputCtrl extends BasicHtml
         togCollapse_(bodyId)
         togVisible_(buttonId)
       }
-      case _        => Helper.error(s"eventCard", "unknown event")
+      case _        => AppEnv.error(s"eventCard", "unknown event")
     }
   }
 
@@ -156,11 +153,11 @@ object InputCtrl extends BasicHtml
     val id = elem.id
 
     if (elem.value=="") {
-      markInput_(id, None)
+      markInput(elem, None)
     } else {
       val length = try { elem.getAttribute("minlength").toInt } catch { case _: Throwable => 0 }
       val invalid = (elem.value.length < length)
-      markInput_(id, Some(invalid))
+      markInput(elem, Some(invalid))
       if (event == "onchange" & invalid) showHlp_(id, true)
       if (event == "oninput") showHlp_(id, false)
     }
@@ -194,10 +191,10 @@ object InputCtrl extends BasicHtml
     showHlp_(id, false)
 
     if (elem.value=="") {
-      markInput_(id, None)
+      markInput(elem, None)
     } else {
       val invalid = !validClub(elem.value)
-      markInput_(id, Some(invalid))
+      markInput(elem, Some(invalid))
       if (event == "onchange" & invalid) showHlp_(id, true)
     }
   }
@@ -235,12 +232,12 @@ object InputCtrl extends BasicHtml
     
     val id = elem.id
     showHlp_(id, false)
-    Helper.info("eventCountry", s"id: ${id} event: ${event}")
+    AppEnv.info("eventCountry", s"id: ${id} event: ${event}")
   }
 
   def getCountry(id: String, help:Boolean=true, required:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {
     val country = getInput(id, "")
-    //Helper.debug("getCountry", s"country: ${country}  id: ${id}")
+    //AppEnv.debug("getCountry", s"country: ${country}  id: ${id}")
     if (country == "") {
       if (help & required) showHlp(id, true)
       if (required) None else Some("")
@@ -263,10 +260,10 @@ object InputCtrl extends BasicHtml
     showHlp_(id, false)
 
     if (elem.value=="") {
-      markInput_(id, None)
+      markInput(elem, None)
     } else {
       val invalid = !validName(elem.value)
-      markInput_(id, Some(invalid))
+      markInput(elem, Some(invalid))
       if (event == "onchange" & invalid) showHlp_(id, true)
     }
   }
@@ -310,10 +307,10 @@ object InputCtrl extends BasicHtml
     showHlp_(id, false)
 
     if (elem.value=="") {
-      markInput_(id, None)
+      markInput(elem, None)
     } else {
       val invalid = !validEmail(elem.value)
-      markInput_(id, Some(invalid))
+      markInput(elem, Some(invalid))
       if (event == "onchange" & invalid) showHlp_(id, true)
     }
   }
@@ -358,11 +355,11 @@ object InputCtrl extends BasicHtml
         showHlp_(id, false)
 
         if (value1 == "") {
-          markInput_(id, None)
+          markInput(elem, None)
         } else {
-          //Helper.debug("eventPassword", s"value1: ${value1}  value2: ${value2}")
+          //AppEnv.debug("eventPassword", s"value1: ${value1}  value2: ${value2}")
           val invalid = if (value2=="") !validPassword(value1) else (value1!=value2)
-          markInput_(id, Some(invalid))
+          markInput(elem, Some(invalid))
           if (!invalid & auxId!="") showHlp_(auxId, false)
           if (event == "onchange" & invalid) showHlp_(id, true)
         }
@@ -384,10 +381,10 @@ object InputCtrl extends BasicHtml
     val showId = pwdId + "Eye"
     if (getAttribute_(pwdId, "type") == "password") {
       setAttribute_(pwdId, "type", "text")
-      addClass_(showId, "fa-eye"); removeClass_(showId,"fa-eye-slash")
+      addClass(gE(showId), "fa-eye"); removeClass(gE(showId),"fa-eye-slash")
     } else {
       setAttribute_(pwdId, "type", "password")
-      addClass_(showId, "fa-eye-slash"); removeClass_(showId,"fa-eye")          
+      addClass(gE(showId), "fa-eye-slash"); removeClass(gE(showId),"fa-eye")          
     }
   }
 
@@ -402,10 +399,10 @@ object InputCtrl extends BasicHtml
     val password2 = if (id2 != "") getInput(id2, "") else ""
 
     try {
-      //Helper.debug("getPassword", s"password: ${password}  password2: ${password2}")
+      //AppEnv.debug("getPassword", s"password: ${password}  password2: ${password2}")
       val valid = validPassword(password) & ((id2=="") | (password == password2))
       if (valid) {
-        // Helper.debug("getPassword", s"id1: ${id1}")
+        // AppEnv.debug("getPassword", s"id1: ${id1}")
         if (show) showHlp(id1, false)
         if (show & (id2!="")) showHlp(id2, false)
         Some(password)
@@ -414,7 +411,7 @@ object InputCtrl extends BasicHtml
         if (show & id2!="") showHlp(id2, (password != password2) & password!="")
         None
       }
-    } catch { case _: Throwable => Helper.error("getPassword", s"id1: ${id1} id2: ${id2}"); None }
+    } catch { case _: Throwable => AppEnv.error("getPassword", s"id1: ${id1} id2: ${id2}"); None }
   }
 
 
@@ -427,12 +424,12 @@ object InputCtrl extends BasicHtml
   def showHlp(key: String, visible: Boolean = true)(implicit ucp: UseCaseParam) = showHlp_(ucp.idBase + "__" + key, visible)
   def showHlp_(key: String, visible: Boolean = true) = {
     val helpKey = key + "Hlp"
-    //Helper.info("showHelp", s"key: ${helpKey} ${visible}")
+    //AppEnv.info("showHelp", s"key: ${helpKey} ${visible}")
     try { 
       val elem = document.getElementById(helpKey).asInstanceOf[HTMLElement]
       if (elem != null) elem.style.setProperty("display", disProp(visible))
     }
-    catch { case _: Throwable => Helper.error("showHlp", s"key: ${helpKey} ${visible}") }
+    catch { case _: Throwable => AppEnv.error("showHlp", s"key: ${helpKey} ${visible}") }
   }
 
 }

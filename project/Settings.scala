@@ -10,8 +10,8 @@ object Settings {
 
   /** The previous and current version of the application */
   val previous = "1.5.0"
-  val version  = "1.5.1"
-  val relDate  = "2021-07-17"
+  val version  = "1.6.0"
+  val relDate  = "2023-08-05"
 
 
    /** The version of scala */

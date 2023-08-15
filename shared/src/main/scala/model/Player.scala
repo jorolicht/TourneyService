@@ -22,11 +22,11 @@ case class Player(
   var hashKey:     String,                  // hashKey to unique identify player cross environments
   var clubId:      Long,                    // plubId primary key of plub = Players Club
   var clubName:    String,                  // club-name CDATA #IMPLIED  
-  val firstname:   String,             
-  val lastname:    String,
-  val birthyear:   Int,                     // 0 => not specified
+  var firstname:   String,             
+  var lastname:    String,
+  var birthyear:   Int,                     // 0 => not specified
   var email:       String,
-  val sex:         SexTyp.Value,            // 0 => not specified, 1 => female, 2 => male
+  var sex:         SexTyp.Value,            // 0 => not specified, 1 => female, 2 => male
   var options:     String = "_"             // separated List of optional parameters
 
 /*
@@ -73,14 +73,15 @@ case class Player(
     if (getRating == 0 | player2.getRating == 0) rating else rating / 2
   }  
 
-
-  def getOptStr(index: Int): String   = getMDStr(options, index) 
-  def getOptInt(index: Int): Int      = getMDInt(options, index)
-  def getOptLong(index: Int): Long    = getMDLong(options, index)
-  def setOpt[X](value: X, index: Int) = options = setMD(options, value, index)
+  def genHash() =  s"${lastname.take(2)}${lastname.takeRight(2)}${firstname.take(2)}${firstname.takeRight(2)}${clubName.take(2)}${clubName.takeRight(2)}${getTTR}${getBYearStr()}"
 
   def getInternalNr: String  = getMDStr(options,0); def setInternalNr(value: String) = { options = setMD(options, value, 0) }
-  def getLicenceNr: String   = getMDStr(options,1); def setLicenceNr(value:String)   = { options = setMD(options, value, 1) }
+  
+  def getLicense: CttLicense     = CttLicense(getMDStr(options,1))
+  def setLicense(lic:CttLicense) = { options = setMD(options, lic.value, 1) }
+  def hasLicense = getMDStr(options,1) != ""
+  def delLicense = { options = setMD(options, "", 1) }
+  
   def getClubNr: String      = getMDStr(options,2); def setClubNr(value:String)      = { options = setMD(options, value, 2) }
   def getClubFedNick: String = getMDStr(options,3); def setClubFedNick(value:String) = { options = setMD(options, value, 3) }
   def getTTR: String         = getMDStr(options,4); def setTTR(value:String)         = { options = setMD(options, value, 4) }
@@ -97,23 +98,13 @@ case class Player(
     case _ => clubName 
   }
 
-  def getBirthyear()    = if (birthyear == 0) None else Some(birthyear)
-  def getBYearStr() = if (birthyear == 0) "" else birthyear.toString
-
-  def updLicenseNr(name2person: HashMap[String, ArrayBuffer[(String, Int, String)]]) = {
-    if (getLicenceNr == "") {
-      val name = s"${lastname}·${firstname}"
-      if (name2person.isDefinedAt(name)) {
-        val cylArray = (name2person(name)) 
-        if (cylArray.length == 1) { 
-          println("Update LicenseNr")
-          setLicenceNr(cylArray(0)._3) 
-        } else {
-          cylArray.foreach { elem => if (elem._1 == clubName) setLicenceNr(elem._3) }
-        } 
-      }
-    }
+  def setClub(club: Club) = {
+    clubId   = club.id
+    clubName = club.name
   }
+
+  def getBirthyear() = if (birthyear == 0) None else Some(birthyear)
+  def getBYearStr()  = if (birthyear == 0) "" else birthyear.toString
 
 }
 
@@ -123,9 +114,7 @@ object Player {
 
   implicit def rw: RW[Player] = macroRW
   def tupled = (this.apply _).tupled
-  def init            = new Player(0L, "", 0L, "","","", 0, "", SexTyp.UNKN, "_")
-  def get()           = new Player(0L, "", 0L, "","","", 0, "", SexTyp.UNKN, "_")
-  def get(plId: Long) = new Player(plId, "", 0L, "", "", "", 0, "", SexTyp.UNKN, "_")
+
   def get(lastname: String, firstname: String, clubName: String, birthyear: Int, email: String, sex: SexTyp.Value) = {
     new Player(0L, "", 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
   }
@@ -138,7 +127,7 @@ object Player {
   }
   
 
-  def parseName(name: String): Either[Error, (String, String, Long)] = {
+  def validateName(name: String): Either[Error, (String, String, Long)] = {
     val mResult = "[^, ]+,[ ]*[^, ]+[ ]*\\[\\d\\d\\d\\]".r.findFirstIn(name).getOrElse(
       "[^, ]+,[ ]*[^, ]+[ ]*".r.findFirstIn(name).getOrElse("")
     )
@@ -146,18 +135,17 @@ object Player {
     res.size match {
       case 3 if mResult == name.trim => Right((res(0).trim, res(1).trim, res(2).toLong))
       case 2 if mResult == name.trim => Right((res(0).trim, res(1).trim, 0L))
-      case _ => Left(Error("err0159.Player.parseName"))
+      case _ => Left(Error("err0159.Player.validateName"))
     }
-  }  
+  }
 
+  def validateEmail(inText: String): Either[Error, String] = {
+    if (inText.trim == "" || validEmail(inText.trim)) Right(inText.trim) else Left(Error("err0160.Player.validateEmail"))
+  } 
 
-  /** parseEmail - returns email or empty string or an error
-   *  
-   */ 
-  def parseEmail(email: String): Either[Error, String] = {
-    if (email.trim == "") Right("")
-    else if (validEmail(email)) Right(email) 
-    else Left(Error(""))
+  def validateTTR(inValue: String, range: (Int,Int)): Either[Error, String] = {
+    val ttr = inValue.toIntOption.getOrElse(-1)
+    if (inValue.trim == "" || (ttr >= range._1 && ttr <= range._2) ) Right(inValue.trim) else Left(Error("err0217.Player.validateTTR"))
   }
 
   def decode(s: String) : Either[Error, Player] = {
@@ -165,7 +153,6 @@ object Player {
     catch { case _: Throwable => Left(Error("err0132.decode.Player", s, "", "Player.decode")) }
   }
 
- 
   def decSeq(plStr: String): Either[Error, Seq[Player]] = {
     try Right(read[Seq[Player]](plStr))
     catch { case _: Throwable => Left(Error("err0038.decode.Players", plStr.take(20), "", "Player.decSeq")) }
@@ -177,5 +164,4 @@ object SexTyp extends Enumeration {
   val UNKN   = Value(0, "UNKN")
   val FEMALE = Value(1, "FEMALE")
   val MALE   = Value(2, "MALE")
-  
 }

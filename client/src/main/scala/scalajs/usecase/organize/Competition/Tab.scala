@@ -32,8 +32,7 @@ import scalajs._
 // Organize Competition Tab/Register
 // ***
 @JSExportTopLevel("OrganizeCompetitionTab")
-object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")  
- with AppHelperSvc with TourneySvc
+object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with TourneySvc
 {
   import org.scalajs.dom.raw.HTMLElement
   import org.scalajs.dom.raw.HTMLTableElement
@@ -73,7 +72,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
   def initFrame(coId: Long, coPhId: Int, section: String):Unit = {
     val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
     // check whether element exists
-    val secElem = getElemById_(s"${selSection}Content_${coId}}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+    val secElem = gE(s"${selSection}Content_${coId}}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
     if (secElem == null) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
   }
 
@@ -88,7 +87,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
     key match {
 
       case "DrawRefresh"   => {
-        val inputNodes = getElemById_(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
+        val inputNodes = gE(s"Draw_${coId}_${coPhId}").querySelectorAll("small[data-drawPos]")
         val result = for( i <- 0 to inputNodes.length-1) yield {
           val elem   = inputNodes.item(i).asInstanceOf[HTMLElement]
           val posOld = elem.getAttribute("data-drawPos").toIntOption.getOrElse(-1)
@@ -120,7 +119,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
   def selFrame(coId: Long, coPhId: Int, section: String)(implicit coPhase: CompPhase) = {
     initFrame(coId, coPhId, section)
 
-    val aNodes = getElemById("Links").getElementsByTagName("a")  
+    val aNodes = gE("Links", ucp).getElementsByTagName("a")  
     // set register/tab active
     for( i <- 0 to aNodes.length-1) {
       if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-coPhId") == coPhId.toString) {
@@ -141,7 +140,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab")
 
     // set relevant section visible
     doTry("selFrame setting section") {
-      val contentNodes = getElemById("Content").getElementsByTagName("section")
+      val contentNodes = gE("Content", ucp).getElementsByTagName("section")
       for( i <- 0 to contentNodes.length-1) {
         val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
         elem.style.display = if (getData(elem, "coPhId", 0) == coPhId & 

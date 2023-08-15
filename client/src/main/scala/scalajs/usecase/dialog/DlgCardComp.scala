@@ -52,7 +52,7 @@ object DlgCardComp extends BasicHtml
         }
       } 
       
-      case "Close"   => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+      case "Close"   => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
       case _         => {}
     }
   }  
@@ -66,11 +66,11 @@ object DlgCardComp extends BasicHtml
     
     var eList = ListBuffer[Error]()
 
-    if (comp.name.length <= 2 )          { eList += Error("dlg.card.comp.hlp.name");   markInput("name", Option(true))   }
-    if (comp.typ == CompTyp.UNKN )       { eList += Error("dlg.card.comp.hlp.typ");    markInput("typ", Option(true))    }
-    if (comp.status == CompStatus.UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput("status", Option(true)) }
+    if (comp.name.length <= 2 )          { eList += Error("dlg.card.comp.hlp.name");   markInput(gE("name"), Option(true))   }
+    if (comp.typ == CompTyp.UNKN )       { eList += Error("dlg.card.comp.hlp.typ");    markInput(gE("typ"), Option(true))    }
+    if (comp.status == CompStatus.UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput(gE("status"), Option(true)) }
     if (!comp.validateDate(trny.startDate, trny.endDate)) { 
-      eList += Error("dlg.card.comp.hlp.startTime"); markInput("startTime", Option(true)) 
+      eList += Error("dlg.card.comp.hlp.startTime"); markInput(gE("startTime"), Option(true)) 
     }
 
     /* read relevant input and verify it */
@@ -150,7 +150,7 @@ object DlgCardComp extends BasicHtml
     val container = document.querySelector(getIdHa("Form"))
     container.querySelectorAll("input, select").map { elem => 
       setDisabled(elem.asInstanceOf[HTMLInputElement], disabled)
-      markInput__(elem.asInstanceOf[HTMLInputElement], None)
+      markInput(elem.asInstanceOf[HTMLInputElement], None)
     }
   }
 
@@ -161,7 +161,7 @@ object DlgCardComp extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -171,8 +171,8 @@ object DlgCardComp extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
+          offEvents(gE("Modal", ucp), "hide.bs.modal")
+          doModal(gE("Modal", ucp), "hide")
         }  
       }
     }
@@ -181,9 +181,9 @@ object DlgCardComp extends BasicHtml
     setInput(comp, trny, lang, mode)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

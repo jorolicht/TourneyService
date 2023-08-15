@@ -1,7 +1,7 @@
 ###
 # Message Entries
 ###
-greeting                                              = Herzlich Willkommen!
+greeting                                            = Herzlich Willkommen!
 
 ###
 # App Main Messages / Configuration Issues
@@ -10,8 +10,8 @@ config.cookie.confirmation                          = false
 config.LogLevel                                     = debug
 
 app.mockup                                          = false
-app.version                                         = 2023-02DE190
-app.date                                            = 2023-04-15
+app.version = 2023-08DE160
+app.date    = 2023-08-07
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -301,21 +301,19 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
   tourney.error.typ                                   = Bitte Sportart auswählen
   tourney.error.privat                                = Bitte Sichtbarkeit angeben
 
-  competition.status.-99                              = Status
-  competition.status.-1                               = UNBEKANNG
-  competition.status.0                                = STARTKLAR
-  competition.status.1                                = VORRUNDE AUSLOSUNG
-  competition.status.2                                = VORRUNDE EINGABE
-  competition.status.3                                = VORRUNDE BEENDET
-  competition.status.4                                = ZWISCHENRUNDE AUSLOSUNG
-  competition.status.5                                = ZWISCHENRUNDE EINGABE
-  competition.status.6                                = ZWISCHENRUNDE BEENDET
-  competition.status.7                                = ENDRUNDE AUSLOSUNG
-  competition.status.8                                = ENDRUNDE EINGABE
-  competition.status.9                                = ENDRUNDE BEENDET
-  competition.status.100                              = GESTARTET
-  
-
+  competition.status.                                 = Status
+  competition.status.UNKN                             = UNBEKANNG
+  competition.status.READY                            = STARTKLAR
+  competition.status.VRAUS                            = VORRUNDE AUSLOSUNG
+  competition.status.VREIN                            = VORRUNDE EINGABE
+  competition.status.VRFIN                            = VORRUNDE BEENDET
+  competition.status.ZRAUS                            = ZWISCHENRUNDE AUSLOSUNG
+  competition.status.ZREIN                            = ZWISCHENRUNDE EINGABE
+  competition.status.ZRFIN                            = ZWISCHENRUNDE BEENDET
+  competition.status.ERAUS                            = ENDRUNDE AUSLOSUNG
+  competition.status.EREIN                            = ENDRUNDE EINGABE
+  competition.status.ERFIN                            = ENDRUNDE BEENDET
+  competition.status.RUN                              = GESTARTET
 
   competition.agegroup.1                              = Damen
   competition.agegroup.2                              = Herren
@@ -950,7 +948,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 
 
 ###
-#  Standard Buttons
+#  Standard Buttons / Placeholders
 ###
   std.btn.ok                                          = OK
   std.btn.start                                       = STARTEN
@@ -968,6 +966,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   std.btn.close                                       = SCHLIESSEN
   std.btn.reset                                       = ZURÜCKSETZEN
   std.btn.xclose                                      = <span>&times;</span>
+
+  std.plh.email                                       = max.mustermann@email.de
 #END Standard Buttons
 
 ###
@@ -1054,6 +1054,24 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
 ###
 #  START Dialog Cards
 ###
+# Edit Player
+  dlg.card.player.Title                           = &nbsp; Spieler #{0}
+  dlg.card.player.lbl.Name                        = Name
+  dlg.card.player.lbl.License                     = Lizenznummer  
+  dlg.card.player.lbl.TTR                         = TTR-Wert
+  dlg.card.player.lbl.Club                        = Verein
+  dlg.card.player.lbl.Email                       = E-Mail
+  dlg.card.player.lbl.Year                        = Jahrgang
+  dlg.card.player.plh.Name                        = <Nachname, Vorname>
+  dlg.card.player.plh.License                     = <Lizenznummer>
+  dlg.card.player.plh.Club                        = <Vereinsname>
+  dlg.card.player.plh.Email                       = max.mustermann@email.de
+  dlg.card.player.notSpecified                    = keine Angaben
+  dlg.card.player.licInfo                         = {0}, {1} [{2}] TTR:{3} Jahr:{4}
+  dlg.card.player.delete.hdr                      = Löschbestätigung
+  dlg.card.player.delete.msg                      = Lizenz ({0}) des Spielers {1} löschen
+
+
 # Registration Single
   dlg.card.reg.single.Title                           = Einzel
   dlg.card.reg.single.lbl.Name                        = Name
@@ -1324,8 +1342,8 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0157.svc.setPlayer                               = Fehler in der Routine setPlayer, ungültiger Identifier für {0}
   err0158.svc.setPlayer                               = Fehler in der Routine setPlayer, Spieler {0} existiert bereits
 
-  err0159.Player.parseName                            = Name des Spielers nicht im Format <Nachname>, <Vorname>
-  err0160.Player.parseEmail                           = Ungültiges E-Mail-Format
+  err0159.Player.validateName                         = Name des Spielers nicht im Format <Nachname>, <Vorname>
+  err0160.Player.validateEmail                        = Ungültiges E-Mail-Format
   err0161.Club.parseName                              = Ungültiger Name für Club
   err0162.Player.already.exists                       = Spieler mit dem Namen existiert bereits
   err0163.Player.already.registered                   = Spieler bereits registriert für den Wettbewerb
@@ -1377,5 +1395,11 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0209.genCttResult.moreMatchingComps              = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen eindeutigen Wettbewerb gefunden
   err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp
   err0211.downloadFile.missingResultFile              = Fehler beim Lesen der Ergebnisdatei: {0}
+  err0212.svc.setPlayer.invalidPlayerId               = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer: {0}
+  err0213.svc.setPlayer.invalidLicense                = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer/Lizenz: {0}/{1}
+  err0214.decode.CttPerson                            = Dekodierfehler Datentyp CttPerson: {0}
+  err0215.sync                                        = Turnierdaten nicht synchron (unterschiedliche Versionen lokal/remote)
+  err0216.svc.setPlayer.invalidUpdate                 = Fehler beim Aktualisiern der Spielerdaten, Spieler hat Lizenz (nur E-Mail-Update erlaubt) 
+  err0217.Player.validateTTR                          = Ungültiges TTR-Wert
 
 #END Error Codes/Messages

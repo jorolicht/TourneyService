@@ -64,6 +64,8 @@ class PostActionCtrl @Inject()
     import upickle.default._
     import cats.data.EitherT
 
+    def accessError(cmd: String) = Error("err0080.access.invalidRights", "", "", cmd).encode
+
     def chkAccess(ctx: shared.utils.Session): Boolean = (ctx.orgId > 0) | !Crypto.accessCtrl
 
     val msgs: Messages = messagesApi.preferred(request)
@@ -90,37 +92,11 @@ class PostActionCtrl @Inject()
     implicit val tse  = TournSVCEnv(toId, ctx.orgDir, trigger, callId)
       
     cmd match {
+
       //
       // Register Action Routines (Single/Double)
       //
-
-      // def setPant2Comp(coId: Long, plId: Player): Future[Either[Error, Pant2Comp]]
-      // registers a player with a competition, returns Pant2Comp entry
-      case "setPant2Comp" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "setPant2Comp").encode)) else {
-          Pant2Comp.decode(reqData) match {
-            case Left(err)  => Future(BadRequest(err.add("setPant2Comp").encode))
-            case Right(p2c) => tsv.setPant2Comp(p2c).map {
-              case Left(err)     => BadRequest(err.add("setPant2Comp").encode)
-              case Right(p2cRes) => Ok(p2cRes.encode) 
-            }
-          } 
-        }
-      }   
- 
-
-      // def delPant2Comp(coId: Long, sno: String): Future[Either[Error, Int]]
-      // removes a player from the competition
-      case "delPant2Comp" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "delPant2Comp").encode)) else {
-          tsv.delPant2Comp(getParam(pMap, "coId", -1L), getParam(pMap, "sno", "XXXXX")).map {
-            case Left(err)     => BadRequest(err.add("delPant2Comp").encode)
-            case Right(result) => Ok(Return(result).encode) 
-          }
-        }
-      } 
-
-
+            
       // def regSingle(coId: Long, pl: Player): Future[Either[Error, String]]
       // registers a player with a competition, returns playerId
       case "regSingle" => {
@@ -155,16 +131,36 @@ class PostActionCtrl @Inject()
       // Pant Action Routines (Pant could be Single,Double or Team (future) 
       // 
 
+      // def setPant2Comp(coId: Long, plId: Player): Future[Either[Error, Pant2Comp]]
+      // registers a player with a competition, returns Pant2Comp entry
+      case "setPant2Comp" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        Pant2Comp.decode(reqData) match {
+          case Left(err)  => Future(BadRequest(err.add("setPant2Comp").encode))
+          case Right(p2c) => tsv.setPant2Comp(p2c).map {
+            case Left(err)     => BadRequest(err.add("setPant2Comp").encode)
+            case Right(p2cRes) => Ok(p2cRes.encode) 
+          }
+        } 
+      } 
+ 
+
+      // def delPant2Comp(coId: Long, sno: String): Future[Either[Error, Int]]
+      // removes a player from the competition
+      case "delPant2Comp" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.delPant2Comp(getParam(pMap, "coId", -1L), getParam(pMap, "sno", "XXXXX")).map {
+          case Left(err)     => BadRequest(err.add("delPant2Comp").encode)
+          case Right(result) => Ok(Return(result).encode) 
+        }
+      }      
+
       // setPantStatus sets the status of a Pant within a competition, returns status
       // def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
-      case "setPantStatus" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantStatus").encode)) else {
-          tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))).map {
-            case Left(err)  => BadRequest(err.encode)
-            case Right(res) => Ok(Return(res).encode)
-          }
+      case "setPantStatus" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))).map {
+          case Left(err)  => BadRequest(err.encode)
+          case Right(res) => Ok(Return(res.id).encode)
         }
-      }  
+      } 
 
       // setPantBulkStatus sets the status of a participant within a competition, returns number of affected
       // def setPantBulkStatus(coId: Long, List[(String, Int)]): Future[Either[Error, Int]]
@@ -172,7 +168,7 @@ class PostActionCtrl @Inject()
         implicit val pStatusReadWrite: upickle.default.ReadWriter[PantStatus.Value] =
           upickle.default.readwriter[Int].bimap[PantStatus.Value](x => x.id, PantStatus(_))
 
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantBulkStatus").encode)) else {
+        if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
           val pantStatus = read[List[(String, PantStatus.Value)]](reqData)
           logger.warn(s"setPantBulkStatus => pants status: ${pantStatus}") 
           tsv.setPantBulkStatus(getParam(pMap, "coId", 0L), pantStatus).map {
@@ -183,18 +179,15 @@ class PostActionCtrl @Inject()
       }  
 
 
-
       
       // setPantPlace sets the place of a participant within a competition, returns placement
       // setPantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]
-      case "setPantPlace" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPantPlace").encode)) else {
-          tsv.setPantPlace(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "place")).map {
-            case Left(err)     => BadRequest(err.encode)
-            case Right(result) => Ok(Placement.encode(result))          
-          }  
-        }
-      }  
+      case "setPantPlace" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.setPantPlace(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "place")).map {
+          case Left(err)     => BadRequest(err.encode)
+          case Right(result) => Ok(Placement.encode(result))          
+        }  
+      } 
 
 
       //
@@ -204,43 +197,37 @@ class PostActionCtrl @Inject()
       /** setPlayfield
        *  def setPlayfield(pf: Playfield): Future[Either[Error, Int]]
        */
-      case "setPlayfield"    => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPlayfield").encode)) else {
-          Playfield.decode(reqData) match {
-            case Left(err)   => Future( BadRequest(err.encode) )
-            case Right(pf)   => tsv.setPlayfield(pf).map {
-              case Left(err)   => BadRequest(err.encode)
-              case Right(pfNr) => Ok(Return(pfNr).encode)
-            }  
-          }
+      case "setPlayfield"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        Playfield.decode(reqData) match {
+          case Left(err)   => Future( BadRequest(err.encode) )
+          case Right(pf)   => tsv.setPlayfield(pf).map {
+            case Left(err)   => BadRequest(err.encode)
+            case Right(pfNr) => Ok(Return(pfNr).encode)
+          }  
         }
-      }    
+      }   
       
       
       /** setPfieldInfo
        *  setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
        */
-      case "setPfieldInfo"    => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","setPfieldInfo").encode)) else {
-          PfieldInfo.decode(reqData) match {
-            case Left(err)    => Future(BadRequest(err.encode))
-            case Right(pfi)   => tsv.setPfieldInfo(pfi)(tse).map {
-              case Left(err)     => BadRequest(err.encode)
-              case Right(res)    => Ok(Return(res).encode)
-            }
+      case "setPfieldInfo"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        PfieldInfo.decode(reqData) match {
+          case Left(err)    => Future(BadRequest(err.encode))
+          case Right(pfi)   => tsv.setPfieldInfo(pfi)(tse).map {
+            case Left(err)     => BadRequest(err.encode)
+            case Right(res)    => Ok(Return(res).encode)
           }
-        } 
-      }  
+        }
+      } 
 
       // delete a playfield with code, returns number of deleted fields
       // def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-      case "delPlayfield"    => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          tsv.delPlayfield(getParam(param, "no", -1), getParam(param, "code"), getParam(param, "verify", false) ).map {
-            case Left(err)    => BadRequest(err.encode)
-            case Right(pfNo)  => Ok(Return(pfNo).encode)
-          }
-        }  
+      case "delPlayfield"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.delPlayfield(getParam(param, "no", -1), getParam(param, "code"), getParam(param, "verify", false) ).map {
+          case Left(err)    => BadRequest(err.encode)
+          case Right(pfNo)  => Ok(Return(pfNo).encode)
+        }
       }  
 
       //
@@ -250,34 +237,30 @@ class PostActionCtrl @Inject()
       /** addTourney adds a tourney to the database
         * addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
         */
-      case "addTourney" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","addTourney").encode)) else {
-          Tourney.decode(reqData) match {
-            case Left(err)    => Future(BadRequest(err.encode))
-            case Right(trny)  => tsv.addTourney(trny)(tse).map {
-              case Left(err)     => BadRequest(err.encode)
-              case Right(trnyId) => Ok(Return(trnyId).encode)
-            }
+      case "addTourney" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        Tourney.decode(reqData) match {
+          case Left(err)    => Future(BadRequest(err.encode))
+          case Right(trny)  => tsv.addTourney(trny)(tse).map {
+            case Left(err)     => BadRequest(err.encode)
+            case Right(trnyId) => Ok(Return(trnyId).encode)
           }
-        }  
+        }
       }  
 
 
       /** delTourney deletes a tourney
        * addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
        */
-      case "delTourney" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights","","","delTourney").encode)) else {
-          tsv.delTourney(toId)(tse).map {
-            case Left(err)     => BadRequest(err.add("delTourney").encode)
-            case Right(result) => Ok(Return(result).encode)
-          }
-        } 
-      }
+      case "delTourney" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.delTourney(toId)(tse).map {
+          case Left(err)     => BadRequest(err.add("delTourney").encode)
+          case Right(result) => Ok(Return(result).encode)
+        }
+      } 
 
 
       // addTournBase adds a tourney (from a tournBase) to the database
-      case "addTournBase" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+      case "addTournBase" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         TournBase.decode(reqData) match {
           case Left(err)       => logger.error(s"addTournBase: ${err.msgCode}"); Future(BadRequest(err.encode))
           case Right(trnyBase) => tsv.addTournBase(trnyBase)(tse).map {
@@ -289,7 +272,7 @@ class PostActionCtrl @Inject()
     
 
       // sync (overwrite) tourney and save to disk
-      case "syncTourney" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+      case "syncTourney" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         Tourney.decode(reqData) match {
           case Left(err)   => logger.error(s"syncTourney: ${err.msgCode}"); Future(BadRequest(err.encode))
           case Right(trny) => tsv.syncTourney(trny)(tse).map {
@@ -301,7 +284,7 @@ class PostActionCtrl @Inject()
 
       
       // save tourney to disk
-      case "saveTourney" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+      case "saveTourney" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         tsv.saveTourney(toId) match {
           case Left(err)  => Future(BadRequest(err.encode))
           case Right(res) => Future(Ok(Return(res).encode))
@@ -310,7 +293,7 @@ class PostActionCtrl @Inject()
   
 
       // setTournBase sets a tourney (from a tournBase) to the database
-      case "setTournBase" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+      case "setTournBase" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         TournBase.decode(reqData) match {
           case Left(err)   => Future( BadRequest(err.encode) ) 
           case Right(tb)   => tsv.setTournBase(tb)(tse).map {
@@ -322,65 +305,60 @@ class PostActionCtrl @Inject()
  
 
       // addTournBase adds tourney based on click TT data
-      case "addTournCTT" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          val orgDir    = ctx.orgDir
-          val organizer = ctx.organizer
+      case "addTournCTT" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        val orgDir    = ctx.orgDir
+        val organizer = ctx.organizer
 
-          // verify necessary parameters
-          val (sDate, eDate, valid) = (for {
-            start  <- getEParam(pMap, "sDate", 0)
-            end    <- getEParam(pMap, "eDate", 0)
-          } yield { (start, end) }) match {
-            case Left(err)  => (0, 0, false)
-            case Right(res) => (res._1, res._2, true)  
-          }
-          if (!valid) Future(BadRequest(Error("err0047.post.addTournCTT").encode)) else {
-            CttService.load("", reqData) match { 
-              case Left(err)      => Future(BadRequest(err.add("addTournCTT").encode)) 
-              case Right(cttTrny) => tsv.addTournCTT(cttTrny, orgDir, organizer).map { 
-                case Left(err)   => BadRequest(err.add("addTournCTT").encode) 
-                case Right(trny) => tsv.saveTourney(trny.id) match {
-                  case Left(err)  => BadRequest(err.encode)
-                  case Right(res) => Ok(trny.encode())
-                }
-              } 
-            }       
-          }
-        }     
-      } 
+        // verify necessary parameters
+        val (sDate, eDate, valid) = (for {
+          start  <- getEParam(pMap, "sDate", 0)
+          end    <- getEParam(pMap, "eDate", 0)
+        } yield { (start, end) }) match {
+          case Left(err)  => (0, 0, false)
+          case Right(res) => (res._1, res._2, true)  
+        }
+        if (!valid) Future(BadRequest(Error("err0047.post.addTournCTT").encode)) else {
+          CttService.load("", reqData) match { 
+            case Left(err)      => Future(BadRequest(err.add("addTournCTT").encode)) 
+            case Right(cttTrny) => tsv.addTournCTT(cttTrny, orgDir, organizer).map { 
+              case Left(err)   => BadRequest(err.add("addTournCTT").encode) 
+              case Right(trny) => tsv.saveTourney(trny.id) match {
+                case Left(err)  => BadRequest(err.encode)
+                case Right(res) => Ok(trny.encode())
+              }
+            } 
+          }       
+        }
+      }     
+
 
 
       //
       // Competition Action Routines
-      //    
-
+      //
       /** setComp updates a competition, returns either error or the competition
         * calls setComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
         */
-      case "setComp"   => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {       
-          Competition.decode(reqData) match {
-            case Left(err)   => Future(BadRequest(err.encode))
-            case Right(co)   => tsv.setComp(co)(msgs, tse).map { 
-              case Left(err)    => { logger.error(s"setComp: ${err.encode}" ); BadRequest(err.add("setComp").encode) }  
-              case Right(newCo) => Ok(newCo.encode) 
-            }
+      case "setComp"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {    
+        Competition.decode(reqData) match {
+          case Left(err)   => Future(BadRequest(err.encode))
+          case Right(co)   => tsv.setComp(co)(msgs, tse).map { 
+            case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.add(s"${cmd}").encode)  
+            case Right(newCo) => logger.info(s"${cmd}: execution Ok");    Ok(newCo.encode) 
           }
         }
-      }      
+      }
+     
 
       /** addComp creates  a competition, returns either error or the competition
         * calls addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]        
         */
-      case "addComp"   => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          Competition.decode(reqData) match {
-            case Left(err)   => Future(BadRequest(err.encode))
-            case Right(co)   => tsv.addComp(co)(msgs, tse).map { 
-              case Left(err)    => { logger.error(s"addComp: ${err.encode}"); BadRequest(err.add("addComp").encode) }  
-              case Right(newCo) => { Ok(newCo.encode) }
-            }
+      case "addComp"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        Competition.decode(reqData) match {
+          case Left(err)   => Future(BadRequest(err.encode))
+          case Right(co)   => tsv.addComp(co)(msgs, tse).map { 
+            case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.add(s"${cmd}").encode) 
+            case Right(newCo) => logger.info(s"${cmd}: execution Ok");    Ok(newCo.encode)
           }
         }
       } 
@@ -391,10 +369,10 @@ class PostActionCtrl @Inject()
         */
       case "setCompStatus"  => {
         import shared.model.Competition._
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+        if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
           tsv.setCompStatus(getParam(pMap, "coId", -1L), CompStatus(getParam(pMap, "status", CompStatus.UNKN.id)) ).map {
-            case Left(err)   => { logger.error(s"setComp: ${err.encode}" ); BadRequest(err.add("setCompStatus").encode) }
-            case Right(res)  => Ok(Return(res).encode)
+            case Left(err)   => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.add(s"${cmd}").encode)
+            case Right(res)  => logger.info(s"${cmd}: execution Ok");    Ok(Return(res).encode)
           } 
         }
       }     
@@ -403,47 +381,66 @@ class PostActionCtrl @Inject()
       /** delComp deletes a competition
         * calls delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]      
         */
-      case "delComp"  => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
-          tsv.delComp(getParam(pMap, "coId", -1L)).map { 
-            case Left(err)   => BadRequest(err.encode)
-            case Right(res)  => Ok(Return(res).encode)
-          }           
+      case "delComp"  => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.delComp(getParam(pMap, "coId", -1L)).map { 
+          case Left(err)   => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(res)  => logger.info(s"${cmd}: execution Ok");    Ok(Return(res).encode)
+        }           
+      }
+
+
+      case "addCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.addCompPhase(getParam(pMap, "coId", -1L),
+                          getParam(pMap, "baseCoPhId", -1),
+                          getParam(pMap, "cfgWinner", true),
+                          getParam(pMap, "coPhCfg", CompPhase.CPC_UNKN),
+                          getParam(pMap, "name", ""),
+                          getParam(pMap, "noWinSets", 0)).map { 
+          case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode)
         }
-      }    
+      }
 
 
       //
       // PLAYER Routines
       //
       // addPlayer adds a player to the database
-      case "addPlayer" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "addPlayer").encode)) else {
-          Player.decode(reqData) match {
-            case Left(err)      => Future(BadRequest(err.encode))
-            case Right(player)  => tsv.addPlayer(player)(tse).map {
-              case Left(err)    => BadRequest(err.encode)
-              case Right(pl)    => { logger.info(s"addPlayer: RETURN" );  Ok(pl.encode) }
-            }
+      case "addPlayer" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        Player.decode(reqData) match {
+          case Left(err)      => Future(BadRequest(err.encode))
+          case Right(player)  => tsv.addPlayer(player)(tse).map {
+            case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+            case Right(pl)    => logger.info(s"${cmd}: execution Ok");    Ok(pl.encode)
           }
-        }  
+        }
       }  
+  
 
-      // setPlayerLicence sets licence of player
-      case "setPlayerLicence" => {
-        if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights", "", "", "setPlayerLicence").encode)) else {
-          tsv.setPlayerLicence(getParam(pMap, "plId", -1L),getParam(pMap, "licence", "")).map {
-            case Left(err)    => BadRequest(err.encode)
-            case Right(pl)    => Ok(pl.encode)
+      // setPlayer set player
+      case "setPlayer" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {                            
+        getParam(pMap, "plId", -1L) match {
+
+          case plId if (plId > (-1L)) => tsv.setPlayer(plId, CttLicense(getParam(pMap, "license", ""))).map {
+            case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+            case Right(pl)    => logger.info(s"${cmd}: execution Ok");    Ok(pl.encode)
           }
-        }  
-      } 
 
+          case _      => Player.decode(reqData) match {
+            case Left(err)      => Future(BadRequest(err.encode))
+            case Right(player)  => tsv.setPlayer(player)(tse).map {
+              case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+              case Right(pl)    => logger.info(s"${cmd}: execution Ok");    Ok(pl.encode)
+            }
+          }    
+
+        }
+      }
 
       //
       // Click TT Action Routines
       //
-      case "genCttResult" => if (!chkAccess(ctx)) Future(BadRequest(Error("err0080.access.invalidRights").encode)) else {
+      case "genCttResult" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         import scala.collection.mutable.ArrayBuffer
         import scala.xml.transform.RewriteRule
         import scala.xml.transform.RuleTransformer
@@ -540,15 +537,15 @@ class PostActionCtrl @Inject()
           case CompTyp.SINGLE =>
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
               val plId    = entry.getSingleId
-              val lic     = trny.players(plId).getLicenceNr
+              val lic     = trny.players(plId).getLicense.value
               entry.ident = licence2player(lic)
             }}
 
           case CompTyp.DOUBLE =>
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
               val plIds  = entry.getDoubleId
-              val lic1   = trny.players(plIds._1).getLicenceNr
-              val lic2   = trny.players(plIds._2).getLicenceNr
+              val lic1   = trny.players(plIds._1).getLicense.value
+              val lic2   = trny.players(plIds._2).getLicense.value
 
               entry.ident = 
                 if (licence2player.isDefinedAt(s"${lic1}·${lic2}")) {

@@ -23,30 +23,30 @@ object DlgSpinner extends BasicHtml
     println("DlgSpinner.start")
     loadModal(clientviews.dialog.html.DlgSpinner(), ucp)
     $("#APP__DlgSpinner__Modal").modal("show")
-    removeClass("Type", "border-danger", "border-success", "border-5")
-    addClass("Type", "border-secondary")
+    removeClass(gE("Type", ucp), "border-danger", "border-success", "border-5")
+    addClass(gE("Type", ucp), "border-secondary")
     setHtml("Content", msg)
     
   }  
 
   def error(msg: String) = {
     setHtml("Content", msg)
-    removeClass("Type", "border-secondary")
-    addClass("Type", "border-danger", "border-5")
+    removeClass(gE("Type", ucp), "border-secondary")
+    addClass(gE("Type", ucp), "border-danger", "border-5")
     setHtml("Image", """<img class="img-fluid" src="assets/img/pullhair150.gif" alt="Error ...">""")
   }  
 
   def result(msg: String) = {
     setHtml("Content", msg)
-    removeClass("Type", "border-secondary")
-    addClass("Type", "border-success", "border-5")
+    removeClass(gE("Type", ucp), "border-secondary")
+    addClass(gE("Type", ucp), "border-success", "border-5")
     setHtml("Image", """<img class="img-fluid" src="assets/img/highfive150.gif" alt="Error ...">""")
   }    
 
   def close() = {
     $("#APP__DlgSpinner__Modal").modal("hide")
     println("Close Modal")
-    removeClass("Type", "border-secondary")
+    removeClass(gE("Type", ucp), "border-secondary")
     $("#APP__DlgSpinner__Modal").modal("hide")
   }  
 }

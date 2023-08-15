@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.StringBuilder
 import play.api.i18n.Messages
-import shared.model. { Competition, CompTyp, CompStatus, Player, Club, SexTyp }
+import shared.model. { Competition, CompTyp, CompStatus, Player, Club, SexTyp, CttPerson, CttLicense }
 import shared.utils.Routines._
 
 
@@ -154,26 +154,10 @@ class CttPlayer(val typVal: String, val id: String, val persons: Array[CttPerson
   }
 }
 
-case class CttPerson(
-  firstname: String, lastname: String, birthyear: String,
-  internalNr: String, licenceNr: String, sex:Int,
-  var clubName:String="",
-  var clubNr: String="",
-  var clubFederationNickname: String="",
-  var ttr: String="", 
-  var ttrMatchCount:String="", 
-  var nationality:String="",
-  var foreignerEqState: String="",
-  var region: String="", 
-  var subRegion: String=""
-)
+
 
 object CttService  { 
 
-  def getBY(byear: String) : Int = {
-    val year = byear.toIntOption.getOrElse(0) 
-    if (year >= 1900 & year < 2100) year else 0
-  } 
 
   def convCttTyp2CompTyp(compTyp: String) = compTyp.toLowerCase match {
     case "einzel" | "single" => CompTyp.SINGLE
@@ -186,10 +170,10 @@ object CttService  {
   // cttPers2Player convert ctt person to player
   //                ctt player is implemented by playerComp mapping table
   def cttPers2Player(cttp: CttPerson) : Player = {
-    val pl = new Player(0L, "", 0L, cttp.clubName, cttp.firstname, cttp.lastname, getBY(cttp.birthyear), "", SexTyp(cttp.sex), "_")
+    val pl = new Player(0L, "", 0L, cttp.clubName, cttp.firstname, cttp.lastname, cttp.getBY(), "", SexTyp(cttp.sex), "_")
 
     pl.setInternalNr(cttp.internalNr)
-    pl.setLicenceNr(cttp.licenceNr)
+    pl.setLicense(CttLicense(cttp.licenceNr))
     pl.setClubNr(cttp.clubNr)
     pl.setClubFedNick(cttp.clubFederationNickname)
     pl.setTTR(cttp.ttr)

@@ -10,12 +10,22 @@ package object twirlhelper {
   def attrName(name: String)(implicit ucp: UseCaseParam) = { s""" name='${ucp.idBase}__${name}' """ }
   def attrId(name: String)(implicit ucp: UseCaseParam)      = { s""" id='${ucp.idBase}__${name}' """ }
   def attrList(name: String)(implicit ucp: UseCaseParam)      = { s""" list='${ucp.idBase}__${name}' """ }
-  def attrPlh(name: String)(implicit ucp: UseCaseParam) = { val pname = s"plh.${name}"; s"placeholder='${msg(pname)}'"}
+  def attrPlh(name: String)(implicit ucp: UseCaseParam) = { 
+    if (name.startsWith("std.")) {
+      val pname = s"std.plh.${name.substring(4)}"
+      s"placeholder='${msg_(pname)}'" 
+    } else {
+      val pname = s"plh.${name}"
+      s"placeholder='${msg(pname)}'"
+    }  
+  }
+
   def attrFor(name: String)(implicit ucp: UseCaseParam) = { s"for='${ucp.idBase}__${name}'"}
   
   def _name(name: String)(implicit ucp: UseCaseParam)    = { s"${ucp.idBase}__${name}"}
   def _data(attrName: String, attrValue: String)(implicit ucp: UseCaseParam) = { s"data-${ucp.dataAttr}-${attrName}='${attrValue}'"}
-  
+  def _list(attrValue: String)(implicit ucp: UseCaseParam) = { s"list='${ucp.idBase + "__" + attrValue}'"}
+
   def msg(name: String, arg: String*)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.${name}", arg)
   def msg_(name: String, arg: String*)(implicit ucp: UseCaseParam): String = ucp.msgfunc(name, arg)
 
@@ -43,9 +53,9 @@ package object twirlhelper {
 
   def _onchange(_func: String, args: String*)(implicit ucp: UseCaseParam): String = {
     import scala.collection.mutable.ListBuffer
-    var argSeq = new ListBuffer[String]()
+    var argSeq = ListBuffer("this")
     args.foreach( arg => argSeq += "'" + arg + "'" )
-    s"""onchange="${ucp.objName}.onchange${_func}(${argSeq.mkString(",")});" """
+    s"""onchange="${ucp.objName}.onchange${_func}(${argSeq.mkString(",")});return false" """
   }
 
   def _onclick(_func: String, args: String*)(implicit ucp: UseCaseParam): String = {

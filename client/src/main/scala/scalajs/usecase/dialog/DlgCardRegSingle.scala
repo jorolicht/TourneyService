@@ -1,13 +1,5 @@
 package scalajs.usecase.dialog
 
-/*
- * Start TestCases
- * http://localhost:9000/start?ucName=TestMain&ucParam=DlgCardRegSingle
- * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetition
- * 
- */
-
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -49,13 +41,17 @@ object DlgCardRegSingle extends BasicHtml
       case "Name" => { 
         debug("actionEvent", s"Input value: ${elem.asInstanceOf[Input].value}")
 
-        Player.parseName(elem.asInstanceOf[Input].value) match {
+        Player.validateName(elem.asInstanceOf[Input].value) match {
           case Left(err)   => setPlayerView("", "", 0L)
           case Right(lfid) => setPlayerView(lfid._1, lfid._2, lfid._3)
         }
       }
     
-      case "Close"   => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+      case "Close"   => {  
+        offEvents(gE("Modal", ucp), "hide.bs.modal")
+        doModal(gE("Modal", ucp), "hide")
+      }    
+
       case _         => {}
     }
   }
@@ -81,17 +77,17 @@ object DlgCardRegSingle extends BasicHtml
 
     debug("validate", s"status: ${status}")
 
-    Player.parseEmail(getInput("Email", "")) match {
+    Player.validateEmail(getInput("Email", "")) match {
       case Left(err)  => eList += err
       case Right(res) => email = res
     }
 
-    Player.parseName(getInput("Name", "")) match {
+    Player.validateName(getInput("Name", "")) match {
       case Left(err)  => eList += err
       case Right(res) => lfid = res
     }
     
-    Club.parseName(getInput("Club", "")) match {
+    Club.validateName(getInput("Club", "")) match {
       case Left(err)  => eList += err
       case Right(res) => clubId = res
     }
@@ -169,7 +165,7 @@ object DlgCardRegSingle extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -179,8 +175,8 @@ object DlgCardRegSingle extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
+          offEvents(gE("Modal", ucp), "hide.bs.modal")
+          doModal(gE("Modal", ucp), "hide")
         }  
       }
 
@@ -190,9 +186,9 @@ object DlgCardRegSingle extends BasicHtml
     init(coId)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

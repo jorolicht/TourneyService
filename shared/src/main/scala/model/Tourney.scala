@@ -42,23 +42,20 @@ case class Tourney(
   var privat:     Boolean                               = true, 
   var contact:    Contact                               = Contact("","","",""), 
   var address:    Address                               = Address("","","","",""), 
-  var players:    Map[Long, Player]                     = Map(),
+  var players:    Map[Long, Player]                     = Map().withDefaultValue(Player(0L, "", 0L, "","","", 0, "", SexTyp.UNKN, "_")),
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
-  var playfields: Map[Int, Playfield]                   = Map()   // map (playfieldNo)   -> Playfield
+  var playfields: Map[Int, Playfield]                   = Map(),   // map (playfieldNo)   -> Playfield
+  var licenses:   Map[String, String]                   = Map().withDefaultValue("")
 )
 {
-
   // inverse hashmaps for fast access to players, clubs, ...  
-  var club2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // club hash -> id
-  var player2id:   Map[String, Long]  = Map().withDefaultValue(0L)  // player hash -> id
-  var comp2id:     Map[String, Long]  = Map().withDefaultValue(0L)  // competition hash -> id
-  var license2id:  Map[String, Long]  = Map().withDefaultValue(0L)
-
-
-
+  var club2id:     Map[String, Long]   = Map().withDefaultValue(0L)  // club hash -> id
+  var player2id:   Map[String, Long]   = Map().withDefaultValue(0L)  // player hash -> id
+  var comp2id:     Map[String, Long]   = Map().withDefaultValue(0L)  // competition hash -> id
+  
   /*
    * tourney management data
    */
@@ -74,14 +71,15 @@ case class Tourney(
     version match {
       case 0 => write[Tourney](this)
       case 1 => {
-        write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield])]((
+        write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield], Map[String,String])]  ((
           1, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
           players.values.toList, 
           comps.values.toList, 
           clubs.values.toList,
           pl2co.values.toList, 
           cophs.values.map(x => x.toTx).toList,
-          playfields.values.toList        
+          playfields.values.toList,
+          licenses    
         ))
       }
       case _ => "Invalid tourney encoding"
@@ -242,46 +240,18 @@ case class Tourney(
   }
   
 
-  /** setPlayer updates existing player 
-   *  if necessary creates new club entry
-   */
-  def setPlayer(pl: Player, hKey: String): Either[Error, Player] =
-    if (pl.id == 0) {
-      Left(Error("err0157.svc.setPlayer", pl.getName()))
-    } else {
-      val plId = player2id(hKey)
-      if (plId == pl.id) {
-        // change with same hash entry
-        players(pl.id) = pl
-        Right(players(pl.id))
-      } else if (plId == 0) {
-        // change with new hash entra
-        // add clubname (idempotent)
-        val club = addClub(pl.clubName)
-
-        // remove old hash entry, change require new one
-        player2id = player2id.filter(x => x._2 != pl.id) 
-        player2id += (hKey -> pl.id)
-        players(pl.id) = pl.copy(clubId = club.id, hashKey = hKey)
-        Right(players(pl.id))
-      } else {
-        // change with hash collision - not allowed
-        Left(Error("err0158.svc.setPlayer", pl.getName()))
-      }
-    }
-
-  
   /** addPlayer - adds new player if it does not exist already
    */
-  def addPlayer(pl: Player, hKey: String): Either[Error, Player] =
+  def addPlayer(pl: Player): Either[Error, Player] =
     if (pl.id != 0) {
       Left(Error("err0155.svc.addPlayer", pl.id.toString))
     } else {
+      val hKey = pl.genHash()
       // check whether an other player exists with same name ....
-      if (player2id.isDefinedAt(hKey) && player2id(hKey) > 0) {
+      val id = player2id.getOrElse(hKey, 0L)
+      if (id > 0) {
         // same player exists => idempotent add 
-        Right(players(player2id(hKey)))
-        //Left(Error("err0156.svc.addPlayer", pl.getName()))
+        Right(players(id))
       } else {
         val club = addClub(pl.clubName)
         // critical path (lock?)
@@ -292,6 +262,67 @@ case class Tourney(
         Right(players(newId))
       }
     }
+
+
+  /** setPlayer updates existing player 
+   *  if necessary creates new club entry
+   */
+  def setPlayer(pl: Player): Either[Error, Player] =
+    if (pl.id == 0) Left(Error("err0157.svc.setPlayer", pl.getName())) else {
+      val hKey = pl.genHash()
+      val plId = player2id(hKey)
+      if (pl.hasLicense) {
+        //allow only change of email!
+        if (pl.copy(email="") != players(pl.id).copy(email="") ) {
+          Left(Error("err0216.svc.setPlayer.invalidUpdate", pl.getName()))
+        } else {
+          players(pl.id).email = pl.email
+          Right(players(pl.id))
+        }
+      } else if (plId == pl.id) {
+        // change with same hash entry
+        players(pl.id) = pl
+        Right(players(pl.id))
+      } else if (plId == 0) {
+        // change with new hash entry
+        // add clubname (idempotent)
+        val club = addClub(pl.clubName)
+
+        // remove old hash entry, change require new one
+        player2id = player2id.filter(x => x._2 != pl.id) 
+        player2id += (hKey -> pl.id)
+
+        players(pl.id) = pl.copy(clubId = club.id, hashKey = hKey)
+        Right(players(pl.id))
+      } else {
+        // change with hash collision - not allowed
+        Left(Error("err0158.svc.setPlayer", pl.getName()))
+      }
+    }
+
+
+  def setPlayer(plId: Long, license: CttLicense): Either[shared.utils.Error, Player] = 
+    if (!players.contains(plId)) Left(Error("err0212.svc.setPlayer.invalidPlayerId ", plId.toString)) 
+    else if (license.value != "" && !licenses.contains(license.value)) Left(Error("err0213.svc.setPlayer.invalidLicense", plId.toString, license.value)) 
+    else {
+      val cttLicInfo = CttPersonCsv(licenses.getOrElse(license.value, ""))  
+      // println(s"setPlayer: cttLicInfo->${cttLicInfo} license.value->${license.value}")
+      cttLicInfo.get match {
+        case Left(err)  => players(plId).delLicense
+        case Right(ctp) => players(plId) = ctp.toPlayer(plId, addClub(ctp.clubName).id)
+      }
+      Right(players(plId))
+    }
+
+  def getPlayerRatingRange() = {
+    typ match {
+      case TourneyTyp.TT   => (100, 5000)
+      case TourneyTyp.SK   => (0, 10000) 
+      case TourneyTyp.ANY  => (0, 5000)
+      case TourneyTyp.UNKN => (0, 5000)
+    }       
+  }
+
 
   /** setClub - adds new Club or merges to existing
    */
@@ -439,9 +470,8 @@ case class Tourney(
   }
 
   def getCompName(coId: Long=0L) = {
-    val effCoId = if (coId == 0) curCoId else coId
-    if (comps.isDefinedAt(effCoId)) { comps(effCoId).name } 
-    else { println(s"ERROR: getCompName(${effCoId}) doesn't exist"); "" }
+    val effCoId = if (coId == 0L) curCoId else coId
+    if (comps.isDefinedAt(effCoId)) comps(effCoId).name else ""
   } 
 
   def getCompMatches(coId: Long) = {
@@ -449,8 +479,7 @@ case class Tourney(
     cophs.filter(_._1._1==coId).foreach { elem => result.append(getCompPhaseMatches(elem._1._1, elem._1._2)) }
     result.append("</matches>")
     result.toString()
-  } 
-
+  }
 
   //
   //  Mgmt Routines
@@ -557,8 +586,8 @@ object Tourney {
       }
       case 1 => {
         try {
-          val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields) =
-            read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield])](trnyStr)
+          val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields, lics) =
+            read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield], Map[String, String])](trnyStr)
           val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
                              tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
           trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)
@@ -567,6 +596,13 @@ object Tourney {
           trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*)
           trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx(x)).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
           trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*)
+          
+          trny.licenses = lics
+
+          // for(license <- licenses) { 
+          //   val key = getMDStr(license, 0)
+          //   if (!trny.licenses.contains(key)) trny.licenses(key) = license
+          // }
 
           trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
           trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
@@ -590,24 +626,16 @@ object Tourney {
       }
     }
   }
+
+
 }
 
              
 
 object TourneyTyp extends Enumeration {
-
   val UNKN = Value(0,  "UNKN")
   val TT   = Value(1,  "Tabletennis")  // table tennis
   val SK   = Value(2,  "Shephead")     // Schafkopf
-  val ANY  = Value(99, "ANY")          // waiting list 
-
-  // def apply(value: String): TourneyTyp.Value = {
-  //   value match {
-  //     case "TT"   => TourneyTyp(1)
-  //     case "SK"   => TourneyTyp(2)
-  //     case "ANY"  => TourneyTyp(99)
-  //     case _      => TourneyTyp(0)
-  //   }
-  // } 
+  val ANY  = Value(99, "ANY")          // waiting list
 }
 

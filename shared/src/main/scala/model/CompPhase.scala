@@ -665,7 +665,7 @@ object CompPhase {
     val coPhTyp  = CompPhase.cfg2typ(coPhCfg)
     val coSize   = coPhTyp match {
       case CompPhaseTyp.GR => noPlayers
-      case CompPhaseTyp.KO => genKOSize(noPlayers)
+      case CompPhaseTyp.KO => KoRound.getSize(noPlayers)
       case CompPhaseTyp.SW => noPlayers  + noPlayers%2
       case _               => 0
     }

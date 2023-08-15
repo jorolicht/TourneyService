@@ -1,6 +1,5 @@
 @*
  * Template Organize Player
- * input Sequence of Player (id, name, clubname, status, coName, coId, coTyp) 
  *@
 
 @import shared.utils.UseCaseParam  
@@ -9,16 +8,11 @@
 
 @()(implicit ucp: UseCaseParam)
 
-<span @id("SortByNo") hidden>0</span>
-<span @id("SortByName") hidden>0</span>
-<span @id("SortByComp") hidden>0</span>
-<span @id("SortByStatus") hidden>0</span>
-
 <div class="card mt-2">
 	<div class="tuse-card-header">		
 		<div class="float-left mt-2">  
 				<a @Html(collapse("MainCard"))>
-					<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("player.hdr") <span @id("CardBadge") class="badge badge-secondary ml-2"></span></h6>
+					<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("player.hdr")<span @id("CardBadge") class="badge badge-secondary ml-2"></span></h6>
 					<span @id("CardBadge") class="badge badge-secondary"></span>
 			  </a> 
 			</div>

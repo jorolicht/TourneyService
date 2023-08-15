@@ -41,7 +41,7 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
     debug("setPage", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists(s"View_${coId}_${coPhId}")) {
       // init page
-      val elem    = getElemById_(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val elem    = gE(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val coPhTyp = coPhase.coPhTyp
       coPhTyp match {
         case CompPhaseTyp.GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))

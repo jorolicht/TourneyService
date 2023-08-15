@@ -16,7 +16,6 @@ import scala.util.{Success, Failure}
 import shared.utils.UseCaseParam
 
 import scalajs.usecase.component._
-import scalajs.usecase.Helper
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 

@@ -83,13 +83,13 @@ object AddonDownload extends UseCase("AddonDownload")
     
     var url = dom.raw.URL.createObjectURL(data)
 
-    getElemById_("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
+    gE("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
     setAttribute_("APP__Download", "download", "example.txt")
 
     DlgBox.standard("Datei Dlg", "Datei <xy> speichern", Seq("cancel", "yes"),0,true).map { _ match {
       case 1 => debug("confirm", "cancel"); false
       case 2 => {
-        getElemById_("APP__Download").asInstanceOf[HTMLAnchorElement].click()
+        gE("APP__Download").asInstanceOf[HTMLAnchorElement].click()
         debug("confirm", "yes"); true
       }  
       case _ => debug("confirm", "unknown"); false

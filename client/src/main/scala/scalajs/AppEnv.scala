@@ -35,8 +35,6 @@ object AppEnv extends BasicHtml
 {
   this: BasicHtml =>
   implicit val ucp=UseCaseParam("APP", "app", "App", "app", getMessage _ ) 
-
-  
   
   var logger:Logger = org.scalajs.logging.NullLogger
   var messages      = Map[String,Map[String,String]]()
@@ -71,6 +69,12 @@ object AppEnv extends BasicHtml
        case _       => setLocalStorage("AppEnv.LogLevel", "");       logger = org.scalajs.logging.NullLogger; debugMode = false 
     }
   } 
+
+  def debug(func: => String, msg: =>String) = logger.debug(s"${func}-> ${msg}")
+  def info(func:  => String, msg: =>String) = logger.info(s"${func}-> ${msg}")
+  def warn(func:  => String, msg: =>String) = logger.warn(s"${func}-> ${msg}")
+  def error(func: => String, msg: =>String) = logger.error(s"${func}-> ${msg}")
+
 
 
   def initMockup() = { mockupMode = getLocalStorage("AppEnv.Mockup").toBooleanOption.getOrElse(false) }
@@ -108,6 +112,15 @@ object AppEnv extends BasicHtml
     userCtx = Session.get(userCtx.runModeLocal) 
   }
 
+  /** resetView
+   * 
+   */
+  def resetView() = {
+    setHeader()
+    ctrlSidebar(status)
+    setHistory("HomeMain","","")
+  } 
+
   def getOrganizer   : String  = { userCtx.organizer }
   def getOrgDir      : String  = { userCtx.orgDir }
   def getOrgId       : Long    = { userCtx.orgId } 
@@ -122,12 +135,42 @@ object AppEnv extends BasicHtml
   def setToId(toId: Long) = { 
     status.toId = toId
     ctrlSidebar(status)
-    if (toId!=0) {
-      setHeadline(App.getTourneyName, App.getCompName()) 
-    } else {
-      setHeadline()
-    }
+    setHeader()
   }
+
+
+  // ctrlSidebar - initialize sidebar for normal user, organizer or admin
+  def ctrlSidebar(status: AppStatus): Unit = {
+
+    val ucName     = status.ucName
+    val validToId  = (status.toId > 0)
+
+    val validOrgId = (AppEnv.getOrgId > 0)
+    val admin      = AppEnv.isAdmin
+
+    AppEnv.debug("ctrlSidebar", s"ucName: ${ucName} toId: ${status.toId}")
+
+    // show normal entries (not for organizer)
+    setVisibleByAttr_("sbentry", "HomeSearch", !validOrgId)
+    setVisibleByAttr_("sbentry", "InfoDisabled", false)
+    setVisibleByAttr_("sbentry", "InfoEnabled",  !validOrgId & validToId )
+
+    // special entries for organizer
+    setVisibleByAttr_("sbentry", "OrganizeTourney", validOrgId)
+    setVisibleByAttr_("sbentry", "OrganizeCompetition", validOrgId & validToId)
+    setVisibleByAttr_("sbentry", "OrganizePlayer", validOrgId & validToId)
+    setVisibleByAttr_("sbentry", "OrganizePlayfield", validOrgId & validToId)
+    setVisibleByAttr_("sbentry", "OrganizeCertificate", validOrgId & validToId)
+    setVisibleByAttr_("sbentry", "OrganizeReport", validOrgId & validToId)
+
+    setVisibleByAttr_("sbentry","Admin", admin)
+    if (ucName != "" & ucName != "HomeMain") {
+      try markSBEntry(ucName)
+      catch { case _: Throwable => AppEnv.warn("setSidebar", s"ucName: ${ucName}")}
+    } 
+    ()
+  }
+  
 
   def setStatus(name: String, param: String, info: String) = { status.ucName = name; status.ucParam = param; status.ucInfo = info }
   def getStatus  = status

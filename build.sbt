@@ -124,7 +124,8 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      commonSettings, 
      name := "shared",
      libraryDependencies ++= Seq(
-       "com.lihaoyi" %%% "upickle" % "1.4.3"
+       "com.lihaoyi" %%% "upickle" % "1.4.3",
+       "com.chuusai"       %%% "shapeless" % "2.3.3"
      )
    )
   .enablePlugins(ScalaJSPlugin).

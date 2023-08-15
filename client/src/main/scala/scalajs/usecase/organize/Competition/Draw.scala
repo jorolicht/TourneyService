@@ -52,7 +52,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     debug("actionEvent", s"key: ${key} coId: ${coId} coPhId: ${coPhId}")
     key match {
       case "DrawRefresh"   => {
-        val drawElements = getElemById_(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
+        val drawElements = gE(s"Draw_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
         val asign = (for ( i <- 0 to drawElements.length-1) yield {
           val elem = drawElements.item(i).asInstanceOf[HTMLElement]
           (elem.getAttribute("data-drawPos").toInt, elem.innerText.toIntOption.getOrElse(0))
@@ -75,7 +75,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists_(s"Draw_${coId}_${coPhId}")) {
       // init view
-      val elem    = getElemById_(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val elem    = gE(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val size    = coPhase.size
       val coPhTyp = coPhase.coPhTyp
       // generate draw frame
@@ -87,7 +87,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       }
     } else { 
       // update view
-      val base = getElemById_(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+      val base = gE(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
       coPhase.coPhTyp match {
         case CompPhaseTyp.GR => updateGrView(base, coPhase.groups)
         case CompPhaseTyp.KO => updateKoView(base, coPhase.ko)
@@ -142,7 +142,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   // reassingDraw set new draw
   def reassignDraw(coph: CompPhase, reassign: Map[Int,Int])= {
     val pants = Array.fill[PantEntry](coph.size)(PantEntry("0", "", "", 0, (0,0)))
-    val base = getElemById_(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
+    val base = gE(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
     coph.coPhTyp match {
       case CompPhaseTyp.GR => {
         coph.groups.foreach { g => 

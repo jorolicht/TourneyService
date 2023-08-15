@@ -34,11 +34,10 @@ import scalajs.service._
 import scalajs.usecase.organize.OrganizeTourney
 
 @JSExportTopLevel("App")
-object App extends BasicHtml
-  with TourneySvc with AppHelperSvc
+object App extends BasicHtml with TourneySvc
 {
   this: BasicHtml =>
-  implicit val ucp = UseCase.defaultParam  //UseCaseParam("APP", "app", "App", "app", AppHelper.getMessage _ )
+  implicit val ucp = UseCase.defaultParam  //UseCaseParam("APP", "app", "App", "app", AppAppEnv.getMessage _ )
 
   // DEBUG Version
   var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
@@ -74,7 +73,7 @@ object App extends BasicHtml
 
     println(s"Startup ucName:${ucName} ucParam:${ucParam} ucInfo:${ucInfo} lang:${language} version: ${version} update:${lastUpdate}")
     setVisible("Info", false)
-    setHeadline()
+    setHeader()
 
     // initialize debug/mockup and logger
     AppEnv.initMockup()
@@ -141,7 +140,7 @@ object App extends BasicHtml
         (ucName, ucParam, ucInfo)
       }
       AppEnv.setStatus(eucName, eucParam, eucInfo)
-      if (ucMap(eucName).sidebar) ctrlSidebar(AppEnv.status)
+      if (ucMap(eucName).sidebar) AppEnv.ctrlSidebar(AppEnv.status)
       ucMap(eucName).render(eucParam, eucInfo, reload)
 
     }
@@ -185,6 +184,10 @@ object App extends BasicHtml
       case _                             => true
     }
   }  
+
+
+
+
 
   /** initTrigger - setup server sent event
    * 
@@ -392,7 +395,7 @@ object App extends BasicHtml
     } else {
       getTourney(toId).map { 
         case Left(err)   => { 
-          Helper.error(s"getTourney", getErrStack(err))
+          AppEnv.error(s"getTourney", getErrStack(err))
           resetLocalTourney()
           Left(err)
         }
@@ -406,7 +409,7 @@ object App extends BasicHtml
   def loadLocalTourney(): Unit = {
     Tourney.decode(AppEnv.getLocalStorage("AppEnv.Tourney")) match {
       case Left(err) => {
-        Helper.error(s"loadLocalTourney", getErrStack(err))
+        AppEnv.error(s"loadLocalTourney", getErrStack(err))
         setLocalTourney(Tourney.init)
       }
       case Right(tourney) => {

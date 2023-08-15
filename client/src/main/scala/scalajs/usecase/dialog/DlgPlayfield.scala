@@ -25,7 +25,6 @@ import shared.model.Playfield
 import shared.utils.UseCaseParam
 
 import scalajs.usecase.component._
-import scalajs.usecase.Helper
 import scalajs.service._
 import scalajs.usecase._
 import scalajs.{ App, AppEnv }

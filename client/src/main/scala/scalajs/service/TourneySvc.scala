@@ -22,12 +22,10 @@ import shared.utils.Routines._
 import shared.utils.Constants._
 import shared.model._
 import shared.model.Competition._
-import scalajs.usecase.Helper
 import scalajs._
 import org.xml.sax.ErrorHandler
 
 trait TourneySvc extends WrapperSvc 
-  with AppHelperSvc
 {
   
   // export database
@@ -40,7 +38,7 @@ trait TourneySvc extends WrapperSvc
   // getContent - either error or file content
   def getContent(path: String): Future[Either[Error, String]] = {
     val absPath = if (path.startsWith("/")) path else s"/${path}"
-    Helper.info("getContent", s"path: ${absPath}")
+    AppEnv.info("getContent", s"path: ${absPath}")
 
     Ajax.get(absPath).map(_.responseText)
       .map(content => Right(content))
@@ -56,15 +54,13 @@ trait TourneySvc extends WrapperSvc
   // getInvitation - either error or file content
   def getInvitation(orgDir: String, startDate: Integer): Future[Either[Error, String]] = {
     val path = s"/service/getInvitation?orgDir=${orgDir}&startDate=${startDate}" 
-    //Helper.info("getCfgFile", s"path: ${path}")
+    //AppEnv.info("getCfgFile", s"path: ${path}")
     Ajax.get(path).map(_.responseText)
       .map(content => Right(content))
       .recover({
-        case dom.ext.AjaxException(req) => Left( 
-          Error("err0034.ajax.getRequest", s"response: ${req.responseText.take(20)} status: ${req.statusText}", path, "getCfgFile") 
-        )
+        case dom.ext.AjaxException(req) => Left(Error("err0034.ajax.getRequest", s"response: ${req.responseText.take(20)} status: ${req.statusText}", path, "getCfgFile"))
         case _: Throwable               => Left(Error("err0035.svc.getCfgFile", path, "", "getCfgFile")) 
-    })
+      })
   }
 
   
@@ -119,14 +115,14 @@ trait TourneySvc extends WrapperSvc
        dom.window.location.href = s"/content/clubs/${orgDir}/certs/Certificate_${tourney.id}_${coId}_${sno}.html"
 
        //Home.link(s"/content/clubs/${orgDir}/certs/Certificate_${getToId}_${coId}_${sno}.html")
-       Helper.debug("genCertFile", s"for coId: ${coId} sno: ${sno}")
+       AppEnv.debug("genCertFile", s"for coId: ${coId} sno: ${sno}")
     }} 
   }  
 
 
   def downloadFile(dloType: DownloadType.Value): Future[Either[Error, (String,String)]] = {
     val path  = genPath("/service/downloadFile", s"toId=${App.tourney.id}&dloType=${dloType.id}")
-    Helper.debug("downloadFile", s"path: ${path}")
+    AppEnv.debug("downloadFile", s"path: ${path}")
     Ajax.get(path).map( response => { 
       val respText = response.responseText 
       val contDisp = getHdrParam(response.getResponseHeader("content-disposition"))
@@ -206,7 +202,7 @@ trait TourneySvc extends WrapperSvc
 
   // add tourney based on with click TT configuration 
   def addTournCTT(cttData: String, sDate: Int, eDate: Int): Future[Either[Error, Tourney]] = {
-    Helper.debug("addTournCTT", s"${cttData.take(20)}")
+    AppEnv.debug("addTournCTT", s"${cttData.take(20)}")
     postAction("addTournCTT", App.tourney.id, s"sDate=${sDate}&eDate=${eDate}", cttData).map {
       case Left(err)     => Left(err.add("addTournCTT"))
       case Right(trnyTx) => Tourney.decode(trnyTx)
@@ -407,7 +403,10 @@ trait TourneySvc extends WrapperSvc
       case Left(err)  => Left(err.add("setPantStatus"))
       case Right(res) => Return.decode2Int(res, "setPantStatus") match {
         case Left(err)     => Left(err)
-        case Right(status) => { App.tourneyUpdate = true; App.tourney.setPantStatus(coId, sno, PantStatus(status)) }
+        case Right(sResult) => { 
+          App.tourneyUpdate = true
+          App.tourney.setPantStatus(coId, sno, PantStatus(sResult)) 
+        }
       }
     }
 
@@ -466,22 +465,50 @@ trait TourneySvc extends WrapperSvc
   //
 
   // addPlayer
-  def addPlayer(player: Player): Future[Either[Error, Player]] = 
-    postAction("addPlayer", App.tourney.id, "", player.encode, true).map {
-      case Left(err) => Left(err)
-      case Right(pl) => Player.decode(pl)
+  def addPlayer(newPlayer: Player): Future[Either[Error, Player]] = 
+    App.tourney.addPlayer(newPlayer) match {
+      case Left(err)  => Future(Left(err))
+      case Right(lPl) => postAction("addPlayer", App.tourney.id, "", newPlayer.encode, true).map {
+        case Left(err)    => AppEnv.info("addPlayer", s" ${newPlayer}"); Left(err)
+        case Right(rPlCo) => Player.decode(rPlCo) match {
+          case Left(err)     => Left(err)
+          case Right(rPl)    => if (rPl == lPl) Right(lPl) else Left(Error("err0215.sync"))
+        }  
+      }  
     }
 
-  def setPlayerLicence(plId: Long, licence: String): Future[Either[Error, Player]] = 
-    postAction("setPlayerLicence", App.tourney.id, s"plId=${plId}&licence=${licence}", "", true).map {
-      case Left(err) => Left(err)
-      case Right(pl) => Player.decode(pl)
-    }    
+
+  /** setPlayer updates existing player 
+   *  if necessary creates new club entry
+   */
+  def setPlayer(player: Player): Future[Either[Error, Player]] = 
+    App.tourney.setPlayer(player) match {
+      case Left(err) => Future(Left(err))
+      case Right(lPl) => postAction("setPlayer", App.tourney.id, "", player.encode, true).map {
+        case Left(err) => AppEnv.info("setPlayer", s" ${player}"); Left(err)
+        case Right(rPlCo) => Player.decode(rPlCo) match {
+          case Left(err)     => Left(err)
+          case Right(rPl)    => if (rPl == lPl) Right(lPl) else Left(Error("err0215.sync"))  
+        }
+      }  
+    } 
+
+
+  def setPlayer(plId: Long, license: CttLicense): Future[Either[Error, Player]] = 
+    App.tourney.setPlayer(plId, license) match {
+      case Left(err) => Future(Left(err))
+      case Right(localPlayer) => postAction("setPlayer", App.tourney.id, s"plId=${plId}&license=${license.value}", "", true).map {
+        case Left(err)             => Left(err)
+        case Right(remoPlayerCode) => Player.decode(remoPlayerCode) match {
+          case Left(err)               => Left(err)
+          case Right(remoPlayer)       => if (remoPlayer == localPlayer) Right(localPlayer) else Left(Error("err0215.sync"))  
+        }
+      }  
+    }
 
   //
   // MATCH Interface
   //
-  
   // getMatchKo - return sequence of result entries of ko round
   def getMatchKo(coId: Long, coPh: Int):  Future[Either[Error, Seq[ResultEntry]]] =
     getAction("getMatchKo", App.tourney.id, s"coId=${coId.toString}&coPh=${coPh.toString}").map {
@@ -511,7 +538,15 @@ trait TourneySvc extends WrapperSvc
   def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
     App.tourney.addCompPhase(coId, baseCoPhId, cfgWinner, coPhCfg, name, noWinSets) match {
       case Left(err)  => Future(Left(err))
-      case Right(res) => Future(Right(res))
+      case Right(lCoPh ) => postAction("addCompPhase", App.tourney.id, 
+                              s"coId=${coId}&baseCoPhId=${baseCoPhId}" +
+                              s"&cfgWinner=${cfgWinner}&coPhCfg=${coPhCfg}&noWinSets=${noWinSets}", "", true).map {
+        case Left(err)      => Left(err)
+        case Right(rCoPhE)  => CompPhase.decode(rCoPhE) match {
+          case Left(err)       => Left(err)
+          case Right(rCoPh)    => if (lCoPh.coPhId == rCoPh.coPhId) Right(lCoPh) else Left(Error("err0215.sync")) 
+        }    
+      }     
     }
 
 

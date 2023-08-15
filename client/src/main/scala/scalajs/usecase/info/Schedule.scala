@@ -83,9 +83,9 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
     // tourneyinfo hints
     getInvitation.map {
-      case Left(value)     => addClass("HintCard", "hidden-xl-down")
+      case Left(value)     => addClass(gE("HintCard", ucp), "hidden-xl-down")
       case Right(content)  => {
-        removeClass("HintCard", "hidden-xl-down")
+        removeClass(gE("HintCard", ucp), "hidden-xl-down")
         setHtml("HintBodyContent", s"""<article class="markdown-body">$content</article>""") 
       }  
     }

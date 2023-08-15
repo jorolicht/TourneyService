@@ -26,7 +26,7 @@ import scalajs._
 
 @JSExportTopLevel("HomeSetting")
 object HomeSetting extends UseCase("HomeSetting") 
-   with AuthenticateSvc with LicenseSvc with AppHelperSvc
+   with AuthenticateSvc with LicenseSvc 
 {
   var ctx = SettingData.init()
 

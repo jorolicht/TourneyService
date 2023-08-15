@@ -13,6 +13,7 @@ import play.api.i18n.Messages
 import shared.model._
 import shared.model.Tourney._
 import shared.utils.Routines._
+import shared.utils.CSVConverter
 import shared.utils._
 import models.daos.TourneyDAO
 
@@ -264,6 +265,24 @@ object TIO {
       case Left(err)    => Left(err)
       case Right(trny)  => if (date2Int(cttTrny.startDate) != trny.startDate) Left(Error("err0205.upload.file.startDate")) else {
         import scala.collection.mutable.ArrayBuffer
+
+        // sets license of player which match the following criteria:
+        // either name has one match or clubname has one match or ttr or birthyear
+        def setPlayerCttLicense(player: Player, name2person: HashMap[String, ArrayBuffer[CttPerson]]) = {
+          val name = s"${player.lastname}·${player.firstname}"
+          player.setLicense(CttLicense(""))
+          if (name2person.isDefinedAt(name)) {
+            val peArray = (name2person(name)) 
+            if (peArray.length == 1) player.setLicense(CttLicense(peArray(0).licenceNr)) else {
+              val cpeArray = peArray.filter(_.clubName == player.clubName)
+              if (cpeArray.length == 1) player.setLicense(CttLicense(cpeArray(0).licenceNr)) else {
+                val tcpeArray = peArray.filter(_.ttr == player.getTTR)
+                if (tcpeArray.length == 1) player.setLicense(CttLicense(tcpeArray(0).licenceNr))
+              }  
+            } 
+          }
+        }
+
         // update Pant2Comp database
         // Step 1: delete/remove all ident info in Pant2Comp database
         // Repeat Step 2-3 for all competitions, if competition matches
@@ -271,7 +290,7 @@ object TIO {
         // Step 2: - generate licence -> ident info map 
         //         - generate lastname, firstname -> licence map
         //         - update licence info for every player who has not yet a licence number
-        //Step 3: for every Pant2Comp entry update ident
+        // Step 3: for every Pant2Comp entry update ident
         //
 
         // Step 0: initialize result
@@ -280,6 +299,7 @@ object TIO {
         // Step 1 - Remove all ident values from Pant2Comp database entries
         trny.pl2co.foreach(_._2.ident = "") 
 
+        
         for ((coId, comp) <- trny.comps) {
           // get approbriate competition
           val cttCompList = cttTrny.competitions.filter( _.matchWith(comp.getAgeGroup, comp.typ, comp.getRatingLowLevel, comp.getRatingUpperLevel, comp.getRatingRemark, comp.startDate) )
@@ -287,23 +307,27 @@ object TIO {
             result += ((coId, -1))
           } else {
             val cttComp = cttCompList.head
-            val name2person    = new HashMap[String, ArrayBuffer[(String,Int,String)]]()
-            val licence2player = new HashMap[String, String]().withDefaultValue("")
+            val name2person   = new HashMap[String, ArrayBuffer[CttPerson]]()
+            // competition specific mapping of license to player ident
+            // person/license has different player idents in different competitions
+            val licence2Ident = new HashMap[String, String]().withDefaultValue("")
 
-            // generate licence2player 
+            // generate licence2Ident 
             for (pl <- cttComp.players) {
               val lic = pl.persons.map(p => p.licenceNr).mkString("·")
-              licence2player(lic) = pl.id 
+              licence2Ident(lic) = pl.id 
             }
 
-            // generate name2person(licence)
+            // generate license info map, containing detailed person info(csv) for each license
+
             for (pl <- cttComp.players; pe <- pl.persons) {
+              // add license if necessary
+              val peCsv = CSVConverter[CttPerson].to(pe)
+              if (!trny.licenses.contains(pe.licenceNr)) trny.licenses(pe.licenceNr) = peCsv
+              
+              // generate name2person(licence) map which generates for every lastname·firstname an array of CttPersons
               val name = s"${pe.lastname}·${pe.firstname}"
-              if (!name2person.isDefinedAt(name)) {
-                name2person(name) = ArrayBuffer((pe.clubName, pe.birthyear.toIntOption.getOrElse(0), pe.licenceNr)) 
-              } else {
-                name2person(name) += ((pe.clubName, pe.birthyear.toIntOption.getOrElse(0), pe.licenceNr))
-              }          
+              if (!name2person.isDefinedAt(name)) name2person(name) = ArrayBuffer(pe) else name2person(name) += (pe)
             }
             
             // update pl2co database, count number of entryies with ctt identifier
@@ -314,8 +338,8 @@ object TIO {
                 trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
                   val plId    = entry.getSingleId
                   // update licence if necessary
-                  trny.players(plId).updLicenseNr(name2person)
-                  entry.ident = licence2player(trny.players(plId).getLicenceNr)
+                  setPlayerCttLicense(trny.players(plId), name2person)
+                  entry.ident = licence2Ident(trny.players(plId).getLicense.value)
                   if (entry.ident != "") cnt = cnt + 1
                 }}
 
@@ -323,10 +347,10 @@ object TIO {
                 trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
                   val plIds  = entry.getDoubleId
                   // update licence if necessary
-                  trny.players(plIds._1).updLicenseNr(name2person)
-                  trny.players(plIds._2).updLicenseNr(name2person)
-                  val (lic1, lic2)   = (trny.players(plIds._1).getLicenceNr, trny.players(plIds._2).getLicenceNr)
-                  entry.ident = if (licence2player.isDefinedAt(s"${lic1}·${lic2}")) licence2player(s"${lic1}·${lic2}") else licence2player(s"${lic2}·${lic1}")
+                  setPlayerCttLicense(trny.players(plIds._1), name2person)
+                  setPlayerCttLicense(trny.players(plIds._2), name2person)
+                  val (lic1, lic2)   = (trny.players(plIds._1).getLicense.value, trny.players(plIds._2).getLicense.value)
+                  entry.ident = if (licence2Ident.isDefinedAt(s"${lic1}·${lic2}")) licence2Ident(s"${lic1}·${lic2}") else licence2Ident(s"${lic2}·${lic1}")
                   if (entry.ident != "") cnt = cnt + 1  
                 }}
 
@@ -344,6 +368,10 @@ object TIO {
         Right(result.toSeq)
       }  
     }            
+
+
+
+
 
 
   /** add - tourney configuration from CTT participant XML-file
@@ -366,6 +394,7 @@ object TIO {
       }
       case None    => tonyDao.insertOrUpdate(tb).map { tony => 
         if (tony.id > 0) {
+          val license2id:  scala.collection.mutable.Map[String, Long] = scala.collection.mutable.Map().withDefaultValue(0L)
           tourney(tony.id) = Tourney.init(tony)
           for((club,i) <- ctt.getClubs.zipWithIndex) {
             tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
@@ -379,8 +408,9 @@ object TIO {
             tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName))
             // generate hash value
             tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
-            tourney(tony.id).license2id(pl.getLicenceNr) = i+1
+            license2id(pl.getLicense.value) = i+1
             tourney(tony.id).playerIdMax = i+1
+            tourney(tony.id).licenses(person.licenceNr) = CSVConverter[CttPerson].to(person)
           }
 
           for((co,i) <- ctt.competitions.zipWithIndex) { 
@@ -395,14 +425,14 @@ object TIO {
             comp.typ match {
               case CompTyp.SINGLE => 
                 for(pls <- co.players) if (pls.persons.length == 1) {
-                  val plId = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr, 0L)
+                  val plId = license2id.getOrElse(pls.persons(0).licenceNr, 0L)
                   val sPant = Pant2Comp.single(plId, coId, PantStatus.REGI)
                   tourney(tony.id).pl2co((sPant.sno, coId)) = sPant
                 }
               case CompTyp.DOUBLE => 
                 for(pls <- co.players) if (pls.persons.length == 2) {
-                  val plId1 = tourney(tony.id).license2id.getOrElse(pls.persons(0).licenceNr,0L)
-                  val plId2 = tourney(tony.id).license2id.getOrElse(pls.persons(1).licenceNr,0L)
+                  val plId1 = license2id.getOrElse(pls.persons(0).licenceNr,0L)
+                  val plId2 = license2id.getOrElse(pls.persons(1).licenceNr,0L)
                   val dPant = Pant2Comp.double(plId1, plId2, coId, PantStatus.REGI)
                   tourney(tony.id).pl2co((dPant.sno, coId)) =  dPant
                 }

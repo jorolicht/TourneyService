@@ -9,21 +9,18 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
 
-import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
 import org.scalajs.dom.document
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.Event
-import org.scalajs.dom.ext._
 
-
-import scalajs.usecase.component.BasicHtml._
+import scalajs.usecase.dialog.DlgBox
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, Player, SexTyp }
+import shared.model.{ Tourney, Player, Club, SexTyp, CttPersonCsv }
 import shared.utils._
-import shared.utils.Constants._
+import shared.utils.Routines._
 import clientviews.dialog.html
 
 
@@ -34,71 +31,105 @@ object DlgCardPlayer extends BasicHtml
   this: BasicHtml =>
   implicit val ucp     = UseCaseParam("APP__DlgCardPlayer", "dlg.card.player", "DlgCardPlayer", "dlgcardplayer", scalajs.AppEnv.getMessage _ )
   implicit var tourney = Tourney.init
- 
+
+  var player = Player(0L, "", 0L, "", "", "", 0, "", SexTyp.UNKN)
+
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
-      case "Name" => { 
-        debug("actionEvent", s"Input value: ${elem.asInstanceOf[Input].value}")
+      case "Year" => {
+        player.birthyear = getInput(elem, 0)
+        debug("actionEvent", s"year ${player.birthyear}") 
+      }  
 
-        Player.parseName(elem.asInstanceOf[Input].value) match {
-          case Left(err)   => debug("parseName", s"error: ${err}")
-          case Right(lfid) => setPlayer(lfid._3)
+      case "Club" => Club.validateName(getInput(elem, "")) match {
+        case Left(err)  => {
+          markInput(elem, Some(true))
+          setDisabled("Submit", true)
+        }  
+        case Right(res) => { 
+          markInput(elem, None)
+          setDisabled("Submit", false)
+          player.clubName = res._1
+          player.clubId   = res._2 
         }
-
-        // debug("actionEvent", s"key: ${key} event: ${event.`type`}")
-        // val x = getRadioBtn("Gender")
-        // debug("actionEvent", s"Radio: ${x}")
       }
-      case "SelectComp" => { 
-        debug("actionEvent", s"key: ${key} event: ${event.`type`}")
-      }      
-      case "Close"   => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+
+      case "TTR" => Player.validateTTR(getInput(elem, ""), tourney.getPlayerRatingRange()) match {
+        case Left(err)  => markInput(elem, Some(true)); setDisabled("Submit", true)
+        case Right(res) => markInput(elem, None); setDisabled("Submit", false); player.setTTR(res)      
+      }
+
+      case "Name" => Player.validateName(getInput(elem, "")) match {
+        case Left(err)  => markInput(elem, Some(true)); setDisabled("Submit", true)
+        case Right(res) => markInput(elem, None); setDisabled("Submit", false); player.lastname = res._1; player.firstname = res._2   
+      }
+
+      case "Email" => Player.validateEmail(getInput(elem, "")) match {
+        case Left(err)  => markInput(elem, Some(true)); setDisabled("Submit", true)
+        case Right(res) => markInput(elem, None); setDisabled("Submit", false); player.email = res 
+      }
+      
+      case "Gender" => player.sex = SexTyp(getInput(elem, 0))
+
+      case "DeleteLicense" => {
+        DlgBox.standard(getMsg("delete.hdr"),getMsg("delete.msg", getInput("License", ""), player.getName(0)), Seq("cancel", "yes"), 0, true) map {
+          case 2 => player.delLicense; setPlayerView(player, tourney) 
+          case _ => debug("actionEvent", s"abort deletion of license")  
+        }
+      }
+    
+      case "ChangeLicense" => {
+        val cttLicInfo = CttPersonCsv(tourney.licenses.getOrElse(getInput("License", ""),"")) 
+        cttLicInfo.get match {
+          case Left(err)  => debug("actionEvent", s"Change License ${err}")
+          case Right(ctp) => player = ctp.toPlayer(player.id, 0L, player.email); setPlayerView(player, tourney)  
+        }
+      }
+
+      case "Close"   => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
+
       case _         => {}
     }
   }
 
-  /** validate input of dialog for Player, return valid Player or a List of Errors
+
+  /** read player input of dialog for Player, return valid Player or a List of Errors
    * 
    */ 
-  def validate(mode: DlgOption.Value): Either[List[Error], Player] = {
-    import shared.model.Player
-    import shared.utils.Routines._
+  def validate(player: Player): Either[List[Error], Player] = {
     import scala.collection.mutable.ListBuffer
     
     var eList = ListBuffer[Error]()
 
-    val id        = getData("Form", "id", 0L)
-    val hashKey   = getData("Form", "hashKey", 0)
-    val options   = getData("Form", "options", "")
     var lfid      = ("", "", 0L) //(lastname, firstname, id)-Tuppel
     var email     = ""
 
     val bYear = getInput("Year", 0)
     val club  = getInput("Club", "")
-    val ttr   = getInput("TTR", "")
+    
 
-    Player.parseEmail(getInput("Email", "")) match {
+    Player.validateEmail(getInput("Email", "")) match {
       case Left(err)  => eList += err
       case Right(res) => email = res
     }
 
-    Player.parseName(getInput("Name", "")) match {
+    Player.validateName(getInput("Name", "")) match {
       case Left(err)  => eList += err
       case Right(res) => lfid = res
     }
-    
-    var inValue = Player(11l,"",33L,"xxx","Rob","Licht",1963,"xx@xx", SexTyp.UNKN, " ")
 
     /* read relevant input and verify it */
-    if (eList.length > 0) Left(eList.toList) else Right(inValue)
+    if (eList.length > 0) {
+      Left(eList.toList)
+    } else {
+      Right(player)
+    }  
   }
 
-
-  def setPlayer(plId: Long, inVisible: Boolean=true)(implicit trny: Tourney): Unit = {
-
-    val player = if (plId != 0) trny.players(plId) else Player.init
+  def setPlayerView(player: Player, trny: Tourney): Unit = {
+    def getLicInfo(enc: String) =  getMsg("licInfo", getMDStr(enc,1), getMDStr(enc,0), getMDStr(enc,2), getMDStr(enc,3), getMDStr(enc,4))
 
     // set the radio button for gender
     def setGender(gender: SexTyp.Value) = gender match {
@@ -106,95 +137,68 @@ object DlgCardPlayer extends BasicHtml
       case SexTyp.MALE   => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", true);  setRadioBtn("GenderNone", false) }
       case SexTyp.UNKN   => { setRadioBtn("GenderFemale", false); setRadioBtn("GenderMale", false); setRadioBtn("GenderNone", true)  }
     }
-
-    // setting invisible data
-    if (inVisible) {
-      setData(gE("Form", ucp), "id", player.id)
-      setData(gE("Form", ucp), "hashKey", player.hashKey)
-      setData(gE("Form", ucp), "options", player.options)
-    }      
+    
     // setting visible data
-    setInput("Name", player.getName(1))
-    setInput("Club", player.getClub(1))
+    setHtml("Title", getMsg("Title", player.id.toString))
+    setInput("Name", player.getName(0))
+    setInput("Club", player.getClub(0))
+    setHtml("ClubList", (for ((id, c) <- trny.clubs) yield s"""<option>${c.getName(1)}</option>""").mkString(" ") )  
+
     setInput("Email", player.email)
     setInput("TTR", player.getTTR)
     setIntOption("Year", player.getBirthyear())
     setGender(player.sex)
+
+
+    val hasLicense = player.hasLicense
+    setDisabled("Name", hasLicense)
+    setDisabled("Club", hasLicense)
+    setDisabled("TTR", hasLicense)
+    setDisabled("Year", hasLicense)
+    setDisabled("GenderFemale", hasLicense)
+    setDisabled("GenderMale", hasLicense)
+    setDisabled("GenderNone", hasLicense)
+
+    // License control / set clickTT license list
+    if (!hasLicense) {
+      val liList = (for ((license, cttPlInfo) <- trny.licenses) yield (getLicInfo(cttPlInfo), license))
+                   .toList.sortBy(_._1).map(x => s"""<option value='${x._2}'>${x._1}</option>""").mkString(" ")
+      setHtml("LicenseList", liList)
+    }
+
+    setVisible("BtnDeleteLicense", hasLicense)
+    setInput("License", if (hasLicense) player.getLicense.value else "")
+    setDisabled("License", hasLicense)
   }
 
-  // set player view
-  def set(plId: Long, coId: Long, trny: Tourney, mode: DlgOption.Value): Unit = {
-    
-    def setNameList(trny: Tourney): Unit = {
-      val nameList = (for ((id, p) <- trny.players) yield s"""<option value="${p.getName(1)}">${p.getClub(0)}</option>""").mkString(" ") 
-      setHtml("NameList", nameList)
-    }
-  
-    def setClubList(trny: Tourney): Unit = {
-      val clubList = (for ((id, c) <- trny.clubs) yield s"""<option>${c.getName(1)}</option>""").mkString(" ") 
-      setHtml("ClubList", clubList)    
-    }
 
-    tourney = trny
-    setNameList(trny)
-    setClubList(trny)
-    setHtml("Class", trny.getCompName(coId))
-    val container = document.querySelector(getIdHa("Form"))
-    val cFooter   = document.querySelector(getIdHa("FormFooter"))
-
-    mode match {
-      case DlgOption.View => { 
-        setVisible("Cancel", false); setVisible("Submit", false); setVisible("Close", true)
-        setPlayer(plId)
-        container.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = true)
-        cFooter.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = true)
-      } 
-      case DlgOption.Edit => { 
-        setVisible("Cancel", true);  setVisible("Submit", true);  setVisible("Close", false)
-        setPlayer(plId)
-        container.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = false)
-        cFooter.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = false)
-      } 
-      case DlgOption.New => { 
-        setVisible("Cancel", true);  setVisible("Submit", true);  setVisible("Close", false)
-        setPlayer(0L)
-        container.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = false)
-        cFooter.querySelectorAll("input, select").map(_.asInstanceOf[Input].disabled = false)
-      } 
-    }
-  }
-  
   // show dialog return result (Future) or Failure when canceled
-  def show(plId: Long, coId: Long, trny: Tourney,  lang: String, mode: DlgOption.Value): Future[Either[Error, Player]] = {
+  def show(plId: Long, trny: Tourney): Future[Either[Error, Player]] = {
     val p     = Promise[Player]()
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
     def submit(e: Event) {
-      validate(mode) match {
-        case Left(eList) => DlgShowError.show(eList)
-        case Right(result)   => {
-          if (!p.isCompleted) p success result
-          //disable modal first, then hide
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
-        }  
-      }
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      if (!p.isCompleted) p success player
+      doModal(gE("Modal", ucp), "hide")
     }
     
     loadModal(html.DlgCardPlayer(), ucp)
-    set(plId, coId, trny, mode)
+    tourney = trny
+    player  = trny.players(plId)
+    setPlayerView(player, tourney)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }
-  }  
+  } 
 }

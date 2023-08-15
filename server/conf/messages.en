@@ -10,8 +10,8 @@ config.cookie.confirmation                          = false
 config.LogLevel                                     = debug
 
 app.mockup                                          = false
-app.version                                         = 2023-02EN190
-app.date                                            = 2023-04-15
+app.version = 2023-08EN160
+app.date    = 2023-08-07
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
@@ -301,19 +301,19 @@ home.register.lbl.withdrawal                          = The cancellation policy 
   tourney.error.typ                                   = Please select type of sport
   tourney.error.privat                                = Please set visibility
 
-  competition.status.-99                              = status
-  competition.status.-1                               = UNKNOWN
-  competition.status.0                                = READY TO START
-  competition.status.1                                = PRELIMINARY DRAW
-  competition.status.2                                = PRELIMINARY RESULT ENTRY
-  competition.status.3                                = PRELIMINARY ROUND FINISHED
-  competition.status.4                                = INTERMEDIATE DRAW
-  competition.status.5                                = INTERMEDIATE RESULT ENTRY
-  competition.status.6                                = INTERMEDIATE ROUND FINISHED
-  competition.status.7                                = FINAL DRAW
-  competition.status.8                                = FINAL RESULT ENTRY
-  competition.status.9                                = FINAL ROUND FINISHED
-  competition.status.100                              = RUNNING
+  competition.status.                                 = status
+  competition.status.UNKN                             = UNKNOWN
+  competition.status.READY                            = READY TO START
+  competition.status.VRAUS                            = PRELIMINARY DRAW
+  competition.status.VREIN                            = PRELIMINARY RESULT ENTRY
+  competition.status.VRFIN                            = PRELIMINARY ROUND FINISHED
+  competition.status.ZRAUS                            = INTERMEDIATE DRAW
+  competition.status.ZREIN                            = INTERMEDIATE RESULT ENTRY
+  competition.status.ZRFIN                            = INTERMEDIATE ROUND FINISHED
+  competition.status.ERAUS                            = FINAL DRAW
+  competition.status.EREIN                            = FINAL RESULT ENTRY
+  competition.status.ERFIN                            = FINAL ROUND FINISHED
+  competition.status.RUN                              = RUNNING
 
   competition.agegroup.1                              = Women
   competition.agegroup.2                              = Gentlemen
@@ -970,6 +970,7 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   std.btn.reset                                       = RESET
   std.btn.close                                       = CLOSE
   std.btn.xclose                                      = <span>&times;</span>
+  std.plh.email                                       = john.doe@email.de
 #END standard buttons
 
 ###
@@ -1053,30 +1054,48 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
 ###
 #  START Dialog Cards
 ###
+# Edit Player
+  dlg.card.player.Title                           = &nbsp; Player #{0}
+  dlg.card.player.lbl.Name                        = Name
+  dlg.card.player.lbl.License                     = License
+  dlg.card.player.lbl.TTR                         = TTR-Value
+  dlg.card.player.lbl.Club                        = Club
+  dlg.card.player.lbl.Email                       = E-Mail
+  dlg.card.player.lbl.Year                        = Birthyear
+  dlg.card.player.plh.Name                        = <lastname, firstname>
+  dlg.card.player.plh.License                     = <license>  
+  dlg.card.player.plh.Club                        = <name of club >
+  dlg.card.player.plh.Email                       = john.doe@email.de
+  dlg.card.player.notSpecified                    = not specified
+  dlg.card.player.licInfo                         = {0}, {1} [{2}] TTR:{3} Year:{4}
+  dlg.card.player.delete.hdr                      = Delete Confirmation
+  dlg.card.player.delete.msg                      = Delete license ({0}) of player {1}
+
+
 # Registration Single
-  dlg.card.reg.single.lbl.Name                        = Single
-  dlg.card.reg.single.lbl.TTR                         = TTR-Value
-  dlg.card.reg.single.lbl.Club                        = Club
-  dlg.card.reg.single.lbl.Email                       = E-Mail
-  dlg.card.reg.single.lbl.Year                        = Birthyear
-  dlg.card.reg.single.plh.Name                        = <lastname, firstname>
-  dlg.card.reg.single.plh.Club                        = <name of club >
-  dlg.card.reg.single.plh.Email                       = john.doe@email.de
-  dlg.card.reg.single.notSpecified                    = not specified
-  dlg.card.reg.single.header                          = Player
-  dlg.card.reg.single.status.hdr                      = Status player for competition:
-  dlg.card.reg.single.status.register                 = (pre-)registered
-  dlg.card.reg.single.status.participate              = participating
+  dlg.card.reg.single.lbl.Name                    = Single
+  dlg.card.reg.single.lbl.TTR                     = TTR-Value
+  dlg.card.reg.single.lbl.Club                    = Club
+  dlg.card.reg.single.lbl.Email                   = E-Mail
+  dlg.card.reg.single.lbl.Year                    = Birthyear
+  dlg.card.reg.single.plh.Name                    = <lastname, firstname>
+  dlg.card.reg.single.plh.Club                    = <name of club >
+  dlg.card.reg.single.plh.Email                   = john.doe@email.de
+  dlg.card.reg.single.notSpecified                = not specified
+  dlg.card.reg.single.header                      = Player
+  dlg.card.reg.single.status.hdr                  = Status player for competition:
+  dlg.card.reg.single.status.register             = (pre-)registered
+  dlg.card.reg.single.status.participate          = participating
 
 # Registration Double
-  dlg.card.reg.double.Title                           = Double
-  dlg.card.reg.double.lbl.Name1                       = Name Player 1
-  dlg.card.reg.double.plh.Name1                       = <lastname, firstname>
-  dlg.card.reg.double.lbl.Name2                       = Name Player 2
-  dlg.card.reg.double.plh.Name2                       = <lastname, firstname>
-  dlg.card.reg.double.status.hdr                      = Status of double for competition:
-  dlg.card.reg.double.status.register                 = (pre-)registered
-  dlg.card.reg.double.status.participate              = participating
+  dlg.card.reg.double.Title                       = Double
+  dlg.card.reg.double.lbl.Name1                   = Name Player 1
+  dlg.card.reg.double.plh.Name1                   = <lastname, firstname>
+  dlg.card.reg.double.lbl.Name2                   = Name Player 2
+  dlg.card.reg.double.plh.Name2                   = <lastname, firstname>
+  dlg.card.reg.double.status.hdr                  = Status of double for competition:
+  dlg.card.reg.double.status.register             = (pre-)registered
+  dlg.card.reg.double.status.participate          = participating
 
 # Competition Phase Configuration
   dlg.card.cfg.compphase.Title                            = Competition Configuration 
@@ -1322,8 +1341,8 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0157.svc.setPlayer                               = Error in routine setPlayer, invalid identifier for {0}
   err0158.svc.setPlayer                               = Error in routine setPlayer, player {0} already exists
 
-  err0159.Player.parseName                            = Wrong format of player name, required: <lastname>, <firstname>
-  err0160.Player.parseEmail                           = Email format not valid 
+  err0159.Player.validateName                         = Wrong format of player name, required: <lastname>, <firstname>
+  err0160.Player.validateEmail                        = Email format not valid 
   err0161.Club.parseName                              = Wrong format of club name
   err0162.Player.already.exists                       = Player with this name exists already
   err0163.Player.already.registered                   = Player already registered with competition
@@ -1375,5 +1394,11 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0209.genCttResult.moreMatchingComps              = Error generating ClickTT result file, no clear competition assignment  
   err0210.downloadFile.invalidType                    = Error invalid download file 
   err0211.downloadFile.missingResultFile              = Error reading result file: {0}
+  err0212.svc.setPlayer.invalidPlayerId               = Error updating player license, wrong id: {0}
+  err0213.svc.setPlayer.invalidLicense                = Error updating player license, wrong id/license: {0}/{1}
+  err0214.decode.CttPerson                            = Decoding error data type CttPerson: {0}
+  err0215.sync                                        = Tourney data not in sync, different versions local/remote
+  err0216.svc.setPlayer.invalidUpdate                 = Error updating player with a license not allowed
+  err0217.Player.validateTTR                          = Invalid TTR-Value
 
 #END error codes / messages

@@ -268,6 +268,8 @@ object KoRound {
     case _                          =>   0
   }
 
+
+
   // getNoRounds calculates number of rounds
   def getNoRounds(noPlayers: Int): Int = {
     noPlayers match {  

@@ -25,6 +25,19 @@
           <button id='DlgPrompt__Close' class="btn btn-outline-secondary btn-xs" type="button" autofocus>@msgStd("btn.close")</button>
           <button id='DlgPrompt__Start' class="btn btn-outline-secondary btn-xs" type="button">@msgStd("btn.submit")</button>
         </div>
+
+        <div class="card border-0">
+          <div class="tuse-card-header d-flex justify-content-between">
+            <div class="mt-2 ml-1">
+              <a @Html(collapse("OutputCard"))>
+                <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>Result / Output</h6>
+              </a>			
+            </div>
+          </div>
+          <div @id("OutputCard") class="tuse-card-body small ml-1 mb-0 p-0 pt-1">
+            <pre @id("OutputText") class='form-control w-100' style='font-size:0.6rem; height:120px;'></pre>
+          </div>
+        </div>
       </div>
     </div>    
   </div>

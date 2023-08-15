@@ -31,8 +31,7 @@ import scalajs._
 // Home of organizer
 // *** 
 @JSExportTopLevel("OrganizeTourney")
-object OrganizeTourney extends UseCase("OrganizeTourney")  
-  with TourneySvc with AppHelperSvc
+object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc 
 {
   import scalajs.usecase.component.BasicHtml._
   import clientviews.organize.tourney.html

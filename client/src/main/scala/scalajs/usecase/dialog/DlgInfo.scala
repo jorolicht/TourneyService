@@ -33,8 +33,8 @@ object DlgInfo extends BasicHtml
 
     $("#APP__DlgInfo__Modal").modal("show")
     alertTyp match {
-      case "danger"  => removeClass("Content", "border-success", "border-secondary"); addClass("Content", "border-danger")
-      case "success" => removeClass("Content", "border-danger", "border-secondary"); addClass("Content", "border-success")
+      case "danger"  => removeClass(gE("Content", ucp), "border-success", "border-secondary"); addClass(gE("Content", ucp), "border-danger")
+      case "success" => removeClass(gE("Content",ucp), "border-danger", "border-secondary"); addClass(gE("Content", ucp), "border-success")
       case _         => warn("show", s"alertTyp: ${alertTyp}")
     }
     setHtml("Title", title)

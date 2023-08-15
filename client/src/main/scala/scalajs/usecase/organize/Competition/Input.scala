@@ -59,7 +59,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }  
     
     def getRowBase(coId: Long, coPhId: Int):HTMLElement = {
-      getElemById_(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]   
+      gE(s"Input_${coId}_${coPhId}").asInstanceOf[HTMLElement]   
     }
         
     val (coId, coPhId) = (getData(elem,"coId",0L), getData(elem,"coPhId",0))
@@ -230,7 +230,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     val coPhId = coPhase.coPhId
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
     if (!exists_(s"Input_${coId}_${coPhId}")) {
-      val elem    = getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val elem    = gE(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
       val size    = coPhase.size
       val coPhTyp = coPhase.coPhTyp
       val maxRnd  = coPhase.getMaxRnds
@@ -248,7 +248,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             setHtml(tableId, "")(UCP())
             for (j<-1 to cnt) {
               gameNo = gameNo + 1
-              val rowElem = getElemById(tableId)(UCP()).asInstanceOf[HTMLTableElement].insertRow(-1)
+              val rowElem = gE(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${gameNo}", "row") 
               setHtml(rowElem, clientviews.organize.competition.input.html.KoMatchEntry(coId, coPhId, gameNo, winSets))
             }
@@ -269,7 +269,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
           BasicHtml.setHtml_(tableId, "")
           try {
             for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
-              val rowElem = getElemById_(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
+              val rowElem = gE(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${m.gameNo}", "row")
               // rowElem.setAttribute("contenteditable", "true")
               setGrMatch(coPhase, rowElem, m.asInstanceOf[MEntryGr])
@@ -280,7 +280,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       case CompPhaseTyp.KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo], coPhase.status)
 
       case _ =>  {
-        setHtml(getElemById_(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
+        setHtml(gE(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
                 showAlert(getMsg("invalidSection"))) 
       }  
     }
@@ -402,8 +402,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   def getMatchRow(m: MEntry): HTMLElement = { 
     try {
       val tableElem = m.coPhTyp match {
-        case CompPhaseTyp.KO  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
-        case CompPhaseTyp.GR  => getElemById_(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CompPhaseTyp.KO  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CompPhaseTyp.GR  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
         case _       => dom.document.createElement("div").asInstanceOf[HTMLElement] 
       }
       tableElem.querySelector(s"[data-game_${m.gameNo}='row']").asInstanceOf[HTMLElement]
@@ -425,15 +425,15 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
 
     println(s"enterDemoResult match: ${matchNo}")
     val r = scala.util.Random
-    val saveBtn = getElemById_(s"SaveBtn_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
-    val pfElem = getElemById_(s"Playfield_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
+    val saveBtn = gE(s"SaveBtn_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
+    val pfElem = gE(s"Playfield_${coId}_${coPhId}_${matchNo}").asInstanceOf[HTMLElement]
     val result = (for (i<-0 until (noWinSets*2)+1) yield {r.nextInt(2)}).toArray
     val (setA, setB) = result.foldLeft((0,0)) {(t,v) => if (t._1 == noWinSets | t._2 == noWinSets) (t._1, t._2) else (t._1 + v, t._2 + (v^1)) }     
     
     for (i<-0 until (setA+setB)) {
       val ball = if (result(i)>0 ) s"${r.nextInt(15)}"  else s"-${r.nextInt(15)}" 
       balls += ball
-      ballElems += getElemById_(s"Input_${coId}_${coPhId}").querySelector(s"[data-game_${matchNo}='ball_${i+1}']").asInstanceOf[HTMLElement]
+      ballElems += gE(s"Input_${coId}_${coPhId}").querySelector(s"[data-game_${matchNo}='ball_${i+1}']").asInstanceOf[HTMLElement]
     }
     // first set playfield to indicate running game
     dom.window.setTimeout(() => { pfElem.innerText = s"${r.nextInt(9)+1}"; clickButton(saveBtn) }, offsetMS)

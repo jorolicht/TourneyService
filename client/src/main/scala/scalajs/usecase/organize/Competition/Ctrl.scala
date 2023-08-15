@@ -127,7 +127,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
       if (!exists(s"Ctrl_${coId}_${coPhId}")) { elem.innerHTML = value }
     }
 
-    val ctrlBase = getElemById_(s"CtrlContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
+    val ctrlBase = gE(s"CtrlContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
     initContent(coId, coPhId, ctrlBase, clientviews.organize.competition.ctrl.html.CtrlCard(coId, coPhId).toString)
         
     // set status

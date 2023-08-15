@@ -38,28 +38,56 @@ object AddonDialog extends UseCase("AddonDialog")
   
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def execTest(number: Int, param: String)= {
+  def execTest(number: Int, toId: Long, plId: Long, param: String): Future[Boolean] = {
+
     number match {
-      case 0 => test_0(param)
-      case _ => println("Invalid DIALOG test option")
+      case 0 => test_0(toId, param)
+      case 1 => test_1(toId, plId).flatMap(identity)
+      case _ => AddonMain.setOutput(s"ERROR invalid test dialog number ${number}"); Future(false)
     }
   }
 
+
   // Test 0 - input dialog
-  def test_0(param: String="Dialog Input") = {
+  def test_0(toId: Long, param: String): Future[Boolean]  = {
     import scalajs.usecase.dialog.DlgInputTxt
 
     def check(input: String): Either[String, Boolean] = {
       if      (input == "")    Left("kein Input") 
       else if (input == "XXX") Left("Triple XXX not allowed")
       else                     Right(true)
-    }    
-    
-    
-    DlgInputTxt.show(param, "TestBTN", "e.g. Vorrunde", "CCLOSE", "SSTART", check) map { 
-      case Left(err)    => println(s"NO INPUT: ${err}")
-      case Right(value) => println(s"INPUT: ${value}")
     }
-  }    
+
+    AddonMain.setOutput(s"START Test Dialog 0: param->${param}")
+    DlgInputTxt.show(param, "TestBTN", "e.g. Vorrunde", "CCLOSE", "SSTART", check) map { 
+      case Left(err)    => AddonMain.addOutput(s"ERROR Test Dialog 0: no input ${err}"); false
+      case Right(value) => AddonMain.addOutput(s"SUCCESS Test Dialog 0: input->${value}"); true
+    }
+  }   
+
+  // Test 1 - input dialog
+  def test_1(toId: Long, plId: Long): Future[Future[Boolean]]  = {
+    import scalajs.usecase.dialog.DlgCardPlayer
+    import cats.data.EitherT
+    import cats.implicits._ 
+    
+    AddonMain.setOutput(s"START Test Dialog 1 player: plId->${plId}")
+    (for {
+      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      result    <- EitherT(App.loadRemoteTourney(toId))
+      player    <- EitherT(DlgCardPlayer.show(plId, App.tourney))
+    } yield { (result, pw, player) }).value.map {
+      case Left(err)    => AddonMain.addOutput(s"ERROR Test Dialog 1: tourney ${toId} failed with: ${err.msgCode}"); Future(false)
+      case Right(res)   => {
+        AddonMain.addOutput(s"SUCCESS Test Dialog 1: player->${res._3}")
+        
+        Future(false)
+
+      }
+    }
+  }  
+
+
 
 }

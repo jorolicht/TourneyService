@@ -199,8 +199,11 @@ object Crypto {
   def genHashClub(club: Club): String = crc32Hex(club.name,club.name.substring(0,1))
 
   def genHashPlayer(player: Player): String = {
-    crc32Hex(s"${player.lastname}${player.firstname}${player.clubName}${player.getTTR}",
-             player.lastname.substring(0,1)+ player.firstname.substring(0,1))
+    crc32Hex(s"${player.lastname}${player.firstname}${player.clubName}${player.getTTR}", player.lastname.substring(0,1) + player.firstname.substring(0,1))
+  }  
+
+  def genHashPlayer(lastname: String, firstname: String, clubName: String, ttr: String): String = {
+    crc32Hex(s"${lastname}${firstname}${clubName}${ttr}", lastname.substring(0,1) + firstname.substring(0,1))
   }  
 
   def genHashComp(comp: Competition): String = {

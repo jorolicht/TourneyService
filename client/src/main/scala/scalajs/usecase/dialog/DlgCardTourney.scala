@@ -35,7 +35,7 @@ object DlgCardTourney  extends BasicHtml
   def actionEvent(key: String, elem: raw.HTMLElement, event: Event) = {
     //debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
-      case "VISIBILITY"   => if (elem.asInstanceOf[HTMLInputElement].value.toIntOption.getOrElse(-1) > 0) markInput__(elem, None) else markInput__(elem, Option(false))
+      case "VISIBILITY"   => if (elem.asInstanceOf[HTMLInputElement].value.toIntOption.getOrElse(-1) > 0) markInput(elem, None) else markInput(elem, Option(false))
       case _              => {}
     }
   }  
@@ -105,14 +105,14 @@ object DlgCardTourney  extends BasicHtml
     val (lastname, firstname) = splitName(getInput("ContactName"))
     val contact = Contact(lastname, firstname, getInput("ContactPhone"), getInput("ContactEMail"))
   
-    if (privat == None)        { eList += Error("dlg.TournBase.hlp.Visibility"); markInput("Visibility", Option(true)) }
+    if (privat == None)        { eList += Error("dlg.TournBase.hlp.Visibility"); markInput(gE("Visibility"), Option(true)) }
     
     // check startDate only when creating a new entry
-    if (getNow() > startDate & id==0) { eList += Error("dlg.TournBase.hlp.nowDate");    markInput("StartDate", Option(true)) }
+    if (getNow() > startDate & id==0) { eList += Error("dlg.TournBase.hlp.nowDate");    markInput(gE("StartDate"), Option(true)) }
 
-    if (endDate < startDate)   { eList += Error("dlg.TournBase.hlp.endDate");    markInput("EndDate", Option(true)) }
-    if (name.length<10)        { eList += Error("dlg.TournBase.hlp.Name");       markInput("Name", Option(true)) }
-    if (typ == None)           { eList += Error("dlg.TournBase.hlp.Typ");        markInput("Typ", Option(true)) } 
+    if (endDate < startDate)   { eList += Error("dlg.TournBase.hlp.endDate");    markInput(gE("EndDate"), Option(true)) }
+    if (name.length<10)        { eList += Error("dlg.TournBase.hlp.Name");       markInput(gE("Name"), Option(true)) }
+    if (typ == None)           { eList += Error("dlg.TournBase.hlp.Typ");        markInput(gE("Typ"), Option(true)) } 
 
     if (eList.length > 0) {
       Left(eList.toList)
@@ -128,7 +128,7 @@ object DlgCardTourney  extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -137,8 +137,8 @@ object DlgCardTourney  extends BasicHtml
         case Left(eList) => DlgShowError.show(eList)
         case Right(tb)   => {
           if (!p.isCompleted) p success tb
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
+          offEvents(gE("Modal", ucp), "hide.bs.modal")
+          doModal(gE("Modal", ucp), "hide")
         }  
       }
     }
@@ -148,9 +148,9 @@ object DlgCardTourney  extends BasicHtml
     set(dlgMode, tournBase)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("BtnSave","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("BtnSave", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

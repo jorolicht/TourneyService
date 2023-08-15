@@ -291,8 +291,8 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var pants:     Array[PantEntry] = Array[PantEntry](),
-  var results:   Array[ResultEntry]      = Array[ResultEntry]()
+  var pants:     Array[PantEntry]   = Array[PantEntry](),
+  var results:   Array[ResultEntry] = Array[ResultEntry]()
 ) 
 
 object GroupTx  {

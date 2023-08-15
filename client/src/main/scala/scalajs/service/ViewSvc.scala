@@ -15,10 +15,7 @@ import shared.model._
 import shared.model.Competition._
 import shared.utils._
 
-
 import scalajs.{ App, AppEnv }
-import scalajs.usecase.Helper
-
 
 trait ViewServices {
 
@@ -91,7 +88,7 @@ trait ViewServices {
              case CompTyp.DOUBLE | CompTyp.MIXED => {
                val (plId1, plId2) = pa2co.getDoubleId
 
-               Helper.debug("getPlacements", s"double: ${plId1.toString}  ${plId2.toString}")
+               AppEnv.debug("getPlacements", s"double: ${plId1.toString}  ${plId2.toString}")
                (pa2co.getPlace()._1, pa2co.getPlaceDesc(AppEnv.getMessage _), 
                 s"${tourney.players(plId1).lastname}/${tourney.players(plId2).lastname}",
                 s"${tourney.players(plId1).clubName}/${tourney.players(plId2).clubName}",
@@ -129,7 +126,7 @@ trait ViewServices {
     val plIds = trny.players.keySet
     val pl2co = trny.pl2co.keySet.filter( ((x)) => x._2==coId ).map( ((x)) => getMDLongArr(x._1).toSeq).flatten
     val diffSet = plIds.diff(pl2co + skipId)
-    Helper.info("genPlayerOption", s"plIds: ${plIds} pl2co: ${pl2co} diffSet: ${diffSet}     ")
+    AppEnv.info("genPlayerOption", s"plIds: ${plIds} pl2co: ${pl2co} diffSet: ${diffSet}     ")
 
     "<option value='0'>---</option>"  + (for ((id) <- diffSet) yield s"""<option value="${id}">${trny.players(id).getName(1)} (${trny.players(id).getClub(0)})</option>""").mkString(" ")
   }

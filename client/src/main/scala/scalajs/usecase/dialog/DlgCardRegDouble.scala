@@ -52,7 +52,7 @@ object DlgCardRegDouble extends BasicHtml
     key match {
       case "Name1" => setNameList("Name2", tourney, selCoId, getInput("Name2", 0L), getInput("Name1", 0L) )        
       case "Name2" => setNameList("Name1", tourney, selCoId, getInput("Name1", 0L), getInput("Name2", 0L) ) 
-      case "Close" => { $(getId("Modal","#")).off("hide.bs.modal");  $(getId("Modal","#")).modal("hide") }
+      case "Close" => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
       case _       => {}
     }
   }
@@ -109,7 +109,7 @@ object DlgCardRegDouble extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -119,8 +119,8 @@ object DlgCardRegDouble extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          $(getId("Modal","#")).off("hide.bs.modal")
-          $(getId("Modal","#")).modal("hide")
+          offEvents(gE("Modal", ucp), "hide.bs.modal")
+          doModal(gE("Modal", ucp), "hide")
         }  
       }
     }
@@ -129,9 +129,9 @@ object DlgCardRegDouble extends BasicHtml
     init(trny, coId)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

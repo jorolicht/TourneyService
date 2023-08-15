@@ -21,19 +21,18 @@ trait TourneyService {
   // Player Interface
   def addPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
   def setPlayer(pl: Player)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
-  def setPlayerLicence(plId: Long, licence: String)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
-  
+  def setPlayer(plId: Long, license: CttLicense)(implicit tse: TournSVCEnv): Future[Either[Error, Player]]
+
   def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]]
   def delPlayers(tse: TournSVCEnv): Future[Either[Error, Int]]
 
-  // setPlayerEMail 
-  def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]]
-
+  // setPlayerEMail setPlayerLicense
+  //def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]]
+  
 
   //
   // Participant Interface (participant could be Single,Double or Team (future) 
   //
-  
   // setPant2Comp maps a participant to a competiton returns Pant2Comp
   def setPant2Comp(p2c: Pant2Comp)(implicit tse :TournSVCEnv):Future[Either[Error, Pant2Comp]]
   // setPant2Comps maps all participants to a competiton returns number of mapped entries
@@ -98,6 +97,7 @@ trait TourneyService {
   def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int): Future[Either[Error, Seq[ResultEntry]]] 
 
   // Competition Phase Interface
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
   def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]] 
   def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]  
    

@@ -1,6 +1,7 @@
 package shared.utils
 
 package object Routines {
+  import scala.util.{Try, Success, Failure}
   private val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
 
   def validEmail(e: String): Boolean = e match{
@@ -15,6 +16,8 @@ package object Routines {
     }
     case _                                              => false
   }
+
+
 
   def ite[A](cond: Boolean, value1: A, value2: A): A = if (cond) value1 else value2
 
@@ -41,6 +44,8 @@ package object Routines {
       nArr.mkString("·")
     }
   }
+
+  def genMD(args: String*): String = args.mkString("·")
 
   def int2ymd(date: Int):(Int, Int, Int) = {
     try 
@@ -174,37 +179,19 @@ package object Routines {
     sb.toString
   }
 
-
   def getOrDefault(value: String, defValue: => String): String = if (value == "") defValue else value 
-  
- 
-  def genKOSize(cntPlayer: Int): Int = cntPlayer match {
-    case 2                          =>   2
-    case x if (3  <= x && x <= 4)   =>   4
-    case x if (5  <= x && x <= 8)   =>   8
-    case x if (9  <= x && x <= 16)  =>  16
-    case x if (17 <= x && x <= 32)  =>  32
-    case x if (33 <= x && x <= 64)  =>  64
-    case x if (65 <= x && x <= 128) => 128
-    case _                          =>   0
-  }
-
-  // genKORnds - generates KO-Rounds for number of players
-  def genKORnds(cntPlayer: Int): Int = cntPlayer match {
-    case 2                          =>   1
-    case x if (3  <= x && x <= 4)   =>   2
-    case x if (5  <= x && x <= 8)   =>   3
-    case x if (9  <= x && x <= 16)  =>   4
-    case x if (17 <= x && x <= 32)  =>   5
-    case x if (33 <= x && x <= 64)  =>   6
-    case x if (65 <= x && x <= 128) =>   7
-    case _                          =>  -1
-  }
 
   def seqEither[A, B](s: Seq[Either[A, B]]): Either[A, Seq[B]] =
     s.foldRight(Right(Nil): Either[A, List[B]]) {
       (e, acc) => for (xs <- acc.right; x <- e.right) yield x :: xs
     }
 
+  trait ToEither[A, B] { def toEither: Either[A, B] }
+
+  implicit def tryToEither[A](t: Try[A]): ToEither[Throwable, A] = new ToEither[Throwable, A] {
+    def toEither = t.map(Right(_)).recover{ case e => Left(e) }.get
+  }  
+
 
 }
+

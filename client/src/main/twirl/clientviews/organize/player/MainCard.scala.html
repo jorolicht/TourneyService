@@ -12,12 +12,14 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(players: Seq[(String, String, String, Int, String, Long, CompTyp.Value, CompStatus.Value, String)])(implicit ucc: UseCaseParam)
+@(players: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)])(implicit ucc: UseCaseParam)
 @getNameWithClub(name:String,club:String) = @{ s"${name}[${club}]"}
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
+<!-- (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) -->
+
 @if(players.isEmpty) {
-	<div  class="alert alert-info text-center" role="alert">
+	<div class="alert alert-info text-center" role="alert">
 		<span class="tuse-font-1">@msg("player.noentry")</span>
 	</div>
 } else {
@@ -25,47 +27,21 @@
 		<tbody>
 			<tr style="border-bottom:2px solid #ccc;">
 				<td class="text-left tuse-height">
-					<a href="#" @onclick("Sort", PlayerSortTyp.SNO.id.toString)><strong>@msg("player.tbl.hdr.no")</strong></a>
+					<a href="#" @onclick("Sort", s"${PlayerSortTyp.SNO.id}")><strong>@msg("player.tbl.hdr.no")</strong></a>
 				</td>
 				<td class="text-left tuse-height">&nbsp;</td>
-				<td class="text-left tuse-height"><i id='@id("SortNameIcon")' class="fa fa-sort" ></i>
-					<a href="#" @onclick("Sort", PlayerSortTyp.Name.id.toString)><strong>@msg("player.tbl.hdr.name")</strong></a>
+				<td class="text-left tuse-height"><i @id("SortName") class="fa fa-sort" ></i>
+					<a href="#" @onclick("Sort", s"${PlayerSortTyp.Name.id}")><strong>@msg("player.tbl.hdr.name")</strong></a>
 				</td>
-				<td class="text-left tuse-height"><i id='@id("SortCompIcon")' class="fa fa-sort"></i>
-					<a href="#" @onclick("Sort", PlayerSortTyp.Competition.toString)><strong>@msg("player.tbl.hdr.competition")</strong></a>
+				<td class="text-left tuse-height"><i @id("SortComp") class="fa fa-sort"></i>
+					<a href="#" @onclick("Sort", s"${PlayerSortTyp.Competition.id}")><strong>@msg("player.tbl.hdr.competition")</strong></a>
 				</td>
-				
-				<td class="text-right tuse-height">
-					<strong>@msg("player.tbl.hdr.signup")</strong>&nbsp;/&nbsp;
-					<a href="#" @onclick("Sort", PlayerSortTyp.Status.toString)><i class="fa fa-sort"></i><strong></i>@msg("player.tbl.hdr.status")</strong></a>
+				<td class="text-right tuse-height"><i @id("SortStatus") class="fa fa-sort"></i>
+					<a href="#" @onclick("Sort", s"${PlayerSortTyp.Status.id}")></i><strong></i>@msg("player.tbl.hdr.status")</strong></a>
 				</td>
 			</tr>
-			<tr @id("ControlPlayerDummy")></tr>
-			@for(player <- players) {	
-				<tr>
-					<td class="text-left tuse-height">
-						<strong>@player._1</strong>
-					</td>
-					<td class="text-left tuse-height">
-						@if(player._9!="") { <a href="mailto:@player._9"><i class="fa fa-envelope-o"></i></a> }
-					</td>
-					<td class="text-left tuse-height">@getNameWithClub(player._2,player._3)</td>
-					<td class="text-left tuse-height">@player._5</td>
-					<td class="text-center tuse-height">
-						@if(player._4==PantStatus.PEND.id){
-							@button("player.btn.accept","","btn-xs","SetStatus", player._6.toString, player._1, "PLS_SIGN")
-							@button("player.btn.reject","","btn-xs","SetStatus", player._6.toString, player._1, "PLS_RJEC")
-							@button("player.btn.wait","","btn-xs",  "SetStatus",   player._6.toString, player._1, "PLS_WAIT")
-						}
-						@if(player._4>=PantStatus.REGI.id){ <i class="fa fa-check"></i>	}			
-					</td>
-					
-					<td class="text-right tuse-height">
-						<input class="form-check-input" type="checkbox" value="" 
-						  @onclick("CheckActiv",player._2) @checked(player._4>0) @if(player._8>CompStatus.READY){disabled="disabled"}>
-					</td>
-				</tr>		      
-			}
+			<tr @id("PlayerDummy")></tr>
+			@ContentCard(players)
 		</tbody>
 	</table>
 }

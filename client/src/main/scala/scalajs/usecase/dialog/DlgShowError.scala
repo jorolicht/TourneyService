@@ -43,14 +43,14 @@ object DlgShowError extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      $(getId("Modal","#")).off("hide.bs.modal")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
     def submit(e: Event):Unit = {
       if (!p.isCompleted) p success true
-      $(getId("Modal","#")).off("hide.bs.modal")
-      $(getId("Modal","#")).modal("hide")
+      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      doModal(gE("Modal", ucp), "hide")
     }
     
     loadModal(html.DlgShowError(), ucp)
@@ -58,9 +58,9 @@ object DlgShowError extends BasicHtml
     set(eList)
 
     // register routines for cancel and submit
-    $(getId("Modal","#")).on("hide.bs.modal", () => cancel())
-    $(getId("Submit","#")).click( (e: Event)     => submit(e)) 
-    $(getId("Modal","#")).modal("show")
+    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
+    onClick(gE("Submit", ucp), (e: Event) => submit(e))
+    doModal(gE("Modal", ucp), "show")
 
     f.map(_ => true)
      .recover { case e: Exception =>  false }

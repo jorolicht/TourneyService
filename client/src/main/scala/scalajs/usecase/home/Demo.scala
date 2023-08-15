@@ -29,16 +29,14 @@ import scalajs.service._
 import scalajs._
 
 @JSExportTopLevel("HomeDemo")
-object HomeDemo extends UseCase("HomeDemo")
-  with TourneySvc
+object HomeDemo extends UseCase("HomeDemo") with TourneySvc
 {
 
   def render(ucParam: String = "", ucInfo: String = "", reload: Boolean=false) = {
     App.loadRemoteTourney(1).map { 
       case Left(err)   => error("render", s"could not set demo tourney")
-      case Right(res)  => { setHeadline(); App.execUseCase("InfoSchedule", "") }
+      case Right(res)  => { setHeader(); App.execUseCase("InfoSchedule", "") }
     }
   }
-
 
 }  

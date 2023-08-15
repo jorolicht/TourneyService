@@ -1,8 +1,5 @@
 package scalajs.usecase.organize
 
-// Start TestCases
-// http://localhost:9000/start?ucName=TestMain&ucParam=OrgComp
-
 import scala.concurrent._
 import scala.util.{Success, Failure }
 import scala.util.matching
@@ -12,9 +9,8 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
-import upickle.default._
+
 
 import shared.model._
 import shared.model.PantStatus
@@ -39,7 +35,7 @@ import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
 // ***
 @JSExportTopLevel("OrganizeCompetition")
 object OrganizeCompetition extends UseCase("OrganizeCompetition")  
-  with TourneySvc with ViewServices with AppHelperSvc
+  with TourneySvc with ViewServices
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
@@ -48,19 +44,14 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
   }
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
-    val toId = AppEnv.getToId
     val coId = App.getCurCoId
     
     val compList = (for { co <- App.tourney.comps.values.toSeq } yield {
       val (cnt, cntActiv) = App.tourney.getCompCnt(co)
       (co, cnt, cntActiv)
     }).toSeq.sortBy(_._1.startDate)  
-
-    // set main card
-    //for (comp <- compList) println(s"CoPhases: ${comp._1.name} Status: ${comp._1.status}") // DEBUG
   
     setHtml("CompCard", CompCard(compList, AppEnv.getLang) )
-    println(s"Competition.update toId: ${toId} coId: ${coId}")
  
     // set play card and select competition
     if (coId > 0) {
@@ -82,11 +73,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         </div>    
       """)
     } 
-    setHeadline()
+    setHeader()
     //addClass("OrganizeCompetition", "show")(UCP("APP__Sidebar"))
     // val classAttr = getAttribute2(uc("OrganizeCompetition"), "class")
     // println(s"OrganizeCompetition: ${classAttr}")
-
   }
 
 
@@ -328,8 +318,6 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
    */
   def startCompPhaseDlg(coId: Long, baseCoPhId: Int, qualify: QualifyTyp.Value, pants: ArrayBuffer[PantSelect])
                          (implicit trny: Tourney): Future[Either[Error, (CompPhase, ArrayBuffer[PantEntry]) ]] = {
-
-
     import cats.data.EitherT
     import scalajs.usecase.dialog.DlgCardCfgCompPhase
     import scalajs.usecase.dialog.DlgCardCfgCompPhase.Result
