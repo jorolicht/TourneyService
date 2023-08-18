@@ -17,7 +17,6 @@ import scala.concurrent._
 
 import clientviews.dialog.html
 import shared.utils.{ UseCaseParam, UCP }
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }

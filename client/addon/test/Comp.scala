@@ -27,7 +27,6 @@ import shared.model._
 import shared.model.CompPhase._
 import shared.utils.Constants._
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -50,7 +49,7 @@ object AddonComp extends UseCase("AddonComp")
       coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
       result    <- EitherT(App.loadRemoteTourney(toId))
     } yield { (result, pw) }).value.map {
-      case Left(err)    => BasicHtml.setResult(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+      case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
         
     // case class CompPhase(val name: String, val coId: Long, val coPh: Int, 

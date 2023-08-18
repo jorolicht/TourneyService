@@ -32,69 +32,8 @@ import shared.utils.Error
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 
-
-/** BasicHtml most methods have a implicit parameter type UseCaseParam
- *  
- *  - idBase: Html id attribute (idBase)  
- *  - msgPrefix: prefix of message label
- *  - objName: name of exported objecet accessable form javascript
- *  - dataAttr: Html universal data attribute (data-<dataAttrPref>-<xxx>)
- */
-object BasicHtml {
-
-  def disProp(visible: Boolean): String = if (visible) "block" else "none"
-
-  def setResult(text: String) = insertHtml_("APP__Load", "afterbegin", s"""<textarea id="APP_Result" style="display:none;">${text}</textarea>""")
-
-  def setHtml_(id: String, content: => String): Unit = {
-    try document.getElementById(id).asInstanceOf[HTMLElement].innerHTML = content
-    catch { case _: Throwable => AppEnv.error("setHtml_", s"id: ${id} -> ${content.take(10)}") } 
-  }
-
-  def insertHtml_(id: String, pos: String, content: String): Unit = {
-    try document.getElementById(id).asInstanceOf[HTMLElement].insertAdjacentHTML(pos, content)
-    catch { case _: Throwable => AppEnv.logger.error(s"insertHtml_ -> id: ${id} pos: ${pos} content: ${content.take(10)}") } 
-  }  
-  
-  def setVisible_(id: String, visible: Boolean): Unit = {
-    try document.getElementById(id).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
-    catch { case _: Throwable => AppEnv.error("setVisible_", s"id: ${id} -> ${visible}") }
-  }
-
-  def setAttribute_(id: String, attrName: String, attrValue: String): Unit = {
-    try document.getElementById(id).setAttribute(attrName, attrValue)
-    catch { case _: Throwable => AppEnv.error("setAttribute_", s"id: ${id} -> ${attrValue}") } 
-  }
-  
-  def getAttribute_(id: String, attrName: String, defVal: String=""): String = {
-    try document.getElementById(id).getAttribute(attrName)
-    catch { case _: Throwable => { AppEnv.error("getAttribute_", s"id: ${id} / ${attrName}"); defVal }}
-  }
-
-
-  
-  def togVisible_(id: String): Unit = {
-    val elem = document.getElementById(id).asInstanceOf[HTMLElement]
-    try if (elem.style.display == "none") elem.style.display="block" else elem.style.display="none"
-    catch { case _: Throwable => AppEnv.error("togVisible_", s"id: ${id}") }
-  }
-
-  def addClass_(elemId: String, _class: String*): Unit = {
-    try _class.foreach(cValue => document.getElementById(elemId).classList.add(cValue) )
-    catch { case _: Throwable => AppEnv.error("addClass", s"id: ${elemId} class: ${_class}") } 
-  }
-
-  def removeClass_(elemId: String, _class: String*): Unit = {
-    try _class.foreach(cValue => document.getElementById(elemId).classList.remove(cValue) ) 
-    catch { case _: Throwable => AppEnv.error("removeClass", s"id: ${elemId} class: ${_class}") } 
-  }
-
-  
-}
-
 class BasicHtml
 {
-
   implicit class NodeListSeq[T <: Node](nodes: DOMList[T]) extends IndexedSeq[T] {
     override def foreach[U](f: T => U): Unit = {
       for (i <- 0 until nodes.length) {
@@ -167,13 +106,13 @@ class BasicHtml
         case _        => content.toString
     }     
     try idElt match {
-      case _:String => gE(idElt.asInstanceOf[String], ucp).innerHTML = value 
+      case _:String => gE(uc(idElt.asInstanceOf[String])).innerHTML = value 
       case _        => idElt.asInstanceOf[HTMLElement].innerHTML = value
     } catch { case _: Throwable => error("setHtml", s"idElt: ${idElt} usecase: ${ucp.idBase} content: ${value.take(10)}") }
   }
 
   def setText(id: String, content: String)(implicit ucp: UseCaseParam): Unit = 
-    doTry(s"setText ${id} ${content.take(10)}") { gE(id, ucp).innerText = content }
+    doTry(s"setText ${id} ${content.take(10)}") { gE(uc(id)).innerText = content }
   
   def insertHtml(elem: HTMLElement, pos: String, content: String): Unit = {
     try elem.insertAdjacentHTML(pos, content)
@@ -183,7 +122,7 @@ class BasicHtml
 
   def setHtmlVisible(id: String, visible: Boolean, content: String="")(implicit ucp: UseCaseParam): Unit = {
     try {
-      val elem = gE(id, ucp)
+      val elem = gE(uc(id))
       elem.style.setProperty("display", disProp(visible))
       if (visible) elem.innerHTML = content
     } catch { case _: Throwable => error(s"setHtmlVisible", s"id: ${uc(id)} visible: ${visible} content: ${content.take(10)}") } 
@@ -223,10 +162,16 @@ class BasicHtml
     try document.getElementById(uc(id)).asInstanceOf[HTMLElement].style.setProperty("display", disProp(visible))
     catch { case _: Throwable => error(s"setVisible", s"id: ${uc(id)} visible: ${visible}") }
   }  
+
   def setVisible(elem: HTMLElement, visible: Boolean): Unit = {
     try elem.style.setProperty("display", disProp(visible))
     catch { case _: Throwable => AppEnv.error(s"setVisible", s"elem: ${elem} visible: ${visible}") }
   }  
+
+  def togVisible(elem: HTMLElement): Unit = {
+    try if (elem.style.display == "none") elem.style.display="block" else elem.style.display="none"
+    catch { case _: Throwable => AppEnv.error("togVisible_", s"elem: ${elem}") }
+  }
 
 
 
@@ -399,7 +344,7 @@ class BasicHtml
 
   def resetInput(name: String)(implicit ucp: UseCaseParam): Unit = {
     try {
-      val divNode = gE(name, ucp)
+      val divNode = gE(uc(name))
       val inNodes = divNode.getElementsByTagName("INPUT")
       inNodes.foreach { node => {
         node.classList.remove("border-danger")
@@ -469,7 +414,7 @@ class BasicHtml
   }
 
 
-  def exists(id: String)(implicit ucp: UseCaseParam): Boolean = { (gE(id,ucp) != null) }  
+  def exists(id: String)(implicit ucp: UseCaseParam): Boolean = { (gE(uc(id)) != null) }  
   def exists_(id: String)(implicit ucp: UseCaseParam): Boolean = { (document.getElementById(id) != null) } 
 
   /* getElementById does not know what kind of element nodeValue is. 
@@ -588,7 +533,7 @@ class BasicHtml
 
   def collapse(name: String, hide: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try {
-      val elem = gE(name, ucp) 
+      val elem = gE(uc(name)) 
       if (hide) {
         if (!elem.classList.contains("collapse")) elem.classList.add("collapse") 
       } else {
@@ -641,17 +586,20 @@ class BasicHtml
     try op catch { case _: Throwable => AppEnv.error("doTry", msg) }
   } 
 
-  def gE(id: String, prefix: String=""): HTMLElement = 
-    try document.getElementById(prefix + id).asInstanceOf[HTMLElement]
-    catch { case _: Throwable => AppEnv.error("gE", s"id: ${id} prefix: ${prefix}"); null } 
+  def gE(id: String): HTMLElement = 
+    try document.getElementById(id).asInstanceOf[HTMLElement]
+    catch { case _: Throwable => AppEnv.error("gE", s"id: ${id}"); null } 
 
-  def gE(id: String, ucp: UseCaseParam): HTMLElement = 
-    try document.getElementById(uc(id)(ucp)).asInstanceOf[HTMLElement]
-    catch { case _: Throwable => AppEnv.error("gE", s"id: ${uc(id)(ucp)}"); null } 
+  def gEqS(id: String, qS: String): HTMLElement = 
+    try document.getElementById(id).querySelector(qS).asInstanceOf[HTMLElement]
+    catch { case _: Throwable => AppEnv.error("gEqS", s"id: ${id} querySelector: ${qS}"); null } 
+
+  def gEqSA(id: String, qS: String) = 
+    try document.getElementById(id).querySelectorAll(qS)
+    catch { case _: Throwable => AppEnv.error("gEqS", s"id: ${id} querySelector: ${qS}"); null } 
+
 
   def uc(id: String)(implicit ucp: UseCaseParam) = { if (ucp.idBase == "") id else s"${ucp.idBase}__${id}"}
-
-
 
   def getError(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
   def getError(err: shared.utils.Error): String    = AppEnv.getMessage(err.msgCode, err.in1, err.in2)

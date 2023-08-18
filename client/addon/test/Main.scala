@@ -34,7 +34,6 @@ import shared.utils.Routines._
 import shared.model._
 import shared.utils.Constants._
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -291,7 +290,7 @@ object AddonMain extends TestUseCase("AddonMain")
   }  
 
   def setOutput(msg: String) = {
-    setHtml_("DlgPrompt__OutputText", msg)
+    setHtml(gE("DlgPrompt__OutputText"), msg)
   }  
 
 

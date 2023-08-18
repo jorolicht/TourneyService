@@ -14,8 +14,6 @@ import org.scalajs.dom._
 import org.scalajs.dom.ext._
 import org.scalajs.dom.raw._
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -33,7 +31,7 @@ object DlgShowError extends BasicHtml
   def set(eList: List[Error]): Unit = {
     setHtml("Content", "")
     eList.foreach {
-      err => insertHtml(gE("Content",ucp), "beforeend", s"""<p class="text-danger mb-0">${getError(err)}</p>""")
+      err => insertHtml(gE(uc("Content")), "beforeend", s"""<p class="text-danger mb-0">${getError(err)}</p>""")
     }
   }
   
@@ -43,14 +41,14 @@ object DlgShowError extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
     def submit(e: Event):Unit = {
       if (!p.isCompleted) p success true
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
-      doModal(gE("Modal", ucp), "hide")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
+      doModal(gE(uc("Modal")), "hide")
     }
     
     loadModal(html.DlgShowError(), ucp)
@@ -58,9 +56,9 @@ object DlgShowError extends BasicHtml
     set(eList)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("Submit", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("Submit")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(_ => true)
      .recover { case e: Exception =>  false }

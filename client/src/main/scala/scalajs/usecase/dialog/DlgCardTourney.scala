@@ -14,8 +14,6 @@ import org.scalajs.dom._
 import org.scalajs.dom.ext._
 import org.scalajs.dom.raw._
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -49,7 +47,7 @@ object DlgCardTourney  extends BasicHtml
     setInput("OrgDir", tB.orgDir)
     setInput("Organizer", tB.organizer)
     setInput("Name", tB.name)
-    setAttribute(gE("Name", ucp), "autocomplete", "off")
+    setAttribute(gE(uc("Name")), "autocomplete", "off")
    
     setDateTimePicker("StartDate", AppEnv.getLang, int2ymd(tB.startDate) )
     setDateTimePicker("EndDate", AppEnv.getLang, int2ymd(tB.endDate))
@@ -65,7 +63,7 @@ object DlgCardTourney  extends BasicHtml
     mode match {
       case "edit" => {
         setVisible("BtnClose", false); setVisible("BtnSave", true); setVisible("BtnCancel", true)
-        setAttribute(gE("StartDate", ucp), "readonly", "readonly")
+        setAttribute(gE(uc("StartDate")), "readonly", "readonly")
         setBooleanOption("Visibility", Some(tB.privat))
         setIntOption("Typ", Some(tB.typ))
       }  
@@ -128,7 +126,7 @@ object DlgCardTourney  extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -137,8 +135,8 @@ object DlgCardTourney  extends BasicHtml
         case Left(eList) => DlgShowError.show(eList)
         case Right(tb)   => {
           if (!p.isCompleted) p success tb
-          offEvents(gE("Modal", ucp), "hide.bs.modal")
-          doModal(gE("Modal", ucp), "hide")
+          offEvents(gE(uc("Modal")), "hide.bs.modal")
+          doModal(gE(uc("Modal")), "hide")
         }  
       }
     }
@@ -148,9 +146,9 @@ object DlgCardTourney  extends BasicHtml
     set(dlgMode, tournBase)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("BtnSave", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("BtnSave")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

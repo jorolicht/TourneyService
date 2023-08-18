@@ -88,7 +88,7 @@ object DlgCardPlayer extends BasicHtml
         }
       }
 
-      case "Close"   => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
+      case "Close"   => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
 
       case _         => {}
     }
@@ -178,14 +178,14 @@ object DlgCardPlayer extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
     def submit(e: Event) {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) p success player
-      doModal(gE("Modal", ucp), "hide")
+      doModal(gE(uc("Modal")), "hide")
     }
     
     loadModal(html.DlgCardPlayer(), ucp)
@@ -194,9 +194,9 @@ object DlgCardPlayer extends BasicHtml
     setPlayerView(player, tourney)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("Submit", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("Submit")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

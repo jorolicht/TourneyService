@@ -36,23 +36,18 @@ import scalajs.usecase.organize.OrganizeTourney
 @JSExportTopLevel("App")
 object App extends BasicHtml with TourneySvc
 {
-  this: BasicHtml =>
-  implicit val ucp = UseCase.defaultParam  //UseCaseParam("APP", "app", "App", "app", AppAppEnv.getMessage _ )
+  //this: BasicHtml =>
+  implicit val ucp = UseCase.defaultParam  // UseCaseParam("APP", "app", "App", "app", AppAppEnv.getMessage _ )
 
-  // DEBUG Version
+  // List of uscases
   var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
                     InfoEnabled, InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
                     OrganizeCompetitionCtrl, OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
+                    OrganizeReport, 
                     AdminDatabase, AdminLicense 
                    )
 
-  // PRODUCTION Version
-  // var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
-  //                   InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
-  //                   OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
-  //                   AdminDatabase, AdminLicense 
-  //                  )
 
   val ucMap  = new scala.collection.mutable.HashMap[String, UseCase]
   
@@ -166,7 +161,7 @@ object App extends BasicHtml with TourneySvc
           msgsLoaded    <- AppEnv.initMessages(lastUpdate, language)
         } yield { 
           initTrigger()
-          BasicHtml.setHtml_("PlayfieldTitle", getMsg("header.title.playfields", tourney.organizer, tourney.name))
+          setHtml(gE("PlayfieldTitle"), getMsg("header.title.playfields", tourney.organizer, tourney.name))
           setMainContent(clientviews.playfield.html.Fullscreen( tourney.playfields.values.toSeq , AppEnv.msgs).toString)
         }
       }
@@ -308,12 +303,11 @@ object App extends BasicHtml with TourneySvc
     }
   }
 
-  def resetMatches(coId: Long, coPh: Int): Unit = {
+  def resetMatches(coId: Long, coPh: Int): Unit = 
     if (tourney.cophs.isDefinedAt((coId, coPh))) {
       tourney.cophs((coId, coPh)).resetMatches
       saveLocalTourney(tourney)
     }
-  }
 
   def updatePlayfield(toId: Long): Future[Boolean] = {
     getPlayfields(toId).map {
@@ -326,8 +320,7 @@ object App extends BasicHtml with TourneySvc
     }
   }    
       
-  def updatePant2Comp(toId: Long): Future[Boolean] = {
-    //debug("updatePant2Comp", s"${toId}")
+  def updatePant2Comp(toId: Long): Future[Boolean] = 
     getPant2Comps(toId).map {
       case Left(err)     => error("updatePant2Comp", getError(err)); false
       case Right(p2cSeq) => { 
@@ -336,10 +329,9 @@ object App extends BasicHtml with TourneySvc
         true
       }
     }
-  }
 
-  def updateCompetition(toId: Long): Future[Boolean]  = {
-    //debug("updateCompetitions", s"${toId}")
+
+  def updateCompetition(toId: Long): Future[Boolean] = 
     getComps(toId).map {
       case Left(err)    => error("updateCompetition", getError(err)); false
       case Right(comps) => {
@@ -348,10 +340,8 @@ object App extends BasicHtml with TourneySvc
         true
       }
     }
-  }
 
-  def updateClub(toId: Long): Future[Boolean]  = {
-    //debug("updateClub", s"${toId}")
+  def updateClub(toId: Long): Future[Boolean]  = 
     getTournClubs(toId).map {
       case Left(err)     => error("updateClub", getError(err)); false
       case Right(clubs) => {
@@ -359,21 +349,18 @@ object App extends BasicHtml with TourneySvc
         saveLocalTourney(tourney)
         true
       }
-    }   
-  }
+    }
 
 
-  def updatePlayer(toId: Long): Future[Boolean]  = {
-    //debug("updatePlayer", s"${toId}")
+  def updatePlayer(toId: Long): Future[Boolean]  = 
     getTournPlayers(toId).map {
-      case Left(err)       => error("updatePlayer", getError(err)); false
+      case Left(err)      => error("updatePlayer", getError(err)); false
       case Right(players) => {
         tourney.players   = collection.mutable.HashMap( players.map { pl => pl.id -> pl } :_* )
         saveLocalTourney(tourney)
         true
       }
     }
-  }
 
   def updateTourney(toId: Long): Future[Boolean] = 
     getTourney(toId).map {
@@ -394,30 +381,15 @@ object App extends BasicHtml with TourneySvc
       Future(Right(true))
     } else {
       getTourney(toId).map { 
-        case Left(err)   => { 
-          AppEnv.error(s"getTourney", getErrStack(err))
-          resetLocalTourney()
-          Left(err)
-        }
-        case Right(trny) => {
-          setLocalTourney(trny)
-          Right(true) 
-        }
+        case Left(err)   => AppEnv.error(s"getTourney", getErrStack(err)); resetLocalTourney(); Left(err)
+        case Right(trny) => setLocalTourney(trny); Right(true) 
       }
     }
 
   def loadLocalTourney(): Unit = {
     Tourney.decode(AppEnv.getLocalStorage("AppEnv.Tourney")) match {
-      case Left(err) => {
-        AppEnv.error(s"loadLocalTourney", getErrStack(err))
-        setLocalTourney(Tourney.init)
-      }
-      case Right(tourney) => {
-        // tourney.run = 
-        //   try TournRun.fromTx(read[TournRunTx](AppEnv.getLocalStorage("AppEnv.TourneyRun")))
-        //   catch { case _: Throwable => { new TournRun(tourney.id) } }
-        AppEnv.setToId(tourney.id)  
-      }
+      case Left(err) => AppEnv.error(s"loadLocalTourney", getErrStack(err)); setLocalTourney(Tourney.init)
+      case Right(tourney) => AppEnv.setToId(tourney.id)
     } 
   }
 
@@ -432,7 +404,7 @@ object App extends BasicHtml with TourneySvc
   def saveLocalTourney(trny: Tourney): Unit = {
     AppEnv.setToId(trny.id)
     try AppEnv.setLocalStorage("AppEnv.Tourney", write(trny))
-    catch { case _: Throwable => println("saveLocalTourney(error)", "couldn't write to local storage") }    
+    catch { case _: Throwable => AppEnv.error("saveLocalTourney(error)", "couldn't write to local storage") }    
   }
   
 

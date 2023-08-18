@@ -333,15 +333,15 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
 
       case _ => {
         if (full) {
-          removeClass(gE("LicenseFull1", ucp), "text-muted");  removeClass(gE("LicenseFullX", ucp), "text-muted")
-          removeClass(gE("LicenseFull1", ucp), "bg-light");    removeClass(gE("LicenseFullX", ucp), "bg-light")
-          addClass(gE("LicenseFree1", ucp), "text-muted");     addClass(gE("LicenseFreeX", ucp), "text-muted")
-          addClass(gE("LicenseFree1", ucp), "bg-light");       addClass(gE("LicenseFreeX", ucp), "bg-light")
+          removeClass(gE(uc("LicenseFull1")), "text-muted");  removeClass(gE(uc("LicenseFullX")), "text-muted")
+          removeClass(gE(uc("LicenseFull1")), "bg-light");    removeClass(gE(uc("LicenseFullX")), "bg-light")
+          addClass(gE(uc("LicenseFree1")), "text-muted");     addClass(gE(uc("LicenseFreeX")), "text-muted")
+          addClass(gE(uc("LicenseFree1")), "bg-light");       addClass(gE(uc("LicenseFreeX")), "bg-light")
         } else { 
-          addClass(gE("LicenseFull1", ucp), "bg-light");       addClass(gE("LicenseFullX", ucp), "bg-light")
-          addClass(gE("LicenseFull1", ucp), "text-muted");     addClass(gE("LicenseFullX", ucp), "text-muted")
-          removeClass(gE("LicenseFree1", ucp), "bg-light");    removeClass(gE("LicenseFreeX", ucp), "bg-light")
-          removeClass(gE("LicenseFree1", ucp), "text-muted");  removeClass(gE("LicenseFreeX", ucp), "text-muted")
+          addClass(gE(uc("LicenseFull1")), "bg-light");       addClass(gE(uc("LicenseFullX")), "bg-light")
+          addClass(gE(uc("LicenseFull1")), "text-muted");     addClass(gE(uc("LicenseFullX")), "text-muted")
+          removeClass(gE(uc("LicenseFree1")), "bg-light");    removeClass(gE(uc("LicenseFreeX")), "bg-light")
+          removeClass(gE(uc("LicenseFree1")), "text-muted");  removeClass(gE(uc("LicenseFreeX")), "text-muted")
         }
 
         setRadioBtn("FullSelect", full)

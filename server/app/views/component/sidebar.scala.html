@@ -38,8 +38,8 @@
 @sbIconEntryBadge(icon: String, uc: String) = @{ 
   val title=msgs.messages(s"sidebar.title.${uc}");
   val label=msgs.messages(s"sidebar.label.${uc}");
-  val content=s"""<i class='fa fa-fw ${icon}'></i><span class='nav-link-text'>${label}</span>"""; 
-  val anchor=s"""<a title='${title}' class='sidebar-link nav-link' data-sbtext='${uc}' href='#' onclick="InputCtrl.eventSidebar('${uc}'); false">${content} &nbsp;<span id='APP__${uc}__SidebarBadge' class="badge badge-light" style='display:none'></span> </a> """;  
+  val content=s"""<i class='fa fa-fw ${icon}'></i><span class='nav-link-text'>${label}  <span id='APP__${uc}__SidebarBadge' class="badge badge-light"></span>  </span>"""; 
+  val anchor=s"""<a title='${title}' class='sidebar-link nav-link' data-sbtext='${uc}' href='#' onclick="InputCtrl.eventSidebar('${uc}'); false">${content}</a> """;  
   Html(anchor)
 }
 

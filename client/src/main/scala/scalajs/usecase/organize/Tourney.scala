@@ -33,7 +33,6 @@ import scalajs._
 @JSExportTopLevel("OrganizeTourney")
 object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc 
 {
-  import scalajs.usecase.component.BasicHtml._
   import clientviews.organize.tourney.html
   import scalajs.usecase.dialog._
   var tournBases: Seq[TournBase] = Seq()
@@ -239,7 +238,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     import shared.utils.Constants._
     
     // perform upload of tourney information file (xml, markdown, or image)
-    val formData = new dom.FormData(gE(s"UploadForm_${uplType.id}", ucp).asInstanceOf[HTMLFormElement])
+    val formData = new dom.FormData(gE(uc(s"UploadForm_${uplType.id}")).asInstanceOf[HTMLFormElement])
       
     startSpinner()
     uplType match {

@@ -13,7 +13,7 @@ import scalajs.service._
 import shared.utils._
 
 @JSExportTopLevel("OrganizeReport")
-object OrganizeReport extends UseCase("OrganizeRegister") 
+object OrganizeReport extends UseCase("OrganizeReport") 
   with TourneySvc
 {
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = setMainContent("REPORTS") 

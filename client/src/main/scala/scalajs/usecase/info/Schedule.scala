@@ -83,9 +83,9 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
     // tourneyinfo hints
     getInvitation.map {
-      case Left(value)     => addClass(gE("HintCard", ucp), "hidden-xl-down")
+      case Left(value)     => addClass(gE(uc("HintCard")), "hidden-xl-down")
       case Right(content)  => {
-        removeClass(gE("HintCard", ucp), "hidden-xl-down")
+        removeClass(gE(uc("HintCard")), "hidden-xl-down")
         setHtml("HintBodyContent", s"""<article class="markdown-body">$content</article>""") 
       }  
     }
@@ -95,14 +95,14 @@ object InfoSchedule extends UseCase("InfoSchedule")
   @JSExport
   def reset(): Boolean = {
     debug("reset", "register")
-    setAttribute(gE("SignUp", ucp),"disabled", "disabled")
+    setAttribute(gE(uc("SignUp")),"disabled", "disabled")
     setCheckbox("CheckConsent", false)
     false
   }  
 
   
   def showHelpSchedule(msg: String="", visible: Boolean=false) = {
-    setHtml("HelpText",msg)
+    setHtml("HelpText", msg)
     setVisible("Help", visible)
   }
 
@@ -150,7 +150,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
   @JSExport
   def onclickCheckConsent(elem: dom.raw.HTMLInputElement) = {
-    if (elem.checked) removeAttribute(gE("SignUp", ucp), "disabled") else setAttribute(gE("SignUp", ucp),"disabled","disabled")
+    if (elem.checked) removeAttribute(gE(uc("SignUp")), "disabled") else setAttribute(gE(uc("SignUp")),"disabled","disabled")
   } 
 
   @JSExport

@@ -1,6 +1,7 @@
 @*
  * Template Organize Tourney Main Table
  *@
+@import shared.utils._
 @import shared.model.TournBase
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._  
@@ -31,15 +32,15 @@
       </tr>
       <tr @id("TableRow_Dummy")></tr>
       @for(tony <- tonys) {
-				<tr @id(s"TableRow_${tony.id}") data-toId='@tony.id' @actionEvent("Select", "onclick") >	
+				<tr @id(s"TableRow_${tony.id}") data-toId='@tony.id' @actionEvent(s"TourneyAction_${TourneyAction.Select.id}", "onclick") >	
 					<td class="text-left tuse-height">@tony.getStartDate(msg_("app.lang"))</td>
 					<td class="text-left tuse-height">@tony.name</td>
 					<td class="text-left tuse-height">@msg_("tourney.typ." + tony.typ)</td>
 					<td class="text-center tuse-height">@getPrivat(tony.privat)</td>
 					<td class="text-right tuse-height">
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("Edit", "onclick")><i class="fa fa-pencil"></i></a>
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("View", "onclick")><i class="fa fa-eye"></i></a>
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent("Delete", "onclick")><i class="fa fa-trash"></i></a>		
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.Edit.id}", "onclick")><i class="fa fa-pencil"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.View.id}", "onclick")><i class="fa fa-eye"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.Delete.id}", "onclick")><i class="fa fa-trash"></i></a>		
 					</td>
 				</tr>	
 			}

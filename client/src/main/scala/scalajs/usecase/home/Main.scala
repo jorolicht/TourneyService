@@ -22,7 +22,6 @@ import scala.util.matching
 import shared.model._
 import shared.utils._
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.dialog._
 import scalajs.usecase.component._
 import scalajs.service._

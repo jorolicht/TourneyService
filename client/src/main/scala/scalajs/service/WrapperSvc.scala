@@ -20,7 +20,6 @@ import upickle.default._
 
 
 import shared.model._
-import scalajs.usecase.component.BasicHtml._
 import scalajs._
 import shared.utils._
 

@@ -27,7 +27,6 @@ import shared.model._
 import shared.model.CompPhase._
 import shared.utils.Constants._
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }

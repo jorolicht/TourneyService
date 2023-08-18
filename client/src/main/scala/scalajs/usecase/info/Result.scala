@@ -21,7 +21,6 @@ import shared.model.CompPhase._
 import shared.utils._
 import shared.utils.Constants._ 
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.App
@@ -60,17 +59,17 @@ object InfoResult extends UseCase("InfoResult")
 			for(j <- 0 to group.size-1) {
 				if(i!=j){
           val res = if(group.results(i)(j).valid) { group.results(i)(j).sets._1.toString + ":" + group.results(i)(j).sets._2.toString } else { "&nbsp;" }
-          setHtml_(s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1}", res)
+          setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1}"), res)
           //debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1} -> ${res}")
         }
       }
       val balls  = group.balls(i)._1.toString + ":" + group.balls(i)._2.toString  
       val sets   = group.sets(i)._1.toString + ":" + group.sets(i)._2.toString  
       val points = group.points(i)._1.toString + ":" + group.points(i)._2.toString
-      setHtml_(s"APP__GrRound_${coId}_${coPhId}_Balls_${group.grId}_${i}", balls)
-      setHtml_(s"APP__GrRound_${coId}_${coPhId}_Sets_${group.grId}_${i}", sets)
-      setHtml_(s"APP__GrRound_${coId}_${coPhId}_Points_${group.grId}_${i}", points)
-      setHtml_(s"APP__GrRound_${coId}_${coPhId}_Places_${group.grId}_${i}", group.pants(i).place._1.toString)
+      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Balls_${group.grId}_${i}"), balls)
+      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Sets_${group.grId}_${i}"), sets)
+      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Points_${group.grId}_${i}"), points)
+      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Places_${group.grId}_${i}"), group.pants(i).place._1.toString)
     } 
   } 
 
@@ -90,23 +89,23 @@ object InfoResult extends UseCase("InfoResult")
       if (result.valid) {
         //debug("showKoResult",s"valid ${index}: APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game} -> ${playerName}")
 
-        setHtml_(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}", playerName)
+        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}"), playerName)
 
         // print result only if it's not against a dummy player 
         if (result.sno._1 != SNO.BYE & result.sno._2 != SNO.BYE) {
-          setHtml_(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}", result.sets._1.toString)
-          setHtml_(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}", result.sets._2.toString)
+          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}"), result.sets._1.toString)
+          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}"), result.sets._2.toString)
           val balls = result.balls.mkString(",")
-          setHtml_(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}", if (balls != "") s"(${balls})" else "&nbsp;" )
+          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}"), if (balls != "") s"(${balls})" else "&nbsp;" )
         }
       } else {
         val (rnd,game) = koRound.getRndManoFromIndex(index)
         //debug("showKoResult",s"invalid ${index}: APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}")
 
-        setHtml_(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}", "&nbsp;")
-        setHtml_(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}", "&nbsp;")
-        setHtml_(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}", "&nbsp;")
-        setHtml_(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}", "&nbsp;")      
+        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}"), "&nbsp;")
+        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}"), "&nbsp;")
+        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}"), "&nbsp;")
+        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}"), "&nbsp;")      
       } 
     }  
   }

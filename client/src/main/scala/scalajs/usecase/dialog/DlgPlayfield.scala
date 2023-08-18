@@ -42,7 +42,7 @@ object DlgPlayfield  extends BasicHtml
 
   private def load = if ($(getIdHa("Modal")).length <= 0) {
     debug("load", "playfield dialog")
-    BasicHtml.setHtml_("APP__DlgPlayfield__Load", clientviews.dialog.html.DlgPlayfield(AppEnv.msgs).toString)
+    setHtml(gE("APP__DlgPlayfield__Load"), clientviews.dialog.html.DlgPlayfield(AppEnv.msgs).toString)
   }
 
   @JSExport

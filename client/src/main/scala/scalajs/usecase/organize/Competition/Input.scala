@@ -266,7 +266,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val maxRnd = coPhase.getMaxRnds
         for (rnd <- 1 to maxRnd) {
           val tableId = s"InputRound_${coId}_${coPhId}_${rnd}"
-          BasicHtml.setHtml_(tableId, "")
+          setHtml(gE(tableId), "")
           try {
             for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
               val rowElem = gE(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)

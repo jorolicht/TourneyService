@@ -20,8 +20,6 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.Event
 import org.scalajs.dom.ext._
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -72,7 +70,7 @@ object DlgCardCfgCompPhase extends BasicHtml
     val f = p.future
 
     def cancel() = {   
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -82,8 +80,8 @@ object DlgCardCfgCompPhase extends BasicHtml
         case Right(res)   => {
           if (!p.isCompleted) p success res
           //disable modal first, then hide
-          offEvents(gE("Modal", ucp), "hide.bs.modal")
-          doModal(gE("Modal", ucp), "hide")
+          offEvents(gE(uc("Modal")), "hide.bs.modal")
+          doModal(gE(uc("Modal")), "hide")
         }  
       }
     }
@@ -109,9 +107,9 @@ object DlgCardCfgCompPhase extends BasicHtml
     setMainView(size)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("Submit", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("Submit")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(x => Right(result)).recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
@@ -139,8 +137,8 @@ object DlgCardCfgCompPhase extends BasicHtml
       }
 
       case "Winners" =>  {
-        val pantTbl = gE("PantTbl", ucp)
-        val winner  = getCheckbox(gE("Winners", ucp))
+        val pantTbl = gE(uc("PantTbl"))
+        val winner  = getCheckbox(gE(uc("Winners")))
 
         qualifyMode = ite(winner, QualifyTyp.Winner, QualifyTyp.Looser)
         pants.foreach { pant => 
@@ -149,7 +147,7 @@ object DlgCardCfgCompPhase extends BasicHtml
         }
       }
 
-      case "Close"        => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
+      case "Close"        => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
 
       case _              => {}
     }

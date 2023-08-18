@@ -14,8 +14,6 @@ import org.scalajs.dom._
 import org.scalajs.dom.ext._
 import org.scalajs.dom.raw._
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -40,19 +38,19 @@ object DlgCardComp extends BasicHtml
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
       case "NameCompose"  => { 
-        if (getCheckbox(gE("NameCompose", ucp))) {  
+        if (getCheckbox(gE(uc("NameCompose")))) {  
           val typ = getInput("typ", 0)
           setInput("name", getInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
                                + getInput("Class", getMsg("plh.Class")) + "·" 
                                + getMsg_("competition.typ."+typ) )
-          setAttribute(gE("name", ucp), "readonly", "true")                     
+          setAttribute(gE(uc("name")), "readonly", "true")                     
         } else {
-          removeAttribute(gE("name", ucp), "readonly") 
+          removeAttribute(gE(uc("name")), "readonly") 
           setInput("name", getInput("name").replace("·", " "))
         }
       } 
       
-      case "Close"   => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
+      case "Close"   => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
       case _         => {}
     }
   }  
@@ -98,26 +96,26 @@ object DlgCardComp extends BasicHtml
   def setInput(comp: Competition, trny: Tourney, lang: String, mode: DlgOption.Value): Unit = {
         
     // setting data-foo
-    setData(gE("Form", ucp), "id", comp.id)
-    setData(gE("Form", ucp), "hashKey", comp.hashKey)
-    setData(gE("Form", ucp), "name", comp.name)
-    setData(gE("Form", ucp), "typ", comp.typ) 
-    setData(gE("Form", ucp), "options", comp.options)
+    setData(gE(uc("Form")), "id", comp.id)
+    setData(gE(uc("Form")), "hashKey", comp.hashKey)
+    setData(gE(uc("Form")), "name", comp.name)
+    setData(gE(uc("Form")), "typ", comp.typ) 
+    setData(gE(uc("Form")), "options", comp.options)
 
     // set start date and time
     if (mode == DlgOption.New) {
       setDateTimePicker("startTime", lang, int2ymd(trny.startDate), (12, 0))
-      setData(gE("Form", ucp), "status", CompStatus.UNKN.id)
+      setData(gE(uc("Form")), "status", CompStatus.UNKN.id)
     } else {
       val (year, month, day, hour, minute) = ymdHM(comp.startDate)
       setDateTimePicker("startTime", lang, (year, month, day), (hour, minute))
-      setData(gE("Form", ucp), "status", comp.status.id)
+      setData(gE(uc("Form")), "status", comp.status.id)
     }
 
     setInput("coId", if (comp.id==0) "X" else comp.id.toString)
     setInput("name", comp.name)
 
-    setAttribute(gE("name", ucp), "autocomplete", "off")
+    setAttribute(gE(uc("name")), "autocomplete", "off")
     setInput("status", comp.status.toString)
     setInput("AgeGroup", comp.getAgeGroup)
     setInput("TTRFrom", comp.getFromTTR)
@@ -161,7 +159,7 @@ object DlgCardComp extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -171,8 +169,8 @@ object DlgCardComp extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          offEvents(gE("Modal", ucp), "hide.bs.modal")
-          doModal(gE("Modal", ucp), "hide")
+          offEvents(gE(uc("Modal")), "hide.bs.modal")
+          doModal(gE(uc("Modal")), "hide")
         }  
       }
     }
@@ -181,9 +179,9 @@ object DlgCardComp extends BasicHtml
     setInput(comp, trny, lang, mode)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("Submit", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("Submit")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

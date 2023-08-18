@@ -81,21 +81,17 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC)))
   
     // check if there are players with need signup commitment
-    //setBadge(player.filter(_._4 == PantStatus.REGI.id).length)
+    setBadge(player.filter(_._4 == PantStatus.PEND.id).length)
   }       
 
   def setBadge(cnt: Int = (-1)) = {
-    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._4 == PantStatus.REGI).length else cnt    
+    val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._4 == PantStatus.PEND).length else cnt    
     if (sicoCnt > 0) {
        // add badge if not already added, do it now
       setHtml("SidebarBadge", sicoCnt.toString)
-      if (sicoCnt == 1) {
-        setHtml("CardBadge", getMsg("badge.waiting.one"))
-      } else {
-        setHtml("CardBadge", getMsg("badge.waiting.more", sicoCnt.toString))
-      }   
+      setHtml("CardBadge", if (sicoCnt == 1) getMsg("badge.waiting.one") else getMsg("badge.waiting.more", sicoCnt.toString))    
     }
-    setVisible("SidebarBadge", sicoCnt > 0)
+    //setVisible("SidebarBadge", sicoCnt > 0)
     setVisible("CardBadge", sicoCnt > 0)
   } 
 
@@ -119,13 +115,13 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   }
 
   def sortByName(): Unit = {
-    toggleSortDirection(gE("SortName", ucp))
+    toggleSortDirection(gE(uc("SortName")))
     sortStatus(); sortComp(); sortName()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
   def sortByComp(): Unit = {
-    toggleSortDirection(gE("SortComp", ucp))
+    toggleSortDirection(gE(uc("SortComp")))
     sortName(); sortStatus(); sortComp()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   }  
@@ -141,33 +137,33 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   } 
 
   def sortByStatus(): Unit = {
-    toggleSortDirection(gE("SortStatus", ucp))
+    toggleSortDirection(gE(uc("SortStatus")))
     sortName(); sortComp(); sortStatus()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
-  def sortName() = getSortDirection(gE("SortName", ucp)) match {
+  def sortName() = getSortDirection(gE(uc("SortName"))) match {
     case -1 => player = player.sortBy(_._2.toLowerCase).reverse 
     case  1 => player = player.sortBy(_._2.toLowerCase)
     case  _ => {} 
   }
 
-  def sortStatus() = getSortDirection(gE("SortStatus", ucp)) match {
+  def sortStatus() = getSortDirection(gE(uc("SortStatus"))) match {
     case -1 => player = player.sortBy(_._4).reverse 
     case  1 => player = player.sortBy(_._4)
     case  _ => {} 
   }  
 
-  def sortComp() = getSortDirection(gE("SortComp", ucp)) match {
+  def sortComp() = getSortDirection(gE(uc("SortComp"))) match {
     case -1 => player = player.sortBy(_._5).reverse 
     case  1 => player = player.sortBy(_._5)
     case  _ => {} 
   }    
 
   def setContent(content: String) = {
-    val rows = gE("MainCard", ucp).querySelectorAll("tr[data-update]")
+    val rows = gE(uc("MainCard")).querySelectorAll("tr[data-update]")
     rows.map( row => row.parentNode.removeChild(row))
-    gE("PlayerDummy", ucp).asInstanceOf[HTMLTableRowElement].insertAdjacentHTML("afterend", content)
+    gE(uc("PlayerDummy")).asInstanceOf[HTMLTableRowElement].insertAdjacentHTML("afterend", content)
   }
 
   @JSExport

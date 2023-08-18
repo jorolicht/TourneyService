@@ -19,7 +19,6 @@ import scala.util.matching
 import shared.utils._
 import shared.utils.Routines._
 
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -84,7 +83,7 @@ object AddonDownload extends UseCase("AddonDownload")
     var url = dom.raw.URL.createObjectURL(data)
 
     gE("APP__Download").asInstanceOf[HTMLAnchorElement].href = url
-    setAttribute_("APP__Download", "download", "example.txt")
+    setAttribute(gE("APP__Download"), "download", "example.txt")
 
     DlgBox.standard("Datei Dlg", "Datei <xy> speichern", Seq("cancel", "yes"),0,true).map { _ match {
       case 1 => debug("confirm", "cancel"); false

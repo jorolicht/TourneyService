@@ -107,7 +107,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
         debug("StartFollowing", s"coId: ${coId} coPhId: ${coPhId}")
       } // StartFollowing
 
-      case "DemoBtn"          => App.tourney.cophs((coId,coPhId)).demo = getCheckbox(gE("DemoBtn", ucp))
+      case "DemoBtn"          => App.tourney.cophs((coId,coPhId)).demo = getCheckbox(gE(uc("DemoBtn")))
 
       case "BadRequest" => error("Invalid Action", s"value: ${key} coId: ${coId} coPhId: ${coPhId}")
 

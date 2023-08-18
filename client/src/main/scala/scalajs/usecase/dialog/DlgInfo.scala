@@ -12,7 +12,6 @@ import org.scalajs.dom.raw._
 
 //import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalajs.usecase.component.BasicHtml._
 import clientviews.dialog.html
 import shared.utils.UseCaseParam
 import scalajs.usecase.component._
@@ -33,8 +32,8 @@ object DlgInfo extends BasicHtml
 
     $("#APP__DlgInfo__Modal").modal("show")
     alertTyp match {
-      case "danger"  => removeClass(gE("Content", ucp), "border-success", "border-secondary"); addClass(gE("Content", ucp), "border-danger")
-      case "success" => removeClass(gE("Content",ucp), "border-danger", "border-secondary"); addClass(gE("Content", ucp), "border-success")
+      case "danger"  => removeClass(gE(uc("Content")), "border-success", "border-secondary"); addClass(gE(uc("Content")), "border-danger")
+      case "success" => removeClass(gE(uc("Content")), "border-danger", "border-secondary"); addClass(gE(uc("Content")), "border-success")
       case _         => warn("show", s"alertTyp: ${alertTyp}")
     }
     setHtml("Title", title)

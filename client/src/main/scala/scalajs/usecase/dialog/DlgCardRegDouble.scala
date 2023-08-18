@@ -19,8 +19,6 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.Event
 import org.scalajs.dom.ext._
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
@@ -52,7 +50,7 @@ object DlgCardRegDouble extends BasicHtml
     key match {
       case "Name1" => setNameList("Name2", tourney, selCoId, getInput("Name2", 0L), getInput("Name1", 0L) )        
       case "Name2" => setNameList("Name1", tourney, selCoId, getInput("Name1", 0L), getInput("Name2", 0L) ) 
-      case "Close" => offEvents(gE("Modal", ucp), "hide.bs.modal"); doModal(gE("Modal", ucp), "hide")
+      case "Close" => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
       case _       => {}
     }
   }
@@ -109,7 +107,7 @@ object DlgCardRegDouble extends BasicHtml
     val f     = p.future
 
     def cancel() = {
-      offEvents(gE("Modal", ucp), "hide.bs.modal")
+      offEvents(gE(uc("Modal")), "hide.bs.modal")
       if (!p.isCompleted) { p failure (new Exception("dlg.canceled")) }
     }
 
@@ -119,8 +117,8 @@ object DlgCardRegDouble extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          offEvents(gE("Modal", ucp), "hide.bs.modal")
-          doModal(gE("Modal", ucp), "hide")
+          offEvents(gE(uc("Modal")), "hide.bs.modal")
+          doModal(gE(uc("Modal")), "hide")
         }  
       }
     }
@@ -129,9 +127,9 @@ object DlgCardRegDouble extends BasicHtml
     init(trny, coId)
 
     // register routines for cancel and submit
-    onEvents(gE("Modal", ucp), "hide.bs.modal", () => cancel())
-    onClick(gE("Submit", ucp), (e: Event) => submit(e))
-    doModal(gE("Modal", ucp), "show")
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
+    onClick(gE(uc("Submit")), (e: Event) => submit(e))
+    doModal(gE(uc("Modal")), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

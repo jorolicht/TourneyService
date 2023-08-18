@@ -22,8 +22,6 @@ import shared.utils.UseCaseParam
 import shared.utils.Routines._
 import shared.utils.Error
 
-
-import scalajs.usecase.component.BasicHtml._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 
@@ -126,7 +124,7 @@ object InputCtrl extends BasicHtml with TourneySvc
     event match {
       case "toggle" => {
         togCollapse_(bodyId)
-        togVisible_(buttonId)
+        togVisible(gE(buttonId))
       }
       case _        => AppEnv.error(s"eventCard", "unknown event")
     }
@@ -379,11 +377,11 @@ object InputCtrl extends BasicHtml with TourneySvc
     */
   def togglePassword(pwdId: String): Unit = {
     val showId = pwdId + "Eye"
-    if (getAttribute_(pwdId, "type") == "password") {
-      setAttribute_(pwdId, "type", "text")
+    if (getAttribute(gE(pwdId), "type") == "password") {
+      setAttribute(gE(pwdId), "type", "text")
       addClass(gE(showId), "fa-eye"); removeClass(gE(showId),"fa-eye-slash")
     } else {
-      setAttribute_(pwdId, "type", "password")
+      setAttribute(gE(pwdId), "type", "password")
       addClass(gE(showId), "fa-eye-slash"); removeClass(gE(showId),"fa-eye")          
     }
   }

@@ -1,12 +1,12 @@
 package shared.utils
 
 object TourneyAction extends Enumeration { 
-  val UNKNOWN   = Value("UNKNOWN")
-  val New       = Value("New")
-  val Edit      = Value("Edit")
-  val Delete    = Value("Delete")
-  val View      = Value("View")
-  val Select    = Value("Select")
+  val UNKNOWN   = Value(0, "UNKNOWN")
+  val New       = Value(1, "New")
+  val Edit      = Value(2, "Edit")
+  val Delete    = Value(3, "Delete")
+  val View      = Value(4, "View")
+  val Select    = Value(5, "Select")
 }
 
 object DownloadType extends Enumeration { 

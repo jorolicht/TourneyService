@@ -11,7 +11,6 @@ import org.scalajs.dom.raw
 
 //import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalajs.usecase.component.BasicHtml._
 import clientviews.dialog.html
 import shared.utils.UseCaseParam
 import scalajs.usecase.component._
