@@ -1,0 +1,99 @@
+@*
+ * Template for referee
+ *@
+@import play.filters.csrf._
+@import shared.utils.Error
+@(err: Error, lang: String, langs: Seq[(String,String)])(implicit request: RequestHeader, msgs: MessagesProvider, assetsFinder: AssetsFinder)
+@getMsg(name: String) = @{ msgs.messages("app." + name) }
+@gM(name: String) = @{ msgs.messages(name) }
+ 
+
+<!DOCTYPE html>
+<html lang='@getMsg("lang")'>
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	  <meta name="description" content="Tournament Service">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+	  <title>@getMsg("title")</title>
+
+		<!-- sbAdmin/Bootstrap CSS-->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap-4.3.1/css/bootstrap.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
+	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
+
+	  @scalajs.html.scripts("client", routes.Assets.at("/public", _).toString, name => getClass.getResource(s"/public/$name") != null)  
+	  
+	</head>
+	<body class="fixed-nav bg-dark sidenav-off" id="page-top" onload="startTime()">
+    
+	  <!-- NAVIGATION -->
+	  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+			<header class="sticky-header w-100">
+		   <div class="d-flex justify-content-between">
+			
+					<div class="text-left text-white">
+						<img alt="TT Logo" height="40" width="56" src="@assetsFinder.path("img/logo.png")">
+					</div>
+
+					<div id="PlayfieldTitle" class="align-self-center text-center text-white">
+						<h4>Turnierprogramm</h4>
+					</div>
+
+					<div  class="text-left">
+						<button id="clock" type="button" class="btn btn-outline-light">Light</button>
+					</div>
+		   </div>
+		   <div class="container-fluid align-content-center border-top border-light text-center">
+				  <span id="ErrorStatus" class="text-light font-4">
+						Fehler
+					</span>	
+			 </div>
+			</header>
+
+	  </nav>
+	    
+	  <!-- CONTENT -->
+	  <div class="content-wrapper mt-4">
+
+	    <div class="container-fluid">
+				<div class="row justify-content-left border ml-2 mr-2 mt-2">
+           <bold id="Error_Code">@getMsg("error.code") @err.msgCode</bold>
+				</div>
+				<div class="row justify-content-left border ml-2 mr-2">
+					<span id="Error_Description">@getMsg("error.description") @gM(err.msgCode)</span>
+				</div>
+	    </div>
+
+	  </div>
+	
+	  <!-- Bootstrap core JavaScript-->
+
+		<script src='@routes.Assets.at("/public", "jQuery-3.6.3/jquery.slim.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "bootstrap-4.3.1/js/bootstrap.bundle.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "js/sb-admin.min.js")'></script>
+	  
+	  <script charset="utf-8">
+		  function startTime() {
+		    var today = new Date();
+		    var h = today.getHours();
+		    var m = today.getMinutes();
+		    m = checkTime(m);
+		    document.getElementById('clock').innerHTML = h + ":" + m;
+		    var t = setTimeout(startTime, 2000);
+	    }
+	
+		  function checkTime(i) {
+	      if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+	      return i;
+	    }
+
+		  App.error('@err.msgCode', '@err.in1', 'err.in2', 'err.callStack', '@lang');    
+    </script>
+
+	</body>
+</html>

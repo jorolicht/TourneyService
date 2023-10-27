@@ -1,0 +1,72 @@
+@*
+ * Template for single referee note
+ * 
+ *@
+@import shared.model._ 
+@import shared.model.CompPhase
+@import shared.utils.twirlhelper._ 
+@import shared.utils.UseCaseParam
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+
+@(coph: CompPhase, gameNo: Int, trnyName: String, compName: String, 
+  compTyp: String, compInfo1: String, compInfo2: String, 
+  player1: String, player2: String, club1: String, club2: String)(implicit ucc: UseCaseParam)
+
+
+  <div class="RefereeTrnyName"><h6>@trnyName</h6></div>
+  <div class="RefereeCompName"><h6>@compName - @compTyp</h6></div>
+  <div class="RefereeCompInfo1">@compInfo1</div>
+  <div class="RefereeCompInfo2">@compInfo2</div>
+  <div class="RefereeTableInfo1">@Html(msg("tableInfo1"))</div>
+  <div class="RefereeTableInfo2">@Html(msg("tableInfo2"))</div>
+  <div class="RefereeGameNo">@gameNo</div>
+  <div class="RefereeLabelGameNo">Spielnummer</div>
+  <div class="RefereeDateTime">DateTime</div>
+  <div  class="RefereeQRCode">
+    <a href="https://www.tutorialspoint.com" id='QRCode_@{coph.coId}_@{coph.coPhId}_@{gameNo}'></a>
+  </div>
+
+  <div class="RefereeLabelSet0">&nbsp;</div>
+  <div class="RefereePlayer1">@player1</div>
+  <div class="RefereePlayer2">@player2</div>
+  <div class="RefereeLabelSet">LabelSet</div>
+  <div class="RefereeClub1">@club1</div>
+  <div class="RefereeClub2">@club2</div>
+
+  <div class="RefereeLabelSet1">Satz 1</div>
+  <div class="RefereePlayer1Set1"></div>
+  <div class="RefereePlayer2Set1"></div>
+  
+  <div class="RefereeLabelSet2">Satz 2</div>
+  <div class="RefereePlayer1Set2"></div>
+  <div class="RefereePlayer2Set2"></div>
+
+  <div class="RefereeLabelSet3">Satz 3</div>
+  <div class="RefereePlayer1Set3"></div>
+  <div class="RefereePlayer2Set3"></div>
+
+  <div class="RefereeLabelSet4">Satz 4</div>
+  <div class="RefereePlayer1Set4"></div>
+  <div class="RefereePlayer2Set4"></div>
+  
+  <div class="RefereeLabelSet5">Satz 5</div>
+  <div class="RefereePlayer1Set5"></div>
+  <div class="RefereePlayer2Set5"></div>
+  
+  <div class="RefereeLabelSet6">Satz 6</div>
+  <div class="RefereePlayer1Set6"></div>
+  <div class="RefereePlayer2Set6"></div>
+  
+  <div class="RefereeLabelSet7">Satz 7</div>
+  <div class="RefereePlayer1Set7"></div>
+  <div class="RefereePlayer2Set7"></div>
+
+
+  <div class="RefereeLabelSets">Sätze</div>
+  <div class="RefereePlayer1Sets"></div>
+  <div class="RefereePlayer2Sets"></div>
+
+  <div class="RefereeLabelWinner">Sieger</div>
+  <div class="RefereePlayer1Winner"></div>
+  <div class="RefereePlayer2Winner"></div>

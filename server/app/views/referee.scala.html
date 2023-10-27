@@ -1,0 +1,154 @@
+@*
+ * Template for referee
+ *@
+@import play.filters.csrf._
+@(organizer: String, winSets:Int, finished: Boolean, refNote: String, lang: String, langs: Seq[(String,String)])(implicit request: RequestHeader, msgs: MessagesProvider, assetsFinder: AssetsFinder)
+@getMsg(name: String) = @{ msgs.messages("referee." + name) }
+
+<!DOCTYPE html>
+<html lang='@getMsg("lang")'>
+	<head>
+	  <meta charset="utf-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	  <meta name="description" content="Tournament Service">
+	  <meta name="author" content="Robert Lichtenegger">
+	  
+	  <title>@getMsg("title")</title>
+
+		<!-- sbAdmin/Bootstrap CSS-->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap-4.3.1/css/bootstrap.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
+	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
+
+	  @scalajs.html.scripts("client", routes.Assets.at("/public", _).toString, name => getClass.getResource(s"/public/$name") != null)  
+	  
+	</head>
+	<body class="fixed-nav bg-dark sidenav-off" id="page-top" onload="startTime()">
+    
+	  <!-- NAVIGATION -->
+	  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+			<header class="sticky-header w-100">
+		   <div class="d-flex justify-content-between">
+			
+					<div class="text-left text-white">
+						<img alt="TT Logo" height="40" width="56" src="@assetsFinder.path("img/logo.png")">
+					</div>
+
+					<div id="PlayfieldTitle" class="align-self-center text-center text-white">
+						<h4>@organizer</h4>
+					</div>
+
+					<div  class="text-left">
+						<button id="clock" type="button" class="btn btn-outline-light">Light</button>
+					</div>
+		   </div>
+		   <div class="container-fluid align-content-center border-top border-light text-center">
+				  <span id="MatchStatus" class="text-light font-4">
+						@if(finished) { @getMsg("matchstatus.view") } else { @getMsg("matchstatus.input") }
+					</span>	
+			 </div>
+			</header>
+
+	  </nav>
+	    
+	  <!-- CONTENT -->
+	  <div class="content-wrapper mt-4">
+
+	    <div class="container-fluid">
+				<div class="row justify-content-center border ml-2 mr-2 mt-2">
+           <span class="font-1" id="Referee_TourneyName">Meisterschft YYY</span>
+				</div>
+				<div class="row justify-content-center border ml-2 mr-2">
+					<span class="font-2"id="Referee_CompName">Spielklasse EINZEL</span>
+				</div>				
+				<div class="row justify-content-center border ml-2 mr-2 mb-2">
+					<span class="font-3" id="Referee_PhaseMatchNoName">Vorrunde - Spielnummer XX</span>
+				</div>
+	    </div>
+
+      <div class="border m-4">
+				<table class="table mb-0">
+					<thead>
+						<tr>
+							<th style="width:12%">@getMsg("header.set")</th>
+							<th id="Referee_PlayerA" class="text-center" style="width:43%"></th>
+							<th class="text-center" style="width: 2%">-</th>
+							<th id="Referee_PlayerB" class="text-center" style="width:43%"></th>
+						</tr>
+					</thead>
+					@for(i <- 1 to (winSets*2)-1 ) {
+						<tr>
+							<td><strong># @i</strong></td>
+							<td class="text-center">
+								<input id='Referee_Set@{i}A' data-setNo='@{i}' data-winSets='@winSets' input="text" size="3" class="text-center" value="" oninput="Referee.change(this)">
+							</td>
+							<td class="text-center"><strong>-</strong></td>
+							<td class="text-center">
+								<input id='Referee_Set@{i}B' data-setNo='@{i}' data-setNo='' data-winSets='@winSets' input="text" size="3" class="text-center" value="" oninput="Referee.change(this)">
+							</td>
+						</tr>
+					}	
+				</table>
+      </div>
+			<div class="border border-3 m-4">	
+				<table class="table mb-0">
+					<thead>
+						<tr>
+							<th style="width:12%"></th>
+							<th id="Referee_SetA" class="text-center" style="width:43%"></th>
+							<th class="text-center" style="width: 2%">-</th>
+							<th id="Referee_SetB" class="text-center" style="width:43%"></th>
+						</tr>
+					</thead>
+				</table>
+		  </div>
+
+			@if(!finished){
+				<div class="container-fluid mt-3 mb-3">
+					<div class="row justify-content-between ml-4 mr-4">
+						<button id="Referee_BtnCancel" type="button" class="btn btn-xs btn-outline-secondary pl-2 pr-2" onclick="Referee.cancel(this)">
+							@getMsg("btn.cancel")
+						</button>
+						
+						<button id="Referee_BtnSubmit" data-winSets='@{(winSets*2)-1}'  disabled=true type="button" class="btn btn-xs btn-outline-secondary pl-2 pr-2" onclick="Referee.submit(this)">
+							@getMsg("btn.submit")
+						</button>
+					</div>
+				</div>
+		  }
+
+
+	  </div>
+
+		<!-- dynamic loaded dialogs -->
+		<span id="APP__Load"></span>
+		<span id="APP__DlgBox__Load"></span>
+	
+	  <!-- Bootstrap core JavaScript-->
+
+		<script src='@routes.Assets.at("/public", "jQuery-3.6.3/jquery.slim.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "bootstrap-4.3.1/js/bootstrap.bundle.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "js/sb-admin.min.js")'></script>
+	  
+	  <script charset="utf-8">
+		  function startTime() {
+		    var today = new Date();
+		    var h = today.getHours();
+		    var m = today.getMinutes();
+		    m = checkTime(m);
+		    document.getElementById('clock').innerHTML = h + ":" + m;
+		    var t = setTimeout(startTime, 2000);
+	    }
+	
+		  function checkTime(i) {
+	      if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+	      return i;
+	    }			
+		  Referee.start('@refNote', '@winSets', '@lang', '@CSRF.getToken(request).map(t=>t.value).getOrElse("")');    
+    </script>
+
+	</body>
+</html>
