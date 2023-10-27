@@ -61,7 +61,7 @@ object AddonCtt extends UseCase("AddonCtt")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(1)
+        App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         println(s"SUCCESS: test_0")
       }
@@ -133,7 +133,7 @@ object AddonCtt extends UseCase("AddonCtt")
             App.loadRemoteTourney(toId).map {
               case Left(err)  => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${getError(err)}")
               case Right(res) => {         
-               App.setCurCoId(1)
+               App.tourney.setCurCoId(1)
                App.execUseCase("OrganizeCompetition", "", "")
               }
             }

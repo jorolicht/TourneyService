@@ -121,8 +121,9 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     val sets      = getSets(balls, noWinSets)
 
     if (m.wgw._1 < 1 | m.wgw._1 > size | m.wgw._2 < 1 | m.wgw._2 > size) {
-      Left(Error("??? who-against-who invalid"))
+      Left(Error("err0225.systemgroup.invalid.whoagainstwho"))
     } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(sets, noWinSets)) {
+      println("Group enter result")
       results(m.wgw._1-1)(m.wgw._2-1).valid    = true
       results(m.wgw._1-1)(m.wgw._2-1).balls    = balls
       results(m.wgw._1-1)(m.wgw._2-1).sets     = sets
@@ -130,14 +131,24 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
       results(m.wgw._1-1)(m.wgw._2-1).ballDiff = getBalls(balls, noWinSets)
       results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
       Right(true)
+    } else if (m.result == "" & sets == (0,0)) {
+      println("Group delete result")
+      results(m.wgw._1-1)(m.wgw._2-1).valid    = false
+      results(m.wgw._1-1)(m.wgw._2-1).balls    = Array("")
+      results(m.wgw._1-1)(m.wgw._2-1).sets     = (0,0)
+      results(m.wgw._1-1)(m.wgw._2-1).points   = (0,0)
+      results(m.wgw._1-1)(m.wgw._2-1).ballDiff = (0,0)     
+      results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
+      Right(true)
     } else {
       results(m.wgw._1-1)(m.wgw._2-1).valid = false
       results(m.wgw._2-1)(m.wgw._1-1).valid = false   
       Right(false)
     }
-  } 
+  }
 
-  def resetMatch(): Unit = {
+
+  def resetResult(): Unit = {
     for (i <- 0 to size-1; j <- 0 to size-1; if (j != i) ) results(i)(j).valid = false
     calc
   }

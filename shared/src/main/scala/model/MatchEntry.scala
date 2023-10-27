@@ -113,9 +113,11 @@ trait MEntry {
 
   def getBalls: Array[(Int,Int)] = {
     val ballsArr = new scala.collection.mutable.ArrayBuffer[(Int,Int)]()
-    result.split("·").foreach( res => ballsArr.append(getBallFromStr(res)) )
-    assert(ballsArr.size == sets._1 + sets._2)
-    ballsArr.to(Array)
+    if (result.trim == "") Array[(Int, Int)]() else {
+      result.split("·").foreach( res => ballsArr.append(getBallFromStr(res)) )
+      assert(ballsArr.size == sets._1 + sets._2)
+      ballsArr.to(Array)
+    }  
   }
 
 }

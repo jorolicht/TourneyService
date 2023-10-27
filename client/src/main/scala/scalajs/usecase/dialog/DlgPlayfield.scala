@@ -40,19 +40,14 @@ object DlgPlayfield  extends BasicHtml
   var clubPlayer: HashMap[String,String] = HashMap()
   var plNameList: String = ""
 
-  private def load = if ($(getIdHa("Modal")).length <= 0) {
-    debug("load", "playfield dialog")
-    setHtml(gE("APP__DlgPlayfield__Load"), clientviews.dialog.html.DlgPlayfield(AppEnv.msgs).toString)
-  }
-
   @JSExport
   def changeComp(obj: js.Dynamic): Unit = {
-    val coId = getInput("Competition",0L)
+    val coId = getInput(gE(uc("Competition")),0L)
     
-    $(getIdHa("NameA")).`val`("")
-    $(getIdHa("NameB")).`val`("")
-    $(getIdHa("ClubA")).`val`("")
-    $(getIdHa("ClubB")).`val`("")
+    setInput("NameA", "")
+    setInput("NameB", "")
+    setInput("ClubA", "")
+    setInput("ClubB", "")
 
     if (coId > 0) {
       playerList = App.tourney.getNamesClubPlayer(coId)
@@ -62,9 +57,8 @@ object DlgPlayfield  extends BasicHtml
     }
     
     plNameList = clientviews.playfield.html.PlayerDatafield(playerList).toString
-    $(getIdHa("NameListA")).html(plNameList)
-    $(getIdHa("NameListB")).html(plNameList)
-
+    setHtml("NameListA", plNameList)
+    setHtml("NameListB", plNameList)
     debug(s"changeCompetition", s"coId: ${coId}")
   }
 
@@ -73,8 +67,8 @@ object DlgPlayfield  extends BasicHtml
    
     pl match {
       case 0 => {
-        val player =  $(getIdHa("NameA")).value.asInstanceOf[String]
-        if (player != "")  $(getIdHa("ClubA")).`val`(clubPlayer(player)) else $(getIdHa("ClubA")).`val`("")
+        val player =  getInput(gE(uc("NameA")), "")
+        if (player != "") $(getIdHa("ClubA")).`val`(clubPlayer(player)) else $(getIdHa("ClubA")).`val`("")
       }
       case 1 => {
         val player =  $(getIdHa("NameB")).value.asInstanceOf[String]
@@ -125,14 +119,14 @@ object DlgPlayfield  extends BasicHtml
 
   // read playfield dilaog with playfield values
   def read(): Playfield = {
-    val coId = getInput("Competition",0L)
-    val nr = if (getInput("InfoOption",0) != 2) getInput("Nr",0) else 0
+    val coId = getInput(gE(uc("Competition")),0L)
+    val nr = if (getInput(gE(uc("InfoOption")),0) != 2) getInput(gE(uc("Nr")),0) else 0
 
     Playfield(nr, true, "19700101000000", "", 
-      getInput("NameA"), getInput("ClubA"),
-      getInput("NameB"), getInput("ClubB"),
+      getInput(gE(uc("NameA"))), getInput(gE(uc("ClubA"))),
+      getInput(gE(uc("NameB"))), getInput(gE(uc("ClubB"))),
       $(getIdHa(s"Competition_${coId}")).text,
-      getInput("Info")
+      getInput(gE(uc("Info")))
     )
   }
   
@@ -149,7 +143,8 @@ object DlgPlayfield  extends BasicHtml
            verifyInfo(pf.info, pf.nr) ) {
         if (!p.isCompleted) { 
           p success pf 
-          $(getIdHa("Modal")).modal("hide")
+          offEvents(gE(uc("Modal")), "hide.bs.modal")
+          doModal(gE(uc("Modal")), "hide")
         }
       } else {
         debug("submit", s"validation failed")
@@ -157,7 +152,8 @@ object DlgPlayfield  extends BasicHtml
       } 
     }
     
-    load
+    doLoad(gE(uc("Load")), clientviews.dialog.html.DlgPlayfield(AppEnv.msgs)) 
+
     $(getIdHa("Form")).trigger("reset")
     $(getIdHa("Help")).hide()
     set(pf)

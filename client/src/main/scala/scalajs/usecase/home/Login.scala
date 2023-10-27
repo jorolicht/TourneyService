@@ -46,7 +46,7 @@ object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc
           case Right(res) => {
             AppEnv.resetContext()
             AppEnv.setHistory("HomeMain","","")
-            App.setCurCoId(0)
+            App.tourney.setCurCoId(0)
             App.resetLocalTourney()
             setHeader()
             AppEnv.ctrlSidebar(AppEnv.status)
@@ -106,7 +106,7 @@ object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc
       }
 
       case "ReqNewPassword"    => {
-        val userInput = getInput("user")
+        val userInput = getInput(gE(uc("user")))
         if (true) {
         //if (EmailAddress.isValid(userInput)) {
           // send user new password

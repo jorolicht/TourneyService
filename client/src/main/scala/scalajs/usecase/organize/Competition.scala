@@ -44,7 +44,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
   }
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
-    val coId = App.getCurCoId
+    val coId = App.tourney.getCurCoId
     
     val compList = (for { co <- App.tourney.comps.values.toSeq } yield {
       val (cnt, cntActiv) = App.tourney.getCompCnt(co)
@@ -95,7 +95,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         // set coId if a new is available
         val coPhIdPrev = 0 
         var coId = getData(elem, "coId", 0L)
-        if (coId != 0) App.setCurCoId(coId) else coId = App.getCurCoId
+        if (coId != 0) App.tourney.setCurCoId(coId) else coId = App.tourney.getCurCoId
 
         debug("actionEvent", s"node id: ${elem.id} coId: ${coId}")
 
@@ -115,8 +115,8 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             //set pant status in participant 2 competition mapping
             for ((key, pEntry) <- App.tourney.pl2co) { if (key._2 == coId && pEntry.status == PantStatus.REDY) pEntry.status == PantStatus.REGI }
             pantResult.foreach { x => App.tourney.pl2co((x.sno, coId)).status = PantStatus.REDY }
-            
-            App.setCurCoPhId(coId, coph.coPhId)
+
+            App.tourney.comps(coId).setCurCoPhId(coph.coPhId)
             App.tourney.comps(coId).status = CompStatus.RUN
             coph.drawOnRanking(pantResult, App.tourney.comps(coId).typ)
             //coph.status = CompPhase.CPS_AUS  
@@ -127,7 +127,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       }
 
       case "AddCompetition"     => {    
-        App.resetCurCoId
+        App.tourney.setCurCoId(0)
         DlgCardComp.show(Competition.init, App.tourney, AppEnv.getLang, DlgOption.New).map {
           case Left(err)    => debug("AddCompetition", s"dialog DlgCardComp.show failed/canceled: ${err}")
           case Right(comp)  => addComp(comp).map { 
@@ -136,7 +136,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               debug("addComp", s"RESULT ${co.id}")
               App.tourney.comps(co.id) = co 
               App.saveLocalTourney(App.tourney)
-              App.setCurCoId(co.id)
+              App.tourney.setCurCoId(co.id)
               update() 
             }
           }
@@ -148,23 +148,23 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         val coName = App.tourney.comps(coId).name
 
         event.stopPropagation()
-        DlgBox.standard(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coName), Seq("cancel", "ok")).map { _ match {
-          case 2 => delComp(coId).map { 
+        dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coName)) { 
+          delComp(coId).map { 
             case Left(err)  => DlgInfo.show("FEHLER", getError(err), "danger")
             case Right(res) => {  
               App.tourney.delComp(coId)
               App.saveLocalTourney(App.tourney)
-              App.resetCurCoId 
+              App.tourney.setCurCoId(0)     // resetCurCoId
               update()               
             }
           }
-          case _ => {}
-        }}
+        }  
+
       }
 
       case "ShowCompetition"      => {
         val coId = getData(elem, "coId", 0L)  
-        App.setCurCoId(coId)
+        App.tourney.setCurCoId(coId)
 
         event.stopPropagation()
         DlgCardComp.show(App.tourney.comps(coId), App.tourney, AppEnv.getLang, DlgOption.View )
@@ -173,7 +173,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
       case "EditCompetition"      => {
         val coId = getData(elem, "coId", 0L)  
-        App.setCurCoId(coId)
+        App.tourney.setCurCoId(coId)
         selTableRow(uc(coId.toString))  
         event.stopPropagation()
         DlgCardComp.show(App.tourney.comps(coId), App.tourney, AppEnv.getLang, DlgOption.Edit ).map {
@@ -184,7 +184,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
                 debug("setComp", s"RESULT ${co.id}")
                 App.tourney.comps(co.id) = co 
                 App.saveLocalTourney(App.tourney)
-                App.setCurCoId(co.id)
+                App.tourney.setCurCoId(co.id)
                 update() 
             }
           }
@@ -197,7 +197,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       }       
 
       case "SelectCompetition"    => {   
-        App.setCurCoId(getData(elem, "coId", 0L))
+        App.tourney.setCurCoId(getData(elem, "coId", 0L))
         update()
       }
 
@@ -207,7 +207,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
       // activate/deactivate participant
       case "CheckParticipant"      => { 
-        val coId = App.getCurCoId
+        val coId = App.tourney.getCurCoId
         val sno  = getData(elem, "sno", "")
         val status = if (elem.asInstanceOf[dom.raw.HTMLInputElement].checked) PantStatus.REDY else PantStatus.REGI 
         setPantStatus(coId, sno, status).map { 
@@ -222,7 +222,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       }
 
       case "DeleteParticipant"      => { 
-        val coId = App.getCurCoId
+        val coId = App.tourney.getCurCoId
         val sno  = getData(elem, "sno", "")
 
         if (coId > 0) {
@@ -252,9 +252,9 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
       //def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, (Player, Int)]] = {
       case "RegParticipant"    => {    
-        App.tourney.comps(App.getCurCoId).typ match {
-          case CompTyp.SINGLE => regSingle(App.tourney, App.getCurCoId, AppEnv.getLang)
-          case CompTyp.DOUBLE => regDouble(App.tourney, App.getCurCoId, AppEnv.getLang)
+        App.tourney.comps(App.tourney.getCurCoId).typ match {
+          case CompTyp.SINGLE => regSingle(App.tourney, App.tourney.getCurCoId, AppEnv.getLang)
+          case CompTyp.DOUBLE => regDouble(App.tourney, App.tourney.getCurCoId, AppEnv.getLang)
           case _              => error("update", s"competition typ not yet supported") 
         }  
       } 

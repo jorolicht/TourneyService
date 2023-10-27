@@ -48,8 +48,8 @@ object DlgCardRegDouble extends BasicHtml
 
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
-      case "Name1" => setNameList("Name2", tourney, selCoId, getInput("Name2", 0L), getInput("Name1", 0L) )        
-      case "Name2" => setNameList("Name1", tourney, selCoId, getInput("Name1", 0L), getInput("Name2", 0L) ) 
+      case "Name1" => setNameList("Name2", tourney, selCoId, getInput(gE(uc("Name2")), 0L), getInput(gE(uc("Name1")), 0L) )        
+      case "Name2" => setNameList("Name1", tourney, selCoId, getInput(gE(uc("Name1")), 0L), getInput(gE(uc("Name2")), 0L) ) 
       case "Close" => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
       case _       => {}
     }
@@ -66,8 +66,8 @@ object DlgCardRegDouble extends BasicHtml
     val status = getRadioBtn("PlayerStatus", -1)
     debug("validate", s"status: ${status}")
  
-    val id1 = getInput("Name1", 0L)
-    val id2 = getInput("Name2", 0L)
+    val id1 = getInput(gE(uc("Name1")), 0L)
+    val id2 = getInput(gE(uc("Name2")), 0L)
 
     if (id1 <= 0L) eList += Error("err0164.RegDouble.Name.missing", "1")
     if (id2 <= 0L) eList += Error("err0164.RegDouble.Name.missing", "2" )

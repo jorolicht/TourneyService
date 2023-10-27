@@ -24,6 +24,7 @@
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "css/print.css")' media="print">
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/github-markdown.css")'>
 	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/atom-one-light.css")'>
 	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
@@ -44,7 +45,7 @@
 	<body class="fixed-nav sticky-footer bg-dark sidenav-toggler" id="page-top" onunload='InputCtrl.eventUnload();' onhashchange='InputCtrl.eventHashchange();'>
 	  
 	  <!-- NAVIGATION -->
-	  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+	  <nav id="mainNav" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-print-none" >
 	    <a class="navbar-brand" onclick='InputCtrl.redirect("home"); return false;'>
 	      <img alt="TT Logo" height="30" width="46" src="@assetsFinder.path("img/logo.png")" >
 	      <span id="APP__Title" class="text-white"><strong>&nbsp; @getAppMsg("title")</strong></span>
@@ -75,7 +76,7 @@
 	      <h3>Update Datum: @getAppMsg("date")</h3>
 			</div>
 	    
-	    <span id="APP__Headline">
+	    <span class="d-print-none" id="APP__Headline">
         <footer class="tuse-sticky-header">
           <div class="container-fluid text-secondary text-center"><small id="APP__Headline__Content"></small></div>                  
         </footer>
@@ -122,6 +123,7 @@
 	  <script src='@routes.Assets.at("/public", "js/highlight.pack.js")'></script>
 	  <script src='@routes.Assets.at("/public", "js/showdown.min.js")'></script>
 	  <script src='@routes.Assets.at("/public", "js/yaml.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "js/qrcode.min.js")'></script>
 	
     <!-- DateTimepicker for Bootstrap -->	
 		<script src='@routes.Assets.at("/public", "js/bootstrap-datetimepicker.min.js")'></script>
@@ -132,7 +134,7 @@
       TrnyJS = {
         crc32:function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0},
         crc32hex:function(r){ return this.crc32(unescape(encodeURIComponent(r))).toString(16).toUpperCase()},
-      };			
+      };
       App.start('@ucName', '@ucParam', '@ucInfo', '@ucContext', '@getAppMsg("lang")', '@getAppMsg("date")', '@getAppMsg("version")', '@CSRF.getToken(request).map(t=>t.value).getOrElse("")');
 		</script>
 	</body>

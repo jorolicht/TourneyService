@@ -65,7 +65,6 @@ class PostActionCtrl @Inject()
     import cats.data.EitherT
 
     def accessError(cmd: String) = Error("err0080.access.invalidRights", "", "", cmd).encode
-
     def chkAccess(ctx: shared.utils.Session): Boolean = (ctx.orgId > 0) | !Crypto.accessCtrl
 
     val msgs: Messages = messagesApi.preferred(request)
@@ -436,6 +435,56 @@ class PostActionCtrl @Inject()
 
         }
       }
+
+      // inputReferee = inputMatch without overwrite functionality
+      case "inputReferee" => {
+        val coId   = getParam(pMap, "coId", 0L)
+        val coPhId = getParam(pMap, "coPhId", 0)
+        val gameNo = getParam(pMap, "gameNo", 0)
+        
+        var data: ((Int,Int),String,String,String) =((0,0),"","","")
+        try   data = read[( (Int, Int), String, String, String) ](reqData)
+        catch { case _ :Throwable => data = ((0,0),"","","") }
+  
+        val sets      = data._1
+        val result    = data._2
+        val info      = data._3
+        val playfield = data._4
+
+        logger.info(s"${cmd}: param: ${sets} ${result} ${info} ${playfield}")
+
+        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, false).map {
+          case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(gList) => logger.info(s"${cmd}: execution Ok");    Ok( write[List[Int]](gList) )
+        }
+      }
+
+      // inputMatch
+      case "inputMatch" => {
+        val coId      = getParam(pMap, "coId", 0L)
+        val coPhId    = getParam(pMap, "coPhId", 0)
+        val gameNo    = getParam(pMap, "gameNo", 0)
+        val overwrite = getParam(pMap, "overwrite", false)
+        
+        var data: ((Int,Int),String,String,String) =((0,0),"","","")
+        try   data = read[( (Int, Int), String, String, String) ](reqData)
+        catch { case _ :Throwable => data = ((0,0),"","","") }
+  
+        val sets      = data._1
+        val result    = data._2
+        val info      = data._3
+        val playfield = data._4
+
+        logger.info(s"${cmd}: param: ${sets} ${result} ${info} ${playfield}")
+
+        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, overwrite).map {
+          case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(gList) => logger.info(s"${cmd}: execution Ok");    Ok( write[List[Int]](gList) )
+        }
+      }
+
+      
+
 
       //
       // Click TT Action Routines

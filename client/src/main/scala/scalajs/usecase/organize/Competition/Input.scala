@@ -96,13 +96,21 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             }
         }
         if (inputOk) {
-          coPhase.inputMatch(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game))  
-          val gameUpdateList = coPhase.propMatch(game) 
 
-          //val gameUpdateList = coPhase.setMatchPropagate(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game)) 
+          //App.tourney.cophs((coId, coPhId))
+          inputMatch(App.tourney.id, coId, coPhId, game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game)).map {
+            case Left(err)           => error("actionEvent", s"SaveMatchResult -> inputMatch: ${err}") 
+            case Right(gUpdateList)  => for (game <- gUpdateList) setMatchView(coPhase, rowBase, game) 
+          }
 
+    //       inputMatchX(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game)) 
+    //              sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = {
+    // Future(Right(App.tourney.cophs((coId, coPhId)).inputMatchX(gameNo, sets, balls, info, playfield)))
+    // //TODO
+    //       val gameUpdateList = coPhase.inputMatchX(game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game))  
+    //       //val gameUpdateList = coPhase.propMatchX(game) 
 
-          for (game <- gameUpdateList) { setMatchView(coPhase, rowBase, game) }
+          
         } else {
           error("actionEvent", s"SaveMatchResult -> input not OK: ${err}")
         }
@@ -114,18 +122,27 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val game     = getData(elem, "game", 0)
         val rowBase  = getRowBase(coId, coPhId) 
  
-        val gameUpdateList = coPhase.resetMatchPropagate(game)
-        for (g <- gameUpdateList) setMatchView(coPhase, rowBase, g)
-        debug("actionEvent", s"DeleteMatchResult -> delete ${game} refresh: ${gameUpdateList.toString} status: ${coPhase.getStatusTxt}") 
+        resetMatch(App.tourney.id, coId, coPhId, game).map {
+          case Left(err)          => error("actionEvent", s"DeleteMatchResult -> resetMatch: ${err}")
+          case Right(gUpdateList) => {
+            for (g <- gUpdateList) setMatchView(coPhase, rowBase, g)
+            debug("actionEvent", s"DeleteMatchResult -> delete ${game} refresh: ${gUpdateList.toString} status: ${coPhase.getStatusTxt}") 
+          }  
+        }        
       }
 
       case "DeleteAll"   => { 
         val coPhase  = App.tourney.cophs((coId, coPhId))
-        val rowBase         = getRowBase(coId, coPhId) 
+        val rowBase  = getRowBase(coId, coPhId) 
 
-        val gameUpdateList  = coPhase.resetAllMatches()
-        for (g <- gameUpdateList) setMatchView(coPhase, rowBase, g)
-        debug("actionEvent", s"DeleteAll -> game update list: ${gameUpdateList.toString} status: ${coPhase.getStatusTxt}") 
+        resetMatches(App.tourney.id, coId, coPhId).map {
+          case Left(err)          => error("actionEvent", s"DeleteAll -> resetMatches: ${err}")
+          case Right(gUpdateList) => {
+            for (g <- gUpdateList) setMatchView(coPhase, rowBase, g)
+            debug("actionEvent", s"DeleteAll -> game update list: ${gUpdateList.toString} status: ${coPhase.getStatusTxt}")  
+          }
+        }         
+        
       }
 
 
@@ -229,8 +246,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     val coId   = coPhase.coId
     val coPhId = coPhase.coPhId
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists_(s"Input_${coId}_${coPhId}")) {
-      val elem    = gE(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+    if (gE(s"Input_${coId}_${coPhId}") == null) {
+      val elem    = gEqS(s"InputContent_${coId}", s"[data-coPhId='${coPhId}']")
       val size    = coPhase.size
       val coPhTyp = coPhase.coPhTyp
       val maxRnd  = coPhase.getMaxRnds
@@ -279,10 +296,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       }  
       case CompPhaseTyp.KO => for (m <- coPhase.matches) setMatchViewContent(getMatchRow(m), m.asInstanceOf[MEntryKo], coPhase.status)
 
-      case _ =>  {
-        setHtml(gE(s"InputContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement],
-                showAlert(getMsg("invalidSection"))) 
-      }  
+      case _ => setHtml(gEqS(s"InputContent_${coId}", s"[data-coPhId='${coPhId}']"), showAlert(getMsg("invalidSection"))) 
+
     }
     
     // STATUS dependend settings
@@ -331,7 +346,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     val gameNo     = row.querySelector(s"[data-game_${m.gameNo}='gameNo']").asInstanceOf[HTMLElement]    
     val saveBtn    = row.querySelector(s"[data-game_${m.gameNo}='save']").asInstanceOf[HTMLElement]
     val deleteBtn  = row.querySelector(s"[data-game_${m.gameNo}='delete']").asInstanceOf[HTMLElement]
-    val inputElts = row.querySelectorAll(s"[data-input_${m.gameNo}]")
+    val inputElts  = row.querySelectorAll(s"[data-input_${m.gameNo}]")
 
     setHtml(nameA, SNO(m.stNoA).getName(m.coTyp, getMsg("bye")))
     setHtml(nameB, SNO(m.stNoB).getName(m.coTyp, getMsg("bye")))
@@ -402,8 +417,8 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   def getMatchRow(m: MEntry): HTMLElement = { 
     try {
       val tableElem = m.coPhTyp match {
-        case CompPhaseTyp.KO  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
-        case CompPhaseTyp.GR  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}").asInstanceOf[HTMLElement]
+        case CompPhaseTyp.KO  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}")
+        case CompPhaseTyp.GR  => gE(s"InputRound_${m.coId}_${m.coPhId}_${m.round}")
         case _       => dom.document.createElement("div").asInstanceOf[HTMLElement] 
       }
       tableElem.querySelector(s"[data-game_${m.gameNo}='row']").asInstanceOf[HTMLElement]

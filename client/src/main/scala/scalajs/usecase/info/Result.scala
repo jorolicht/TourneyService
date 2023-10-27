@@ -116,7 +116,7 @@ object InfoResult extends UseCase("InfoResult")
     debug("showTourneyResults", s"start")
     val coPhMapSeq = tourney.cophs.values.groupBy(x => x.coId).transform((key, value) => value.toList.sortBy(_.coPhId).toSeq)
     val co2NaSt = (for { (key, comp) <- tourney.comps } yield {
-      key -> (comp.name, getMsg_("competition.status." + comp.status))
+      key -> (comp.name, gM("competition.status." + comp.status))
     }).toMap
 
 

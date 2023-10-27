@@ -80,7 +80,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
       // do file upload depending on upload type
       case s"UploadType_$id"    => {
         val uplType = UploadType(id.toIntOption.getOrElse(0))
-        val fName   = getInput(s"Input_${uplType.id}", "")
+        val fName   = getInput(gE(uc(s"Input_${uplType.id}")))
         uplType match {
           case UploadType.ClickTT => println("Upload ClickTT"); actionUploadClickTT(fName) 
           case UploadType.Invite  => println("Upload Invite");  actionUploadInvite(fName) 
@@ -150,16 +150,15 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     
 
   // Click dustbin on list
-  def actionTourneyDelete(toId: Long) = { 
-    if (toId == App.tourney.getToId & toId != 0) {
-      DlgBox.confirm(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)).map { _ =>
+  def actionTourneyDelete(toId: Long) = 
+    if (toId == App.tourney.getToId & toId != 0) 
+      dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)) { 
         delTourney(toId).map { 
           case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
           case Right(res) => { App.resetLocalTourney(); render() }
-        }
+        }        
       }
-    }
-  }
+
 
 
   // Click on new tourney button
@@ -179,7 +178,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
       setHtmlVisible("UploadError", false)
       if (App.tourney.getToId != 0 ) {
         // want update tournament/event ?           
-        DlgBox.standard(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.getTourneyName()),
+        DlgBox.standard(getMsg("upload.msgbox.header"), getMsg("upload.msgbox.body1", App.tourney.name),
           Seq("cancel", "update", "new"),0,true).map { result => result match {
             case 2 => doUpload(UploadType.ClickTT, UploadMode.Update)
             case 3 => doUpload(UploadType.ClickTT, UploadMode.New) 
@@ -211,8 +210,8 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   def actionDownloadPlayer() = {
     val fName = getMsg("download.notify.filename")
     DlgBox.saveStringAsFile(
-      getMsg_("dlg.box.save.verify.hdr"), 
-      getMsg_("dlg.box.save.verify.msg", fName), 
+      gM("dlg.box.save.verify.hdr"), 
+      gM("dlg.box.save.verify.msg", fName), 
       getMsg("download.notify.filename"),
       genPlayerList
     )
@@ -223,8 +222,8 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   def actionDownloadClickTT() = {
     startSpinner()
     downloadFile(DownloadType.ClickTT).map {
-      case Left(err)  => stopSpinner(); DlgInfo.show(getMsg_("dlg.info.download.error.hdr"), getError(err), "danger") 
-      case Right(res) => stopSpinner(); DlgBox.saveStringAsFile(getMsg_("dlg.box.save.verify.hdr"), getMsg_("dlg.box.save.verify.msg", res._1), res._1,  res._2)
+      case Left(err)  => stopSpinner(); DlgInfo.show(gM("dlg.info.download.error.hdr"), getError(err), "danger") 
+      case Right(res) => stopSpinner(); DlgBox.saveStringAsFile(gM("dlg.box.save.verify.hdr"), gM("dlg.box.save.verify.msg", res._1), res._1,  res._2)
     }
   }
 

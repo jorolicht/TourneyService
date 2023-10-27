@@ -169,6 +169,16 @@ object CompTyp extends Enumeration {
   val DOUBLE = Value(2, "DOUBLE")    
   val MIXED  = Value(3, "MIXED")         
   val TEAM   = Value(4, "TEAM")
+
+  def name(getMsg:(String, Seq[String])=>String) = {
+    this match {
+      case UNKN    => getMsg(s"competition.typ.5",Seq())
+      case SINGLE  => getMsg(s"competition.typ.1",Seq())
+      case DOUBLE  => getMsg(s"competition.typ.2",Seq())
+      case MIXED   => getMsg(s"competition.typ.3",Seq())
+      case TEAM    => getMsg(s"competition.typ.4",Seq())
+    }
+  }    
 }  
 
 object CompStatus extends Enumeration {

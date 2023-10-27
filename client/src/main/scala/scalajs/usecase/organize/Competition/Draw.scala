@@ -73,9 +73,9 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   // set draw page for a competition phase (round), coId != 0 and coPhId != 0
   def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
     debug("init", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists_(s"Draw_${coId}_${coPhId}")) {
+    if (gE(s"Draw_${coId}_${coPhId}") == null) {
       // init view
-      val elem    = gE(s"DrawContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val elem    = gEqS(s"DrawContent_${coId}", s"[data-coPhId='${coPhId}']")
       val size    = coPhase.size
       val coPhTyp = coPhase.coPhTyp
       // generate draw frame
@@ -87,7 +87,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
       }
     } else { 
       // update view
-      val base = gE(s"Draw_${coId}_${coPhId}").asInstanceOf[HTMLElement]
+      val base = gE(s"Draw_${coId}_${coPhId}")
       coPhase.coPhTyp match {
         case CompPhaseTyp.GR => updateGrView(base, coPhase.groups)
         case CompPhaseTyp.KO => updateKoView(base, coPhase.ko)
@@ -142,7 +142,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   // reassingDraw set new draw
   def reassignDraw(coph: CompPhase, reassign: Map[Int,Int])= {
     val pants = Array.fill[PantEntry](coph.size)(PantEntry("0", "", "", 0, (0,0)))
-    val base = gE(s"Draw_${coph.coId}_${coph.coPhId}").asInstanceOf[HTMLElement]   
+    val base = gE(s"Draw_${coph.coId}_${coph.coPhId}")   
     coph.coPhTyp match {
       case CompPhaseTyp.GR => {
         coph.groups.foreach { g => 

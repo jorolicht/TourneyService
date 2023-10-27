@@ -48,8 +48,8 @@ object AdminLicense extends UseCase("AdminLicense")
 
   @JSExport
   def buttonDelete() = {
-    val clubId   = getInput("FormClubId", 0L) //Try { $(getIdHa("FormClubId") ).value.asInstanceOf[String].toInt } getOrElse { 0 }
-    val clubName = getInput("FormClub", "Club unknown") // Try { $(getIdHa("FormClub") ).value.asInstanceOf[String] } getOrElse { "unknown Club" }
+    val clubId   = getInput(gE(uc("FormClubId")), 0L) //Try { $(getIdHa("FormClubId") ).value.asInstanceOf[String].toInt } getOrElse { 0 }
+    val clubName = getInput(gE(uc("FormClub")), "Club unknown") // Try { $(getIdHa("FormClub") ).value.asInstanceOf[String] } getOrElse { "unknown Club" }
     if (clubId != 0) {
       DlgBox.standard(getMsg("delete.header"), getMsg("delete.body", s"${clubName}"), Seq("cancel","ok")).map { _ match {
         case 2 => deleteLicense(clubId).map { _ =>

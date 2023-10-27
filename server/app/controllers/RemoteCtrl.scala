@@ -58,6 +58,8 @@ class RemoteCtrl @Inject()
   extends AbstractController(coco) with I18nSupport with Logging
 {
 
+  val langMap = for (lng <- langs.availables) yield (lng.toLocale.getLanguage, lng.toLocale.getDisplayLanguage(lng.toLocale).capitalize)
+
   /** trigger - triggers update of connected clients
    * 
    */
@@ -389,11 +391,11 @@ class RemoteCtrl @Inject()
   } 
 
 
-  /** setMatches 
+  /** setXMatches 
    * 
-   *  Serivce: def setMatches(ma: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
+   *  Serivce: def setXMatches(ma: Seq[MatchEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
    */ 
-  def setMatches(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
+  def setXMatches(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:    Messages  = messagesApi.preferred(request)
     val content  = request.body.asText.getOrElse("")
     val ctx      = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
@@ -404,18 +406,18 @@ class RemoteCtrl @Inject()
 
     try {
       val matches = read[Seq[MEntryTx]](content).map(_.decode)
-      tsv.setMatches(matches).map {
+      tsv.setXMatches(matches).map {
         case Left(err)   => BadRequest(err.encode)
         case Right(cnt)  => Ok(Return(cnt).encode)  
       }
     } catch { case _: Throwable => Future(BadRequest(Error("err0191.ctrl.decode.MEntry", content.take(10)).encode)) }
   } 
 
-  /** setMatch 
+  /** setXMatch 
    * 
-   *  Service: def setMatch(ma: MatchEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+   *  Service: def setXMatch(ma: MatchEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
    */ 
-  def setMatch(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
+  def setXMatch(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:  Messages  = messagesApi.preferred(request)
     val content  = request.body.asText.getOrElse("")
     val ctx      = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)  
@@ -424,7 +426,7 @@ class RemoteCtrl @Inject()
     //logger.debug(s"setMatch toId:${toId} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir} body:${content}")
     try {
       val mEntry = read[MEntryTx](content).decode
-      tsv.setMatch(mEntry).map {
+      tsv.setXMatch(mEntry).map {
         case Left(err)      => BadRequest(err.encode)
         case Right(result)  => Ok(Return(result).encode)       
       } 
@@ -432,13 +434,13 @@ class RemoteCtrl @Inject()
   } 
 
 
-  /** delMatches
+  /** resetXMatches
    *  input parameter encoded in request body :
    *  <competition Identification> : <competition Phase Identification>
    * 
-   *  Service: def delMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
+   *  Service: def resetXMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
    */ 
-  def delMatches(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
+  def resetXMatches(toId: Long, trigger: Boolean = false) = Action.async { implicit request: Request[AnyContent] =>
     val msgs:    Messages  = messagesApi.preferred(request)
     val ctx    = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
     val param  = Crypto.encParam(request.body.asText.getOrElse("") )
@@ -448,12 +450,71 @@ class RemoteCtrl @Inject()
     val coId = param("coId").toLong
     val coPh = param("coPh").toInt
 
-    logger.debug(s"delMatches toId:${toId} coId:${coId} coPh:${coPh} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
-    tsv.delMatches(coId, coPh).map {
+    logger.debug(s"resetXMatches toId:${toId} coId:${coId} coPh:${coPh} trigger:${trigger} orgId:${ctx.orgId} orgDir:${ctx.orgDir}")
+    tsv.resetXMatches(coId, coPh).map {
       case Left(err)   => BadRequest(err.encode)
       case Right(cnt)  => Ok(Return(cnt).encode)       
     }    
   } 
+
+
+
+
+
+  /** getReferee 
+   * 
+   *  Service: def getReferee returns referee note to enter result (for player)
+   */ 
+  def getReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, nonce:Long, test:Boolean=false) = Action.async { implicit request =>
+    val msgs:  Messages  = messagesApi.preferred(request)
+    val lang = Messages("app.lang")
+    val nonceCalc = RefereeNote.nonce(toId, coId, coPhId, gameNo)
+
+    logger.debug(s"getReferee toId:${toId} coId:${coId} coPhId:${coPhId} gameNo:${gameNo} lang: ${lang} nonce: ${nonce} should be ${nonceCalc}")
+    
+    if (test) {
+      val refNote = RefereeNote("TTC Freising", "Stadtmeisterschaft", toId,
+                                "Herren A Klasse", coId, "Vorrunde", coPhId,
+                                13, false, 3,
+                                "Flötzinger, Norbert", "Lichtenegger, Robert",
+                                "TTC Erdinger Str", "TTC Finkenstraße", List()) 
+      Future(Ok(views.html.referee(refNote.organizer, refNote.winSets, refNote.finished, write[RefereeNote](refNote), lang, langMap)))                         
+    } else {
+      tsv.getRefereeNote(toId, coId, coPhId, gameNo).map {
+        case Left(err)      => Ok(views.html.error(err, lang, langMap))
+        case Right(refNote) => {
+          if (nonceCalc.toString == nonce.toString) {
+            Ok(views.html.referee(refNote.organizer, refNote.winSets, refNote.finished, write[RefereeNote](refNote), lang, langMap))
+          } else {
+            Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap))
+          } 
+        }                     
+      }
+    }  
+  }
+
+  /** setReferee 
+   * 
+   *  Service: def setReferee sets result according to the referee note
+   */ 
+  def setReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, nonce: Int, test:Boolean=false) = Action.async { implicit request: Request[AnyContent] =>
+    val msgs:  Messages  = messagesApi.preferred(request)
+    val lang = Messages("app.lang")
+    val content  = request.body.asText.getOrElse("")
+
+    val nonceCalc = RefereeNote.nonce(toId, coId, coPhId, gameNo)
+
+    logger.debug(s"setReferee toId:${toId} coId:${coId} coPhId:${coPhId} body:${content}")
+
+    if (nonceCalc != nonce) Future(Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap))) else {
+      tsv.inputMatch(toId, coId, coPhId, gameNo, (1,3), "7.6.4.5", "hallo", "33", false).map {
+        case Left(err)  =>  Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap)) 
+        case Right(res) =>  Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap)) 
+      }
+    }  
+
+  }  
+
 
 
   /** setCompPhase - set a competition phase

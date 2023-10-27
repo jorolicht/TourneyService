@@ -124,7 +124,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
     val coPhCfg = coph.coPhCfg 
 
     def initContent(coId: Long, coPhId: Int, elem: Element, value: String) = {
-      if (!exists(s"Ctrl_${coId}_${coPhId}")) { elem.innerHTML = value }
+      if (gE(uc(s"Ctrl_${coId}_${coPhId}")) == null) { elem.innerHTML = value }
     }
 
     val ctrlBase = gE(s"CtrlContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']")
@@ -132,7 +132,7 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
         
     // set status
     setHtml(s"Status_${coph.coId}_${coph.coPhId}", getMsg(s"competition.phase.status${coph.status}"))
-    setHtml(s"Config_${coph.coId}_${coph.coPhId}", coph.getDescription(getMsg_)) 
+    setHtml(s"Config_${coph.coId}_${coph.coPhId}", coph.getDescription(gM)) 
     setHtml(s"Finished_${coph.coId}_${coph.coPhId}", getMsg("finished", s"${coph.mFinished}", s"${coph.mTotal}")) 
 
     // set action buttons

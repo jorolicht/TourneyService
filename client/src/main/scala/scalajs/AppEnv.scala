@@ -99,10 +99,26 @@ object AppEnv extends BasicHtml
     debug("initContext", s"callerId: ${callerId.toString}")
 
     if (csrfToken != "") csrf = csrfToken
-    home = dom.window.location.protocol + "//" + dom.window.location.host
-    println(s"initContext home: ${home}")
     result
   }
+
+  def initHome(): Future[Boolean] = if (dom.window.location.host.startsWith("localhost")) 
+    getIpAddress.map {
+      case Left(err)     => false
+      case Right(ipAddr) => {
+        home = dom.window.location.protocol + "//" + dom.window.location.host.replace("localhost",ipAddr)
+        println(s"initHome: ${home}")
+        true
+      } 
+    }
+    else {
+      home = dom.window.location.protocol + "//" + dom.window.location.host
+      println(s"initHome: ${home}")
+      Future(true)
+    }  
+
+
+
 
   def initPrompt() = {
     prompt = scala.collection.mutable.ArrayBuffer("command1", "command2")
@@ -218,7 +234,7 @@ object AppEnv extends BasicHtml
     
     lang = language
 
-    if (localMessages == "" | (getLocalStorage("AppEnv.LogLevel") == "") | localUpdate != lastUpdate) {
+    if (localMessages == "" | (getLocalStorage("AppEnv.LogLevel") == "debug") | localUpdate != lastUpdate) {
       Ajax.get("/getMessages").map(_.responseText).map(content => {
         setLocalStorage("AppEnv.Messages", content)
         setLocalStorage("AppEnv.LastUpdate", lastUpdate)

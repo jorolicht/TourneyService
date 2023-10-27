@@ -60,7 +60,7 @@ object DlgInput extends BasicHtml
   def actionEvent(key: String, elem: raw.HTMLElement, event: dom.Event) = {
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     try {
-      val ucName = getInput("UseCase")
+      val ucName = getInput(gE(uc("UseCase")))
       val ikey = event.`type` match {
         case "click"  => "CLICK"
         case "change" => "CHANGE"
@@ -72,8 +72,8 @@ object DlgInput extends BasicHtml
   }
 
   def hide = { $("#APP__DlgInput").modal("hide") }
-  def get = getInput("Input", "")  
-  def add(content: String) = DlgInput.set(getInput("Output", "") + "\n" + content)
+  def get = getInput(gE(uc("Input")), "")  
+  def add(content: String) = DlgInput.set(getInput(gE(uc("Output")), "") + "\n" + content)
   def set(value: String) = setHtml("Output", value)
   def clear = setInput("Input", "")
   def focus = dom.document.getElementById("APP__DlgInput__Input").asInstanceOf[raw.HTMLInputElement].focus()

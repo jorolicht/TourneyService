@@ -115,6 +115,26 @@ class HomeCtrl @Inject()(
     }}
   }
 
+
+  def getIpAddress() = Action { implicit request =>
+    //import scala.jdk.CollectionConverters
+    import collection.JavaConverters._
+    import java.net._
+
+    val enumeration = NetworkInterface.getNetworkInterfaces.asScala.toSeq
+
+    val ipAddresses = enumeration.flatMap(p =>
+      p.getInetAddresses.asScala.toSeq
+    )
+
+    val address = ipAddresses.find { address =>
+      val host = address.getHostAddress
+      host.contains(".") && !address.isLoopbackAddress
+    }.getOrElse(InetAddress.getLocalHost)
+
+    Ok(address.getHostAddress)  
+  }
+
   /** qrcode generation
    *
    * generates qrcode together with tourney data
@@ -200,8 +220,6 @@ class HomeCtrl @Inject()(
     //logger.info(s"getErrMsg: ${errMsgs.filter(x => x._1.startsWith("err"))}")
     Ok(Json.toJson(errMsgs.filter(x => x._1.startsWith("err")) )) 
   }
-
-
 
 
   /** content send a file

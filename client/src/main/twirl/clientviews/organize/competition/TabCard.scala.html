@@ -12,7 +12,7 @@
 
 @(coId: Long, coPhNameIdList:List[(String, Int)])(implicit ucc: UseCaseParam)
 
-  <div class="container-fluid">
+  <div class="container-fluid d-print-none">
     <div class="row mb-2">
       <div class="col-12 ml-0 mr-0 pr-0 pl-0" @id("Links")>
           <ul class="nav nav-tabs">
@@ -34,7 +34,7 @@
 
   
 <div @id("Content")>
-  @for(i<-List("Ctrl","Draw","Input","View")){
+  @for(i<-List("Ctrl","Draw","Input","View","Referee")){
     <div id='@{i}Content_@{coId}'>
       @for(coPhNameIdElem<-coPhNameIdList){ <section style="display:none;" data-section='@{i}' data-coPhId='@coPhNameIdElem._2'></section> }
     </div> 

@@ -47,7 +47,7 @@ case class Tourney(
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
-  var playfields: Map[Int, Playfield]                   = Map(),   // map (playfieldNo)   -> Playfield
+  var playfields: Map[Int, Playfield]                   = Map(),  // map (playfieldNo)   -> Playfield
   var licenses:   Map[String, String]                   = Map().withDefaultValue("")
 )
 {
@@ -469,10 +469,17 @@ case class Tourney(
     if (cophs.isDefinedAt((coId, coPhId))) cophs((coId, coPhId)).getMatchesXML(sno2clickTTId) else ""
   }
 
-  def getCompName(coId: Long=0L) = {
+  def getCompName(coId: Long=0L, fmt:Int=0) = {
     val effCoId = if (coId == 0L) curCoId else coId
-    if (comps.isDefinedAt(effCoId)) comps(effCoId).name else ""
+    println(s"getCompName ${effCoId} ${coId}  ${fmt}")
+    fmt match {
+      case 1 => if (comps.isDefinedAt(effCoId) && effCoId != 0L) s"[${comps(effCoId).name}]" else ""
+      case _ => if (comps.isDefinedAt(effCoId) && effCoId != 0L) comps(effCoId).name else ""
+    }
   } 
+
+  //def getCompName(coId: Long=0L, fmt:Int=0) = "ffffffff"
+
 
   def getCompMatches(coId: Long) = {
     val result = new StringBuilder("<matches>")
@@ -484,14 +491,19 @@ case class Tourney(
   //
   //  Mgmt Routines
   // 
-  def getCurCoId: Long                      = curCoId
-  def getCurCoPhId: Int                     = if (comps.isDefinedAt(curCoId)) comps(curCoId).getCurCoPhId else 0
+  def getCurCoId: Long = { 
+    if (curCoId == 0L) {
+      val cophStarted = cophs.keys.filter(x => x._2 == 1).toList.sortBy(_._1) 
+      if (cophStarted.length >= 1) {
+        curCoId = cophStarted.head._1
+        if (comps(curCoId).getCurCoPhId == 0) comps(curCoId).setCurCoPhId(1)
+      }
+    }
+    curCoId
+  } 
 
-  def setCurCoId(coId: Long)                = { curCoId = coId }
-  def setCurCoPhId(coId: Long, coPhId: Int) = {
-    if (comps.isDefinedAt(coId)) { comps(coId).setCurCoPhId(coPhId) }
-    else { println(s"ERROR: setCurCoPhId(${coId}) doesn't exist") }
-  }  
+  def setCurCoId(value: Long) = { curCoId = value}
+  def getCurCoPhId: Int = if (comps.isDefinedAt(curCoId) && curCoId !=0 ) comps(curCoId).getCurCoPhId else 0
 
 
   //

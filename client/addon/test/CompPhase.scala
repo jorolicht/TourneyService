@@ -58,7 +58,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(1)
+        App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         println(s"SUCCESS: test_0")
       }
@@ -78,7 +78,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(2)
+        App.tourney.setCurCoId(2)
         
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         println(s"SUCCESS: test_0")
@@ -104,7 +104,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(2)
+        App.tourney.setCurCoId(2)
         val coPhIdPrev = 0 
         var coId = 2
 
@@ -150,7 +150,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     } yield { (result, pw) }).value.map {
       case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(2)
+        App.tourney.setCurCoId(2)
         val coId   = 2
         val coPhId = 1
 
@@ -183,7 +183,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
             val (pants, drawInfo) = pantsWithGroupInfo.unzip
             coph.drawWithGroupInfo(pants, drawInfo, App.tourney.comps(coId).typ)
 
-            App.setCurCoPhId(coId, coph.coPhId)
+            App.tourney.comps(coId).setCurCoPhId(coph.coPhId)
             App.execUseCase("OrganizeCompetitionDraw", "", "")
 
 

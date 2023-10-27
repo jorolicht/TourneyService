@@ -195,7 +195,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
     }
   }
   
-  def resetMatch(): Unit = {
+  def resetResult(): Unit = {
     for (result <- results) result.valid = false
     calc
   }

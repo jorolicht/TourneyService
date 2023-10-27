@@ -50,9 +50,9 @@ object AdminDatabase extends UseCase("AdminDatabase")
 
   @JSExport
   def export() = {
-    val toId     = getInput("FormTourneyId",0L)
-    val clubName = getInput("FormClub","")
-    val toDate   = getInput("FormDate",0)
+    val toId     = getInput(gE(uc("FormTourneyId")),0L)
+    val clubName = getInput(gE(uc("FormClub")))
+    val toDate   = getInput(gE(uc("FormDate")),0)
 
     debug("export", s"${toId} ${clubName} ${toDate}")
 

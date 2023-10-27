@@ -10,13 +10,30 @@ config.cookie.confirmation                          = false
 config.LogLevel                                     = debug
 
 app.mockup                                          = false
-app.version = 2023-08DE160
-app.date    = 2023-08-07
+app.version                                         = 2023-08DE160
+app.date                                            = 2023-09-11
+
+referee.lang                                        = de
+referee.title                                       = Turnierspiel-Ergebnis
+referee.header.set                                  = Satz
+referee.gameNo                                      = Spielnummer: {0}
+referee.matchstatus.input                           = Ergebnis Eingabe
+referee.matchstatus.view                            = Ergebnis Anzeige
+referee.btn.cancel                                  = ABBRUCH
+referee.btn.submit                                  = ÜBERTRAGEN
+
+referee.dlg.hdr.confirm                             = Spielergebnis speichern
+referee.dlg.result.message                          = {0} - {1} = {2} 
+
+
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
-app.url.download                                    = https://turnier-service.org/download/   
+app.url.download                                    = https://turnier-service.org/download/  
 
+
+app.error.code                                      = Code:
+app.error.description                               = Beschreibung:
 app.error                                           = Upps ... wir konnten leider genau diese eine Seite nicht liefern. 
 app.error.tip                                       = Bitte Ruhe bewahren, eventuell Kaffee holen und Eingabe neu überdenken.
 app.srv.error                                       = Upps ... das sieht nach einem Server- oder Programmierfehler aus. 
@@ -84,7 +101,8 @@ sidebar.label.AdminReport                           = Berichte
 sidebar.label.OrganizeCompetitionCtrl               = Steuerung
 sidebar.label.OrganizeCompetitionDraw               = Auslosung
 sidebar.label.OrganizeCompetitionInput              = Eingabe
-sidebar.label.OrganizeCompetitionView               = Anzeige  
+sidebar.label.OrganizeCompetitionView               = Anzeige
+sidebar.label.OrganizeCompetitionReferee            = Schiri 
 
 sidebar.title.HomeSearch                            = Turniersuche
 sidebar.title.Info                                  = Turnier-Information
@@ -348,6 +366,12 @@ home.register.lbl.withdrawal                          = Die Widerufsbelehrung un
 
   competition.GrRound                                 = Runde {0}
 
+  CompTyp.-1                                          = Typ
+  CompTyp.0                                           = UNBEKANNT
+  CompTyp.1                                           = EINZEL
+  CompTyp.2                                           = DOPPEL
+  CompTyp.3                                           = MIXED
+  CompTyp.4                                           = TEAM
   competition.typ.0                                   = Typ
   competition.typ.1                                   = EINZEL
   competition.typ.2                                   = DOPPEL
@@ -612,6 +636,12 @@ organize.tourney.confirm.delete.btn.cancel            = ABBRUCH
   organize.competition.draw.noSelection                 = Kein Wettbewerb ausgewählt.
   organize.competition.draw.noSection                   = Kein Spielabschnitt definiert.
   organize.competition.draw.invalidSection              = Konfiguration für Spielabschnitt z.Z. nicht unterstützt.
+
+  organize.competition.referee.tableInfo1               = Tisch 
+  organize.competition.referee.tableInfo2               = <small>siehe<br>Klemmbrett /<br>Becher</small>
+  organize.competition.referee.group                    = Gruppe {0}
+  organize.competition.referee.round                    = Runde {0}
+
 
   organize.competition.ctrl.plh.name                    = z.B. KO-Endrunde
   organize.competition.ctrl.lbl.DemoBtn                 = Demobutton zur Erzeugung zufälliger Ergebnisse anzeigen.
@@ -1211,7 +1241,7 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0008.ajax.postJson                               = Kommunikationsfehler postJson-Aufruf: {0} {1}
   err0009.ajax.postForm                               = Kommunikationsfehler postForm-Aufruf: {0} {1}
   err0010.call.delComp                                = ????
-  err0011.trny.load                                   = Turnier {0} konnte nicht geladen
+  err0011.trny.load                                   = Turnier {0} konnte nicht geladen werden
   err0012.trny.read                                   = Fehler beim Lesen des Turniers {0} orgDir/startDate: {1}
   err0013.trny.insufficient.rights                    = Fehlende Zugriffsrechte
   err0014.trny.compNotFound                           = Wettbewerb {0} nicht gefunden
@@ -1401,5 +1431,20 @@ admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
   err0215.sync                                        = Turnierdaten nicht synchron (unterschiedliche Versionen lokal/remote)
   err0216.svc.setPlayer.invalidUpdate                 = Fehler beim Aktualisiern der Spielerdaten, Spieler hat Lizenz (nur E-Mail-Update erlaubt) 
   err0217.Player.validateTTR                          = Ungültiges TTR-Wert
+  err0218.svc.getReferee.notFound                     = Spiel nicht gefunden/vorhanden
+  err0219.svc.getReferee.invalid                      = Spielinfo ungültig
+  err0220.getIpAddress                                = IP-Adresse des Servers nicht verfügbar. Kommunikationsfehler. 
+  err0221.invalidNonce                                = Fehlende Berechtigung / EinmalPassword nicht ok.
+  err0222.svc.invalidCompetitionPhase                 = Spielrunde / Spielphase nicht gefunden
+  err0223.svc.inputMatch.decodeResult                 = Dekodierfehler in Routine inputMatch, Datentyp List[Int]
+  err0224.coph.inputMatch.invalidGameNo               = Fehler in Routine inputMatch, Spielnummer ungültig {0}
+  err0225.systemgroup.invalid.whoagainstwho           = Fehler im Gruppensystem, falsche Werte für wer-gegen-wen
+  err0226.svc.resetMatch.failed                       = Fehler in Routine resetMatch
+  err0227.tourney.isDummy                             = Serverless Modus
+  err0228.svc.resetMatch.decodeResult                 = Dekodierfehler in Routine resetMatch, Datentyp List[Int]
+  err0229.svc.resetMatches.failed                     = Fehler in Routine resetMatches
+  err0230.svc.resetMatch.game                         = Fehler in Routine resetMatch, Spiel {0}
+  err0231.svc.inputReferee.decodeResult               = Dekodierfehler in Routine inputReferee
+
 
 #END Error Codes/Messages

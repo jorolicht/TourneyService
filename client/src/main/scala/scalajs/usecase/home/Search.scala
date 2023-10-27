@@ -34,10 +34,10 @@ object HomeSearch
 
 
   @JSExport
-  def onsubmit(): Unit = doSearch(getInput("string"), getInput("typ", 0), getInput("year", 1970))
+  def onsubmit(): Unit = doSearch(getInput(gE(uc("string"))), getInput(gE(uc("typ")), 0), getInput(gE(uc("year")), 1970))
   
   @JSExport
-  def onchange(): Unit = doSearch(getInput("string"), getInput("typ", 0), getInput("year", 1970))
+  def onchange(): Unit = doSearch(getInput(gE(uc("string"))), getInput(gE(uc("typ")), 0), getInput(gE(uc("year")), 1970))
 
   /** doSearch - searches for tourneys (searchs tring) lists results
    *  

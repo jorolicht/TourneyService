@@ -54,7 +54,6 @@ class BasicHtml
   }  
 
 
-
   /* ScalaJs: getElementById does not know what kind of element nodeValue is. 
    * It does not have access to the .html to figure that out, and hence it returns a very 
    * generic Element. But in fact, you know that it is an input element, i.e., 
@@ -65,14 +64,19 @@ class BasicHtml
 
 
   // getId - adds usecase prefix to id  
-  def getIdX(id: String, prefix: String = "")(implicit ucp: UseCaseParam) = { s"${prefix}${ucp.idBase}__${id}"}
   def getIdHa(id: String)(implicit ucp: UseCaseParam) = { s"#${ucp.idBase}__${id}"}
 
   def onEvents(elem: HTMLElement, events: String, handler:()=>Unit) = $(elem).on(events, handler)
   def offEvents(elem: HTMLElement, events: String) = $(elem).off(events)
   def onClick(elem: HTMLElement, handler:dom.raw.Event=>Unit) = $(elem).click(handler)
+  def onClick2(selector: String, handler:dom.raw.Event=>Unit)  = $(selector).click(handler)
   def doModal(elem: HTMLElement, cmd: String) = $(elem).modal(cmd)
+  def doLoad[C](elem: HTMLElement, text: C)  = if (!checkId(elem)) text match {
+    case _:String => insertHtml(gE("APP__Load"), "afterbegin", text.asInstanceOf[String])
+    case _        => insertHtml(gE("APP__Load"), "afterbegin", text.toString) 
+  }
 
+  def checkId(elem: HTMLElement): Boolean = try (elem.textContent.length > 0) catch { case _: Throwable => false }
 
   def checkId[Context](id: String, ucp: Context): Boolean = { 
     try ucp match {
@@ -133,7 +137,7 @@ class BasicHtml
     catch { case _: Throwable => error(s"setDisabled", s"id: ${uc(id)} value: ${value}") } 
   }
 
-  def setDisabled(elem:HTMLElement, value: Boolean): Unit = {
+  def setDisabled(elem: HTMLElement, value: Boolean): Unit = {
     try elem.asInstanceOf[Input].disabled = value
     catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
   }
@@ -266,19 +270,15 @@ class BasicHtml
     * @return
     */
 
-  def getData[I, A](id: I, name: String, default: A)(implicit ucp: UseCaseParam): A = {
+  def getData[A](elem: HTMLElement, name: String, default: A): A = {
     try {
-      val elem = id match {
-        case _:String => document.getElementById(uc(id.asInstanceOf[String])).asInstanceOf[HTMLElement]
-        case _        => id.asInstanceOf[HTMLElement]
-      }
       default match {
         case _:Int    => elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default.asInstanceOf[Int]).asInstanceOf[A]
         case _:Long   => elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default.asInstanceOf[Long]).asInstanceOf[A]
         case _:String => elem.getAttribute(s"data-${name}").asInstanceOf[A]
-        case _        => { error("getData", s"idElt: ${id}  usecase: ${ucp.idBase} default: ${default}"); default }
+        case _        => { AppEnv.error("getData", s"elem: ${elem} default: ${default}"); default }
       }
-    }  catch { case _: Throwable => AppEnv.error("getData", s"id: ${id} name: ${name} default: ${default}"); default }
+    }  catch { case _: Throwable => AppEnv.error("getData", s"elem: ${elem} name: ${name} default: ${default}"); default }
   }
 
   def setData[A](elem: HTMLElement, attr: String, value: A) = {
@@ -294,26 +294,13 @@ class BasicHtml
     * @return
     */
 
-  def getInput[I,R](idElt: I, defVal: R = "")(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): R = {
-    try { 
-      val result = idElt match {
-        case _:String => {
-          val id = idElt.asInstanceOf[String]
-          if   (id.startsWith("_")) document.getElementById(id.substring(1)).asInstanceOf[Input].value
-          else document.getElementById(uc(id)).asInstanceOf[Input].value  
-        }  
-        case _        => idElt.asInstanceOf[Input].value
-      }
-
-      defVal match {
-        case _:Int    => result.toIntOption.getOrElse(defVal).asInstanceOf[R]
-        case _:Long   => result.toLongOption.getOrElse(defVal).asInstanceOf[R]
-        case _:String => result.asInstanceOf[R]
-        case _        => { error("getInput", s"idElt: ${idElt}  uc: ${ucp.idBase} defVal: ${defVal}"); defVal }
-      } 
-
-    } catch { case _: Throwable => error("getInput", s"idElt: ${idElt} usecase: ${ucp.idBase} defVal: ${defVal}"); defVal }
-  }
+  def getInput[R](elem: HTMLElement, defVal: R = ""): R = 
+    try defVal match {
+        case _:Int    => elem.asInstanceOf[Input].value.toIntOption.getOrElse(defVal).asInstanceOf[R]
+        case _:Long   => elem.asInstanceOf[Input].value.toLongOption.getOrElse(defVal).asInstanceOf[R]
+        case _:String => elem.asInstanceOf[Input].value.asInstanceOf[R]
+        case _        => AppEnv.logger.error(s"getInput -> elem: ${elem} defVal: ${defVal}"); defVal
+    } catch { case _: Throwable => AppEnv.logger.error(s"getInput elem: ${elem} defVal: ${defVal}"); defVal }
 
   def getBooleanOption(name: String)(implicit ucp: UseCaseParam): Option[Boolean] = {
     try document.getElementById(uc(name)).asInstanceOf[Input].value.toBooleanOption
@@ -407,15 +394,17 @@ class BasicHtml
     try document.getElementById(uc(id)).asInstanceOf[Input].value = text
     catch { case _: Throwable => error(s"setInput", s"id: ${uc(id)}") }
   } 
+  def setInput(elem: HTMLElement, text: String): Unit = {
+    try elem.asInstanceOf[Input].value = text
+    catch { case _: Throwable => AppEnv.error(s"setInput", s"elem: ${elem}") }
+  } 
+
 
   def getTextContent(id: String, defVal: String="")(implicit ucp: UseCaseParam): String = {
     try document.getElementById(uc(id)).textContent
     catch { case _: Throwable => error("getTextContent", s"id: ${uc(id)}"); defVal }
   }
 
-
-  def exists(id: String)(implicit ucp: UseCaseParam): Boolean = { (gE(uc(id)) != null) }  
-  def exists_(id: String)(implicit ucp: UseCaseParam): Boolean = { (document.getElementById(id) != null) } 
 
   /* getElementById does not know what kind of element nodeValue is. 
    * It does not have access to the .html to figure that out, and hence it returns a very 
@@ -432,27 +421,21 @@ class BasicHtml
    * @param defVal if no value is present
    * @param attrValue value of attribute
    */
-  def getAttribute(elem: HTMLElement, attrName: String, defVal: String=""): String = {
+  def getAttribute(elem: HTMLElement, attrName: String, defVal: String=""): String = 
     try elem.getAttribute(attrName)
     catch { case _: Throwable => { AppEnv.error("getAttribute", s"elem: ${elem} attrName: ${attrName}"); defVal }}
-  }
 
-  def setAttribute(elem: HTMLElement, attrName: String, attrValue: String): Unit = {
+  def setAttribute(elem: HTMLElement, attrName: String, attrValue: String): Unit = 
     try elem.setAttribute(attrName, attrValue)
     catch { case _: Throwable => AppEnv.error("setAttribute", s"elem:${elem} ${attrName }-> ${attrValue}") } 
-  }
 
-  def removeAttribute(elem: HTMLElement, attrName: String): Unit = {
+  def removeAttribute(elem: HTMLElement, attrName: String): Unit = 
     try elem.removeAttribute(attrName)
     catch { case _: Throwable => AppEnv.error("removeAttribute", s"elem: ${elem} attrName: ${attrName}") } 
-  }
 
-
-  def setPlaceholder(id: String, value: String)
-                    (implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
-    try document.getElementById(uc(id)).asInstanceOf[Input].placeholder = value
-    catch { case _: Throwable => error("setPlaceholder", s"id: ${uc(id)}") } 
-  }  
+  def setPlaceholder(elem: HTMLElement, value: String) =
+    try elem.asInstanceOf[Input].placeholder = value
+    catch { case _: Throwable => AppEnv.error("setPlaceholder", s"elem: ${elem}") } 
 
 
   def selectOption(id: String, selValue: String)(implicit ucp: UseCaseParam): Unit = {
@@ -462,19 +445,19 @@ class BasicHtml
 
   def addClass(elem: HTMLElement, _class: String*): Unit = 
     try _class.foreach(cValue => elem.classList.add(cValue))
-    catch { case _: Throwable => AppEnv.logger.error(s"addClass -> elem: ${elem}  class: ${_class}") } 
+    catch { case _: Throwable => AppEnv.error(s"addClass", s"elem: ${elem}  class: ${_class}") } 
 
 
   def removeClass(elem: HTMLElement, _class: String*): Unit = 
     try _class.foreach(cValue => elem.classList.remove(cValue))
-    catch { case _: Throwable => AppEnv.logger.error(s"removeClass -> elem: ${elem}  class: ${_class}") } 
+    catch { case _: Throwable => AppEnv.error(s"removeClass", s"elem: ${elem}  class: ${_class}") } 
 
 
-  def setClass(id: String, value: Boolean, _class: String*)(implicit ucp: UseCaseParam): Unit = {
-    try if (value) { _class.foreach(cValue => document.getElementById(uc(id)).classList.add(cValue)) } 
-        else       { _class.foreach(cValue => document.getElementById(uc(id)).classList.remove(cValue)) }   
+  def setClass(id: String, value: Boolean, _class: String*)(implicit ucp: UseCaseParam): Unit = 
+    try if (value) { _class.foreach(cValue => gE(uc(id)).classList.add(cValue)) } 
+        else       { _class.foreach(cValue => gE(uc(id)).classList.remove(cValue)) }   
     catch { case _: Throwable => error("setClass", s"id: ${uc(id)}  class: ${_class}") } 
-  }
+
 
   def setRadioBtn(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(uc(id)).asInstanceOf[Input].checked = value
@@ -560,8 +543,19 @@ class BasicHtml
   def getMsg(key: String, args: String*)(implicit ucp: UseCaseParam): String = {
     if (key.startsWith("_")) AppEnv.getMessage(key.substring(1), args: _*) else AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
   }
+  
+  def gM(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
 
-  def getMsg_(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
+  def mP(key: String)(implicit ucp: UseCaseParam): String = {
+    if(key.startsWith("_")) key.substring(1) else s"${ucp.msgPrefix}.${key}"
+  }
+
+
+
+  def getTypName[T](value: T): String = value match {
+    case _:shared.model.CompTyp.Value => gM(s"CompTyp.${value.asInstanceOf[shared.model.CompTyp.Value].id}")
+    case _                            => "XXX"
+  }
 
   def setMainContent[C](content: C): Unit = content match {
     case _:play.twirl.api.Html => document.getElementById("mainContent").asInstanceOf[HTMLElement].innerHTML = content.toString
@@ -598,7 +592,6 @@ class BasicHtml
     try document.getElementById(id).querySelectorAll(qS)
     catch { case _: Throwable => AppEnv.error("gEqS", s"id: ${id} querySelector: ${qS}"); null } 
 
-
   def uc(id: String)(implicit ucp: UseCaseParam) = { if (ucp.idBase == "") id else s"${ucp.idBase}__${id}"}
 
   def getError(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
@@ -614,7 +607,19 @@ class BasicHtml
     setVisible(gE("APP__Result"), visi)
   }  
 
-    /** setHeader
+  /** DIALOGS
+   *  
+   */ 
+  def dlgCancelOk(hdrMsg: String, confirmMsg: String)(fun: => Unit): Future[Boolean] = {
+    import scalajs.usecase.dialog.DlgBox
+    DlgBox.confirm(hdrMsg, confirmMsg).map { 
+      case true => fun; true
+      case _    => false
+    } 
+  }  
+
+
+  /** setHeader
    *  
    */ 
   def setHeader(): Unit = {
@@ -623,6 +628,7 @@ class BasicHtml
     if (AppEnv.getOrganizer != "") { 
       setHtml(gE("APP__Title"), AppEnv.getMessage("app.header.title.club", AppEnv.getOrganizer))
     } else {
+      println(s"setHeader APP_Title")
       setHtml(gE("APP__Title"), AppEnv.getMessage("app.header.title",""))
     }  
     
@@ -640,10 +646,10 @@ class BasicHtml
     setHtml(gE("APP__ClubName"), AppEnv.getOrganizer)
     setVisible(gE("APP__UserName"), login)
     setVisible(gE("APP__ClubName"), login)
-
-    val trnyName = App.tourney.name
-    val compName = App.tourney.getCompName()
-    setHtml(gE("APP__Headline__Content"), s"<strong>${trnyName}</strong>" + { if (compName != "") s"[${compName}]" else "" })
+    
+    val HContent = s"<strong>${App.tourney.name}</strong> ${App.tourney.getCompName(0,1)}"
+    //println(s"APP__Headline__Content: ${HContent}")
+    setHtml(gE("APP__Headline__Content"), HContent)
   }
 
   // setFooter
@@ -675,21 +681,13 @@ class BasicHtml
   def showSBMenu(name: String) = {
     val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]
     liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement].classList.remove("collapsed")
-
     gE(s"APP__Sidebar__${name}").classList.add("show")
   }
 
   def hideSBMenu(name: String) = {
     val liElem = document.querySelector(s"[data-sbentry='${name}']").asInstanceOf[HTMLElement]
     liElem.querySelector(s"[data-toggle='collapse']").asInstanceOf[HTMLElement].classList.add("collapsed")
-
     gE(s"APP__Sidebar__${name}").classList.remove("show")
   }
-
-
-
-
-
-
 
 }

@@ -60,10 +60,10 @@ object AddonDownload extends UseCase("AddonDownload")
       case Right(res) => {
         startSpinner()
         downloadFile(DownloadType.ClickTT).map {
-          case Left(err)  => stopSpinner(); DlgInfo.show(getMsg_("dlg.info.download.error.hdr"), getError(err), "danger") 
+          case Left(err)  => stopSpinner(); DlgInfo.show(gM("dlg.info.download.error.hdr"), getError(err), "danger") 
           case Right(res) => {
             stopSpinner()
-            DlgBox.saveStringAsFile(getMsg_("dlg.box.save.verify.hdr"), getMsg_("dlg.box.save.verify.msg", res._1), res._1,  res._2)
+            DlgBox.saveStringAsFile(gM("dlg.box.save.verify.hdr"), gM("dlg.box.save.verify.msg", res._1), res._1,  res._2)
           }  
         }
       }

@@ -69,23 +69,23 @@ object DlgCardRegSingle extends BasicHtml
     var clubId  = ("", 0L)     //(clubname, id)-Tuppel
     var email   = ""
 
-    val bYear  = getInput("Year", 0)
+    val bYear  = getInput(gE(uc("Year")), 0)
     val status = getRadioBtn("PlayerStatus", -1)
     val gender = SexTyp(getRadioBtn("Gender", SexTyp.UNKN.id)) 
 
     debug("validate", s"status: ${status}")
 
-    Player.validateEmail(getInput("Email", "")) match {
+    Player.validateEmail(getInput(gE(uc("Email")), "")) match {
       case Left(err)  => eList += err
       case Right(res) => email = res
     }
 
-    Player.validateName(getInput("Name", "")) match {
+    Player.validateName(getInput(gE(uc("Name")), "")) match {
       case Left(err)  => eList += err
       case Right(res) => lfid = res
     }
     
-    Club.validateName(getInput("Club", "")) match {
+    Club.validateName(getInput(gE(uc("Club")), "")) match {
       case Left(err)  => eList += err
       case Right(res) => clubId = res
     }
@@ -94,7 +94,7 @@ object DlgCardRegSingle extends BasicHtml
       trny.players(lfid._3)
     } else {
       val pl = Player(0L, "", clubId._2, clubId._1, lfid._2, lfid._1, bYear, email, gender, "") 
-      pl.setTTR(getInput("TTR", "")) 
+      pl.setTTR(getInput(gE(uc("TTR")), "")) 
         // check if player already exists ...
       if (trny.player2id.isDefinedAt(genHashPlayer(pl))) eList += Error("err0162.Player.already.exists")
       pl 

@@ -114,7 +114,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
             
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(getMsg_("msg.processing","")).toString)
+            setHtml("Processing", clientviews.component.html.Spinner(gM("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
             val result = (for {
               licIdCpn <- EitherT(requestLicense(licReq))
@@ -152,7 +152,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
             val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.encode, pw.getBytes.toBase64, ctx("clubname").str, false, false)
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(getMsg_("msg.processing","")).toString)
+            setHtml("Processing", clientviews.component.html.Spinner(gM("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
 
             val result = (for {
@@ -236,7 +236,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
         if (event == RegisterEvent.FullBack | event == RegisterEvent.FreeBack) {
           Future(true)
         } else {
-          val valid = chkCode(ctx, getInput("code", 0))
+          val valid = chkCode(ctx, getInput(gE(uc("code")), 0))
           showHelp("code", !valid)
           // debug("validateState", s"Confirm -> CodeInput ${valid}")
           Future(valid)
@@ -245,10 +245,10 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
         if (event == RegisterEvent.FullBack | event == RegisterEvent.FreeBack) {
           Future(true)
         } else {
-          val valid1 = chkCode(ctx, getInput("code", 0))
+          val valid1 = chkCode(ctx, getInput(gE(uc("code")), 0))
           showHelp("code", !valid1)
 
-          val valid2 = getInput("withdrawal", false) & getInput("gtc", false)
+          val valid2 = getInput(gE(uc("withdrawal")), false) & getInput(gE(uc("gtc")), false)
           showHelp("ConfirmConditions", !valid2)          
 
           // debug("validateState", s"Confirm -> CodeInput ${valid}")

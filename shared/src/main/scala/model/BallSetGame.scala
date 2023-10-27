@@ -37,6 +37,8 @@ package object Utility {
     }
   }
 
+
+
   def getBalls(balls: Array[String], noSets: Int): (Int, Int) = {
     var res    = (0,0)
     var nASets = 0
@@ -55,6 +57,22 @@ package object Utility {
   def validSets(sets: (Int,Int), noSets: Int): Boolean =  {
     (sets._1 == noSets & sets._2 < noSets) | (sets._1 < noSets & sets._2 == noSets)
   } 
+
+
+  def validBalls(balls: (Int,Int)): Boolean =  
+    ( balls._1 >= (balls._2 + 2) & balls._1 == 11 & balls._2 >=0 ) |
+    ( balls._1 == (balls._2 + 2) & balls._1 >  11)                 |
+    ( balls._2 >= (balls._1 + 2) & balls._2 == 11 & balls._1 >=0 ) |
+    ( balls._2 == (balls._1 + 2) & balls._2 >  11) 
+
+
+
+  def getSets(balls: (Int,Int)): (Int, Int) = 
+    if (!validBalls(balls)) (0,0) else {
+      if      (balls._1 > balls._2) (1,0) 
+      else if (balls._2 > balls._1) (0,1)
+      else                          (0,0)
+    }
 
   def getSets(balls: Array[String], noSets: Int): (Int, Int) = {
     var nASets = 0

@@ -112,7 +112,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
    */
   @JSExport
   def verifyComp(): Int = {
-    val coSel = getInput("Competition","").split("__") match {
+    val coSel = getInput(gE(uc("Competition")),"").split("__") match {
       case Array(s1,s2) => (s1,s2) 
     }
     showHelpSchedule()
@@ -174,15 +174,15 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
     // hide help
     showHelpSchedule()
-    val (lastname, firstname) = getInput("PlayerName","").split(",")  match { 
+    val (lastname, firstname) = getInput(gE(uc("PlayerName")),"").split(",")  match { 
       case Array(s1,s2) => (s1.trim,s2.trim)
       case _            => ("","") 
     }
-    val pl = Player(0L,"",0L,getInput("PlayerClub",""),firstname,lastname,
-                    getInput("PlayerYear", 0), getInput("PlayerEmail",""), SexTyp.UNKN, "_")
-    pl.setTTR(getInput("PlayerTTR",""))
+    val pl = Player(0L,"",0L,getInput(gE(uc("PlayerClub"))),firstname,lastname,
+                    getInput(gE(uc("PlayerYear")), 0), getInput(gE(uc("PlayerEmail"))), SexTyp.UNKN, "_")
+    pl.setTTR(getInput(gE(uc("PlayerTTR"))))
 
-    val (coId, cTyp) = getInput("Competition","").split("__") match {
+    val (coId, cTyp) = getInput(gE(uc("Competition")),"").split("__") match {
       case Array(s1,s2) => (s1.toLong, s2) 
       case _            => (0L,0) 
     }
@@ -190,9 +190,9 @@ object InfoSchedule extends UseCase("InfoSchedule")
     verifyComp match {
       case 1 => doRegSPlayer(coId, pl)
       case 2 => {
-        val (lastname2, firstname2) = getInput("PlayerName2","").split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
-        val pl2 = Player(0L,"",0L,getInput("PlayerClub2",""), firstname2, lastname2, getInput("PlayerYear2",0), "", SexTyp.UNKN, "_")
-        pl2.setTTR(getInput("PlayerTTR2",""))
+        val (lastname2, firstname2) = getInput(gE(uc("PlayerName2"))).split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
+        val pl2 = Player(0L,"",0L,getInput(gE(uc("PlayerClub2"))), firstname2, lastname2, getInput(gE(uc("PlayerYear2")), 0), "", SexTyp.UNKN, "_")
+        pl2.setTTR(getInput(gE(uc("PlayerTTR2"))))
         doRegDPlayer(coId, pl, pl2)
       }
       case _ =>  debug("buttonSignUp", "unknown competition type")
@@ -205,7 +205,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
   def getInvitation(): Future[Either[Error, String]] = {
     val converter = new Converter()
     // debug(s"getInvitation", "started")
-    getInvitation(App.getTourneyOrgDir, App.getTourneyStartDate).map {
+    getInvitation(App.tourney.orgDir, App.tourney.startDate).map {
       case Left(err)   =>  Left(err)
       case Right(content)  => {
         // convert markdown to html, hide metadata

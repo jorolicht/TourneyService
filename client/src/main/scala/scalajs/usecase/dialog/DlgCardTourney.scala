@@ -90,18 +90,18 @@ object DlgCardTourney  extends BasicHtml
     import shared.utils.Routines._
     import scala.collection.mutable.ListBuffer
     var eList      = ListBuffer[Error]()
-    val name       = getInput("Name")
-    val id         = getInput("Id", 0L)
-    val orgDir     = getInput("OrgDir")
-    val organizer  = getInput("Organizer")
+    val name       = getInput(gE(uc("Name")))
+    val id         = getInput(gE(uc("Id")), 0L)
+    val orgDir     = getInput(gE(uc("OrgDir")))
+    val organizer  = getInput(gE(uc("Organizer")))
     val typ        = getIntOption("Typ")
     val privat     = getBooleanOption("Visibility")
-    val startDate  = date2Int(getInput("StartDate"))
-    val endDate    = date2Int(getInput("EndDate"))
+    val startDate  = date2Int(getInput(gE(uc("StartDate"))))
+    val endDate    = date2Int(getInput(gE(uc("EndDate"))))
 
-    val addr = Address(getInput("AddrDescription"), getInput("AddrCountry"), getInput("AddrZIP"), getInput("AddrCity"), getInput("AddrStreet"))  
-    val (lastname, firstname) = splitName(getInput("ContactName"))
-    val contact = Contact(lastname, firstname, getInput("ContactPhone"), getInput("ContactEMail"))
+    val addr = Address(getInput(gE(uc("AddrDescription"))), getInput(gE(uc("AddrCountry"))), getInput(gE(uc("AddrZIP"))), getInput(gE(uc("AddrCity"))), getInput(gE(uc("AddrStreet"))))  
+    val (lastname, firstname) = splitName(getInput(gE(uc("ContactName"))))
+    val contact = Contact(lastname, firstname, getInput(gE(uc("ContactPhone"))), getInput(gE(uc("ContactEMail"))))
   
     if (privat == None)        { eList += Error("dlg.TournBase.hlp.Visibility"); markInput(gE("Visibility"), Option(true)) }
     

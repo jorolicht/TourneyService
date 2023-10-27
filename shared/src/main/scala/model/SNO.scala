@@ -64,7 +64,7 @@ case class SNO(value: String) {
   def getName(coTyp: CompTyp.Value, byeName: String="")(implicit trny: Tourney): String  = {
     if (value == "") {
       ""
-    } else if (byeName != "" & isBye()) { 
+    } else if (isBye()) { 
       byeName
     } else {
       coTyp match {

@@ -10,18 +10,31 @@ config.cookie.confirmation                          = false
 config.LogLevel                                     = debug
 
 app.mockup                                          = false
-app.version = 2023-08EN160
-app.date    = 2023-08-07
+app.version                                         = 2023-08EN160
+app.date                                            = 2023-09-11
+
+referee.lang                                        = en
+referee.title                                       = Tourney Match Result
+referee.header.set                                  = Set
+referee.gameNo                                      = Game Number: {0}
+referee.matchstatus.input                           = Result Input
+referee.matchstatus.view                            = Result View
+referee.btn.cancel                                  = CANCEL
+referee.btn.submit                                  = SUBMIT
+referee.dlg.hdr.confirm                             = Save Match Result
+referee.dlg.result.message                          = {0} - {1} = {2} 
 
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
 app.url.download                                    = https://turnier-service.org/download/
 
+app.error.code                                      = Code:
+app.error.description                               = Description:
 app.error                                           = Oops ... unfortunately we couldn't deliver this page.
 app.error.tip                                       = Please keep calm, get some coffee if necessary and reconsider your entry.
 app.srv.error                                       = Oops ... that looks like a server or programming error.
 app.srv.error.tip                                   = Please keep calm, get coffee if necessary and inform those responsible in a friendly manner.
-app.lang                                            = de
+app.lang                                            = en
 app.title                                           = Tournament Service
 app.ping                                            = Ping from IP address {0} with license: {1}
 app.test                                            = Language {0} is en ... # 'ÄöüÜl @% &? ß! ^^ °
@@ -85,6 +98,7 @@ sidebar.label.OrganizeCompetitionCtrl               = Control
 sidebar.label.OrganizeCompetitionDraw               = Draw
 sidebar.label.OrganizeCompetitionInput              = Input
 sidebar.label.OrganizeCompetitionView               = View
+sidebar.label.OrganizeCompetitionReferee            = Referee
 
 sidebar.title.HomeSearch                            = Tournament Search
 sidebar.title.Info                                  = Tournament Information
@@ -348,6 +362,12 @@ home.register.lbl.withdrawal                          = The cancellation policy 
 
   competition.GrRound                                 = Round {0}
 
+  CompTyp.-1                                          = Typ
+  CompTyp.0                                           = UNKNOWN
+  CompTyp.1                                           = SINGLE
+  CompTyp.2                                           = DOUBLE
+  CompTyp.3                                           = MIXED
+  CompTyp.4                                           = TEAM
   competition.typ.0                                   = Typ
   competition.typ.1                                   = SINGLE
   competition.typ.2                                   = DOUBLE
@@ -614,6 +634,11 @@ organize.tourney.confirm.delete.btn.cancel            = CANCEL
   organize.competition.draw.noSelection                 = No competition selected.
   organize.competition.draw.noSection                   = No competition section defined.
   organize.competition.draw.invalidSection              = Configuration for competition section not supported.
+
+  organize.competition.referee.tableInfo1               = Table 
+  organize.competition.referee.tableInfo2               = <small>see<br>Clipboard /<br>Mug</small>
+  organize.competition.referee.group                    = Group {0}
+  organize.competition.referee.round                    = Round {0}
 
   organize.competition.ctrl.plh.name                    = e.g. Final Round
   organize.competition.ctrl.lbl.DemoBtn                 = Show demo button to generate random results
@@ -1400,5 +1425,20 @@ admin.database.placeholder.orgdir                     = <path> / <directory>
   err0215.sync                                        = Tourney data not in sync, different versions local/remote
   err0216.svc.setPlayer.invalidUpdate                 = Error updating player with a license not allowed
   err0217.Player.validateTTR                          = Invalid TTR-Value
+  err0218.svc.getReferee.notFound                     = Match not found
+  err0219.svc.getReferee.invalid                      = Match info invalid
+  err0220.getIpAddress                                = Could not get IP-Address from server
+  err0221.invalidNonce                                = Operation not allowed / one-time password not ok.
+  err0222.svc.invalidCompetitionPhase                 = Competition phase / round not found
+  err0223.svc.inputMatch.decodeResult                 = Error decoding inputMatch result
+  err0224.coph.inputMatch.invalidGameNo               = Error in routine inputMatch, game number {0} invalid
+  err0225.systemgroup.invalid.whoagainstwho           = Error in group system, wrong who against who values
+  err0226.svc.resetMatch.failed                       = Error in routine resetMatch
+  err0227.tourney.isDummy                             = Serverless mode
+  err0228.svc.resetMatch.decodeResult                 = Error decoding resetMatch result
+  err0229.svc.resetMatches.failed                     = Error in routine resetMatches
+  err0230.svc.resetMatch.game                         = Error in routine resetMatch with game {0}
+  err0231.svc.inputReferee.decodeResult               = Error decoding inputReferee result
+
 
 #END error codes / messages

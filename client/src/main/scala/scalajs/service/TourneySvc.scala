@@ -28,8 +28,18 @@ import org.xml.sax.ErrorHandler
 trait TourneySvc extends WrapperSvc 
 {
   
-  // export database
+  // ping server
   def ping(toId: Long, msg: String): Future[Either[Error, String]] = getAction("ping", toId, s"msg=${msg}")
+
+  // get ip address of server
+  def getIpAddress(): Future[Either[Error, String]] = {
+    Ajax.get("/getIpAddress").map(_.responseText)
+      .map(content => Right(content))
+      .recover({
+        case dom.ext.AjaxException(req) => Left(Error("err0034.ajax.getRequest", s"response: ${req.responseText.take(20)} status: ${req.statusText}", "getIpAddress"))
+        case _: Throwable               => Left(Error("err0220.getIpAddress", "getIpAddress")) 
+      })
+  }
 
   // export database
   def expDatabase(toId: Long, club: String, date: Int, etyp: String): Future[Either[Error, String]] = 
@@ -54,7 +64,6 @@ trait TourneySvc extends WrapperSvc
   // getInvitation - either error or file content
   def getInvitation(orgDir: String, startDate: Integer): Future[Either[Error, String]] = {
     val path = s"/service/getInvitation?orgDir=${orgDir}&startDate=${startDate}" 
-    //AppEnv.info("getCfgFile", s"path: ${path}")
     Ajax.get(path).map(_.responseText)
       .map(content => Right(content))
       .recover({
@@ -506,23 +515,10 @@ trait TourneySvc extends WrapperSvc
       }  
     }
 
+
   //
   // MATCH Interface
   //
-  // getMatchKo - return sequence of result entries of ko round
-  def getMatchKo(coId: Long, coPh: Int):  Future[Either[Error, Seq[ResultEntry]]] =
-    getAction("getMatchKo", App.tourney.id, s"coId=${coId.toString}&coPh=${coPh.toString}").map {
-      case Left(err)  => Left(err.add("getMatchKo"))
-      case Right(res) => ResultEntry.decSeq(res)
-    }
-
-  // getMatchGr - return sequence of result entries of a group  
-  def getMatchGr(coId: Long, coPh: Int, grId: Int):  Future[Either[Error, Seq[ResultEntry]]] = 
-    getAction("getMatchGr", App.tourney.id, s"coId=${coId}&coPh=${coPh}&grId=${grId}").map {
-      case Left(err)  => Left(err.add("getMatchGr"))
-      case Right(res) => ResultEntry.decSeq(res)
-    }
-
   // hasMatch - returns true if game results for player are available
   def hasResult():  Future[Either[Error, Boolean]] = 
     getAction("hasResult", App.tourney.id).map {
@@ -530,6 +526,111 @@ trait TourneySvc extends WrapperSvc
       case Right(res) => Return.decode2Boolean(res, "hasResult")
     } 
 
+
+
+  // inputMatch - input match result, returns affected game numbers 
+  def inputMatch(toId: Long, coId: Long, coPhId: Int, gameNo: Int, 
+                 sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
+      (for {
+        r1 <- EitherT(Future(App.tourney.cophs((coId, coPhId)).inputMatch(gameNo, sets, balls, info, playfield)))
+        r2 <- EitherT(inputMatchRemote(toId, coId, coPhId, gameNo, sets, balls, info, playfield) ) 
+      } yield { (r1, r2) }).value.map {   
+        case Left(err)  => Left(err)
+        case Right(res) => Right(res._1) 
+      }
+    }  
+  }
+
+  // inputReferee - input match result (no overwrite), returns affected game numbers 
+  def inputReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, 
+                 sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = 
+    postAction("inputMatch", toId, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}",
+      write[( (Int, Int), String, String, String) ]((sets, balls, info, playfield)), true).map {
+        case Left(err)  => Left(err.add("postAction/inputReferee"))
+        case Right(res) => {
+          try Right(read[List[Int]](res))  
+          catch { case _:Throwable => Left(Error("err0223.svc.inputMatch.decodeResult", "", "", "inputRefere")) }    
+          } 
+      }
+
+
+  def inputMatchRemote(toId: Long, coId: Long, coPhId: Int, gameNo: Int, 
+                       sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = 
+    if (App.serverLess) Future(Right(List())) else {
+      postAction("inputMatch", toId, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}",
+        write[( (Int, Int), String, String, String) ]((sets, balls, info, playfield)), true).map {
+          case Left(err)  => Left(err.add("postAction/inputMatch"))
+          case Right(res) => {
+            try Right(read[List[Int]](res))  
+            catch { case _:Throwable => Left(Error("err0223.svc.inputMatch.decodeResult", "", "", "inputMatch")) }    
+            } 
+        }
+    }    
+
+
+  // resetMatch - reset a match locally result, returns affected game numbers 
+  def resetMatch(toId: Long, coId: Long, coPhId: Int, gameNo: Int,  
+                 rPantA: Boolean=false, rPantB: Boolean=false): Future[Either[Error, List[Int]]] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
+      (for {
+        r1 <- EitherT(Future( App.tourney.cophs((coId, coPhId)).resetMatch(gameNo, rPantA, rPantB) ))
+        r2 <- EitherT( resetMatchRemote(toId, coId, coPhId, gameNo, rPantA, rPantB) )
+      } yield { (r1, r2) }).value.map {   
+        case Left(err)  => Left(err)
+        case Right(res) => Right(res._1) 
+      }
+    }  
+  }
+
+  // resetMatchRemote - reset a match locally result, returns affected game numbers 
+  def resetMatchRemote(toId: Long, coId: Long, coPhId: Int, gameNo: Int,  
+                 rPantA: Boolean=false, rPantB: Boolean=false): Future[Either[Error, List[Int]]] = 
+    if (App.serverLess) Future(Right(List())) else {
+      postAction("resetMatch", toId, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}&resetPantA=${rPantA}&resetPantB=${rPantB}", "", true).map {
+          case Left(err)  => Left(err.add("postAction/reseetMatch"))
+          case Right(res) => {
+            try Right(read[List[Int]](res))  
+            catch { case _:Throwable => Left(Error("err0228.svc.resetMatch.decodeResult", "", "", "resetMatch")) }    
+            } 
+        }
+    }  
+
+
+
+  // resetMatch - reset a match locally result, returns affected game numbers 
+  def resetMatches(toId: Long, coId: Long, coPhId: Int): Future[Either[Error, List[Int]]] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
+      (for {
+        r1 <- EitherT(Future( App.tourney.cophs((coId, coPhId)).resetMatches() ))
+        r2 <- EitherT( resetMatchesRemote(toId, coId, coPhId) )
+      } yield { (r1, r2) }).value.map {   
+        case Left(err)  => Left(err)
+        case Right(res) => Right(res._1) 
+      }
+    }  
+  }
+
+  // resetMatchesRemote - reset a match locally result, returns affected game numbers 
+  def resetMatchesRemote(toId: Long, coId: Long, coPhId: Int): Future[Either[Error, List[Int]]] = 
+    if (App.serverLess) Future(Right(List())) else {
+      postAction("resetMatches", toId, s"coId=${coId}&coPhId=${coPhId}", "", true).map {
+        case Left(err)  => Left(err.add("postAction/resetMatches"))
+        case Right(res) => {
+          try Right(read[List[Int]](res))  
+          catch { case _:Throwable => Left(Error("err0228.svc.resetMatch.decodeResult", "", "", "resetMatch")) }    
+        } 
+      }
+    }
 
 
   //
@@ -548,6 +649,16 @@ trait TourneySvc extends WrapperSvc
         }    
       }     
     }
+
+  // getCompPhase - fetches whole competition phase from server
+  def getCompPhase(coId: Long, coPhId: Int): Future[Either[Error, CompPhase]] = 
+    postAction("getCompPhase", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}", "", false).map {
+      case Left(err)      => Left(err)
+      case Right(coPhEnc) => CompPhase.decode(coPhEnc) match {
+        case Left(err)       => Left(err)
+        case Right(result)   => Right(result)
+      }      
+    }  
 
 
   //

@@ -74,14 +74,14 @@ object DlgCardPlayer extends BasicHtml
       case "Gender" => player.sex = SexTyp(getInput(elem, 0))
 
       case "DeleteLicense" => {
-        DlgBox.standard(getMsg("delete.hdr"),getMsg("delete.msg", getInput("License", ""), player.getName(0)), Seq("cancel", "yes"), 0, true) map {
+        DlgBox.standard(getMsg("delete.hdr"),getMsg("delete.msg", getInput(gE(uc("License")), ""), player.getName(0)), Seq("cancel", "yes"), 0, true) map {
           case 2 => player.delLicense; setPlayerView(player, tourney) 
           case _ => debug("actionEvent", s"abort deletion of license")  
         }
       }
     
       case "ChangeLicense" => {
-        val cttLicInfo = CttPersonCsv(tourney.licenses.getOrElse(getInput("License", ""),"")) 
+        val cttLicInfo = CttPersonCsv(tourney.licenses.getOrElse(getInput(gE(uc("License")), ""),"")) 
         cttLicInfo.get match {
           case Left(err)  => debug("actionEvent", s"Change License ${err}")
           case Right(ctp) => player = ctp.toPlayer(player.id, 0L, player.email); setPlayerView(player, tourney)  
@@ -106,16 +106,16 @@ object DlgCardPlayer extends BasicHtml
     var lfid      = ("", "", 0L) //(lastname, firstname, id)-Tuppel
     var email     = ""
 
-    val bYear = getInput("Year", 0)
-    val club  = getInput("Club", "")
+    val bYear = getInput(gE(uc("Year")), 0)
+    val club  = getInput(gE(uc("Club")), "")
     
 
-    Player.validateEmail(getInput("Email", "")) match {
+    Player.validateEmail(getInput(gE(uc("Email")), "")) match {
       case Left(err)  => eList += err
       case Right(res) => email = res
     }
 
-    Player.validateName(getInput("Name", "")) match {
+    Player.validateName(getInput(gE(uc("Name")), "")) match {
       case Left(err)  => eList += err
       case Right(res) => lfid = res
     }

@@ -120,9 +120,9 @@ object DlgCardCfgCompPhase extends BasicHtml
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {     
       case "Selection" => { 
-        val cst = getInput("CfgSelection", CPC_UNKN)  // competition phase category
+        val cst = getInput(gE(uc("CfgSelection")), CPC_UNKN)  // competition phase category
         setDisabled("Submit", cst == CPC_UNKN)
-        setHtml("CfgInfo", CompPhase.getDescription(cst, size, getMsg_ )) 
+        setHtml("CfgInfo", CompPhase.getDescription(cst, size, gM )) 
         setInput("CfgName", genCfgName(cst, 0, true))
       }
       
@@ -158,9 +158,9 @@ object DlgCardCfgCompPhase extends BasicHtml
    * 
    */ 
   def validate(): Either[Error, Boolean] = {
-    result.config  = getInput("CfgSelection", CPC_UNKN)
-    result.name    = getInput("CfgName", "")
-    result.winSets = getInput("CfgWinset", 0)
+    result.config  = getInput(gE(uc("CfgSelection")), CPC_UNKN)
+    result.name    = getInput(gE(uc("CfgName")))
+    result.winSets = getInput(gE(uc("CfgWinset")), 0)
     result.qualify = qualifyMode == QualifyTyp.None || qualifyMode == QualifyTyp.Winner || qualifyMode == QualifyTyp.All
     result.pants   = pants
 

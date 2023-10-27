@@ -1,13 +1,14 @@
 /**
  * Stylesheet for printing
- * @version         1.0
- * @lastmodified    2019/07/12
+ * @version         1.1
+ * @lastmodified    2022/09/05
+ * Das A4-Blatt hat die Maße 297 mm x 210 mm und den Flächeninhalt 297 
  */
 
  body {
-  width:  19cm;
-  height: 22.7cm;
-  margin: 5mm 5mm 5mm 5mm; 
+  width:  20.5cm;
+  height: 29.5cm;
+  margin: 0mm 0mm 0mm 0mm; 
     /* change the margins as you want them to be. */
 
   font: 13pt Georgia, "Times New Roman", Times, serif;
@@ -85,87 +86,131 @@
 
 @media print {
  
-#content, #page {
-  width: 100%; 
-  margin: 0; 
-  float: none;
-}
+  #content, #page {
+    width: 100%; 
+    margin: 0; 
+    float: none;
+  }
 
-/* define all page breaks*/
-a {
-  page-break-inside:avoid
-}
-blockquote {
-  page-break-inside: avoid;
-}
-h1, h2, h3, h4, h5, h6 { 
-  page-break-after:avoid; 
-  page-break-inside:avoid 
-}
-img { 
-  page-break-inside:avoid; 
-  page-break-after:avoid; 
-}
-table, pre { page-break-inside:avoid }
-ul, ol, dl { page-break-before:avoid }
-    
+  /* define all page breaks*/
+  a {
+    page-break-inside:avoid
+  }
+  blockquote {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 { 
+    page-break-after:avoid; 
+    page-break-inside:avoid 
+  }
+  img { 
+    page-break-inside:avoid; 
+    page-break-after:avoid; 
+  }
+  table, pre { page-break-inside:avoid }
+  ul, ol, dl { page-break-before:avoid }
+      
 
-a:link, a:visited, a {
-  background: transparent;
-  color: #520;
-  font-weight: bold;
-  text-decoration: underline;
-  text-align: left;
-}
+  a:link, a:visited, a {
+    background: transparent;
+    color: #520;
+    font-weight: bold;
+    text-decoration: underline;
+    text-align: left;
+  }
 
-a {
-  page-break-inside:avoid
-}
+  a {
+    page-break-inside:avoid
+  }
 
-a[href^=http]:after {
-  content:" <" attr(href) "> ";
-}
+  a[href^=http]:after {
+    content:" <" attr(href) "> ";
+  }
 
-$a:after > img {
-  content: "";
-}
+  a:after > img {
+    content: "";
+  }
 
-article a[href^="#"]:after {
-  content: "";
-}
+  article a[href^="#"]:after {
+    content: "";
+  }
 
-a:not(:local-link):after {
-  content:" <" attr(href) "> ";
-}
+  a:not(:local-link):after {
+    content:" <" attr(href) "> ";
+  }
 
 
-p, address, li, dt, dd, blockquote {
-font-size: 100%
-}
+  p, address, li, dt, dd, blockquote {
+  font-size: 100%
+  }
 
-code, pre { font-family: "Courier New", Courier, mono}
+  code, pre { font-family: "Courier New", Courier, mono}
 
-ul, ol {
- list-style: square; margin-left: 18pt;
- margin-bottom: 20pt;    
-}
+  ul, ol {
+  list-style: square; margin-left: 18pt;
+  margin-bottom: 20pt;    
+  }
 
-li {
-  line-height: 1.6em;
-}
+  li {
+    line-height: 1.6em;
+  }
 
-.pagebreak { page-break-before: always; }
+  .print_full_image {
+      position: absolute;
+      top: 0in;
+      left: 0in;
+      width: 4in;
+      height: 3in;
+      margin-top: 0in;
+      margin-left: 0in;
+      margin-bottom: 0in;
+      margin-right: 0in;
+  }
 
-.print_full_image {
-    position: absolute;
-    top: 0in;
-    left: 0in;
-    width: 4in;
-    height: 3in;
-    margin-top: 0in;
-    margin-left: 0in;
-    margin-bottom: 0in;
-    margin-right: 0in;
-}
-    
+  nav.navbar { 
+    width: 0%;
+  }
+
+  .printarea-referee {
+    page-break-after:always;
+    break-after: page;
+    display: block!important;
+  }
+
+  .printbefore {
+    page-break-before:always;
+  }
+
+  
+  .content-wrapper {
+    margin-left: 0px;
+  } 
+
+  body.sidenav-toggled footer.tuse-sticky-header {
+    width: 100%;
+  }
+  footer.tuse-sticky-header {
+    width: 100%;
+  }
+  footer.tuse-sticky-footer {
+    width: 100%;
+  }
+
+  #mainNav .navbar-brand {
+    width: 0px;
+  }
+  #mainNav .navbar-collapse .navbar-sidenav > .nav-item {
+    width: 0px;
+    padding: 0;
+  }
+  #mainNav.fixed-top .sidenav-toggler > .nav-item {
+    width: 0px;
+    padding: 0;
+  }
+  footer.sticky-footer {
+    width: 100%;
+  }
+
+
+
 }

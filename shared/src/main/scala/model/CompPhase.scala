@@ -31,7 +31,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   //*****************************************************************************
   // Status Routines
   //*****************************************************************************
-  def setStatus():Unit = { 
+  def updateStatus():Unit = { 
     mFinished = matches.foldLeft(0) ((cnt, m) => if (m.finished) cnt + 1 else cnt)
     
     status match {
@@ -239,11 +239,11 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }      
   }
 
-  def resetMatches(): Unit = {
+  def resetResults(): Unit = {
     for (i<-0 to matches.length-1) matches(i).reset()
     coPhTyp match {
-      case CompPhaseTyp.GR => for (i <- 0 to groups.size-1) groups(i).resetMatch
-      case CompPhaseTyp.KO => ko.resetMatch()
+      case CompPhaseTyp.GR => for (i <- 0 to groups.size-1) groups(i).resetResult
+      case CompPhaseTyp.KO => ko.resetResult()
       case _      => // do some error handling?
     }
   }
@@ -252,9 +252,13 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   // setModel enter result into the corresponding model 
   def setModel(m: MEntry): Unit = {  
     matches(m.gameNo-1) = m
+
+    
     m.coPhTyp match {
       case CompPhaseTyp.GR => {
         val mtch = m.asInstanceOf[MEntryGr]
+        println(s"setModel (group) match: ${mtch.toString}")
+
         if (mtch.grId > 0 & mtch.grId <= groups.length) {
           groups(mtch.grId-1).setMatch(mtch) match {
             case Left(err)  => println(s"Error: set group match: ${err.toString}" )
@@ -265,11 +269,13 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         }
       }  
 
-
-      case CompPhaseTyp.KO => ko.setMatch(m.asInstanceOf[MEntryKo]) match {
-        case Left(err)  => println("Error: set ko match, invalid param")
-        case Right(res) => if (res) ko.calc else println("Error: set ko match, invalid param")
-      } 
+      case CompPhaseTyp.KO => {
+        println(s"setModel (ko) match: ${m.asInstanceOf[MEntryKo]}")
+        ko.setMatch(m.asInstanceOf[MEntryKo]) match {
+          case Left(err)  => println("Error: set ko match, invalid param")
+          case Right(res) => if (res) ko.calc else println("Error: set ko match, invalid param")
+        }
+      }   
  
       case _      => ()
     }
@@ -277,15 +283,19 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
   
 
 
-  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String) = {
-    val m = getMatch(gameNo)
-    m.setSets(sets)
-    m.setResult(result)
-    m.setInfo(info)
-    m.setPlayfield(playfield)
-    m.setStatus(depFinished(gameNo, m.coPhTyp))
-    setModel(m)
-    setStatus() 
+  // inputMatch - set match result, info, playfield ....
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = {
+    try {
+      val m = getMatch(gameNo)
+      m.setSets(sets)
+      m.setResult(result)
+      m.setInfo(info)
+      m.setPlayfield(playfield)
+      m.setStatus(depFinished(gameNo, m.coPhTyp))
+      setModel(m)
+      updateStatus() 
+      Right(propMatch(gameNo))
+    } catch { case _:Throwable => Left(Error("err0224.coph.inputMatch.invalidGameNo", gameNo.toString))} 
   }
 
 
@@ -323,7 +333,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
         }
       }
     }
-    setStatus() 
+    updateStatus() 
     triggerList.toList
   }
 
@@ -336,68 +346,75 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, val coPh
     }    
   }
   
-  def resetMatch(gameNo: Int): Unit = {
-    matches(gameNo-1).reset()
-    setModel(matches(gameNo-1))
-  }
 
-  def resetAllMatches(): List[Int] = {
+  def resetMatches(): Either[Error, List[Int]] = {
+    var error = Error.dummy
     val triggerList = scala.collection.mutable.ListBuffer[Int]()
 
-    coPhTyp match {
-      case CompPhaseTyp.KO | CompPhaseTyp.GR => {
-        // val mList = (for (m <- matches) yield { if (m.status == MEntry.MS_FIN && (m.round == maxRnd || m.round == (maxRnd-1))) m.gameNo else 0 }).filter(_ != 0)
-        // mList.distinct.sorted foreach { g => triggerList ++= resetMatchPropagate(g) } 
-        for (i<-0 to matches.length-1) {
-          if (matches(i).status == MEntry.MS_FIN || matches(i).status == MEntry.MS_RUN) {
-            triggerList ++= resetMatchPropagate(matches(i).gameNo)
-          }          
-        }
+    try {
+      coPhTyp match {
+        case CompPhaseTyp.KO | CompPhaseTyp.GR => 
+          // val mList = (for (m <- matches) yield { if (m.status == MEntry.MS_FIN && (m.round == maxRnd || m.round == (maxRnd-1))) m.gameNo else 0 }).filter(_ != 0)
+          // mList.distinct.sorted foreach { g => triggerList ++= resetMatchPropagate(g) } 
+          for (i<-0 to matches.length-1) 
+            if (matches(i).status == MEntry.MS_FIN || matches(i).status == MEntry.MS_RUN) 
+              resetMatch(matches(i).gameNo) match {
+                case Left(err)  => error = err
+                case Right(res) => triggerList ++= res
+              }
+        case _ => {}
       }
-      case _ => {
-
-      }
-    }
-    triggerList.distinct.sorted.toList
+      if (error.isDummy) Right(triggerList.distinct.sorted.toList) else Left(error)
+    } catch { case _:Throwable => Left(Error("err0229.svc.resetMatches.failed")) }
   }
 
 
-  def resetMatchPropagate(gameNo: Int, resetPantA: Boolean=false, resetPantB: Boolean=false): List[Int] = {
+
+  def resetMatch(gameNo: Int, resetPantA: Boolean=false, resetPantB: Boolean=false): Either[Error, List[Int]] = {
     import scala.collection.mutable.ListBuffer
 
-    val triggerList = ListBuffer[Int](gameNo)
-    val m = getMatch(gameNo)
-    m.reset(resetPantA, resetPantB)
+    try {
+      var error = Error.dummy
+      val triggerList = ListBuffer[Int](gameNo)
+      val m = getMatch(gameNo)
+      m.reset(resetPantA, resetPantB)
+      
+      m.coPhTyp match {
+        case CompPhaseTyp.GR => {
+          setModel(m.setStatus(depFinished(gameNo, m.coPhTyp)))
+
+          // set status for every match to be triggered
+          val trigger = m.asInstanceOf[MEntryGr].getTrigger
+          for (g <- trigger) { 
+            setModel(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
+            triggerList.append(g)
+          }  
+        }
+
+        case CompPhaseTyp.KO => {
+          setModel(m.setStatus(true))      
+          // propagate deletion of that position
+          val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
+          //println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
+          if (existsMatchNo(gWin)) resetMatch(gWin, pWin==0, pWin==1 ) match {
+            case Left(err)  => error = err
+            case Right(res) => triggerList ++= res
+          }
+          
+
+          // propagate looser i.e. 3rd place match
+          val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
+          //println(s"propagate looser gameNo: ${gLoo} position: ${pWin}")
+          if (existsMatchNo(gLoo)) resetMatch(gLoo, pLoo==0, pLoo==1 ) match {
+            case Left(err) => error = err
+            case Right(res) => triggerList ++= res
+          }
+        }
+      }
+      updateStatus() 
+      if (error.isDummy) Right(triggerList.toList) else Left(error)
+    } catch { case _: Throwable => Left(Error("err0230.svc.resetMatch.game", gameNo.toString))}
     
-    m.coPhTyp match {
-      case CompPhaseTyp.GR => {
-        println(s"Match 1: ${m}")
-
-        setModel(m.setStatus(depFinished(gameNo, m.coPhTyp)))
-        println(s"Match 2: ${matches(m.gameNo-1)}")
-        // set status for every match to be triggered
-        val trigger = m.asInstanceOf[MEntryGr].getTrigger
-        for (g <- trigger) { 
-          setModel(getMatch(g).setStatus(depFinished(g, m.coPhTyp)))
-          triggerList.append(g)
-        }  
-      }
-
-      case CompPhaseTyp.KO => {
-        setModel(m.setStatus(true))      
-        // propagate deletion of that position
-        val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
-        println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
-        if (existsMatchNo(gWin)) { triggerList ++= resetMatchPropagate(gWin, pWin==0, pWin==1 ) }  
-
-        // propagate looser i.e. 3rd place match
-        val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
-        println(s"propagate looser gameNo: ${gLoo} position: ${pWin}")
-        if (existsMatchNo(gLoo)) { triggerList ++= resetMatchPropagate(gLoo, pLoo==0, pLoo==1 ) } 
-      }
-    }
-    setStatus() 
-    triggerList.toList
   }
 
 

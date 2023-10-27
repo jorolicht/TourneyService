@@ -57,7 +57,7 @@ object InfoPlayer extends UseCase("InfoPlayer")
           ("%05d".format(tourney.players(pl).id), 
             tourney.players(pl).getName(),
             tourney.players(pl).clubName, 
-            info.getPlaceDesc(getMsg_ _), 
+            info.getPlaceDesc(gM _), 
             tourney.players(pl).getTTR)
         } else if (info.status >= fromStatus &  tourney.comps(co).typ == 2) {
           // DOUBLE
@@ -65,7 +65,7 @@ object InfoPlayer extends UseCase("InfoPlayer")
           ("%05d".format(tourney.players(pl1).id) + "·" + "%05d".format(tourney.players(pl2).id),
           s"${tourney.players(pl1).lastname}/${tourney.players(pl2).lastname}",
           s"${tourney.players(pl1).clubName}/${tourney.players(pl2).clubName}",
-          info.getPlaceDesc(getMsg_ _), 
+          info.getPlaceDesc(gM _), 
           s"${tourney.players(pl1).getTTR}/${tourney.players(pl2).getTTR}")
         } else {
           ("","","","","")

@@ -41,9 +41,12 @@ object App extends BasicHtml with TourneySvc
 
   // List of uscases
   var ucList = List(HomeMain, HomeSetting, HomeSearch, HomeLogin, HomeRegister, HomeDemo, HomeMockup,  
-                    InfoEnabled, InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, InfoPlayfield, InfoResult, InfoSchedule,
-                    OrganizeCertificate, OrganizeCompetition, OrganizePlayer, OrganizePlayfield, OrganizeReport, OrganizeTourney,
-                    OrganizeCompetitionCtrl, OrganizeCompetitionDraw, OrganizeCompetitionInput, OrganizeCompetitionView,
+                    InfoEnabled, InfoDisabled, InfoCertificate, InfoCompetition, InfoPlayer, 
+                    InfoPlayfield, InfoResult, InfoSchedule,
+                    OrganizeCertificate, OrganizeCompetition, OrganizePlayer, 
+                    OrganizePlayfield, OrganizeReport, OrganizeTourney,
+                    OrganizeCompetitionCtrl, OrganizeCompetitionDraw, OrganizeCompetitionInput, 
+                    OrganizeCompetitionView, OrganizeCompetitionReferee,
                     OrganizeReport, 
                     AdminDatabase, AdminLicense 
                    )
@@ -53,6 +56,21 @@ object App extends BasicHtml with TourneySvc
   
   var tourney       = Tourney.init
   var tourneyUpdate = false
+  var serverLess    = false
+
+ /** error - entry point of application
+   *
+   * @param msgCode       - error code
+   * @param in1           - first insert for error message
+   * @param in2           - 2nd insert for error message
+   * @param callStack     - list of all called functions
+   * @param lang          - language code
+   */  
+  @JSExport
+  def error(msgCode: String, in1: String, in2: String, callStack: String, lang: String): Unit = {  
+    errLog(s"msgCode:${msgCode} in1:${in1} in2:${in2} callStack:${callStack} lang:${lang}")
+  }            
+
 
   /** main - entry point of application
    *
@@ -68,7 +86,7 @@ object App extends BasicHtml with TourneySvc
 
     println(s"Startup ucName:${ucName} ucParam:${ucParam} ucInfo:${ucInfo} lang:${language} version: ${version} update:${lastUpdate}")
     setVisible("Info", false)
-    setHeader()
+    
 
     // initialize debug/mockup and logger
     AppEnv.initMockup()
@@ -79,13 +97,13 @@ object App extends BasicHtml with TourneySvc
     ucList foreach { uc => ucMap.addOne(uc.name, uc) }
 
     val initOk = for {
+      homeSet       <- AppEnv.initHome()
       msgsLoaded    <- AppEnv.initMessages(lastUpdate, language)
       cookieAllowed <- AppEnv.initCookie(
                          if (msgsLoaded) AppEnv.getMessage("config.cookie.confirmation").toBooleanOption.getOrElse(true) else true
                        ) 
     } yield {
-      AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
-      cookieAllowed & msgsLoaded
+      cookieAllowed & msgsLoaded & homeSet
     }  
 
     // regularly update database
@@ -98,6 +116,11 @@ object App extends BasicHtml with TourneySvc
     val result = initOk.map { _ match {
       // do the actual work and exec the usecase
       case true  => {
+        // initialize header with de
+        setHeader()
+        // set debug level
+        AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
+
         // initialize tourney if basic usecase is called
         if (ucName == "HomeMain") setLocalTourney(Tourney.init) else loadLocalTourney()
         initTrigger()      
@@ -116,8 +139,8 @@ object App extends BasicHtml with TourneySvc
   def execUseCase(ucName: String, ucParam: String="", ucInfo: String="", setHistory: Boolean = true, reload: Boolean = false): Unit = {
     
     try   {      
-      val url = s"${AppEnv.home}/start?ucName=${ucName}&ucParam=${ucParam}&ucInfo=${ucInfo}"
-
+      val home = dom.window.location.protocol + "//" + dom.window.location.host
+      val url = s"${home}/start?ucName=${ucName}&ucParam=${ucParam}&ucInfo=${ucInfo}"
       if (setHistory) {
         dom.window.history.pushState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
       } else {
@@ -141,6 +164,13 @@ object App extends BasicHtml with TourneySvc
     }
     catch { case _: Throwable => HomeMain.render("Error", getError(Error("err0098.usecase.unknown", ucName))) }
   }
+
+
+
+
+
+
+
 
 
   @JSExport
@@ -179,9 +209,6 @@ object App extends BasicHtml with TourneySvc
       case _                             => true
     }
   }  
-
-
-
 
 
   /** initTrigger - setup server sent event
@@ -255,11 +282,10 @@ object App extends BasicHtml with TourneySvc
             case "Competition"      => for { x <- updateCompetition(toId)      } yield updViews(updt) 
             case "Club"             => for { x <- updateClub(toId)             } yield updViews(updt) 
             case "Player"           => for { x <- updatePlayer(toId)           } yield updViews(updt) 
-            case "Pant2Comp" => for { x <- updatePant2Comp(toId) } yield updViews(updt) 
+            case "Pant2Comp"        => for { x <- updatePant2Comp(toId) } yield updViews(updt) 
             case "Playfield"        => for { x <- updatePlayfield(toId)        } yield updViews(updt) 
-            case "MatchKo"          => for { x <- updatePlayfield(toId); y <- updateMatchKo(toId, coId, coPh) } yield updViews(updt)
-            case "MatchGr"          => for { x <- updatePlayfield(toId); y <- updateMatchGr(toId, coId, coPh, grId) } yield updViews(updt)
-            case "MatchReset"       => resetMatches(coId,coPh); updViews(updt)
+            case "CompPhase"        => updateCompPhase(toId, coId, coPh).map { case _ => updViews(updt) }
+            case "MatchReset"       => resetResults(coId,coPh); updViews(updt)
             case _                  => debug("receive", s"unknown trigger command: ${e.data.toString}")
           }
         }
@@ -280,32 +306,10 @@ object App extends BasicHtml with TourneySvc
     execUseCase("HomeTest", arg1, arg2)
   }  
 
-  def updateMatchKo(toId: Long, coId: Long, coPh: Int): Future[Boolean] = {
-    getMatchKo(coId,coPh).map { 
-      case Left(err) => error("updateMatchKo", getError(err)); false
-      case Right(matches) => {
-        tourney.cophs((coId, coPh)).ko.setResultEntries(matches)
-        saveLocalTourney(tourney)
-        true
-      }  
-    }
-  }
 
-  def updateMatchGr(toId: Long, coId: Long, coPh: Int, grId: Int): Future[Boolean] = {
-    //debug("updateMatchGr", s"coId: ${coId} coPh: ${coPh} grId: ${grId}")
-    getMatchGr(coId,coPh,grId).map { 
-      case Left(err)      => error("updateMatchGr", getError(err)); false
-      case Right(matches) => {
-        tourney.cophs((coId,coPh)).groups(grId-1).setResultEntries(matches)
-        saveLocalTourney(tourney)
-        true
-      }  
-    }
-  }
-
-  def resetMatches(coId: Long, coPh: Int): Unit = 
+  def resetResults(coId: Long, coPh: Int): Unit = 
     if (tourney.cophs.isDefinedAt((coId, coPh))) {
-      tourney.cophs((coId, coPh)).resetMatches
+      tourney.cophs((coId, coPh)).resetResults
       saveLocalTourney(tourney)
     }
 
@@ -329,6 +333,18 @@ object App extends BasicHtml with TourneySvc
         true
       }
     }
+
+  // updates competition phase, returns Error or status of the competition phase  
+  def updateCompPhase(toId: Long, coId: Long, coPhId:Int): Future[Either[Error, CompPhaseStatus.Value]] = 
+    getCompPhase(coId, coPhId).map {
+      case Left(err)   => Left(err)
+      case Right(coph) => {
+        tourney.cophs((coId, coPhId)) = coph
+        saveLocalTourney(tourney)
+        Right(coph.status)
+      }
+    }
+
 
 
   def updateCompetition(toId: Long): Future[Boolean] = 
@@ -400,31 +416,12 @@ object App extends BasicHtml with TourneySvc
     saveLocalTourney(trny)
   }
 
-
   def saveLocalTourney(trny: Tourney): Unit = {
     AppEnv.setToId(trny.id)
     try AppEnv.setLocalStorage("AppEnv.Tourney", write(trny))
     catch { case _: Throwable => AppEnv.error("saveLocalTourney(error)", "couldn't write to local storage") }    
   }
   
-
   def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
 
-  /** 
-   * Tourney getter and setter 
-   */
-  def getCompName(coId: Long=0) = tourney.getCompName(coId)
-  def getCurCoId                = tourney.getCurCoId
-  def getCurCoPhId              = tourney.getCurCoPhId
-
-  def getTourneyName()          = tourney.name
-  def getTourneyOrgDir()        = tourney.orgDir 
-  def getTourneyOrganizer()     = tourney.organizer 
-  def getTourneyStartDate()     = tourney.startDate
-  def getTourneyEndDate()       = tourney.endDate
-
-  def setCurCoId(coId: Long)                 = tourney.setCurCoId(coId)
-  def resetCurCoId                           = tourney.setCurCoId(0)
-
-  def setCurCoPhId(coId: Long, coPhId: Int)  = tourney.setCurCoPhId(coId, coPhId) 
 }

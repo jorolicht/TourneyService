@@ -54,7 +54,7 @@ object AddonDraw extends TestUseCase("AddonDraw")
     } yield { (result, pw) }).value.map {
       case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(1)
+        App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
 
         //val testTrny = Tourney.decode(encResult)
@@ -79,7 +79,7 @@ object AddonDraw extends TestUseCase("AddonDraw")
     } yield { (result, pw) }).value.map {
       case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(1)
+        App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
         SUCCESS(tnp)
 
@@ -100,8 +100,8 @@ object AddonDraw extends TestUseCase("AddonDraw")
     } yield { (result, pw) }).value.map {
       case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
       case Right(res)   => {
-        App.setCurCoId(1)
-        App.setCurCoPhId(1, 3)
+        App.tourney.setCurCoId(1)
+        App.tourney.comps(1).setCurCoPhId(3)
         App.execUseCase("OrganizeCompetitionInput", "", "")
         SUCCESS(tnp)
       }

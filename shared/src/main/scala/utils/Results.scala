@@ -24,6 +24,7 @@ object Error {
     errTx.split("\\^").length == 4
   }
   def dummy = Error("","","","")
+
 }
 
 case class Return[A](value: A) {

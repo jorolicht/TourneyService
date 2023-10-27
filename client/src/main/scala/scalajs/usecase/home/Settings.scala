@@ -123,7 +123,11 @@ object HomeSetting extends UseCase("HomeSetting")
 
         if (valid) {
           debug("actionEvent", s"key: ${key} email: ${email} name: ${name}") 
-          authUpdate(email, name,  Address("", InputCtrl.getCountry("country").getOrElse(""), getInput("zip"), getInput("city"), getInput("street")), password).map { 
+          authUpdate(email, name,  
+            Address("", InputCtrl.getCountry("country").getOrElse(""), 
+                        getInput(gE(uc("zip"))), 
+                        getInput(gE(uc("city"))), 
+                        getInput(gE(uc("street")))), password).map { 
             case Left(err)  => {
               DlgInfo.show(getMsg("contactChange.failure.dlg.hdg"), getError(err), "danger")
             }

@@ -37,7 +37,7 @@ object DlgPrompt extends BasicHtml
     val f = p.future
   
     def dialogBoxCancel() = if (!p.isCompleted) p success Left("CANCEL")
-    def dialogBoxClick(e: Event) = if (!p.isCompleted) p success Right(getInput("DlgPrompt__Input", "")(UCP()))
+    def dialogBoxClick(e: Event) = if (!p.isCompleted) p success Right(getInput(gE("DlgPrompt__Input")))
 
     loadModal(html.DlgPrompt(), "DlgPrompt__Modal")
     actionfunc = afunc
@@ -52,7 +52,7 @@ object DlgPrompt extends BasicHtml
       if (Seq(13).contains(e.keyCode.toInt)) {
         // ENTER KEY
         e.preventDefault()
-        if (!p.isCompleted) p success Right(getInput("DlgPrompt__Input", "")(UCP()))
+        if (!p.isCompleted) p success Right(getInput(gE("DlgPrompt__Input")))
       }
 
       if (Seq(38).contains(e.keyCode.toInt)) {
@@ -108,7 +108,7 @@ object DlgPrompt extends BasicHtml
   }
 
   def hide = { $("#DlgPrompt").modal("hide") }
-  def get = getInput("DlgPrompt__Input", "")(UCP()) 
+  def get = getInput(gE("DlgPrompt__Input")) 
   def set(value: String) = setInput("DlgPrompt__Input", value)(UCP())
   def clear = setInput("Input", "")
   def focus = dom.document.getElementById("DlgPrompt__Input").asInstanceOf[HTMLInputElement].focus()

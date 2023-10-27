@@ -39,14 +39,14 @@ object DlgCardComp extends BasicHtml
     key match {
       case "NameCompose"  => { 
         if (getCheckbox(gE(uc("NameCompose")))) {  
-          val typ = getInput("typ", 0)
-          setInput("name", getInput("AgeGroup", getMsg("plh.AgeGroup") )+ "·" 
-                               + getInput("Class", getMsg("plh.Class")) + "·" 
-                               + getMsg_("competition.typ."+typ) )
+          val typ = getInput(gE(uc("typ")), 0)
+          setInput("name", getInput(gE(uc("AgeGroup")), getMsg("plh.AgeGroup") )+ "·" 
+                               + getInput(gE(uc("Class")), getMsg("plh.Class")) + "·" 
+                               + gM("competition.typ."+typ) )
           setAttribute(gE(uc("name")), "readonly", "true")                     
         } else {
           removeAttribute(gE(uc("name")), "readonly") 
-          setInput("name", getInput("name").replace("·", " "))
+          setInput("name", getInput(gE(uc("name"))).replace("·", " "))
         }
       } 
       
@@ -79,16 +79,16 @@ object DlgCardComp extends BasicHtml
   // getInput
   def getInput(): Competition = {
 
-    val comp = Competition(getData("Form","id", 0L), getData("Form","hashKey",""), 
-                           getInput("name", ""), CompTyp(getInput("typ", 0)),
-                           parseStartTime(getInput("startTime", "")),
-                           CompStatus(getInput("status", CompStatus.UNKN.id)), getData("Form", "options", ""))
+    val comp = Competition(getData(gE(uc("Form")),"id", 0L), getData(gE(uc("Form")),"hashKey",""), 
+                           getInput(gE(uc("name"))), CompTyp(getInput(gE(uc("typ")), 0)),
+                           parseStartTime(getInput(gE(uc("startTime")))),
+                           CompStatus(getInput(gE(uc("status")), CompStatus.UNKN.id)), getData(gE(uc("Form")), "options", ""))
     // set optional values                       
-    comp.setAgeGroup(getInput("AgeGroup", ""))
-    comp.setRatingRemark(getInput("Class", ""))
-    comp.setRatingLowLevel(getInput("TTRFrom", 0))
-    comp.setRatingUpperLevel(getInput("TTRTo", 0))
-    comp.setSex(getInput("Sex", 0))
+    comp.setAgeGroup(getInput(gE(uc("AgeGroup"))))
+    comp.setRatingRemark(getInput(gE(uc("Class"))))
+    comp.setRatingLowLevel(getInput(gE(uc("TTRFrom")), 0))
+    comp.setRatingUpperLevel(getInput(gE(uc("TTRTo")), 0))
+    comp.setSex(getInput(gE(uc("Sex")), 0))
     comp
   }
 

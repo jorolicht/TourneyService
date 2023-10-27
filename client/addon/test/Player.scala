@@ -61,7 +61,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
     } yield { (result, pw) }).value.map {
       case Left(err)    => AddonMain.addOutput(s"ERROR Test Player 0: load tourney ${toId} failed with: ${err.msgCode}"); false
       case Right(res)   => {
-        App.setCurCoId(1)
+        App.tourney.setCurCoId(1)
         App.execUseCase("OrganizePlayer", "", "")
         AddonMain.addOutput(s"SUCCESS Test Player 0")
         true

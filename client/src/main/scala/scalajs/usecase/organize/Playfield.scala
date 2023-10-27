@@ -28,7 +28,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    debug("render", s"${App.getTourneyStartDate.toString}") 
+    debug("render", s"${App.tourney.startDate}") 
     
     if (App.tourney.playfields.isEmpty) {
       App.updatePlayfield(App.tourney.getToId()).map { _ => 
@@ -47,7 +47,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
       case "ReqFullscreen"    => {
-        dom.document.open(s"/club/${App.getTourneyOrgDir}/${App.getTourneyStartDate.toString}/playfield", 
+        dom.document.open(s"/club/${App.tourney.orgDir}/${App.tourney.startDate}/playfield", 
           getMsg("tableview"), "channelmode=1,fullscreen=1,location=0,toolbar=0,menubar=0" )
       }
       case "ReqPlayfieldEdit" => {
@@ -77,7 +77,7 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
   def onclickOpen(elem: dom.raw.HTMLInputElement) = {
     import dom.document
     debug("onclickOpen", s"${elem.id}")
-    dom.document.open(s"/club/${App.getTourneyOrgDir}/${App.getTourneyStartDate.toString}/playfield", 
+    dom.document.open(s"/club/${App.tourney.orgDir}/${App.tourney.startDate.toString}/playfield", 
       getMsg("tableview"), "channelmode=1,fullscreen=1,location=0,toolbar=0,menubar=0" )
   }
 

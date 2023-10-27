@@ -524,11 +524,44 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
       case Right(trny)  => if (trny.comps.isDefinedAt(coId)) Right(trny.comps(coId).name) else Left(Error("err0031.svc.getCompName", coId.toString) ) 
     }   
 
+  // 
+  // Match Routines (internally used through web-client)
+  // 
+
+  def getMatchStatus(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, Int]] = 
+    TIO.get(toId).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
+                           else  Right( trny.cophs((coId, coPhId)).getMatch(gameNo).status )  
+    } 
+
+  def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] =
+    TIO.get(toId).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
+                           else  trny.cophs((coId, coPhId)).inputMatch(gameNo, sets, result, info, playfield)
+    } 
+
+
+  def resetMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, List[Int]]] =
+    TIO.get(toId).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
+                           else  trny.cophs((coId, coPhId)).resetMatch(gameNo) 
+    } 
+
+  def resetMatches(toId: Long, coId: Long, coPhId:Int): Future[Either[Error,List[Int]]] =
+    TIO.get(toId).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
+                           else trny.cophs((coId, coPhId)).resetMatches()
+    } 
+
 
   // 
-  // Match Routines
+  // Match X Routines (internally used through external client)
   // 
-  def setMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error,Boolean]] = 
+  def setXMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error,Boolean]] = 
     //def prt(msg: String) = logger.info(s"setMatch: ${msg}")
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
@@ -538,10 +571,10 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
           val trigCmd = ma.coPhTyp match {
             case CompPhaseTyp.GR => {
               val maGr = ma.asInstanceOf[MEntryGr]
-              UpdateTrigger("MatchGr", "000000", tse.toId, maGr.coId, maGr.coPhId, maGr.grId)
+              UpdateTrigger("CompPhase", "000000", tse.toId, maGr.coId, maGr.coPhId, maGr.grId)
             }  
-            case CompPhaseTyp.KO => UpdateTrigger("MatchKo", "000000", tse.toId, ma.coId, ma.coPhId, 0)
-            case _      => UpdateTrigger("Match", tse.toId)
+            case CompPhaseTyp.KO => UpdateTrigger("CompPhase", "000000", tse.toId, ma.coId, ma.coPhId, 0)
+            case _               => UpdateTrigger("Match", tse.toId)
           }
 
           //logger.info(s"setMatch: ${ma.status} ${ma.coId} ${ma.coPh} ${ma.result.mkString(":")}")
@@ -561,7 +594,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     }  
 
 
-  def setMatches(mas: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = {
+  def setXMatches(mas: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = {
     //def prt(msg: String) = logger.info(s"setMatch: ${msg}")
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
@@ -580,7 +613,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     }  
   }    
 
-  /** delMatches delete all matches of a certain competition phase
+  /** resetXMatches delete all match results of a certain competition phase
     * 
     * @param coId
     * @param coPh
@@ -588,13 +621,13 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     * @return true if matches of competition phase was deleted otherwise false
     */
 
-  def delMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = 
+  def resetXMatches(coId: Long, coPhId: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if (trny.cophs.isDefinedAt((coId, coPh))) {
-          trny.cophs((coId, coPh)).resetMatches()
-          trigger(trny, UpdateTrigger("MatchReset", tse.callerIdent, tse.toId, coId, coPh, 0))
+        if (trny.cophs.isDefinedAt((coId, coPhId))) {
+          trny.cophs((coId, coPhId)).resetResults()
+          trigger(trny, UpdateTrigger("MatchReset", tse.callerIdent, tse.toId, coId, coPhId, 0))
           Right(true)
         } else {
           Right(false)
@@ -603,31 +636,36 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     }
 
 
-  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] = 
+  // 
+  // Referee Routines
+  //     
+  def getRefereeNote(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, RefereeNote]] = 
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if (trny.cophs.isDefinedAt((coId, coPh))) {
-          //logger.info(s"getMatchKo: ${coId} ${coPh} /n ${ trny.cophs((coId,coPh)).ko.toString}")
-          Right(trny.cophs((coId,coPh)).ko.results.toSeq)
-        } else {
-          Right(Seq())   
-        }  
-      }
-    }    
+        if (trny.cophs.isDefinedAt((coId, coPhId))) {
+          try {
+            val m = trny.cophs((coId, coPhId)).matches(gameNo-1)
+            val playerInfoA = SNO(m.stNoA).getInfo(m.coTyp)(trny) 
+            val playerInfoB = SNO(m.stNoB).getInfo(m.coTyp)(trny)
 
-  
-  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int):  Future[Either[Error, Seq[ResultEntry]]] = 
-    TIO.get(toId).map {
-      case Left(err)    => Left(err)
-      case Right(trny)  => {
-        if (trny.cophs.isDefinedAt((coId, coPh))) {
-          Right(trny.cophs((coId,coPh)).groups(grId-1).getResultEntrys())
+            Right(RefereeNote(
+              trny.organizer, trny.name, toId,
+              trny.comps(coId).name, coId,
+              trny.cophs((coId,coPhId)).name, coPhId,
+              gameNo, m.finished,
+              trny.cophs((coId, coPhId)).noWinSets,
+              playerInfoA._2, playerInfoB._2, 
+              playerInfoA._3, playerInfoB._3,
+              m.getBalls.to(List)
+            ))
+          } catch { case _: Throwable => Left(Error("err0219.svc.getReferee.invalid")) }
         } else {
-          Right(Seq())   
+          Left(Error("err0218.svc.getReferee.notFound"))   
         }  
       }
-    }
+    } 
+
 
 
   // 

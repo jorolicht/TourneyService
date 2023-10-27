@@ -51,16 +51,17 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        $("#APP__DlgBox__Modal").modal("hide")
+        offEvents(gE(uc("Modal")), "hide.bs.modal")
+        doModal(gE(uc("Modal")), "hide")
       }         
     }
     
-
     setHtml("Load", html.DlgBox(header, body, buttons, defaultButton, sameSize))
 
-    $("#APP__DlgBox__Modal").modal("show")
-    $("#APP__DlgBox__Modal").on("hide.bs.modal", () => dialogBoxCancel())
-    $("[id^=APP__DlgBox__Click_]").click((e: Event)  => dialogBoxClick(e)) 
+    // register routines for cancel and submit
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
+    onClick2("[id^=APP__DlgBox__Click_]", (e: Event) => dialogBoxClick(e))
+    doModal(gE(uc("Modal")), "show")
     f
   }
 
@@ -87,14 +88,15 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        $("#APP__DlgBox__Modal").modal("hide")
+        offEvents(gE(uc("Modal")), "hide.bs.modal")
+        doModal(gE(uc("Modal")), "hide")
       }         
     }
     
     setHtml("Load", html.DlgBoxStd(header, body, buttons, defaultButton, true))
-    $("#APP__DlgBox__Modal").modal("show")
-    $("#APP__DlgBox__Modal").on("hide.bs.modal", () => dialogBoxCancel())
-    $("[id^=APP__DlgBox__Click_]").click((e: Event)  => dialogBoxClick(e)) 
+    onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
+    onClick2("[id^=APP__DlgBox__Click_]", (e: Event) => dialogBoxClick(e))
+    doModal(gE(uc("Modal")), "show")
     f
   }
 

@@ -57,7 +57,8 @@ object AddonMain extends TestUseCase("AddonMain")
               |
               |  log  - set log level
               |  show - show/dump tourney objects
-              |  sync - purge local tourney data to server 
+              |  sync - purge local tourney data to server
+              |  set  - set DOM Elments
               |
               |Options:
               |""".stripMargin)
@@ -71,6 +72,7 @@ object AddonMain extends TestUseCase("AddonMain")
       case "log"   => cmdLog(args1)
       case "show"  => cmdShow(args1)
       case "sync"  => cmdSync(); Future(true)
+      case "set"   => cmdSet(args1)
       case "test"  => cmdTest(args1)
       case "save"  => cmdSave()
       case "load"  => cmdLoad(args1(0))
@@ -108,6 +110,57 @@ object AddonMain extends TestUseCase("AddonMain")
     }
     setOutput(s"Current LogLevel: ${AppEnv.getDebugLevel.getOrElse("UNKNOWN")}")
     Future(true)
+  }
+
+
+
+  /** set command
+    * 
+    */ 
+  def cmdSet(args: Array[String]): Future[Boolean] = {
+
+    class ConfSet(arguments: Seq[String]) extends ScallopConf(arguments) {
+
+      override def onError(e: Throwable): Unit = e match {
+        case _ => printHelp()
+      }
+
+      banner("""
+        |usage: set <element> [<args>]
+        |""".stripMargin)
+
+      footer("\n'show help lists available elements.\n")
+
+
+      val display = new Subcommand("display") {
+        val style = choice(name="style", choices= Seq("none", "block"))
+        val toId  = opt[Long](name="toId", required = true)
+        val id    = opt[String](name="id", required = true)
+      }   
+      addSubcommand(display)
+
+      verify()
+    }
+
+    val conf   = new ConfSet(args)
+    conf.subcommand match {
+      case Some(conf.display) => {
+        val style = conf.display.style.getOrElse("style ???")
+        val id = conf.display.id.getOrElse("id ???")
+        val toId = conf.display.toId.getOrElse(185L)
+
+        setLoginLoad(toId).map {
+          case false => false
+          case true  => {
+            AddonMain.setOutput(s"START set display style ${style} ${id}")
+            gE(id).style.setProperty("display", style)
+            true
+          }
+        } 
+      }
+ 
+      case _                  => println(s"no subcommand"); Future(false)
+    }
   }
 
 
@@ -192,13 +245,15 @@ object AddonMain extends TestUseCase("AddonMain")
               |   Options:
               |""".stripMargin)
 
-      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog", "ctt", "download"))
+      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog", "ctt", "referee", "download", "match"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")
 
       val toId  = opt[Long](name="toId")
       val coId  = opt[Long](name="coId")
       val plId  = opt[Long](name="plId")
+      val phase = opt[Int](name="phase")
+      val game  = opt[Int](name="game")
       
       verify()
     }
@@ -210,6 +265,8 @@ object AddonMain extends TestUseCase("AddonMain")
     val toId   = conf.toId.getOrElse(0L)
     val plId   = conf.plId.getOrElse(0L)
     val coId   = conf.coId.getOrElse(0L)
+    val phase  = conf.phase.getOrElse(0)
+    val game   = conf.game.getOrElse(0)
 
     scope match {
       case "basic"     => AddonBasic.execTest(number, param);     Future(false)
@@ -217,6 +274,8 @@ object AddonMain extends TestUseCase("AddonMain")
       case "compphase" => AddonCompPhase.execTest(number, param); Future(false)
       case "ctt"       => AddonCtt.execTest(number, param);       Future(false)
       case "player"    => AddonPlayer.execTest(number, toId, plId, param)
+      case "referee"   => AddonReferee.execTest(number, toId, coId, phase, param)
+      case "match"     => AddonMatch.execTest(number, toId, coId, phase, game, param)
       case "download"  => AddonDownload.execTest(number, param);  Future(false)
       case _           => Future(false)
     }
@@ -258,12 +317,21 @@ object AddonMain extends TestUseCase("AddonMain")
    * 
    */ 
   def cmdLoad(toIdStr: String): Future[Boolean] = {
-    import cats.data.EitherT
-    import cats.implicits._ 
     val toId = toIdStr.toLongOption.getOrElse(0L)
 
     setOutput("START load")
-    if (toId == 0) {
+    setLoginLoad(toIdStr.toLongOption.getOrElse(0L)).map {
+      case false => false
+      case true  => println(s"TOURNEY: \n ${App.tourney.toString()}"); true 
+    }
+  }
+
+
+  def setLoginLoad(toId: Long): Future[Boolean] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+    
+    if (toId <= 0) {
       setOutput(s"ERROR load: loading tourney ${toId} not possible"); Future(false)
     } else {
       (for {
@@ -273,13 +341,14 @@ object AddonMain extends TestUseCase("AddonMain")
       } yield { (result, pw) }).value.map {
         case Left(err)    => addOutput(s"ERROR load: ${err}"); false
         case Right(res)   => {
-          addOutput(s"SUCCESS load: Tourney ${toIdStr} loaded")
-          println(s"TOURNEY: \n ${App.tourney.toString()}")
+          addOutput(s"SUCCESS load: Tourney ${toId} loaded")
           true
         } 
       } 
     }
   }
+
+
 
   def addOutput(msg: String) = {
     import org.scalajs.dom.document
@@ -295,10 +364,10 @@ object AddonMain extends TestUseCase("AddonMain")
 
 
   @JSExport
-  def console(): Unit = prompt(getMsg_("home.main.prompt")).map {
+  def console(): Unit = prompt(gM("home.main.prompt")).map {
     case Left(err)  => println("invalid command/cancel")
     case Right(cmd) => execute(cmd).map {
-      case true  => console()
+      case true  => println("Restart"); console()
       case false => console()
     } 
   } 
@@ -357,21 +426,11 @@ object AddonMain extends TestUseCase("AddonMain")
     import cats.implicits._ 
 
     setOutput("START show tourney")
-    if (toId == 0) {
-      setOutput(s"ERROR show tourney: loading tourney ${toId} not possible")
-      Future(false)
-    } else {
-      (for {
-        pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-        coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-        result    <- EitherT(App.loadRemoteTourney(toId))
-      } yield { (result, pw) }).value.map {
-        case Left(err)    => setOutput(s"ERROR show tourney: error message: ${err}"); false
-        case Right(res)   => setOutput(s"SUCCESS show tourney: \n ${App.tourney.toString()}"); true
-      } 
+    setLoginLoad(toId).map {
+      case false => false
+      case true  => setOutput(s"SUCCESS show tourney: \n ${App.tourney.toString()}"); true
     }
   }
 
  
 }
-

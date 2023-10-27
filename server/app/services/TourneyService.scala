@@ -89,12 +89,21 @@ trait TourneyService {
   def getCompStatus(toId: Long, coId: Long): Future[Either[Error, CompStatus.Value]]
   def getCompName(toId: Long, coId: Long): Future[Either[Error, String]]
 
-  // Match Interface
-  def setMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
-  def setMatches(ma: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]] 
-  def delMatches(coId: Long, coPh: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
-  def getMatchKo(toId: Long, coId: Long, coPh:Int): Future[Either[Error, Seq[ResultEntry]]] 
-  def getMatchGr(toId: Long, coId: Long, coPh:Int, grId: Int): Future[Either[Error, Seq[ResultEntry]]] 
+  // Match X Interface (used internal through external programms)
+  def setXMatch(ma: MEntry)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def setXMatches(ma: Seq[MEntry])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]  
+  def resetXMatches(coId: Long, coPhId: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] 
+
+  // Match Interface (used internal)
+  def getMatchStatus(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, Int]] 
+  def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, 
+                 info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] 
+  def resetMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, List[Int]]] 
+  def resetMatches(toId: Long, coId: Long, coPhId:Int): Future[Either[Error,List[Int]]] 
+
+  // Referee Interface
+  def getRefereeNote(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, RefereeNote]] 
+
 
   // Competition Phase Interface
   def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]

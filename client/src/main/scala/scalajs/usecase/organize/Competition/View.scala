@@ -39,9 +39,9 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
   // set view page for a competition phase(round), coId != 0 and coPhId != 0
   def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
     debug("setPage", s"coId: ${coId} coPhId: ${coPhId}")
-    if (!exists(s"View_${coId}_${coPhId}")) {
+    if (gE(uc(s"View_${coId}_${coPhId}")) == null) {
       // init page
-      val elem    = gE(s"ViewContent_${coId}").querySelector(s"[data-coPhId='${coPhId}']").asInstanceOf[HTMLElement]
+      val elem = gEqS(s"ViewContent_${coId}", s"[data-coPhId='${coPhId}']")
       val coPhTyp = coPhase.coPhTyp
       coPhTyp match {
         case CompPhaseTyp.GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))

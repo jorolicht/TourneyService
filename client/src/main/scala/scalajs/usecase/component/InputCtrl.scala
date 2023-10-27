@@ -165,7 +165,7 @@ object InputCtrl extends BasicHtml with TourneySvc
    * 
    */  
   def getText(name: String, help:Boolean=true, minLength:Int=0)(implicit ucp: UseCaseParam): Option[String] = {    
-    val value = getInput(name, "")
+    val value = getInput(gE(uc(name)), "")
     if (value.length >= minLength) {
       if (help) showHlp(name, false)
       Some(value)
@@ -201,7 +201,7 @@ object InputCtrl extends BasicHtml with TourneySvc
    * 
    */  
   def getClub(name: String, help:Boolean=true, required:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {    
-    val club = getInput(name, "")
+    val club = getInput(gE(uc(name)), "")
 
     if (validClub(club)) {
       if (help) showHlp(name, false)
@@ -234,7 +234,7 @@ object InputCtrl extends BasicHtml with TourneySvc
   }
 
   def getCountry(id: String, help:Boolean=true, required:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {
-    val country = getInput(id, "")
+    val country = getInput(gE(uc(id)), "")
     //AppEnv.debug("getCountry", s"country: ${country}  id: ${id}")
     if (country == "") {
       if (help & required) showHlp(id, true)
@@ -273,7 +273,7 @@ object InputCtrl extends BasicHtml with TourneySvc
    * @return optionally naem
    */ 
   def getName(id: String, help: Boolean=true, required:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {
-    val name = getInput(id, "")
+    val name = getInput(gE(uc(id)), "")
 
     if (validName(name)) {
       if (help) showHlp(id, false)
@@ -320,7 +320,7 @@ object InputCtrl extends BasicHtml with TourneySvc
    * @return optionally email
    */ 
   def getEmail(id: String, help: Boolean=true, required:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {
-    val email = getInput(id, "")
+    val email = getInput(gE(uc(id)), "")
 
     if (validEmail(email)) {
       if (help) showHlp(id, false)
@@ -348,7 +348,7 @@ object InputCtrl extends BasicHtml with TourneySvc
 
       case _         => {
         val value1 = elem.value
-        val value2 = getInput(s"_${auxId}", "")
+        val value2 = getInput(gE(s"_${auxId}"), "")
         val id = elem.id
         showHlp_(id, false)
 
@@ -393,8 +393,8 @@ object InputCtrl extends BasicHtml with TourneySvc
     * @param show - show help if input is not valid
     */
   def getPassword(id1: String, id2: String="", show:Boolean=true)(implicit ucp: UseCaseParam): Option[String] = {
-    val password = getInput(id1, "")
-    val password2 = if (id2 != "") getInput(id2, "") else ""
+    val password = getInput(gE(uc(id1)), "")
+    val password2 = if (id2 != "") getInput(gE(uc(id2)), "") else ""
 
     try {
       //AppEnv.debug("getPassword", s"password: ${password}  password2: ${password2}")
