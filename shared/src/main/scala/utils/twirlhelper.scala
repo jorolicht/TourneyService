@@ -40,7 +40,7 @@ package object twirlhelper {
   def msgStd(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"std.${name}", Seq())
 
   def collapse(name: String)(implicit ucp: UseCaseParam): String = {
-    s""" href="javascript:InputCtrl.collapse('${ucp.idBase}__${name}')" """
+    s"""href="javascript:InputCtrl.collapse('${ucp.idBase}__${name}')" """
   }
 
   def _onfocusout(name: String)(implicit ucp: UseCaseParam): String = {

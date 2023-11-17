@@ -6,11 +6,11 @@
 @import shared.utils.twirlhelper._ 
 
 @(name: String, _class: String="form-control-sm", _default:Int=(-99))(implicit ucp: UseCaseParam)
-@statusValues=@{ List(1, 2, 3, 7, 8, 9) }
 
 <select @id(name) class='form-control @{_class}' >
-  <option value='-99' disabled selected>@msg_("competition.status.-99")</option>
-  <option value='-1'>@msg_("competition.status.-1")</option>
-  <option value='0' >@msg_("competition.status.0")</option>
-  @for(status<-statusValues){ <option value='@status' disabled>@msg_("competition.status."+status.toString)</option> }
+  <option value='99' disabled selected>@msg_("CompPhaseStatus.99")</option>
+  <option value='1' disabled>@msg_("CompPhaseStatus.1")</option>
+  <option value='2' disabled>@msg_("CompPhaseStatus.2")</option>
+  <option value='3' disabled>@msg_("CompPhaseStatus.3")</option>
+  <option value='4' disabled>@msg_("CompPhaseStatus.4")</option>
 </select>

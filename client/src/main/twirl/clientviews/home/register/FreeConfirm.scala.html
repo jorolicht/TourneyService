@@ -22,7 +22,7 @@
     <div class="col ml-2 mr-2">
       <p>
         @{ Html(msg("confirm.entercode", ctx("email").str)) }
-        @actionButton("codeResend", "code.resend", "btn-xs")
+        @actionButton("codeResend", "code.resend", "btn-outline-secondary btn-xs")
       </p>
     </div>
 
@@ -43,10 +43,10 @@
 
   <div class="form-group row mt-2 pb-1 alert-primary">
     <div class="col ml-2 pt-2 pb-2">
-      @actionButton("FreeBack", "free.back", "btn-sm")
+      @actionButton("FreeBack", "free.back", "btn-outline-secondary btn-sm")
     </div>
     <div class="col ml-2 pt-2 pb-2">
-      @actionButton("FreeConfirm", "free.confirm", "btn-sm")
+      @actionButton("FreeConfirm", "free.confirm", "btn-outline-secondary btn-sm")
     </div>
   </div>
 </form>

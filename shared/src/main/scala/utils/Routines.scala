@@ -88,7 +88,7 @@ package object Routines {
 
       lang match {
         case "de" => {
-          if (fmt==0) s"${day}.${moArDe(month)} ${year}" else
+          if (fmt==0) s"${day}. ${moArDe(month)} ${year}" else
           if (fmt==1) s"${day}.${month}.${year}" else s"${day}-${month}-${year}"
         }  
         case "en" => "%02d".format(month) + "-" + "%02d".format(day) + "-" + year
@@ -190,8 +190,7 @@ package object Routines {
 
   implicit def tryToEither[A](t: Try[A]): ToEither[Throwable, A] = new ToEither[Throwable, A] {
     def toEither = t.map(Right(_)).recover{ case e => Left(e) }.get
-  }  
-
+  }
 
 }
 

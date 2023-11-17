@@ -67,7 +67,7 @@ object UUIS {
 
 
 object Crypto {
-  var rml:        Boolean = true
+  var rml:        Boolean = true  //runModeLocal: Boolean = false,  local/privat server (no silhouette login) or cloud server (silhouette/google login)
   var accessCtrl: Boolean = true
 
   private val SALT:     String = "jMhKlOuJnM34G6NHkqo9V010GhLAqOpF0BePojHgh1HgNg8^72k" 

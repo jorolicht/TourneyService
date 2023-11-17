@@ -457,10 +457,6 @@ class RemoteCtrl @Inject()
     }    
   } 
 
-
-
-
-
   /** getReferee 
    * 
    *  Service: def getReferee returns referee note to enter result (for player)

@@ -50,7 +50,7 @@ case class Competition(
     case "doppel" | "double" => CompTyp.DOUBLE
     case "mixed"             => CompTyp.MIXED
     case "team"              => CompTyp.TEAM
-    case _                   => CompTyp.UNKN
+    case _                   => CompTyp.Typ
   } 
 
   def setTyp(value : String)= { typ = getTyp(value) }
@@ -112,12 +112,14 @@ case class Competition(
       f"[$lB%04.0f-XXXX]" 
     } else if (lB == 0 & uB > 0) {
       f"[0000-$uB%04.0f]"
-    } else { "" }   
+    } else { "0000-XXXX" }   
   }
 
   def getFromTTR: String = if (getRatingLowLevel>0) "%04d".format(getRatingLowLevel) else "0000"
   def getToTTR: String   = if (getRatingUpperLevel>0) "%04d".format(getRatingUpperLevel) else "XXXX"
   
+  def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(status.msgCode, Seq())
+  def getTypName(mfun:(String, Seq[String])=>String): String = mfun(typ.msgCode,Seq())  
   def genName(fun:(String, Seq[String])=>String): String = {
     if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${getTypName(fun)}" }
   }
@@ -126,9 +128,6 @@ case class Competition(
   def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
   def encode = write[Competition](this)
 
-  def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.status.${status}",Seq())
-  def getTypName(mfun:(String, Seq[String])=>String): String = mfun(s"competition.typ.${typ}",Seq())
-
   def matchClickTT(ageGroup: String, ttrFrom: String, ttrTo: String, ttrRemark: String, cttType: String): Boolean = {
     getAgeGroup.toLowerCase     == ageGroup.toLowerCase && 
     getRatingRemark.toLowerCase == ttrRemark.toLowerCase &&
@@ -136,8 +135,8 @@ case class Competition(
     getRatingUpperLevel         == ttrTo.toIntOption.getOrElse(0) &&
     typ                         == getTyp(cttType)
   }
-
 }                                                               
+
 
 object Competition {
   implicit val compStatusReadWrite: upickle.default.ReadWriter[CompStatus.Value] =
@@ -149,8 +148,8 @@ object Competition {
   implicit def rw: RW[Competition] = macroRW
 
   def tupled = (this.apply _).tupled
-  def init             = new Competition(0L, "", "",  CompTyp.UNKN, "", CompStatus.UNKN, "")
-  def get(name: String)= new Competition(0L, "", name,  CompTyp.UNKN, "", CompStatus.UNKN, "")
+  def init             = new Competition(0L, "", "",  CompTyp.Typ, "", CompStatus.CFG, "")
+  def get(name: String)= new Competition(0L, "", name,  CompTyp.Typ, "", CompStatus.CFG, "")
 
   def decode(s: String): Either[shared.utils.Error, Competition] = {
     try Right(read[Competition](s))
@@ -164,28 +163,29 @@ object Competition {
 }
 
 object CompTyp extends Enumeration {
-  val UNKN   = Value(0, "UNKN")
-  val SINGLE = Value(1, "SINGLE") 
-  val DOUBLE = Value(2, "DOUBLE")    
-  val MIXED  = Value(3, "MIXED")         
-  val TEAM   = Value(4, "TEAM")
-
-  def name(getMsg:(String, Seq[String])=>String) = {
-    this match {
-      case UNKN    => getMsg(s"competition.typ.5",Seq())
-      case SINGLE  => getMsg(s"competition.typ.1",Seq())
-      case DOUBLE  => getMsg(s"competition.typ.2",Seq())
-      case MIXED   => getMsg(s"competition.typ.3",Seq())
-      case TEAM    => getMsg(s"competition.typ.4",Seq())
-    }
-  }    
+  val UNKN   = Value(0,  "UNKN")
+  val SINGLE = Value(1,  "SINGLE") 
+  val DOUBLE = Value(2,  "DOUBLE")    
+  val MIXED  = Value(3,  "MIXED")         
+  val TEAM   = Value(4,  "TEAM")
+  val Typ    = Value(99, "Typ")
+  
+  implicit class CompTypValue(ct: Value) {
+    def msgCode = s"CompTyp.${ct.toString}"
+  }
 }  
 
 object CompStatus extends Enumeration {
-  val UNKN   = Value( -1, "UNKN")
-  val READY  = Value(  0, "READY") 
-  val RUN    = Value(100, "RUN")  
 
+  val UNKN   = Value(97,  "UNKN")  
+  val Status = Value(98,  "Status")
+  val CFG    = Value(99,  "CFG")
+  val RUN    = Value(100, "RUN")
+  val AUS    = Value(101, "AUS")
+  val EIN    = Value(102, "EIN")
+  val FIN    = Value(103, "FIN")
+
+  val READY  = Value(  0, "READY")
   val VRAUS  = Value(  1, "VRAUS")   // Auslosung der Vorrunde       
   val VREIN  = Value(  2, "VREIN")   // Auslosung erfolgt, Eingabe der Ergebnisse
   val VRFIN  = Value(  3, "VRFIN")   // Vorrunde beendet, Auslosung ZR oder ER kann erfolgen
@@ -197,4 +197,9 @@ object CompStatus extends Enumeration {
   val ERAUS  = Value(  7, "ERAUS")   // Auslosung der Endrunde   
   val EREIN  = Value(  8, "EREIN")   // Auslosung erfolgt, Eingabe der Ergebnisse
   val ERFIN  = Value(  9, "ERFIN")   // Endrunde beendet ... 
+
+  implicit class CompStatusValue(cs: Value) {
+    def msgCode = s"CompStatus.${cs.toString}"
+  }
+
 }

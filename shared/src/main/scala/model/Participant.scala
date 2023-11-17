@@ -23,13 +23,18 @@ object PantStatus extends Enumeration {
   val PLAY = Value( 2,  "PLAY")   // currently playing
   val FINI = Value( 3,  "FINI")   // competition finished
 
+  implicit class PantStatusValue(ps: Value) {
+    def code       = s"${ps.toString}"
+    def msgCode    = s"PantStatus.${ps.toString}"
+  }
+
   def apply(value: String): PantStatus.Value = {
     value match {
       case "RJEC" => PantStatus(-3)
       case "WAIT" => PantStatus(-2)
       case "PEND" => PantStatus(-1)
       case "REGI" => PantStatus(0)
-      case "REDI" => PantStatus(1)
+      case "REDY" => PantStatus(1)
       case "PLAY" => PantStatus(2)
       case "FINI" => PantStatus(3)
       case _      => PantStatus(-99)

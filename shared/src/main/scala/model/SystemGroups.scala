@@ -10,6 +10,7 @@ import shared.utils.Routines._
 import shared.model.MEntryGr
 import shared.model.PantEntry
 import shared.model.Utility._
+import shared.utils.Error
 
 
 case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
@@ -30,13 +31,11 @@ object GroupEntry {
 
   def apply(valid: Boolean): GroupEntry =  GroupEntry(false,(0,0),(0,0),(0,0),Array[String]())
 
-  def fromResultEntry(re: ResultEntry, noSets: Int): GroupEntry = {
-    if (re.valid) {
-      GroupEntry(true, getPoints(re.sets, noSets), re.sets, getBalls(re.balls, noSets), re.balls)
-    } else {
-      GroupEntry(false)
-    }  
-  }
+  def fromResultEntry(re: ResultEntry, noSets: Int): Either[Error, GroupEntry] = 
+    try Right( if   (re.valid) GroupEntry(true, getPoints(re.sets, noSets), re.sets, getBalls(re.balls, noSets), re.balls)
+               else            GroupEntry(false))
+    catch { case _: Throwable => Left(Error("GroupEntry.fromResultEntry")) }
+
 
   def obify(gREStr: String): GroupEntry = {
     val g = gREStr.split(";")
@@ -120,31 +119,31 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     val balls     = m.result.split('·')
     val sets      = getSets(balls, noWinSets)
 
-    if (m.wgw._1 < 1 | m.wgw._1 > size | m.wgw._2 < 1 | m.wgw._2 > size) {
-      Left(Error("err0225.systemgroup.invalid.whoagainstwho"))
-    } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(sets, noWinSets)) {
-      println("Group enter result")
-      results(m.wgw._1-1)(m.wgw._2-1).valid    = true
-      results(m.wgw._1-1)(m.wgw._2-1).balls    = balls
-      results(m.wgw._1-1)(m.wgw._2-1).sets     = sets
-      results(m.wgw._1-1)(m.wgw._2-1).points   = getPoints(sets, noWinSets)
-      results(m.wgw._1-1)(m.wgw._2-1).ballDiff = getBalls(balls, noWinSets)
-      results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
-      Right(true)
-    } else if (m.result == "" & sets == (0,0)) {
-      println("Group delete result")
-      results(m.wgw._1-1)(m.wgw._2-1).valid    = false
-      results(m.wgw._1-1)(m.wgw._2-1).balls    = Array("")
-      results(m.wgw._1-1)(m.wgw._2-1).sets     = (0,0)
-      results(m.wgw._1-1)(m.wgw._2-1).points   = (0,0)
-      results(m.wgw._1-1)(m.wgw._2-1).ballDiff = (0,0)     
-      results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
-      Right(true)
-    } else {
-      results(m.wgw._1-1)(m.wgw._2-1).valid = false
-      results(m.wgw._2-1)(m.wgw._1-1).valid = false   
-      Right(false)
-    }
+    try {
+      if (m.wgw._1 < 1 | m.wgw._1 > size | m.wgw._2 < 1 | m.wgw._2 > size) {
+        Left(Error("err0225.systemgroup.invalid.whoagainstwho"))
+      } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(sets, noWinSets)) {
+        results(m.wgw._1-1)(m.wgw._2-1).valid    = true
+        results(m.wgw._1-1)(m.wgw._2-1).balls    = balls
+        results(m.wgw._1-1)(m.wgw._2-1).sets     = sets
+        results(m.wgw._1-1)(m.wgw._2-1).points   = getPoints(sets, noWinSets)
+        results(m.wgw._1-1)(m.wgw._2-1).ballDiff = getBalls(balls, noWinSets)
+        results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
+        Right(true)
+      } else if (m.result == "" & sets == (0,0)) {
+        results(m.wgw._1-1)(m.wgw._2-1).valid    = false
+        results(m.wgw._1-1)(m.wgw._2-1).balls    = Array()
+        results(m.wgw._1-1)(m.wgw._2-1).sets     = (0,0)
+        results(m.wgw._1-1)(m.wgw._2-1).points   = (0,0)
+        results(m.wgw._1-1)(m.wgw._2-1).ballDiff = (0,0) 
+        results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
+        Right(true)
+      } else {
+        results(m.wgw._1-1)(m.wgw._2-1).valid = false
+        results(m.wgw._2-1)(m.wgw._1-1).valid = false   
+        Right(false)
+      }
+    } catch { case _: Throwable => println(s"ERROR Group.setMatch ${m.toString}"); Left(Error("Group_setMatch"))}  
   }
 
 
@@ -156,30 +155,33 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
 
   // calc position of pants based on points, sets and ball difference
   def calc() = {
-    def sumPoints(pos: Int): (Int,Int) = { 
-      var sum = (0,0); for ( i <- 0 to size-1) if (results(pos)(i).valid) sum = sum + results(pos)(i).points; sum
-    }
-    def sumSets(pos:Int): (Int,Int) = {
-      var sum = (0,0); for ( i <- 0 to size-1)  if (results(pos)(i).valid) sum = sum + results(pos)(i).sets; sum
-    }
-    def sumBallDiffs(pos: Int): (Int,Int) = {
-      var sum = (0,0); for ( i <- 0 to size-1)  if (results(pos)(i).valid) sum = sum + results(pos)(i).ballDiff; sum
-    }
+    
+      def sumPoints(pos: Int): (Int,Int) = { 
+        var sum = (0,0); for ( i <- 0 to size-1) if (results(pos)(i).valid) sum = sum + results(pos)(i).points; sum
+      }
+      def sumSets(pos:Int): (Int,Int) = {
+        var sum = (0,0); for ( i <- 0 to size-1)  if (results(pos)(i).valid) sum = sum + results(pos)(i).sets; sum
+      }
+      def sumBallDiffs(pos: Int): (Int,Int) = {
+        var sum = (0,0); for ( i <- 0 to size-1)  if (results(pos)(i).valid) sum = sum + results(pos)(i).ballDiff; sum
+      }
+    try {
+      var tmpPos  = Array.ofDim[(Int,Long)](size)
+      for (i <- 0 to size-1) {
+        balls(i)  = sumBallDiffs(i)
+        sets(i)   = sumSets(i)
+        points(i) = sumPoints(i)
+        tmpPos(i)    = (i, (balls(i)._1 - balls(i)._2) + 2000L +  ((sets(i)._1 - sets(i)._2) + 50) * 10000 +  ((points(i)._1 - points(i)._2) + 50) * 10000000)
+      }
+      tmpPos = tmpPos.sortBy(_._2).reverse
+      var cnt = 1 
+      pants(tmpPos(0)._1).place = (cnt,0)
+      for (i <- 1 to size-1) { 
+        if (tmpPos(i)._2 < tmpPos(i-1)._2) { cnt = cnt + 1 }
+        pants(tmpPos(i)._1).place = (cnt,0) 
+      }
+    } catch { case _: Throwable => s"ERROR Group.calc ${grId}"}
 
-    var tmpPos  = Array.ofDim[(Int,Long)](size)
-    for (i <- 0 to size-1) {
-      balls(i)  = sumBallDiffs(i)
-      sets(i)   = sumSets(i)
-      points(i) = sumPoints(i)
-      tmpPos(i)    = (i, (balls(i)._1 - balls(i)._2) + 2000L +  ((sets(i)._1 - sets(i)._2) + 50) * 10000 +  ((points(i)._1 - points(i)._2) + 50) * 10000000)
-    }
-    tmpPos = tmpPos.sortBy(_._2).reverse
-    var cnt = 1 
-    pants(tmpPos(0)._1).place = (cnt,0)
-    for (i <- 1 to size-1) { 
-      if (tmpPos(i)._2 < tmpPos(i-1)._2) { cnt = cnt + 1 }
-      pants(tmpPos(i)._1).place = (cnt,0) 
-    }
   }
 
   def getResultEntrys(): Seq[ResultEntry] = {
@@ -194,7 +196,11 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     for (i <- 0 to size-1; j <- 0 to size-1; if (j != i) ) results(i)(j).valid = false
     for (result  <- reEntries) {
       if (result.valid & result.pos._1 > 0 & result.pos._2 > 0 & result.pos._1 <= size & result.pos._2 <= size) {
-        results(result.pos._1-1)(result.pos._2-1) = GroupEntry.fromResultEntry(result, noWinSets)
+
+        GroupEntry.fromResultEntry(result, noWinSets) match {
+          case Left(err)  => println(s"ERROR: ${err.toString}")
+          case Right(res) => results(result.pos._1-1)(result.pos._2-1) = res
+        }
         results(result.pos._2-1)(result.pos._1-1) = results(result.pos._1-1)(result.pos._2-1).invert
       } 
     }
@@ -208,24 +214,35 @@ object Group {
 
   def getNoRounds(size: Int) = if (size % 2 != 1 ) size - 1 else size
 
-  def fromTx(grtx: GroupTx, drawPos: Int = 0) = {
-    val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
+  def fromTx(grtx: GroupTx, drawPos: Int = 0): Either[Error, Group] = {
+    var error = Error.dummy
+    try {
+      val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
 
-    // set participants
-    gr.pants  = grtx.pants
+      // set participants
+      gr.pants  = grtx.pants
 
-    // add matches
-    for (resEntry <- grtx.results) {
-      if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
-        gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = GroupEntry.fromResultEntry(resEntry, grtx.noWinSets)
-        gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
-      } 
-    }
+      // add matches
+      for (resEntry <- grtx.results) {
+        //println(s"Group from Tx: resEntrys: ${resEntry.toString}")
+        if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
+          GroupEntry.fromResultEntry(resEntry, grtx.noWinSets) match {
+            case Left(err)  => error = err
+            case Right(res) => {
+              gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = res
+              gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
+            }  
+          }
+        } 
+      }
 
-    gr.drawPos = drawPos
-    gr.genOccuRating
-    gr.calc
-    gr
+
+      gr.drawPos = drawPos
+      gr.genOccuRating
+      gr.calc
+
+      Right(gr)
+    } catch { case _: Throwable => Left(error.add("Group.fromTx")) }
   }
 
   /** genGrpSplit - check whether the numbers of players can be
@@ -250,18 +267,18 @@ object Group {
   /** genGrpConfig - generate configuration array for groups
    *  (grName: String, grId: Int, grSize: Int, pos: Int)
    */
-  def genGrpConfig(secTyp: Int, noPlayer: Int): ArrayBuffer[GroupConfig] = {
+  def genGrpConfig(secTyp: CompPhaseCfg.Value, noPlayer: Int): ArrayBuffer[GroupConfig] = {
     var gList:  ArrayBuffer[(Int,Int)] = new ArrayBuffer()
     var result: ArrayBuffer[GroupConfig] = new ArrayBuffer()
 
     secTyp match {
-      case CPC_GRPS3  => { val g3 = noPlayer / 3; gList += ((3, g3)) } 
-      case CPC_GRPS34 => { val (g3, g4) = genGrpSplit(noPlayer, 3); gList += ((4, g4)); gList += ((3, g3)) } 
-      case CPC_GRPS4  => { val g4 = noPlayer / 4; gList += ((4, g4)) }       
-      case CPC_GRPS45 => { val (g4, g5) = genGrpSplit(noPlayer, 4); gList += ((5, g5)); gList += ((4, g4)) }
-      case CPC_GRPS5  => { val g5 = noPlayer / 5; gList += ((5, g5)) }  
-      case CPC_GRPS56 => { val (g5, g6) = genGrpSplit(noPlayer, 5); gList += ((6, g6)); gList += ((5, g5)) }
-      case CPC_GRPS6  => { val g6 = noPlayer / 6; gList += ((6, g6)) }
+      case CompPhaseCfg.GRPS3  => { val g3 = noPlayer / 3; gList += ((3, g3)) } 
+      case CompPhaseCfg.GRPS34 => { val (g3, g4) = genGrpSplit(noPlayer, 3); gList += ((4, g4)); gList += ((3, g3)) } 
+      case CompPhaseCfg.GRPS4  => { val g4 = noPlayer / 4; gList += ((4, g4)) }       
+      case CompPhaseCfg.GRPS45 => { val (g4, g5) = genGrpSplit(noPlayer, 4); gList += ((5, g5)); gList += ((4, g4)) }
+      case CompPhaseCfg.GRPS5  => { val g5 = noPlayer / 5; gList += ((5, g5)) }  
+      case CompPhaseCfg.GRPS56 => { val (g5, g6) = genGrpSplit(noPlayer, 5); gList += ((6, g6)); gList += ((5, g5)) }
+      case CompPhaseCfg.GRPS6  => { val g6 = noPlayer / 6; gList += ((6, g6)) }
     }
 
     var cnt = 1

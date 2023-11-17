@@ -3,32 +3,62 @@
 
 
 fork := true
-
+import sbt.Keys._
 import scala.sys.process._
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import NativePackagerHelper._
 
-// set EclipseKeys.skipParents in ThisBuild := false
-// eclipse with-source=true
-
-resolvers in ThisBuild  += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+// resolvers in ThisBuild  += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 resolvers in ThisBuild  += "Atlassian's Maven Public Repository" at "https://packages.atlassian.com/maven-public/"
-
-//resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 //val serverURL = settingKey[String]("The URL of the server.")
 //ThisBuild / serverURL := "https://turnier-service.info"
 //ThisBuild / serverURL := "http://ubuntu1804"
 
+lazy val concMsgFiles = taskKey[Unit]("Concatenate message files")
 
 lazy val server = (project in file("server")).
   settings(
     commonSettings,
+    concMsgFiles := {  
+      val outputFileDE = file("server/conf/messages.de")
+      val inputFilesDE = Seq(file("server/conf/messages/de/01_app.de"), 
+                             file("server/conf/messages/de/02_general.de"), 
+                             file("server/conf/messages/de/03_dialog.de"), 
+                             file("server/conf/messages/de/04_sidebar.de"),
+                             file("server/conf/messages/de/05_email.de"),
+                             file("server/conf/messages/de/06_invoice.de"),
+                             file("server/conf/messages/de/07_referee.de"),
+                             file("server/conf/messages/de/10_home.de"),
+                             file("server/conf/messages/de/11_info.de"),
+                             file("server/conf/messages/de/12_organizer.de"),
+                             file("server/conf/messages/de/13_admin.de"),
+                             file("server/conf/messages/de/99_error.de"))
+
+      val outputFileEN = file("server/conf/messages.en")
+      val inputFilesEN = Seq(file("server/conf/messages/en/01_app.en"), 
+                             file("server/conf/messages/en/02_general.en"), 
+                             file("server/conf/messages/en/03_dialog.en"), 
+                             file("server/conf/messages/en/04_sidebar.en"),
+                             file("server/conf/messages/en/05_email.en"),
+                             file("server/conf/messages/en/06_invoice.en"),
+                             file("server/conf/messages/en/07_referee.en"),
+                             file("server/conf/messages/en/10_home.en"),
+                             file("server/conf/messages/en/11_info.en"),
+                             file("server/conf/messages/en/12_organizer.en"),
+                             file("server/conf/messages/en/13_admin.en"),
+                             file("server/conf/messages/en/99_error.en"))
+
+      IO.write(outputFileDE, inputFilesDE.map(IO.read(_)).reduceLeft(_ ++ _))
+      IO.write(outputFileEN, inputFilesEN.map(IO.read(_)).reduceLeft(_ ++ _))
+      println("Concatenating message files") 
+    },
     maintainer      := "Robert Lichtenegger <robert.lichtenegger@icloud.com>",
     name            := Settings.name,
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
+    compile in Compile := ((compile in Compile) dependsOn concMsgFiles).value,
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     mappings in Universal ++= directory(baseDirectory.value / "public"),
@@ -76,6 +106,8 @@ lazy val server = (project in file("server")).
     )  
 ).enablePlugins(PlayScala).
   dependsOn(sharedJvm)
+
+//compile.dependsOn(concatFiles)
 
 // Library infos:
 // com.iheart-ficus: Ficus is a lightweight companion to Typesafe config that makes it more Scala-friendly.
@@ -125,7 +157,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
      name := "shared",
      libraryDependencies ++= Seq(
        "com.lihaoyi" %%% "upickle" % "1.4.3",
-       "com.chuusai"       %%% "shapeless" % "2.3.3"
+       "com.chuusai" %%% "shapeless" % "2.3.3"
      )
    )
   .enablePlugins(ScalaJSPlugin).
@@ -155,7 +187,7 @@ lazy val testing = (project in file("testing"))
       //  "org.scalatest" %% "scalatest" % "3.2.11" % "test",
       //  "com.lihaoyi"  %% "utest" % "0.7.9" % "test"
      )
-  )   
+  ) 
 
 lazy val commonSettings = Seq(
   scalaVersion   := Settings.scalaVersion,

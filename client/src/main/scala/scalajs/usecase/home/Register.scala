@@ -149,11 +149,15 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
             val pw = InputCtrl.getPassword("password").getOrElse("")
             if (pw == "") error("execRequest", s"password not set")
 
+            println("RegisterState.FullFinish 1")
+
             val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.encode, pw.getBytes.toBase64, ctx("clubname").str, false, false)
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
             setHtml("Processing", clientviews.component.html.Spinner(gM("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
+
+            println("RegisterState.FullFinish 2")
 
             val result = (for {
               licIdCpn <- EitherT(requestLicense(licReq))

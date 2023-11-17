@@ -4,7 +4,6 @@ package addon.test
 ** test -s compphase -n 1
 **
 */
-
 import org.rogach.scallop._
 
 import scala.scalajs.js.annotation._
@@ -55,10 +54,13 @@ object AddonMain extends TestUseCase("AddonMain")
               | 
               |Commands:
               |
+              |  load - load tourney as an organizer
               |  log  - set log level
               |  show - show/dump tourney objects
               |  sync - purge local tourney data to server
+              |  save - purge/save server db to disk
               |  set  - set DOM Elments
+              |  test - test various Web dialogs and internal tourney functionality
               |
               |Options:
               |""".stripMargin)
@@ -76,15 +78,15 @@ object AddonMain extends TestUseCase("AddonMain")
       case "test"  => cmdTest(args1)
       case "save"  => cmdSave()
       case "load"  => cmdLoad(args1(0))
-      case _      => { val conf = new ConfMain(Seq()); conf.printHelp(); Future(true) }
+      case _       => { val conf = new ConfMain(Seq()); conf.printHelp(); Future(true) }
     }
   }
 
 
 
-   /** log command
-    * 
-    */ 
+  /** log command
+   * 
+   */ 
   def cmdLog(args: Array[String]): Future[Boolean] = {
 
     class ConfLog(arguments: Seq[String]) extends ScallopConf(arguments) {
@@ -113,10 +115,9 @@ object AddonMain extends TestUseCase("AddonMain")
   }
 
 
-
   /** set command
-    * 
-    */ 
+   * 
+   */ 
   def cmdSet(args: Array[String]): Future[Boolean] = {
 
     class ConfSet(arguments: Seq[String]) extends ScallopConf(arguments) {
@@ -150,8 +151,8 @@ object AddonMain extends TestUseCase("AddonMain")
         val toId = conf.display.toId.getOrElse(185L)
 
         setLoginLoad(toId).map {
-          case false => false
-          case true  => {
+          case Left(err)  => false
+          case Right(res) => {
             AddonMain.setOutput(s"START set display style ${style} ${id}")
             gE(id).style.setProperty("display", style)
             true
@@ -203,7 +204,11 @@ object AddonMain extends TestUseCase("AddonMain")
     conf.subcommand match {
       case Some(conf.tourney) => {
         val toId = conf.tourney.toid.getOrElse(0L)
-        showTourney(toId)
+        setOutput("START show tourney")
+        setLoginLoad(toId).map {
+          case Left(err)  => false
+          case Right(res) => setOutput(s"SUCCESS show tourney: \n ${App.tourney.toString()}"); true
+        }
       }  
       case Some(conf.comp)    => {
         val coId   = conf.phase.coid.getOrElse(0L)
@@ -241,7 +246,7 @@ object AddonMain extends TestUseCase("AddonMain")
         case _ => printHelp()
       }
       version("TourneyService 1.0.3 (c) 2023 Robert Lichtenegger")
-      banner("""Usage: test --scope [type|tourney|competition|compphase|player|basic|ctt|player] --param <value> --number <number>
+      banner("""Usage: test --scope [type|tourney|competition|compphase|player|basic|ctt|referee|download|match] --param <value> --number <number>
               |   Options:
               |""".stripMargin)
 
@@ -271,7 +276,7 @@ object AddonMain extends TestUseCase("AddonMain")
     scope match {
       case "basic"     => AddonBasic.execTest(number, param);     Future(false)
       case "dialog"    => AddonDialog.execTest(number, toId, plId, param)
-      case "compphase" => AddonCompPhase.execTest(number, param); Future(false)
+      case "compphase" => AddonCompPhase.execTest(number, param)
       case "ctt"       => AddonCtt.execTest(number, param);       Future(false)
       case "player"    => AddonPlayer.execTest(number, toId, plId, param)
       case "referee"   => AddonReferee.execTest(number, toId, coId, phase, param)
@@ -313,6 +318,7 @@ object AddonMain extends TestUseCase("AddonMain")
     }
   }
 
+
   /** load command
    * 
    */ 
@@ -321,33 +327,32 @@ object AddonMain extends TestUseCase("AddonMain")
 
     setOutput("START load")
     setLoginLoad(toIdStr.toLongOption.getOrElse(0L)).map {
-      case false => false
-      case true  => println(s"TOURNEY: \n ${App.tourney.toString()}"); true 
+      case Left(err)   => false
+      case Right(res)  => println(s"TOURNEY: \n ${App.tourney.toString()}"); true 
     }
   }
 
 
-  def setLoginLoad(toId: Long): Future[Boolean] = {
+  def setLoginLoad(toId: Long): Future[Either[Error,Boolean]] = {
     import cats.data.EitherT
     import cats.implicits._ 
     
     if (toId <= 0) {
-      setOutput(s"ERROR load: loading tourney ${toId} not possible"); Future(false)
+      setOutput(s"ERROR load: loading tourney ${toId} not possible"); Future(Left(Error("Wrong_toId")))
     } else {
       (for {
         pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
         coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
         result    <- EitherT(App.loadRemoteTourney(toId))
       } yield { (result, pw) }).value.map {
-        case Left(err)    => addOutput(s"ERROR load: ${err}"); false
+        case Left(err)    => addOutput(s"ERROR load: ${err}"); Left(err)
         case Right(res)   => {
           addOutput(s"SUCCESS load: Tourney ${toId} loaded")
-          true
+          Right(true)
         } 
       } 
     }
   }
-
 
 
   def addOutput(msg: String) = {
@@ -358,21 +363,22 @@ object AddonMain extends TestUseCase("AddonMain")
     elt.innerText = s"${content}\n${msg}"
   }  
 
-  def setOutput(msg: String) = {
-    setHtml(gE("DlgPrompt__OutputText"), msg)
-  }  
-
+  def setOutput(msg: String) = setHtml(gE("DlgPrompt__OutputText"), msg)
 
   @JSExport
-  def console(): Unit = prompt(gM("home.main.prompt")).map {
-    case Left(err)  => println("invalid command/cancel")
-    case Right(cmd) => execute(cmd).map {
-      case true  => println("Restart"); console()
-      case false => console()
-    } 
-  } 
+  def console(): Unit = {
+    // execute first command if set
+    val command = getData(gE("DemoButton"), "command", "")
+    if (command != "") setData(gE("DemoButton"), "command", "")
+    println(s"COMMAND: ${command}")
+
+    prompt(gM("home.main.prompt"), command).map {
+      case Left(err)  => println("Invalid Console Command or Cancel")
+      case Right(cmd) => execute(cmd).map { _ => console() }
+    }
+  }
   
-  def prompt(title: String) : Future[Either[String, String]] = {
+  def prompt(title: String, command: String) : Future[Either[String, String]] = {
     import org.scalajs.dom.raw.HTMLElement
     import scalajs.usecase.dialog.DlgPrompt
     import scala.collection.mutable.ArrayBuffer
@@ -399,37 +405,24 @@ object AddonMain extends TestUseCase("AddonMain")
       }
     }
 
-    val initVal = if (pHistory.length > 0) { pPosition = 0; pHistory(0) } else { pPosition = -1; "" }  
-    DlgPrompt.show(title, initVal, actionEvent) map {
-      case Left(err)    => Left(err)
-      case Right(input) => {
-        // save history
-        pHistory.insert(0, input)
-        if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
-        AppEnv.setArrayBuffer("AppEnv.prompt", pHistory) 
-        Right(input)
-      }  
+    val initVal = if (pHistory.length > 0) { pPosition = 0; pHistory(0) } else { pPosition = -1; "" } 
+    
+    if (command != "") {
+      loadModal(clientviews.dialog.html.DlgPrompt(), "DlgPrompt__Modal")
+      Future(Right(command))
+    } else {
+      DlgPrompt.show(title, initVal, actionEvent) map {
+        case Left(err)    => Left(err)
+        case Right(input) => {
+          // save history
+          pHistory.insert(0, input)
+          if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
+          AppEnv.setArrayBuffer("AppEnv.prompt", pHistory) 
+          Right(input)
+        }  
+      }
     }
-  }
 
-
-
-  /*
-  **
-  **  HELPER
-  **
-  */
-
-  // show tourney
-  def showTourney(toId: Long): Future[Boolean] = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    setOutput("START show tourney")
-    setLoginLoad(toId).map {
-      case false => false
-      case true  => setOutput(s"SUCCESS show tourney: \n ${App.tourney.toString()}"); true
-    }
   }
 
  

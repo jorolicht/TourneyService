@@ -81,14 +81,14 @@ class HomeCtrl @Inject()(
    */
 
   def start(ucName: String="", ucParam: String="", ucInfo: String="") = Action { implicit request =>
-    import tourn.services.Crypto._
+    import tourn.services.Crypto
     logger.info(s"start(${ucName},${ucParam},${ucInfo})")
-    val ctx = getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
+    val ctx = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
 
     if (ctx.orgId <= 0) {
-      Ok(views.html.start(ucName, ucParam, ucInfo, genSessionBase64(), lS, rml)).discardingCookies(DiscardingCookie("TuSe"))
+      Ok(views.html.start(ucName, ucParam, ucInfo, Crypto.genSessionBase64(), lS, Crypto.rml)).discardingCookies(DiscardingCookie("TuSe"))
     } else {
-      Ok(views.html.start(ucName, ucParam, ucInfo, genSessionBase64(ctx), lS, rml))
+      Ok(views.html.start(ucName, ucParam, ucInfo, Crypto.genSessionBase64(ctx), lS, Crypto.rml))
     }
   }
    

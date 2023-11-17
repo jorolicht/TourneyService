@@ -60,7 +60,7 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
           val (pl1, pl2) = (tourney.players(plId1), tourney.players(plId2))
           (PantEntry.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
         }
-        case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.UNKN, CompStatus.UNKN, "", 0L, 0L, "")
+        case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
       }
     }).toSeq
   }

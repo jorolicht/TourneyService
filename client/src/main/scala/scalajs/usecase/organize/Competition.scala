@@ -11,7 +11,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 
-
 import shared.model._
 import shared.model.PantStatus
 import shared.model.Competition._
@@ -30,6 +29,14 @@ import scalajs.usecase.dialog._
 import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
 import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
 
+
+/* DEBUG LINKS
+** http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20compphase%20%2Dn%204 
+**
+** 
+*/
+
+
 // ***
 // COMPETITION Administration
 // ***
@@ -40,43 +47,85 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     setMainContent(clientviews.organize.html.Competition())
-    update()
+    updComp()
   }
 
-  override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
-    val coId = App.tourney.getCurCoId
-    
+  def updComp() = {
+    val coId   = App.tourney.getCurCoId
+    val coPhId = App.tourney.getCurCoPhId
+
+    setData(gUE("BtnAddCompPhase"), "coId", coId)
+
     val compList = (for { co <- App.tourney.comps.values.toSeq } yield {
       val (cnt, cntActiv) = App.tourney.getCompCnt(co)
       (co, cnt, cntActiv)
     }).toSeq.sortBy(_._1.startDate)  
-  
-    setHtml("CompCard", CompCard(compList, AppEnv.getLang) )
- 
+    setHtml("CompCard", CompCard(compList, coId, AppEnv.getLang) )
+    
+    println(s"OrganizeCompetition.update -> coId: ${coId}  coPhId: ${coPhId}")
+
     // set play card and select competition
     if (coId > 0) {
       val comp = App.tourney.comps(coId)
-      setDisabled("BtnStartCompetition", comp.status > CompStatus.READY)
-      selTableRow(uc(coId.toString))
+      setVisible(gUE("CoPhCardMain"), true)
+      setVisible(gUE("ParticipantCardMain"), true)
+      setHtml("CoPhCardHdr", getMsg("coph.card", comp.name))
+      setHtml("ParticipantCardHdr", getMsg("participant.card", comp.name))
+
+      // prepare CompCard
+      collapse("CompCard", false)
+      
+      // prepare CoPhCard
+      val coPhNameId = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
+      println(s"Competition Phase List: ${coPhNameId.mkString(":")}")
+      setHtml("CoPhCard", CoPhCard(coId, coPhNameId))
+      setCompPhaseTab(coId, coPhId) 
+
+
+      val editable = (comp.status == CompStatus.READY) || (comp.status == CompStatus.CFG)
+
+      // prepare ParticipantCard
       comp.typ match {
-        case CompTyp.SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(App.tourney, coId), comp.status <= CompStatus.READY)) 
-        case CompTyp.DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(App.tourney, coId), comp.status <= CompStatus.READY)) 
+        case CompTyp.SINGLE => setHtml("ParticipantCard", SingleCard(genSingleTblData(App.tourney, coId), editable )) 
+        case CompTyp.DOUBLE => setHtml("ParticipantCard", DoubleCard(genDoubleTblData(App.tourney, coId), editable )) 
         case _              => error("update", s"competition typ not yet supported") 
       }
-      collapse("CompCard", false)
+      
       //showSBMenu("OrganizeCompetition")
     } else {
-      setDisabled("BtnStartCompetition", true)
-      setHtml("ParticipantCard", s"""
-        <div class="alert alert-info text-center mb-0" role="alert">
-          <span class="tuse-font-1">${getMsg("nocompselect")}</span>
-        </div>    
-      """)
-    } 
+      setVisible(gUE("CoPhCardMain"), false)
+      setVisible(gUE("ParticipantCardMain"), false)
+    }
     setHeader()
     //addClass("OrganizeCompetition", "show")(UCP("APP__Sidebar"))
     // val classAttr = getAttribute2(uc("OrganizeCompetition"), "class")
     // println(s"OrganizeCompetition: ${classAttr}")
+  }
+
+
+  def updCoPh(coph: CompPhase) = {
+    import org.scalajs.dom.raw.HTMLInputElement 
+    import org.scalajs.dom.document
+    if (coph.coPhId == 1) {
+        val pants = (App.tourney.pl2co.filterKeys(_._2 == coph.coId).filter { case (x1,x2) => x2.status == PantStatus.REDY } map { x => SNO(x._2.sno) }).toList
+        coph.noPlayers = pants.length
+        println(s"updCoPh: pants ${pants.mkString(":")}")
+    } else {
+      // select pants from previous phase / round
+      // read winner looser all selection
+      // read configuration
+      // decide on pants selection depending on KO or Group round
+    }
+
+  
+    setHtml(gE(s"CoPhCardContent_${coph.coId}_${coph.coPhId}"), clientviews.organize.competition.CoPhCard.html.Content(coph) )
+    
+    setCophSystemOptions(coph.coId, coph.coPhId, coph.noPlayers)
+    selectOption(s"Winset_${coph.coId}_${coph.coPhId}", coph.noWinSets.toString)
+    selectOption(s"GameSystem_${coph.coId}_${coph.coPhId}", coph.coPhCfg.id.toString)
+    setHtml(gUE(s"Status_${coph.coId}_${coph.coPhId}"), gMTyp(coph.status))
+    setHtml(gUE(s"NoGames_${coph.coId}_${coph.coPhId}"), gUM("coph.noGames", coph.mFinished.toString, coph.mTotal.toString))
+    setHtml(gUE(s"NoPlayer_${coph.coId}_${coph.coPhId}"), gUM("coph.noPlayers", coph.noPlayers.toString))
   }
 
 
@@ -137,7 +186,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               App.tourney.comps(co.id) = co 
               App.saveLocalTourney(App.tourney)
               App.tourney.setCurCoId(co.id)
-              update() 
+              updComp() 
             }
           }
         }
@@ -155,11 +204,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               App.tourney.delComp(coId)
               App.saveLocalTourney(App.tourney)
               App.tourney.setCurCoId(0)     // resetCurCoId
-              update()               
+              updComp()               
             }
           }
-        }  
-
+        }
       }
 
       case "ShowCompetition"      => {
@@ -168,7 +216,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
         event.stopPropagation()
         DlgCardComp.show(App.tourney.comps(coId), App.tourney, AppEnv.getLang, DlgOption.View )
-        update()
+        updComp()
       }
 
       case "EditCompetition"      => {
@@ -185,7 +233,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
                 App.tourney.comps(co.id) = co 
                 App.saveLocalTourney(App.tourney)
                 App.tourney.setCurCoId(co.id)
-                update() 
+                updComp() 
             }
           }
         } 
@@ -198,7 +246,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
 
       case "SelectCompetition"    => {   
         App.tourney.setCurCoId(getData(elem, "coId", 0L))
-        update()
+        updComp()
       }
 
       //
@@ -216,7 +264,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
             // set statistic/numbers
             val p2c = App.tourney.pl2co.values.filter(_.coId == coId).toSeq
             val (total, activ) = (p2c.length, p2c.filter(_.status > PantStatus.REGI).length )
-            setHtml(s"Counter_${coId}", s"${total}/${activ}")           
+            setHtml(s"Counter_${coId}", s"${total}/${activ}")
+
+            //update competition phase
+            if (App.tourney.cophs.contains((coId, App.tourney.getCurCoPhId))) updCoPh(App.tourney.cophs((coId, App.tourney.getCurCoPhId)))
           }
         }
       }
@@ -241,7 +292,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
               case Right(res) => {
                 if ( App.tourney.pl2co.isDefinedAt((sno, coId)) ) App.tourney.pl2co -= ((sno,coId))
                 App.saveLocalTourney(App.tourney)
-                update()
+                updComp()
               }
             }
             case false => info("DeleteParticipant", s"not confirmed for: ${sno}")
@@ -267,6 +318,55 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         togCollapse("ParticipantCard")
       }
 
+
+      //
+      // Action with competition phase
+      //      
+
+      case "SelectCoPh"   => {
+        val (coId, coPhId) = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
+        App.tourney.comps(coId).setCurCoPhId(coPhId)
+        setCompPhaseTab(coId, coPhId)
+      }  
+
+
+      case "AddCompPhase" => DlgInputTxt.show(getMsg("dlg.coph.new.hdr"), 
+                                              getMsg("dlg.coph.new.lbl"), 
+                                              getMsg("dlg.coph.new.plh"), 
+                                              gM("std.btn.close"), 
+                                              gM("std.btn.add"), chkCoPhName) map { 
+        case Left(err)    => error("AddCompPhase.action", s"DlgInputTxt ${err}")
+        case Right(value) => {
+          val coId = getData(elem, "coId", 0L)
+          addCompPhase(coId, value).map {
+            case Left(err)    => error("AddCompPhase.action", s"addCompPhase ${err}")
+            case Right(coph)  => {
+              App.tourney.comps(coId).setCurCoPhId(coph.coPhId)
+              updComp()             
+              collapse("CoPhCard", false)
+            }
+          }      
+        }
+      }
+
+      case "CollapseCoPh" => {
+        togCollapse("CoPhCard")
+        setCompPhaseTab(App.tourney.getCurCoId, App.tourney.getCurCoPhId)        
+      }
+
+      case "GameSystem" => {
+        val coId   = getData(elem, "coId", 0L)
+        val coPhId = getData(elem, "coPhId", 0)
+        App.tourney.getCoPh(coId, coPhId) match { case Right(coph) => coph.coPhCfg = CompPhaseCfg(getInput(gUE(s"GameSystem_${coId}_${coPhId}"), 0)); case _ => {} }
+      }
+
+      case "Winset" => {
+        val coId   = getData(elem, "coId", 0L)
+        val coPhId = getData(elem, "coPhId", 0)
+        App.tourney.getCoPh(coId, coPhId) match { case Right(coph) => coph.noWinSets = getInput(gUE(s"Winset_${coId}_${coPhId}"), 0); case _ => {} }
+      }      
+
+
       case _          => { debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}") }
     }
   }
@@ -286,7 +386,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
       case Left(err)  => if (!err.equal2Code("dlg.canceled")) DlgShowError.show(List(err)) else info("DlgCardRegSingle", s"dialog canceled: ${err}")
       case Right(res) => { 
         App.setLocalTourney(res._3)
-        update()      
+        updComp()      
       }
     }
   }
@@ -305,7 +405,7 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
             info("RegDouble", s"success: ${p2c}")
             tourney.pl2co((p2c.sno, p2c.coId)) = p2c
             App.saveLocalTourney(App.tourney)
-            update()
+            updComp()
           }
         }
       }
@@ -335,6 +435,81 @@ def regSingle(tourney: Tourney, coId: Long, lang: String): Unit = {
       }  
     }
   }
+
+  def setCompPhaseTab(coId: Long, selectedId: Int) = {
+    import org.scalajs.dom.raw.HTMLElement
+    val aNodes = gE("CoPhCardLinks").getElementsByTagName("a")  
+    // set register/tab active
+    for( i <- 0 to aNodes.length-1) {
+      val elem   = aNodes.item(i).asInstanceOf[HTMLElement]
+      val coPhId = getData(elem, "coPhId", 0)
+      val activ = (coPhId == selectedId)
+
+      // set link and content
+      setClass(elem, activ, "active")
+      setVisible(gE(s"CoPhCardContent_${coId}_${coPhId}"), activ)
+    } 
+    App.tourney.comps(coId).setCurCoPhId(selectedId)
+    App.tourney.getCoPh(coId,selectedId) match { case Right(coph) => updCoPh(coph); case _ => {} }
+  }   
+
+
+  def chkCoPhName(input: String): Either[String, Boolean] = {
+    val coId = App.tourney.getCurCoId
+    val coPhNames = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => x.name).toList
+    if      (input == "")               Left(gM("err0233.noInput")) 
+    else if (coPhNames.contains(input)) Left(gM("err0234.coph.already.exists", input))
+    else if (input.length < 2)          Left(gM("err0235.coph.name.short"))
+    else                                Right(true)
+  }
+
+
+  // sysOptions generate all possible options for given size
+  def sysOptions(size: Int): List[CompPhaseCfg.Value] = {
+    def sysOptions21to128(size: Int): List[CompPhaseCfg.Value] = {
+      val result = ArrayBuffer[CompPhaseCfg.Value]()  
+      if (size % 3 == 0) result += CompPhaseCfg.GRPS3 else result += CompPhaseCfg.GRPS34
+      if (size % 4 == 0) result += CompPhaseCfg.GRPS4 else result += CompPhaseCfg.GRPS45
+      if (size % 5 == 0) result += CompPhaseCfg.GRPS5 else result += CompPhaseCfg.GRPS56
+      result += CompPhaseCfg.KO
+      result += CompPhaseCfg.SW
+      result.to(List)
+    }
+
+    size match {
+      case 3 | 4 | 5 => List(CompPhaseCfg.JGJ,    CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 6         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ)
+      case 7         => List(CompPhaseCfg.GRPS34, CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ)
+      case 8         => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ     )
+      case 9         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 10        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 11        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 12        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW )
+      case 13        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW )
+      case 14        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 15        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5,  CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 16        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 17        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 18        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 19        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 20        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW)
+
+      case i if (i > 21 && i <= 128) => sysOptions21to128(i)
+      case _                         => List()        
+    }
+  }
+
+
+  // setCophSystemOptions
+  def setCophSystemOptions(coId: Long, coPhId: Int, size: Int): Unit = {
+    val cfgOptions = sysOptions(size)
+    val selOptions = new StringBuilder(s"<option value='${CompPhaseCfg.CFG.id}' selected>${gM(CompPhaseCfg.CFG.msgCode)}</option>")
+    for (cfg <- cfgOptions) {
+      selOptions ++= s"<option value='${cfg.id}' selected>${gM(cfg.msgCode)}</option>" 
+    }
+    setHtml(s"GameSystem_${coId}_${coPhId}", selOptions.toString)
+  }
+
 
 
   

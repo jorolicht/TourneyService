@@ -39,18 +39,14 @@ object OrganizeCompetitionReferee extends UseCase("OrganizeCompetitionReferee")
     val base = gE(s"Referee_${coph.coId}_${coph.coPhId}")
 
     if (base == null) {
-      val qrCodeParam = new QRCodeParam { val width = 60; val height = 60 }
-
       // init view
       // get section, one for every coPhId
-      val elem    = gEqS(s"RefereeContent_${coph.coId}", s"[data-coPhId='${coph.coPhId}']")
+      val elem = gEqS(s"RefereeContent_${coph.coId}", s"[data-coPhId='${coph.coPhId}']")
 
       // generate main page with referee notes
       val noSchiris = coph.matches.length
       setHtml(elem, clientviews.organize.competition.referee.html.RefereeCard(coph, noSchiris))
-
-      val test = getTypName(coph.matches(1).coTyp)
-      debug("setPage", s"Test getTypeName: ${test} noSchiris: ${noSchiris}")
+      debug("setPage", s"Test msgCode: ${gMTyp(coph.matches(1).coTyp)} noSchiris: ${noSchiris}")
 
       coph.matches.zipWithIndex.foreach { case (m, idx) => {
         val (snoA, nameA, clubA, ttrA) = SNO(m.stNoA).getInfo(m.coTyp)(App.tourney)
@@ -59,7 +55,7 @@ object OrganizeCompetitionReferee extends UseCase("OrganizeCompetitionReferee")
           case CompPhaseTyp.GR => {
             setHtml(gE(s"RefereeNote_${coph.coId}_${coph.coPhId}_${idx+1}"), 
                     clientviews.organize.competition.referee.html.RefereeCardSingle(coph, m.gameNo,
-                    App.tourney.name, coph.name, getTypName(m.coTyp), 
+                    App.tourney.name, coph.name, gMTyp(m.coTyp), 
                     getMsg("group", m.asInstanceOf[MEntryGr].grId.toString),
                     getMsg("round", m.asInstanceOf[MEntryGr].round.toString),
                     nameA, nameB, clubA, clubB))
@@ -67,18 +63,19 @@ object OrganizeCompetitionReferee extends UseCase("OrganizeCompetitionReferee")
           case CompPhaseTyp.KO => {
             setHtml(gE(s"RefereeNote_${coph.coId}_${coph.coPhId}_${idx+1}"), 
                     clientviews.organize.competition.referee.html.RefereeCardSingle(coph, m.gameNo,
-                    App.tourney.name, coph.name, getTypName(m.coTyp), 
+                    App.tourney.name, coph.name, gMTyp(m.coTyp), 
                     "Gruppe A", "Runde 5",
                     nameA, nameB, clubA, clubB))
           }
           case _               =>
         }
+        val qrCodeParam = new QRCodeParam { val width = 80; val height = 80 }
         val qrCode = new QRCode(gE(s"QRCode_${coph.coId}_${coph.coPhId}_${idx+1}"), qrCodeParam) 
 
         val nonce = RefereeNote.nonce(App.tourney.id, coph.coId, coph.coPhId, m.gameNo)
-        val refereeAddr = s"${AppEnv.home}/svc/getReferee/${App.tourney.id}/${coph.coId}/${coph.coPhId}/${m.gameNo}/${nonce}"
+        val refereeAddr = s"${AppEnv.serverAddress}/svc/getReferee/${App.tourney.id}/${coph.coId}/${coph.coPhId}/${m.gameNo}/${nonce}"
         qrCode.makeCode(refereeAddr)
-        gE(s"QRCode_${coph.coId}_${coph.coPhId}_${idx+1}").asInstanceOf[dom.raw.HTMLAnchorElement].href = refereeAddr 
+        gE(s"QRCodeLink_${coph.coId}_${coph.coPhId}_${idx+1}").asInstanceOf[dom.raw.HTMLAnchorElement].href = refereeAddr 
       }}
     } else { 
       error("setPage", s" Referee (not null)") 

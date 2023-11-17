@@ -22,7 +22,7 @@ case class ResultEntry(
   var sets:  (Int,Int),                // sets and balls with
   var balls: Array[String]             // view from player A
 ) {
-  def stringify() = s"${valid}^${pos._1}^${pos._2}^${sno._1}^${sno._2}^${sets._1}^${sets._2}^${balls.mkString("·")}^"
+  override def toString = s"ResultEntry valid:${valid} pos:${pos} sno:${sno} sets:${sets} balls:${balls.mkString(":")}" 
 }
 
 object ResultEntry {

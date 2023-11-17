@@ -57,7 +57,7 @@ object DlgCardRegSingle extends BasicHtml
   /** validate input of dialog for Player, return valid Player or a List of Errors
    * 
    */ 
-  def validate(coId: Long)(implicit trny: Tourney): Either[List[Error], (Player, Int)] = {
+  def validate(coId: Long)(implicit trny: Tourney): Either[List[Error], (Player, PantStatus.Value)] = {
     import shared.model.Player
     import shared.model.SexTyp
     import shared.model.Club
@@ -69,11 +69,11 @@ object DlgCardRegSingle extends BasicHtml
     var clubId  = ("", 0L)     //(clubname, id)-Tuppel
     var email   = ""
 
-    val bYear  = getInput(gE(uc("Year")), 0)
-    val status = getRadioBtn("PlayerStatus", -1)
-    val gender = SexTyp(getRadioBtn("Gender", SexTyp.UNKN.id)) 
+    val bYear   = getInput(gE(uc("Year")), 0)
+    val pStatus = PantStatus(getRadioBtn("PantStatus", PantStatus.UNKN.code))
+    val gender  = SexTyp(getRadioBtn("Gender", SexTyp.UNKN.id)) 
 
-    debug("validate", s"status: ${status}")
+    debug("validate", s"status: ${pStatus}")
 
     Player.validateEmail(getInput(gE(uc("Email")), "")) match {
       case Left(err)  => eList += err
@@ -101,9 +101,8 @@ object DlgCardRegSingle extends BasicHtml
     }
 
     /* read relevant input and verify it */
-    if (eList.length > 0) Left(eList.toList) else Right((player, status))
+    if (eList.length > 0) Left(eList.toList) else Right((player, pStatus))
   } // end validate
-
 
 
   def setPlayerView(name: String, firstname: String, plId: Long)(implicit trny: Tourney): Unit = {
@@ -114,7 +113,7 @@ object DlgCardRegSingle extends BasicHtml
       setInput("Email", player.email)
       setInput("TTR", player.getTTR)
       setIntOption("Year", player.getBirthyear())
-      setRadioBtnByValue("Gender", player.sex.toString)
+      setRadioBtnByValue(uc("Gender"), player.sex.toString)
       disablePlayer(true)
     } else {
       if (name == "") {
@@ -122,7 +121,7 @@ object DlgCardRegSingle extends BasicHtml
         setInput("Email", "")
         setInput("TTR", "")
         setIntOption("Year", None)
-        setRadioBtnByValue("Gender", "0")
+        setRadioBtnByValue(uc("Gender"), "0")
       }
       disablePlayer(false)
     }
@@ -153,13 +152,13 @@ object DlgCardRegSingle extends BasicHtml
     setClubList(trny)
     setPlayerView("","", 0L)(trny)
 
-    setRadioBtnByValue("PlayerStatus", PantStatus.REDY.toString)
+    setRadioBtnByValue(uc("PantStatus"), PantStatus.REDY.code)
     setHtml("Class", trny.getCompName(coId))
   }
   
   // show dialog return result (Future) or Failure when canceled
-  def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, (Player, Int)]] = {
-    val p     = Promise[(Player, Int)]()
+  def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, (Player, PantStatus.Value)]] = {
+    val p     = Promise[(Player, PantStatus.Value)]()
     val f     = p.future
 
     def cancel() = {
@@ -180,13 +179,13 @@ object DlgCardRegSingle extends BasicHtml
 
     
     tourney = trny
-    loadModal(html.DlgCardRegSingle(),ucp)
+    loadModal(html.DlgCardRegSingle(), ucp)
     init(coId)
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
-    onClick(gE(uc("Submit")), (e: Event) => submit(e))
-    doModal(gE(uc("Modal")), "show")
+    onEvents(gUE("Modal"), "hide.bs.modal", () => cancel())
+    onClick(gUE("Submit"), (e: Event) => submit(e))
+    doModal(gUE("Modal"), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

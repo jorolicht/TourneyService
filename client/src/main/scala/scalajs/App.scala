@@ -144,7 +144,7 @@ object App extends BasicHtml with TourneySvc
       if (setHistory) {
         dom.window.history.pushState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
       } else {
-        dom.window.history.replaceState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
+        dom.window.history.replaceState(write((ucName, ucParam, ucInfo)), getMsg("title"), url)
       }
 
       setFooter()
@@ -164,14 +164,6 @@ object App extends BasicHtml with TourneySvc
     }
     catch { case _: Throwable => HomeMain.render("Error", getError(Error("err0098.usecase.unknown", ucName))) }
   }
-
-
-
-
-
-
-
-
 
   @JSExport
   def playfields(toIdStr: String, language: String, csrfToken: String, lastUpdate: String): Unit = {

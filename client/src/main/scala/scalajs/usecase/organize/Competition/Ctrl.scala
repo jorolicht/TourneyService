@@ -142,12 +142,12 @@ object OrganizeCompetitionCtrl extends UseCase("OrganizeCompetitionCtrl")
     setCheckbox("DemoBtn", coph.demo)
 
     coPhCfg match {
-      case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45| CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6 => {
+      case CompPhaseCfg.GRPS3 | CompPhaseCfg.GRPS34 | CompPhaseCfg.GRPS4 | CompPhaseCfg.GRPS45| CompPhaseCfg.GRPS5 | CompPhaseCfg.GRPS56 | CompPhaseCfg.GRPS6 => {
         setActionBtn(coId, coPhId, "StartFollowing", !(coph.status == CompPhaseStatus.AUS))
       }
 
-      case CPC_KO => {   }
-      case CPC_SW => {   }
+      case CompPhaseCfg.KO => {   }
+      case CompPhaseCfg.SW => {   }
       case _      => {   }
     }
   }

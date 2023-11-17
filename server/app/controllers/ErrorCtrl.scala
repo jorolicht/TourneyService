@@ -4,11 +4,8 @@ import play.api.mvc.Results._
 import scala.concurrent._
 import javax.inject.Singleton
 
-import play.api.i18n.Lang
-import play.api.i18n.Langs
-import play.api.i18n.MessagesApi
+import play.api.i18n.{ I18nSupport, Messages, MessagesApi, Langs, Lang }
 import play.api.Logging
-
 
 import javax.inject._
 import views.html._
@@ -16,17 +13,17 @@ import views.html._
 import shared.utils._
 
 @Singleton
-class ErrorHandler@Inject() (langs: Langs, messagesApi: MessagesApi) 
-extends HttpErrorHandler with Logging {
+class ErrorHandler@Inject() (
+  langs: Langs,
+  messagesApi: MessagesApi
+) extends HttpErrorHandler with Logging {
 
   def onClientError(request: RequestHeader, statusCode: Int, message: String) = {
     val lang: Lang = langs.availables.head
-
     val errMsg: String = messagesApi("app.error")(lang)
     val errTip: String = messagesApi("app.error.tip")(lang)
-    val errLang: String = messagesApi("app.lang")(lang)
 
-    Future.successful(Status(statusCode)(views.html.component.ErrorPage.render(errMsg, errTip, errLang)))
+    Future.successful(Status(statusCode)(views.html.component.ErrorPage.render(errMsg, errTip)))
   }
 
   def onServerError(request: RequestHeader, exception: Throwable) = {

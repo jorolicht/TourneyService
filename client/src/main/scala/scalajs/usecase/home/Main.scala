@@ -37,6 +37,8 @@ object HomeMain extends UseCase("HomeMain")
       case "None"              => { }
 
       case "Content"           => setContent(ucInfo)
+      case "Debug"             => { setData(gE("DemoButton"), "command", ucInfo); gE("DemoButton").click() }
+
       case "Error"             => setMainContent(clientviews.home.html.Error(ucInfo).toString)
       case "ErrorCode"         => setMainContent(clientviews.home.html.Error(getError(ucInfo)).toString)
       case "WelcomeOrganizer"  => setMainContent(clientviews.home.html.Welcome(AppEnv.getOrganizer, AppEnv.getFullName, getMsg("Welcome")).toString)

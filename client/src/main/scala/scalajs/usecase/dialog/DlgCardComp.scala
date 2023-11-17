@@ -38,15 +38,15 @@ object DlgCardComp extends BasicHtml
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
       case "NameCompose"  => { 
-        if (getCheckbox(gE(uc("NameCompose")))) {  
-          val typ = getInput(gE(uc("typ")), 0)
-          setInput("name", getInput(gE(uc("AgeGroup")), getMsg("plh.AgeGroup") )+ "·" 
-                               + getInput(gE(uc("Class")), getMsg("plh.Class")) + "·" 
-                               + gM("competition.typ."+typ) )
-          setAttribute(gE(uc("name")), "readonly", "true")                     
+        if (getCheckbox(gUE("NameCompose"))) {  
+          val typ = CompTyp(getInput(gUE("typ"), 0))
+          setInput("name", getInput(gUE("AgeGroup"), gM("CompAgeGroup.plh"))  + "·" + 
+                           getInput(gUE("Class"),    gM("CompClass.plh")) + "·" + 
+                           gMTyp(typ) )
+          setAttribute(gUE("name"), "readonly", "true")                     
         } else {
-          removeAttribute(gE(uc("name")), "readonly") 
-          setInput("name", getInput(gE(uc("name"))).replace("·", " "))
+          removeAttribute(gUE("name"), "readonly") 
+          setInput("name", getInput(gUE("name")).replace("·", " "))
         }
       } 
       
@@ -64,11 +64,11 @@ object DlgCardComp extends BasicHtml
     
     var eList = ListBuffer[Error]()
 
-    if (comp.name.length <= 2 )          { eList += Error("dlg.card.comp.hlp.name");   markInput(gE("name"), Option(true))   }
-    if (comp.typ == CompTyp.UNKN )       { eList += Error("dlg.card.comp.hlp.typ");    markInput(gE("typ"), Option(true))    }
-    if (comp.status == CompStatus.UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput(gE("status"), Option(true)) }
+    if (comp.name.length <= 2 )         { eList += Error("dlg.card.comp.hlp.name");   markInput(gUE("name"), Option(true))   }
+    if (comp.typ == CompTyp.Typ )       { eList += Error("dlg.card.comp.hlp.typ");    markInput(gUE("typ"),  Option(true))    }
+    //if (comp.status == CompStatus.UNKN ) { eList += Error("dlg.card.comp.hlp.status"); markInput(gE("status"), Option(true)) }
     if (!comp.validateDate(trny.startDate, trny.endDate)) { 
-      eList += Error("dlg.card.comp.hlp.startTime"); markInput(gE("startTime"), Option(true)) 
+      eList += Error("dlg.card.comp.hlp.startTime"); markInput(gUE("startTime"), Option(true)) 
     }
 
     /* read relevant input and verify it */
@@ -79,16 +79,16 @@ object DlgCardComp extends BasicHtml
   // getInput
   def getInput(): Competition = {
 
-    val comp = Competition(getData(gE(uc("Form")),"id", 0L), getData(gE(uc("Form")),"hashKey",""), 
-                           getInput(gE(uc("name"))), CompTyp(getInput(gE(uc("typ")), 0)),
-                           parseStartTime(getInput(gE(uc("startTime")))),
-                           CompStatus(getInput(gE(uc("status")), CompStatus.UNKN.id)), getData(gE(uc("Form")), "options", ""))
+    val comp = Competition(getData(gUE("Form"),"id", 0L), getData(gUE("Form"),"hashKey",""), 
+                           getInput(gUE("name")), CompTyp(getInput(gUE("typ"), 0)),
+                           parseStartTime(getInput(gUE("startTime"))),
+                           CompStatus(getInput(gUE("status"), CompStatus.CFG.id)), getData(gUE("Form"), "options", ""))
     // set optional values                       
-    comp.setAgeGroup(getInput(gE(uc("AgeGroup"))))
-    comp.setRatingRemark(getInput(gE(uc("Class"))))
-    comp.setRatingLowLevel(getInput(gE(uc("TTRFrom")), 0))
-    comp.setRatingUpperLevel(getInput(gE(uc("TTRTo")), 0))
-    comp.setSex(getInput(gE(uc("Sex")), 0))
+    comp.setAgeGroup(getInput(gUE("AgeGroup")))
+    comp.setRatingRemark(getInput(gUE("Class")))
+    comp.setRatingLowLevel(getInput(gUE("TTRFrom"), 0))
+    comp.setRatingUpperLevel(getInput(gUE("TTRTo"), 0))
+    comp.setSex(getInput(gUE("Sex"), 0))
     comp
   }
 
@@ -96,32 +96,32 @@ object DlgCardComp extends BasicHtml
   def setInput(comp: Competition, trny: Tourney, lang: String, mode: DlgOption.Value): Unit = {
         
     // setting data-foo
-    setData(gE(uc("Form")), "id", comp.id)
-    setData(gE(uc("Form")), "hashKey", comp.hashKey)
-    setData(gE(uc("Form")), "name", comp.name)
-    setData(gE(uc("Form")), "typ", comp.typ) 
-    setData(gE(uc("Form")), "options", comp.options)
+    setData(gUE("Form"), "id", comp.id)
+    setData(gUE("Form"), "hashKey", comp.hashKey)
+    setData(gUE("Form"), "name", comp.name)
+    setData(gUE("Form"), "typ", gMTyp(comp.typ)) 
+    setData(gUE("Form"), "options", comp.options)
 
     // set start date and time
     if (mode == DlgOption.New) {
       setDateTimePicker("startTime", lang, int2ymd(trny.startDate), (12, 0))
-      setData(gE(uc("Form")), "status", CompStatus.UNKN.id)
+      setData(gUE("Form"), "status", CompStatus.CFG.id)
     } else {
       val (year, month, day, hour, minute) = ymdHM(comp.startDate)
       setDateTimePicker("startTime", lang, (year, month, day), (hour, minute))
-      setData(gE(uc("Form")), "status", comp.status.id)
+      setData(gUE("Form"), "status", comp.status.id)
     }
 
     setInput("coId", if (comp.id==0) "X" else comp.id.toString)
     setInput("name", comp.name)
 
     setAttribute(gE(uc("name")), "autocomplete", "off")
-    setInput("status", comp.status.toString)
+    setInput("status", gMTyp(comp.status))
     setInput("AgeGroup", comp.getAgeGroup)
     setInput("TTRFrom", comp.getFromTTR)
     setInput("TTRTo", comp.getToTTR)
 
-    setInput("typ", comp.typ.toString)
+    setInput("typ", s"${comp.typ.id}")
     val (cnt, cntActiv) = trny.getCompCnt(comp)
     setDisabled("typ", cnt==0)
     
@@ -169,8 +169,8 @@ object DlgCardComp extends BasicHtml
         case Right(result)   => {
           if (!p.isCompleted) p success result
           //disable modal first, then hide
-          offEvents(gE(uc("Modal")), "hide.bs.modal")
-          doModal(gE(uc("Modal")), "hide")
+          offEvents(gUE("Modal"), "hide.bs.modal")
+          doModal(gUE("Modal"), "hide")
         }  
       }
     }
@@ -179,9 +179,9 @@ object DlgCardComp extends BasicHtml
     setInput(comp, trny, lang, mode)
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
-    onClick(gE(uc("Submit")), (e: Event) => submit(e))
-    doModal(gE(uc("Modal")), "show")
+    onEvents(gUE("Modal"), "hide.bs.modal", () => cancel())
+    onClick(gUE("Submit"), (e: Event) => submit(e))
+    doModal(gUE("Modal"), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

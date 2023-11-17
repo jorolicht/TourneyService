@@ -38,9 +38,9 @@
 					<td class="text-left tuse-height">@msg_("tourney.typ." + tony.typ)</td>
 					<td class="text-center tuse-height">@getPrivat(tony.privat)</td>
 					<td class="text-right tuse-height">
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.Edit.id}", "onclick")><i class="fa fa-pencil"></i></a>
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.View.id}", "onclick")><i class="fa fa-eye"></i></a>
-						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(s"TourneyAction_${TourneyAction.Delete.id}", "onclick")><i class="fa fa-trash"></i></a>		
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(TourneyAction.Edit.code, "onclick")><i class="fa fa-pencil"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(TourneyAction.View.code, "onclick")><i class="fa fa-eye"></i></a>
+						<a data-toId='@tony.id' class="text-dark" href="#" @actionEvent(TourneyAction.Delete.code, "onclick")><i class="fa fa-trash"></i></a>		
 					</td>
 				</tr>	
 			}

@@ -37,12 +37,13 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
 {
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def execTest(number: Int, param: String)= {
+  def execTest(number: Int, param: String):Future[Boolean]= {
     number match {
-      case 0 => test_0(param)
-      case 1 => test_1(param)
-      case 2 => test_2(param)
-      case 3 => test_3(param)
+      case 0 => test_0(param); Future(true)
+      case 1 => test_1(param); Future(true)
+      case 2 => test_2(param); Future(true)
+      case 3 => test_3(param); Future(true)
+      case 4 => test_4(param)
     }
   }
 
@@ -190,6 +191,27 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
             println(s"${coph.toString}")
           }
         }
+      }
+    }
+  }
+
+  def test_4(param: String):Future[Boolean] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    val test = s"START Test Competition Phase 4 text->${param}"
+    AddonMain.setOutput(test)
+    val toId = 186L
+    (for {
+      valid   <- EitherT(authBasicContext("maria30.lichtenegger@gmail.com", "", "MLich@4530"))
+      result       <- EitherT(App.loadRemoteTourney(toId))
+    } yield { (valid, result) }).value.map {
+      case Left(err)    => AddonMain.setOutput(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}"); true
+      case Right(res)   => {
+        App.tourney.setCurCoId(1)
+        App.execUseCase("OrganizeCompetition", "", "")
+        AddonMain.setOutput(s"SUCCESS: ${test}")
+        true
       }
     }
   }

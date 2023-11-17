@@ -187,7 +187,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
   def setMatch(m: MEntry, prt: (String)=>Unit): Either[shared.utils.Error, Boolean] = {
     val rEntry = ResultEntry.fromMatchEntry(m)
     if (validPos(rEntry.pos)) {
-      prt(s"addkoMatch: index=${getIndex(rEntry.pos)} rEntry=${rEntry}")
+      //prt(s"addkoMatch: index=${getIndex(rEntry.pos)} rEntry=${rEntry}")
       results(getIndex(rEntry.pos)) = rEntry
       Right(true)
     } else {
@@ -269,7 +269,6 @@ object KoRound {
   }
 
 
-
   // getNoRounds calculates number of rounds
   def getNoRounds(noPlayers: Int): Int = {
     noPlayers match {  
@@ -300,34 +299,39 @@ object KoRound {
 
   def getMatchesPerRound(rnd: Int): Int = {
     rnd match { case 7 => 64; case 6 => 32; case 5 => 16; case 4 => 8; case 3 => 4; case 2 => 2; case 1|0 => 1; case _ => 0 }
-  } 
-
-
-  def fromTx(tx: KoRoundTx): KoRound = {
-    val kr = new KoRound(tx.size, tx.name, tx.noWinSets, tx.rnds)
-
-    // add players
-    for ((plentry, count) <- tx.pants.zipWithIndex) {
-      if (count < tx.pants.length) {
-        kr.pants(count) = plentry
-        kr.sno2pos += (kr.pants(count).sno -> count) 
-      }  
-    }
-
-    // add matches
-    for (result <- tx.results) {
-      val resEntry = result
-      val index = kr.getIndex(resEntry.pos._1, resEntry.pos._2)
-
-      // calcualte position within array from the result entry
-      // results of ko tree are linearized/flattend 
-      if (resEntry.valid & index >= 0 & index < scala.math.pow(2,kr.rnds).toInt) {
-        kr.results(index) = resEntry
-      }
-    }
-    kr.calc
-    kr
   }
+
+
+  def fromTx(tx: KoRoundTx): Either[Error, KoRound] = {
+    try {
+      val kr = new KoRound(tx.size, tx.name, tx.noWinSets, tx.rnds)
+
+      // add players
+      for ((plentry, count) <- tx.pants.zipWithIndex) {
+        if (count < tx.pants.length) {
+          kr.pants(count) = plentry
+          kr.sno2pos += (kr.pants(count).sno -> count) 
+        }  
+      }
+
+      // add matches
+      for (result <- tx.results) {
+        val resEntry = result
+        val index = kr.getIndex(resEntry.pos._1, resEntry.pos._2)
+
+        // calcualte position within array from the result entry
+        // results of ko tree are linearized/flattend 
+        if (resEntry.valid & index >= 0 & index < scala.math.pow(2,kr.rnds).toInt) {
+          kr.results(index) = resEntry
+        }
+      }
+      kr.calc
+      Right(kr)
+    } catch { case _: Throwable => Left(Error("err0236.decode.koRound")) }
+  }  
+
+
+
 }
 
 

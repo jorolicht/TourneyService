@@ -296,12 +296,15 @@ class BasicHtml
 
   def getInput[R](elem: HTMLElement, defVal: R = ""): R = 
     try defVal match {
-        case _:Int    => elem.asInstanceOf[Input].value.toIntOption.getOrElse(defVal).asInstanceOf[R]
-        case _:Long   => elem.asInstanceOf[Input].value.toLongOption.getOrElse(defVal).asInstanceOf[R]
-        case _:String => elem.asInstanceOf[Input].value.asInstanceOf[R]
-        case _        => AppEnv.logger.error(s"getInput -> elem: ${elem} defVal: ${defVal}"); defVal
+        case _:Boolean => elem.asInstanceOf[Input].checked.asInstanceOf[R]
+        case _:Int     => elem.asInstanceOf[Input].value.toIntOption.getOrElse(defVal).asInstanceOf[R]
+        case _:Long    => elem.asInstanceOf[Input].value.toLongOption.getOrElse(defVal).asInstanceOf[R]
+        case _:String  => { val in = elem.asInstanceOf[Input].value.asInstanceOf[R]; if (in=="") defVal else in }  
+        case _         => AppEnv.logger.error(s"getInput -> elem: ${elem} defVal: ${defVal}"); defVal
     } catch { case _: Throwable => AppEnv.logger.error(s"getInput elem: ${elem} defVal: ${defVal}"); defVal }
 
+
+    
   def getBooleanOption(name: String)(implicit ucp: UseCaseParam): Option[Boolean] = {
     try document.getElementById(uc(name)).asInstanceOf[Input].value.toBooleanOption
     catch { case _: Throwable => AppEnv.error("getBooleanOption", s"${name}"); None }
@@ -311,6 +314,7 @@ class BasicHtml
     try document.getElementById(uc(name)).asInstanceOf[Input].value.toIntOption
     catch { case _: Throwable => AppEnv.error("getIntOption", s"${name}"); None }
   }
+
 
   def setBooleanOption(name: String, input: Option[Boolean])(implicit ucp: UseCaseParam): Unit = {
     try input match {
@@ -458,17 +462,34 @@ class BasicHtml
         else       { _class.foreach(cValue => gE(uc(id)).classList.remove(cValue)) }   
     catch { case _: Throwable => error("setClass", s"id: ${uc(id)}  class: ${_class}") } 
 
+ def setClass(elem: HTMLElement, value: Boolean, _class: String*): Unit = 
+    try if (value) { _class.foreach(cValue => elem.classList.add(cValue)) } 
+        else       { _class.foreach(cValue => elem.classList.remove(cValue)) }   
+    catch { case _: Throwable => AppEnv.error("setClass", s"elem: ${elem}  class: ${_class}") }     
+
+
 
   def setRadioBtn(id: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
     try document.getElementById(uc(id)).asInstanceOf[Input].checked = value
     catch { case _: Throwable => error("setRadioBtn", s"id: ${uc(id)} -> ${value}") } 
   }
 
-  def setRadioBtnByValue(name: String, value: String)(implicit ucp: UseCaseParam): Unit = {
-    val inpNodes = document.getElementsByName(uc(name)).asInstanceOf[NodeList]
-    val node = inpNodes.filter(_.asInstanceOf[Input].value == value).head
-    node.asInstanceOf[Input].checked= true
+  def setRadioBtnByValue(name: String, value: String): Unit = {
+    try {
+      val inpNodes = document.getElementsByName(name).asInstanceOf[NodeList]
+      val node = inpNodes.filter(_.asInstanceOf[Input].value == value).head
+      node.asInstanceOf[Input].checked= true
+    } catch { case _: Throwable => AppEnv.error("setRadioBtnByValue", s"name: ${name} -> ${value}") } 
   }
+
+  def selectOptionByValue(elem: HTMLElement, value: String): Unit = {
+    try {
+      val elems = elem.childNodes.asInstanceOf[NodeListOf[Input]]
+      elems.map { e => if (e.value==value) e.setAttribute("selected","true") else e.setAttribute("selected","false")  }
+    } catch { case _: Throwable => AppEnv.error("selectOptionByValue", s"elem: ${elem} -> ${value}") } 
+  }
+
+
 
   def getRadioBtn[A](name: String, defVal: A)(implicit ucp: UseCaseParam): A = {
     try {
@@ -544,6 +565,10 @@ class BasicHtml
     if (key.startsWith("_")) AppEnv.getMessage(key.substring(1), args: _*) else AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
   }
   
+  def gUM(key: String, args: String*)(implicit ucp: UseCaseParam): String = {
+    AppEnv.getMessage(ucp.msgPrefix + "." + key, args: _*)
+  }
+
   def gM(key: String, args: String*): String = AppEnv.getMessage(key, args: _*)
 
   def mP(key: String)(implicit ucp: UseCaseParam): String = {
@@ -551,10 +576,13 @@ class BasicHtml
   }
 
 
+  def gMTyp[T](value: T, in: String=""): String = value match {
+    case _:shared.model.CompTyp.Value         => gM(value.asInstanceOf[shared.model.CompTyp.Value].msgCode, in)
+    case _:shared.model.CompStatus.Value      => gM(value.asInstanceOf[shared.model.CompStatus.Value].msgCode, in)
+    case _:shared.model.CompPhaseStatus.Value => gM(value.asInstanceOf[shared.model.CompPhaseStatus.Value].msgCode, in)
+    case _:shared.model.CompPhaseTyp.Value    => gM(value.asInstanceOf[shared.model.CompPhaseTyp.Value].msgCode, in)
 
-  def getTypName[T](value: T): String = value match {
-    case _:shared.model.CompTyp.Value => gM(s"CompTyp.${value.asInstanceOf[shared.model.CompTyp.Value].id}")
-    case _                            => "XXX"
+    case _                                    => "XXX"
   }
 
   def setMainContent[C](content: C): Unit = content match {
@@ -583,6 +611,11 @@ class BasicHtml
   def gE(id: String): HTMLElement = 
     try document.getElementById(id).asInstanceOf[HTMLElement]
     catch { case _: Throwable => AppEnv.error("gE", s"id: ${id}"); null } 
+
+  def gUE(id: String)(implicit ucp: UseCaseParam) : HTMLElement = 
+    try document.getElementById(uc(id)).asInstanceOf[HTMLElement]
+    catch { case _: Throwable => AppEnv.error("gUE", s"id: ${uc(id)}"); null } 
+
 
   def gEqS(id: String, qS: String): HTMLElement = 
     try document.getElementById(id).querySelector(qS).asInstanceOf[HTMLElement]
@@ -665,7 +698,7 @@ class BasicHtml
 
 
   def markSBEntry(ucName: String) = {
-    println(s"Call markSBEntry: ${ucName}")
+    //println(s"Call markSBEntry: ${ucName}")
     val elem = document.querySelectorAll(s"[data-sbentry='${ucName}']").head.asInstanceOf[HTMLElement].parentElement
     if (elem!=null) elem.classList.remove("collapse")    
     document.querySelectorAll(s"[data-sbtext]").map(_.asInstanceOf[HTMLElement].classList.remove("text-light"))

@@ -43,11 +43,12 @@ object AppEnv extends BasicHtml
   def msgs          = messages(lang)
   var userCtx       = Session.get(true)
   var home          = ""
+  var serverAddress = "127.0.0.1"
   var csrf          = "" 
   var callerId      = CallerIdent("000000")
   var status        = AppStatus.load
   var mockupMode    = false   // enable mockup usecase execution
-  var debugMode     = false   // enable debug mode 
+  var debugMode     = false   // enable debug mode
 
   def getDebugLevel():Option[String] =  {
     getLocalStorage("AppEnv.LogLevel") match {
@@ -102,23 +103,15 @@ object AppEnv extends BasicHtml
     result
   }
 
-  def initHome(): Future[Boolean] = if (dom.window.location.host.startsWith("localhost")) 
-    getIpAddress.map {
-      case Left(err)     => false
-      case Right(ipAddr) => {
-        home = dom.window.location.protocol + "//" + dom.window.location.host.replace("localhost",ipAddr)
-        println(s"initHome: ${home}")
-        true
-      } 
-    }
-    else {
-      home = dom.window.location.protocol + "//" + dom.window.location.host
-      println(s"initHome: ${home}")
-      Future(true)
-    }  
-
-
-
+  def initHome(): Future[Boolean] = {
+    home = dom.window.location.protocol + "//" + dom.window.location.host
+    if (dom.window.location.host.startsWith("localhost")) 
+      getIpAddress.map {
+        case Left(err)     => { serverAddress = home; false }
+        case Right(ipAddr) => { serverAddress = dom.window.location.protocol + "//" + dom.window.location.host.replace("localhost", ipAddr); true }
+      }
+    else { serverAddress = home; Future(true) }
+  }
 
   def initPrompt() = {
     prompt = scala.collection.mutable.ArrayBuffer("command1", "command2")
@@ -164,7 +157,7 @@ object AppEnv extends BasicHtml
     val validOrgId = (AppEnv.getOrgId > 0)
     val admin      = AppEnv.isAdmin
 
-    AppEnv.debug("ctrlSidebar", s"ucName: ${ucName} toId: ${status.toId}")
+    //AppEnv.debug("ctrlSidebar", s"ucName: ${ucName} toId: ${status.toId}")
 
     // show normal entries (not for organizer)
     setVisibleByAttr_("sbentry", "HomeSearch", !validOrgId)
@@ -219,7 +212,7 @@ object AppEnv extends BasicHtml
 
   def setHistory(ucName: String, ucParam: String, ucInfo: String): Unit = {
     val url = s"${home}/start?ucName=${ucName}&ucParam=${ucParam}&ucInfo=${ucInfo}"
-    dom.window.history.replaceState(write((ucName,ucParam,ucInfo)), getMsg("title"), url)
+    dom.window.history.replaceState(write((ucName, ucParam, ucInfo)), getMsg("title"), url)
   } 
 
 

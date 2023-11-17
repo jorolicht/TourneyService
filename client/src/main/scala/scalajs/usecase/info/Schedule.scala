@@ -157,8 +157,9 @@ object InfoSchedule extends UseCase("InfoSchedule")
   def buttonSignUp(): Unit = {
     
     def doRegSPlayer(coId: Long, player: Player) = {
+      import shared.model.PantStatus
       if (verifyEmail(player.email) && verifyName(player.lastname)) {
-        regSingle(coId, player, 0).map {
+        regSingle(coId, player, PantStatus.REGI).map {
           case Left(err)  => showResult(true, getMsg("signup.ok.error"), getMsg("signup.error"), "danger")
           case Right(res) => showResult(true, getMsg("signup.ok.header"), getMsg("signup.ok"), "success")
         }

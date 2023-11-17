@@ -98,15 +98,16 @@ trait TourneyService {
   def getMatchStatus(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, Int]] 
   def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, 
                  info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] 
-  def resetMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, List[Int]]] 
-  def resetMatches(toId: Long, coId: Long, coPhId:Int): Future[Either[Error,List[Int]]] 
+  def resetMatch(coId: Long, coPhId:Int, gameNo: Int, resetPantA: Boolean, resetPantB: Boolean)(implicit tse :TournSVCEnv): Future[Either[Error, List[Int]]] 
+  def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]] 
 
   // Referee Interface
   def getRefereeNote(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, RefereeNote]] 
 
 
   // Competition Phase Interface
-  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
+  def addCompPhase(coId: Long, name: String)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
   def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]] 
   def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]  
    

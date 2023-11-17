@@ -23,7 +23,7 @@ import org.scalajs.dom.ext._
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
-import shared.model.{ Tourney, CompPhase, Player, SNO, PantStatus }
+import shared.model.{ Tourney, CompPhase, CompPhaseCfg ,Player, SNO, PantStatus }
 import shared.model.CompPhase._
 import shared.utils._
 import clientviews.dialog.DlgCardCfgCompPhase.html
@@ -33,7 +33,7 @@ object DlgCardCfgCompPhase extends BasicHtml
   with TourneySvc 
 {
   this: BasicHtml =>
-  case class Result(var name: String, var config: Int, var category: Int, var winSets: Int, var qualify: Boolean, var pants: ArrayBuffer[PantSelect])
+  case class Result(var name: String, var config: CompPhaseCfg.Value, var category: Int, var winSets: Int, var qualify: Boolean, var pants: ArrayBuffer[PantSelect])
   case class PantSelect(sno: SNO, name: String, info: String, var checked: Boolean, val qualify: QualifyTyp.Value=QualifyTyp.None)
   
   object QualifyTyp extends Enumeration {
@@ -58,7 +58,7 @@ object DlgCardCfgCompPhase extends BasicHtml
   var qualifyMode = QualifyTyp.None
   var pants = ArrayBuffer[PantSelect]()
 
-  val result = Result("", CompPhase.CPC_UNKN, CompPhase.Category_Start, 0, true, pants)
+  val result = Result("", CompPhaseCfg.CFG, CompPhase.Category_Start, 0, true, pants)
 
 
   /** show dialog returns either tupel result or an error
@@ -107,9 +107,9 @@ object DlgCardCfgCompPhase extends BasicHtml
     setMainView(size)
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
-    onClick(gE(uc("Submit")), (e: Event) => submit(e))
-    doModal(gE(uc("Modal")), "show")
+    onEvents(gUE("Modal"), "hide.bs.modal", () => cancel())
+    onClick(gUE("Submit"), (e: Event) => submit(e))
+    doModal(gUE("Modal"), "show")
 
     f.map(x => Right(result)).recover { case e: Exception =>  Left(Error(e.getMessage)) }
   }
@@ -120,8 +120,8 @@ object DlgCardCfgCompPhase extends BasicHtml
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {     
       case "Selection" => { 
-        val cst = getInput(gE(uc("CfgSelection")), CPC_UNKN)  // competition phase category
-        setDisabled("Submit", cst == CPC_UNKN)
+        val cst = getInput(gE(uc("CfgSelection")), CompPhaseCfg.UNKN)  // competition phase category
+        setDisabled("Submit", cst == CompPhaseCfg.UNKN)
         setHtml("CfgInfo", CompPhase.getDescription(cst, size, gM )) 
         setInput("CfgName", genCfgName(cst, 0, true))
       }
@@ -137,8 +137,8 @@ object DlgCardCfgCompPhase extends BasicHtml
       }
 
       case "Winners" =>  {
-        val pantTbl = gE(uc("PantTbl"))
-        val winner  = getCheckbox(gE(uc("Winners")))
+        val pantTbl = gUE("PantTbl")
+        val winner  = getCheckbox(gUE("Winners"))
 
         qualifyMode = ite(winner, QualifyTyp.Winner, QualifyTyp.Looser)
         pants.foreach { pant => 
@@ -147,7 +147,7 @@ object DlgCardCfgCompPhase extends BasicHtml
         }
       }
 
-      case "Close"        => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
+      case "Close"        => offEvents(gUE("Modal"), "hide.bs.modal"); doModal(gUE("Modal"), "hide")
 
       case _              => {}
     }
@@ -158,22 +158,22 @@ object DlgCardCfgCompPhase extends BasicHtml
    * 
    */ 
   def validate(): Either[Error, Boolean] = {
-    result.config  = getInput(gE(uc("CfgSelection")), CPC_UNKN)
-    result.name    = getInput(gE(uc("CfgName")))
-    result.winSets = getInput(gE(uc("CfgWinset")), 0)
+    result.config  = getInput(gUE("CfgSelection"), CompPhaseCfg.UNKN)
+    result.name    = getInput(gUE("CfgName"))
+    result.winSets = getInput(gUE("CfgWinset"), 0)
     result.qualify = qualifyMode == QualifyTyp.None || qualifyMode == QualifyTyp.Winner || qualifyMode == QualifyTyp.All
     result.pants   = pants
 
     //set participant status 
     //pants.foreach { entry => trny.setPantStatus(coId, entry.sno.value, if (entry.checked) Pant.REDY else Pant.SIGN) }
-    if (result.config == CPC_UNKN || result.name == "" || result.winSets == 0 ) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
+    if (result.config == CompPhaseCfg.UNKN || result.name == "" || result.winSets == 0 ) Left(Error("err0175.DlgCardCfgSection")) else Right(true)
   }
 
   
   // setMainView
   def setMainView(size: Int): Unit = {
     val cfgOptions = sysOptions(size)
-    val selOptions = new StringBuilder(s"<option value='${CPC_UNKN}' selected>---</option>")
+    val selOptions = new StringBuilder(s"<option value='${CompPhaseCfg.UNKN}' selected>---</option>")
     for (cfg <- cfgOptions) {
       val msg = getMsg(s"option.${cfg}")
       selOptions ++= s"<option value='${cfg}'>${msg}</option>" 
@@ -186,34 +186,34 @@ object DlgCardCfgCompPhase extends BasicHtml
 
 
   // sysOptions generate all possible options for given size
-  def sysOptions(size: Int): List[Int] = {
-    def sysOptions21to128(size: Int): List[Int] = {
-      val result = ArrayBuffer[Int]()  
-      if (size % 3 == 0) result += CPC_GRPS3 else result += CPC_GRPS34
-      if (size % 4 == 0) result += CPC_GRPS4 else result += CPC_GRPS45
-      if (size % 5 == 0) result += CPC_GRPS5 else result += CPC_GRPS56
-      result += CPC_KO
-      result += CPC_SW
+  def sysOptions(size: Int): List[CompPhaseCfg.Value] = {
+    def sysOptions21to128(size: Int): List[CompPhaseCfg.Value] = {
+      val result = ArrayBuffer[CompPhaseCfg.Value]()  
+      if (size % 3 == 0) result += CompPhaseCfg.GRPS3 else result += CompPhaseCfg.GRPS34
+      if (size % 4 == 0) result += CompPhaseCfg.GRPS4 else result += CompPhaseCfg.GRPS45
+      if (size % 5 == 0) result += CompPhaseCfg.GRPS5 else result += CompPhaseCfg.GRPS56
+      result += CompPhaseCfg.KO
+      result += CompPhaseCfg.SW
       result.to(List)
     }
 
     size match {
-      case 3 | 4 | 5 => List(CPC_JGJ, CPC_KO, CPC_SW)
-      case 6         => List(CPC_GRPS3, CPC_KO, CPC_SW, CPC_JGJ)
-      case 7         => List(CPC_GRPS34, CPC_KO, CPC_SW, CPC_JGJ)
-      case 8         => List(CPC_GRPS4, CPC_KO, CPC_SW, CPC_JGJ )
-      case 9         => List(CPC_GRPS3, CPC_GRPS45, CPC_KO, CPC_SW, CPC_JGJ)
-      case 10        => List(CPC_GRPS34, CPC_GRPS5, CPC_KO, CPC_SW)
-      case 11        => List(CPC_GRPS34, CPC_GRPS56, CPC_KO, CPC_SW)
-      case 12        => List(CPC_GRPS3, CPC_GRPS4, CPC_GRPS6, CPC_KO, CPC_SW )
-      case 13        => List(CPC_GRPS34, CPC_GRPS45, CPC_KO, CPC_SW )
-      case 14        => List(CPC_GRPS34, CPC_GRPS45, CPC_KO, CPC_SW)
-      case 15        => List(CPC_GRPS3, CPC_GRPS34, CPC_GRPS5, CPC_KO, CPC_SW)
-      case 16        => List(CPC_GRPS4, CPC_GRPS56, CPC_KO, CPC_SW)
-      case 17        => List(CPC_GRPS34, CPC_GRPS45, CPC_GRPS56, CPC_KO, CPC_SW)
-      case 18        => List(CPC_GRPS3, CPC_GRPS45, CPC_GRPS6, CPC_KO, CPC_SW)
-      case 19        => List(CPC_GRPS34, CPC_GRPS45, CPC_KO, CPC_SW)
-      case 20        => List(CPC_GRPS4, CPC_GRPS5, CPC_KO, CPC_SW)
+      case 3 | 4 | 5 => List(CompPhaseCfg.JGJ, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 6         => List(CompPhaseCfg.GRPS3, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 7         => List(CompPhaseCfg.GRPS34, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 8         => List(CompPhaseCfg.GRPS4, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ )
+      case 9         => List(CompPhaseCfg.GRPS3, CompPhaseCfg.GRPS45, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 10        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 11        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 12        => List(CompPhaseCfg.GRPS3, CompPhaseCfg.GRPS4, CompPhaseCfg.GRPS6, CompPhaseCfg.KO, CompPhaseCfg.SW )
+      case 13        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO, CompPhaseCfg.SW )
+      case 14        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 15        => List(CompPhaseCfg.GRPS3, CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 16        => List(CompPhaseCfg.GRPS4, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 17        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 18        => List(CompPhaseCfg.GRPS3, CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS6, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 19        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO, CompPhaseCfg.SW)
+      case 20        => List(CompPhaseCfg.GRPS4, CompPhaseCfg.GRPS5, CompPhaseCfg.KO, CompPhaseCfg.SW)
 
       case i if (i > 21 && i <= 128) => sysOptions21to128(i)
       case _                         => List()        
@@ -221,15 +221,15 @@ object DlgCardCfgCompPhase extends BasicHtml
   }
 
   // genCfgName - generate configuration name proposal
-  def genCfgName(option: Int, coPhId: Int, winner: Boolean=true): String = {
+  def genCfgName(option: CompPhaseCfg.Value, coPhId: Int, winner: Boolean=true): String = {
     option match {
-      case CPC_GRPS3 | CPC_GRPS34 | CPC_GRPS4 | CPC_GRPS45 | CPC_GRPS5 | CPC_GRPS56 | CPC_GRPS6  => {
+      case CompPhaseCfg.GRPS3 | CompPhaseCfg.GRPS34 | CompPhaseCfg.GRPS4 | CompPhaseCfg.GRPS45 | CompPhaseCfg.GRPS5 | CompPhaseCfg.GRPS56 | CompPhaseCfg.GRPS6  => {
         if      (coPhId == 0)  { getMsg(s"name.1") } 
         else if (winner)       { getMsg(s"name.2") } 
         else                   { getMsg(s"name.4") }
       }
-      case CPC_KO | CPC_SW | CPC_JGJ => if (winner) getMsg(s"name.3") else getMsg(s"name.4") 
-      case CPC_UNKN                  => ""
+      case CompPhaseCfg.KO | CompPhaseCfg.SW | CompPhaseCfg.JGJ => if (winner) getMsg(s"name.3") else getMsg(s"name.4") 
+      case CompPhaseCfg.UNKN         => ""
       case _                         => getMsg(s"name.3") 
     }
   }  

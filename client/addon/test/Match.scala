@@ -4,6 +4,9 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs._
 
+import cats.data.EitherT
+import cats.implicits._ 
+
 import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
 import org.scalajs.dom.ext._             // import stmt sequence is important
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
@@ -40,174 +43,46 @@ object AddonMatch extends UseCase("AddonMatch")
   def execTest(number: Int, toId: Long, coId: Long, phase: Int, game: Int, param: String)= {
     number match {
       case 0 => test_0(toId, coId, phase, game, param)
+      case 1 => test_1(toId, coId, phase, game, param)
       case _ => println(s"Invalid match test number ${number}"); Future(false)
     }
   }
 
-    // Test 0 - schiri zettel / referee notes
+  // Test 0 - resetMatch
   def test_0(toId: Long, coId: Long, phase: Int, game: Int, param: String): Future[Boolean]  = {
-    AddonMain.setOutput(s"START Test Delete Match: toId->${toId} coId->${coId} phase->${phase} game->${game} param->${param}")
-    AddonMain.setLoginLoad(toId).map {
-      case false => false
-      case true  => App.tourney.cophs((coId, phase)).resetMatch(game) match {
-        case Left(err)  => AddonMain.addOutput(s"ERROR Test Delete Match ${err.toString}"); false
-        case Right(res) => {
-          AddonMain.addOutput(s"Affected games: ${res.mkString(":")}") 
-          AddonMain.addOutput(s"SUCCESS Test Delete Match")
-          true              
-        }
+    
+    AddonMain.setOutput(s"START Test Reset Match: toId->${toId} coId->${coId} phase->${phase} game->${game} param->${param}")
+    
+    (for {
+      valid   <- EitherT(AddonMain.setLoginLoad(toId))
+      result  <- EitherT(resetMatch(toId, coId, phase, game))
+    } yield { (valid, result) }).value.map {
+      case Left(err)   => AddonMain.addOutput(s"ERROR Test Reset Match ${err.toString}"); false
+      case Right(res)  => {
+        AddonMain.addOutput(s"Affected games: ${res._2.mkString(":")}") 
+        AddonMain.addOutput(s"SUCCESS Test Delete Match")
+        true
       }
     }
   }  
 
-
-  def test_0(text: String) = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    val toId = text.toLongOption.getOrElse(182L)
+  // Test 1 - getMatch
+  def test_1(toId: Long, coId: Long, phase: Int, game: Int, param: String): Future[Boolean]  = {
+    
+    AddonMain.setOutput(s"START Test getMatch: toId->${toId} coId->${coId} phase->${phase} game->${game} param->${param}")
+    
     (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
-      case Right(res)   => {
-        App.tourney.setCurCoId(1)
-        App.execUseCase("OrganizeCompetitionDraw", "", "")
-        println(s"SUCCESS: test_0")
+      valid   <- EitherT(AddonMain.setLoginLoad(toId))
+      result  <- EitherT(getMatch(toId, coId, phase, game))
+    } yield { (valid, result) }).value.map {
+      case Left(err)   => AddonMain.addOutput(s"ERROR Test getMatch ${err.toString}"); false
+      case Right(res)  => {
+        AddonMain.addOutput(s"RESULT: ${res._2.toString}") 
+        AddonMain.addOutput(s"SUCCESS Test getMatch")
+        true
       }
     }
-  }
-
-
-  def test_1(text: String) = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
-      case Right(res)   => {
-        App.tourney.setCurCoId(2)
-        
-        App.execUseCase("OrganizeCompetitionDraw", "", "")
-        println(s"SUCCESS: test_0")
-      }
-    }
-  }
-
-  def test_2(text: String) = {
-    import scala.collection.mutable.ArrayBuffer
-    import scalajs.usecase.organize.OrganizeCompetition
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
-
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
-      case Right(res)   => {
-        App.tourney.setCurCoId(2)
-        val coPhIdPrev = 0 
-        var coId = 2
-
-        // initialize participants to be shown 
-        // only participants with status signed or ready
-        val pants = (App.tourney.pl2co.filterKeys(_._2 == coId).filter { case (x1,x2) => x2.status == PantStatus.PEND.id || x2.status == PantStatus.REDY.id } map { x =>
-          val sno = SNO(x._2.sno) 
-          val (snoValue, name, club, ttr) = sno.getInfo(App.tourney.comps(coId).typ)(App.tourney)
-          val enabled = (x._2.status == PantStatus.REDY.id)
-          // show name, club name and ttr value
-          PantSelect(sno, s"${name} [${club}]", s"TTR: ${ttr}", enabled, if(enabled) QualifyTyp.Winner else QualifyTyp.Looser ) 
-        }).to(ArrayBuffer).sortBy(x => (!x.checked, x.name))
-        
-        OrganizeCompetition.startCompPhaseDlg(coId, coPhIdPrev, QualifyTyp.All, pants)(App.tourney).map {
-          case Left(err)   => error("startCompPhaseDlg", s"error message: ${err}")
-          case Right((coph, pantResult)) => {
-            //set pant status in participant 2 competition mapping
-            println(s"${coph.toString}")
-            pantResult.foreach { x => println(s"${x.name} [${x.club}] ${x.rating}") }
-          }
-        }
-      }
-    }
-  }
-
-  
-  // test_3 start following ko-round
-  def test_3(text: String) = {
-    import scala.collection.mutable.ArrayBuffer
-    import scalajs.usecase.organize.OrganizeCompetition
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
-    import scalajs.usecase.dialog.DlgCardCfgCompPhase.QualifyTyp
-
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
-      case Right(res)   => {
-        App.tourney.setCurCoId(2)
-        val coId   = 2
-        val coPhId = 1
-
-        // initialize participants to be shown 
-        // only participants with status signed or ready
-        val coph = App.tourney.cophs((coId, coPhId))
-
-        // generate tuple (PantSelect, Clubname, Group.grId, Position)
-        val pantsInfo = (for(i <- 0 to coph.groups.size-1; j <- 0 to coph.groups(i).size-1) yield {
-          val pEntry = coph.groups(i).pants(j)
-          val pos  = pEntry.place._1
-          val size = coph.groups(i).size
-          val enabled = pos <= (size/2 + size%2)
-          val sets   = coph.groups(i).sets(j)
-          val points = coph.groups(i).points(j)
-          val rank:Int = (50 + sets._1 - sets._2)*1000 + (50 + points._1 - points._2)
-          println(s"${pEntry.name} sets: ${sets._1}/${sets._2}   points: ${points._1}/${points._2} ")
-          (PantSelect(SNO(pEntry.sno), s"${pEntry.name} [${pEntry.club}]", s"Group: ${coph.groups(i).name} Position: ${pos}", enabled, if(enabled) QualifyTyp.Winner else QualifyTyp.Looser), coph.groups(i).name, coph.groups(i).grId, pos, rank)
-        }).to(ArrayBuffer).sortBy(x => (x._3, x._4))
-        val pantMap = pantsInfo.map(x => (x._1.sno -> (x._2, x._3, x._4, x._5))).toMap
-
-        OrganizeCompetition.startCompPhaseDlg(coId, coPhId, QualifyTyp.All, pantsInfo.map(x => x._1))(App.tourney).map {
-          case Left(err)   => error("startCompPhaseDlg", s"error message: ${err}")
-          case Right((coph, pantResult)) => {
-            //set pant status in participant 2 competition mapping
-            pantResult.foreach { x => 
-              println(s"SNO: ${x.sno}  [${x.club}] ${x.rating}  ${pantMap(SNO(x.sno))._1}  grId: ${pantMap(SNO(x.sno))._2} pos: ${pantMap(SNO(x.sno))._3}    ") 
-            }
-            val pantsWithGroupInfo = pantResult.map(x => (x, (pantMap(SNO(x.sno))._1, pantMap(SNO(x.sno))._2, pantMap(SNO(x.sno))._3, pantMap(SNO(x.sno))._4))).sortBy(x=>(x._2._3,-x._2._4))
-            val (pants, drawInfo) = pantsWithGroupInfo.unzip
-            coph.drawWithGroupInfo(pants, drawInfo, App.tourney.comps(coId).typ)
-
-            App.tourney.comps(coId).setCurCoPhId(coph.coPhId)
-            App.execUseCase("OrganizeCompetitionDraw", "", "")
-
-
-            println(s"${coph.toString}")
-          }
-        }
-      }
-    }
-  }
+  } 
 
 
 

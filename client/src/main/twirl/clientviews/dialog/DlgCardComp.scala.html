@@ -1,9 +1,10 @@
 @*
- * Template for Player Dialog
+ * Template for Competition Dialog
  *@
 
 @import shared.utils.UseCaseParam   
 @import shared.utils.twirlhelper._ 
+@import shared.model.CompTyp
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
 
@@ -18,7 +19,7 @@
         <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
       </div>
       
-      <!--  START Body Player --> 
+      <!--  START Body Competition --> 
       <div class="modal-body pb-1">
         <div @id("Form") class="container-fluid pl-0 pr-0">
 
@@ -33,7 +34,8 @@
             </div>
 
             <div class="form-group col-sm-5">
-              @inputCompStatus("status")
+              <input @id("status") style='padding-left:1px;padding-right:1px' type='text' value='' 
+                class="form-control form-control-sm text-center"/>
             </div>
           </div> 
 
@@ -46,24 +48,26 @@
           <div class="form-row mb-0 mt-2">
             <div class="form-group col-sm-4">
               <select @id("typ") class="form-control form-control-sm" @actionEvent("NameCompose", "oninput")>
-                <option value="0" disabled selected>@msg_("competition.typ.0")</option>
-                @for(i <- 1 to 4) {	<option value="@i">@msg_("competition.typ."+i.toString)</option> } 
+                <option value='@{CompTyp.Typ.id}' disabled selected>@msg_("CompTyp.Typ")</option>
+                <option value='@{CompTyp.SINGLE.id}'>@msg_("CompTyp.SINGLE")</option>
+                <option value='@{CompTyp.DOUBLE.id}'>@msg_("CompTyp.DOUBLE")</option>
+                <option value='@{CompTyp.MIXED.id}' >@msg_("CompTyp.MIXED")</option>
               </select>
             </div>
 
             <div class="form-group col-sm-4 mb-0">
               <input @id("AgeGroup") type="text" class="form-control form-control-sm" 
-                @plh("AgeGroup") @actionEvent("NameCompose", "oninput") value='' list='@_name("AgeGroupList")'>
+                placeholder='@msg_("CompAgeGroup.plh")*' @actionEvent("NameCompose", "oninput") value='' list='@_name("AgeGroupList")'>
               <datalist @id("AgeGroupList")>
-                @for(i <- 1 to 21) { <option data-value="@i">@msg_("competition.agegroup."+i.toString)</option> } 
+                @for(i <- 1 to 21) { <option data-value="@i">@msg_(s"CompAgeGroup.${i}")</option> } 
               </datalist>		
             </div>
 
             <div class="form-group col-sm-4 mb-0">
               <input @id("Class") type="text" class="form-control form-control-sm mr-2" 
-                @plh("Class") @actionEvent("NameCompose", "oninput") value='' list='@_name("ClassDatalist")'>
+              placeholder='@msg_("CompClass.plh")*' @actionEvent("NameCompose", "oninput") value='' list='@_name("ClassDatalist")'>
               <datalist @id("ClassDatalist")>
-                  @for(i <- 1 to 5) {	<option data-value="@i">@msg_("competition.class."+i.toString)</option> } 
+                  @for(i <- 1 to 5) {	<option data-value="@i">@msg_(s"CompClass.${i}")</option> } 
               </datalist>	
             </div>
           </div>
@@ -72,7 +76,7 @@
             <div class="form-group col-sm-4 mb-0">
               <div class='input-group date' >
                 <input @id("startTime") style='padding-left:1px;padding-right:1px' type='text' value='' 
-                      class="form-control form-control-sm text-center" @plh("startTime") />
+                  class="form-control form-control-sm text-center" @plh("startTime") />
               </div>
             </div>
 

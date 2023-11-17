@@ -44,6 +44,8 @@ object Referee extends BasicHtml with TourneySvc
       AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), gM("config.LogLevel")))
       println(s"Startup referee name:${refNote} winSets: ${winSets} lang:${lang}")
 
+      AppEnv.home = dom.window.location.protocol + "//" + dom.window.location.host
+
       try refNote = read[RefereeNote](refNoteJson.replace("&quot;","\""))
       catch { case _: Throwable => errLog(s"Couldn't decode RefereeNote: ${refNoteJson}") }
     
@@ -62,11 +64,8 @@ object Referee extends BasicHtml with TourneySvc
         setHtml(gE(s"Referee_SetA"), refNote.getSets._1)
         setHtml(gE(s"Referee_SetB"), refNote.getSets._2)
       }
-      println("FINISCH setup")
     }}
-
-  }  
-
+  }
 
  /** referee - submit
    *
@@ -92,22 +91,22 @@ object Referee extends BasicHtml with TourneySvc
       }
     }
 
-    var result = balls.foldLeft("")( (x,y) => if (y._1 > y._2) s"${x}·${y._2}" else s"${x}·-${y._1}")
+    var result = (balls.foldLeft("")( (x,y) => if (y._1 > y._2) s"${x}·${y._2}" else s"${x}·-${y._1}")).stripPrefix("·")
     val msgHdr     = gM("referee.dlg.hdr.confirm")
-    val msgContent = gM("referee.dlg.result.message", refNote.playerA, refNote.playerB, s"(${sets._1}:${sets._2}) ${result}")
+    val msgContent = gM("referee.dlg.result.message", refNote.playerA, refNote.playerB, s"${sets._1}", s"${sets._2}", s"${result.replace('·',' ')}")
     
     val dlgFinished = dlgCancelOk(msgHdr, msgContent) {
-      println(s"Input Match CONFIRMED")
-      inputMatch(refNote.toId, refNote.coId, refNote.coPhId, refNote.gameNo, sets, result, "Result by Player", "").map {
-        case Left(err)    => AppEnv.error("inputMatch", s"${err.toString}")
-        case Right(gList) => AppEnv.debug("inputMatch", s"result: ${gList.mkString(":")}") 
+      //println(s"Input Match CONFIRMED with result: '${result}' ")
+      inputReferee(refNote.toId, refNote.coId, refNote.coPhId, refNote.gameNo, sets, result, "ResultByPlayer", "").map {
+        case Left(err)    => AppEnv.error("inputReferee", s"${err.toString}")
+        case Right(gList) => {
+          setHtml(gE(s"Referee_SetA"), sets._1)
+          setHtml(gE(s"Referee_SetB"), sets._2)
+          setVisible(gE(s"Referee_Buttons"), false)
+          setVisible(gE(s"Referee_Registered"), true)
+        }
       }
     }
-
-    dlgFinished.map { _ =>
-      println(s"WEITER")
-    }
-    
   } 
 
   @JSExport
@@ -159,9 +158,7 @@ object Referee extends BasicHtml with TourneySvc
   }  
 
   @JSExport
-  def cancel(elem: dom.raw.HTMLElement): Unit = { 
-    println(s"Referee CANCEL")
-  }
+  def cancel(elem: dom.raw.HTMLElement): Unit = dom.window.location.href = s"${AppEnv.home}"
 
   def initMessages(): Future[Boolean] = {
     val localMessages = AppEnv.getLocalStorage("AppEnv.Messages")
@@ -171,12 +168,12 @@ object Referee extends BasicHtml with TourneySvc
         AppEnv.setLocalStorage("AppEnv.Messages", content)
 
         AppEnv.messages = read[ Map[String,Map[String,String]]] (content)
-        println(s"loadMessages remote messages")
+        //println(s"loadMessages remote messages")
         true
       })
     } else {
       AppEnv.messages = read[ Map[String,Map[String,String]]] (localMessages)
-      println(s"loadMessages local messages")
+      //println(s"loadMessages local messages")
       Future(true)
     }
   }
@@ -188,6 +185,5 @@ object Referee extends BasicHtml with TourneySvc
   def setSuccess(pos: Int, ab: String) = addClass(gE(s"Referee_Set${pos}${ab}"), "border", "border-success")
   def rmMark(pos: Int, ab: String)     = removeClass(gE(s"Referee_Set${pos}${ab}"), "border", "border-danger", "border-success")
   def getBall(pos: Int, ab: String)    = getInput(gE(s"Referee_Set${pos}${ab}"), -1)
-
 
 }

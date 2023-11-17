@@ -39,7 +39,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
 
   // render view
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    setMainContent(clientviews.organize.html.Tourney(App.tourney.getToId).toString)
+    setMainContent(clientviews.organize.html.Tourney(App.tourney.id))
     update()
   } 
 
@@ -47,10 +47,10 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     getTournBases(AppEnv.getOrgDir).map { 
       case Left(err)    => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
       case Right(trnys) => {
-        val toId = App.tourney.getToId
+        val toId = App.tourney.id
         tournBases = trnys
         //debug("update", s"TournBases: ${tournBases}")
-        setHtml("TourneyCard", html.TourneyCard(toId, trnys).toString)
+        setHtml("TourneyCard", html.TourneyCard(toId, trnys))
 
         selTableRow(uc(s"TableRow_${toId}"))
         setViewTournBase(App.tourney)
@@ -118,7 +118,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   // Click edit button on list
   def actionTourneyEdit(toId: Long) = {
     if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("edit", App.tourney.getBase()).map {
-      case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Left(err)  => if (err != Error("dlg.canceled")) DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
       case Right(tB)  => setTournBase(tB).map {
         case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
         case Right(trny) => App.setLocalTourney(trny); update()
@@ -130,7 +130,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   // Click viewbutton on list
   def actionTourneyView(toId: Long) = {
     if (toId == App.tourney.getToId & toId != 0) DlgCardTourney.show("view", App.tourney.getBase()).map {
-      case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Left(err)  => if (err != Error("dlg.canceled")) DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
       case Right(tB)  => setTournBase(tB).map {
         case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
         case Right(trny) => App.setLocalTourney(trny); update()
@@ -143,7 +143,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   def actionTourneySelect(toId: Long, elem: dom.raw.HTMLElement) = 
     if (toId != App.tourney.getToId) {
       App.loadRemoteTourney(toId).map {
-        case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+        case Left(err)  => if (err != Error("dlg.canceled")) DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
         case Right(res) => highlight(elem)
       }
     }
@@ -164,7 +164,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
   // Click on new tourney button
   def actionTourneyNew() = 
     DlgCardTourney.show("new", TournBase("", AppEnv.getOrganizer, AppEnv.getOrgDir, getNow(), getNow(), "", TourneyTyp.UNKN.id, true, "", "" , 0L)).map {
-      case Left(err) => {} // only cancel as error DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
+      case Left(err) => if (err != Error("dlg.canceled")) DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
       case Right(tb) => addTournBase(tb).map {
         case Left(err)   => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
         case Right(trny) => App.setLocalTourney(trny); update()

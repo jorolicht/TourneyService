@@ -92,6 +92,8 @@
     float: none;
   }
 
+  a[href]{display:none;}
+
   /* define all page breaks*/
   a {
     page-break-inside:avoid

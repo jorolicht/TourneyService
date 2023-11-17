@@ -187,7 +187,7 @@ case class Tourney(
       s"Competition coId ${coId} does not exist" 
     } else {
       val co = comps(coId)
-      val str = new StringBuilder(s"COMPETITION(${co.id}): ${co.name} \n  typ: ${co.getTypName(fun)} status: ${co.getStatusName(fun)}\n")
+      val str = new StringBuilder(s"COMPETITION(${co.id}): ${co.name} \n  typ: ${co.typ} status: ${co.status}\n")
       var first=true   
       for ((k,v) <- cophs) {
         if (k._1 == coId && first)  { 
@@ -409,10 +409,10 @@ case class Tourney(
   // Competition Phase Routines
   //
 
-  /** getCompPhaseStatus returns status of the competition phase 
+  /** getCoPhStatus returns status of the competition phase 
    *  otherwise undefined status
    */ 
-  def getCompPhaseStatus(coId: Long, coPhId: Int): CompPhaseStatus.Value = 
+  def getCoPhStatus(coId: Long, coPhId: Int): CompPhaseStatus.Value = 
     if (cophs.isDefinedAt((coId,coPhId))) { cophs((coId,coPhId)).status } else { CompPhaseStatus.UNKN } 
 
   /** add a competition phase to a competition (start competition with first competition phase)
@@ -423,7 +423,7 @@ case class Tourney(
    *           2 -> 4 / 5
    *           3 -> 6 / 7
    */
-  def addCompPhase(coId: Long, prefCoPhId: Int, winner: Boolean, coPhCfg: Int, name: String, noWinSets: Int): Either[Error, CompPhase] = {      
+  def addCompPhase(coId: Long, prefCoPhId: Int, winner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int): Either[Error, CompPhase] = {      
     
     val startOption = 
     if      (prefCoPhId == 0 & cophs.isDefinedAt((coId, 1)))      Left(Error("err0194.msg.addCompPhase.existing"))
@@ -441,6 +441,26 @@ case class Tourney(
       }
     }
   }
+
+  def addCompPhase(coId: Long, name: String): Either[Error, CompPhase] = { 
+    val coPhIds = cophs.filter(x => x._1._1 == coId).values.map(x => x.coPhId).toList
+    val coPhNames = cophs.filter(x => x._1._1 == coId).values.map(x => x.name).toList
+    val coPhId = if (coPhIds.isEmpty) 1 else coPhIds.max + 1
+    if (coPhNames.contains(name)) {
+      Left(Error("err0234.coph.already.exists", name))
+    } else {
+      val coph = CompPhase(name, coId, coPhId, CompPhaseCfg.CFG, CompPhaseTyp.UNKN, CompPhaseStatus.CFG, false, 0, 0, 0)
+      cophs((coId, coph.coPhId)) = coph
+      println(s"addCompPhase ${cophs.mkString(":")}")
+      Right(coph)
+    }
+  }
+
+  def getCoPh(coId: Long, coPhId: Int): Either[Error, CompPhase] = 
+    if (cophs.isDefinedAt((coId,coPhId))) Right(cophs((coId,coPhId))) else {
+      println(s"ERROR: getCoPh(${coId},${coPhId}) doesn't exist")
+      Left(Error("err0237.getCoPh.notFound", coId.toString, coPhId.toString))
+    }
 
   def delCompPhase(coId: Long, coPhId: Int) = if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId))
 
@@ -471,7 +491,7 @@ case class Tourney(
 
   def getCompName(coId: Long=0L, fmt:Int=0) = {
     val effCoId = if (coId == 0L) curCoId else coId
-    println(s"getCompName ${effCoId} ${coId}  ${fmt}")
+    //println(s"getCompName ${effCoId} ${coId}  ${fmt}")
     fmt match {
       case 1 => if (comps.isDefinedAt(effCoId) && effCoId != 0L) s"[${comps(effCoId).name}]" else ""
       case _ => if (comps.isDefinedAt(effCoId) && effCoId != 0L) comps(effCoId).name else ""
@@ -491,19 +511,30 @@ case class Tourney(
   //
   //  Mgmt Routines
   // 
+  /* getCurCoId - take stored value when available, otherwise select a good choice: 
+  **              competition with running phases/rounds
+  **              first configured competition
+  */
   def getCurCoId: Long = { 
     if (curCoId == 0L) {
       val cophStarted = cophs.keys.filter(x => x._2 == 1).toList.sortBy(_._1) 
       if (cophStarted.length >= 1) {
-        curCoId = cophStarted.head._1
+        setCurCoId(cophStarted.head._1)
         if (comps(curCoId).getCurCoPhId == 0) comps(curCoId).setCurCoPhId(1)
+      } else {
+        if (comps.size > 0) setCurCoId(comps.head._1)
       }
     }
     curCoId
   } 
 
   def setCurCoId(value: Long) = { curCoId = value}
-  def getCurCoPhId: Int = if (comps.isDefinedAt(curCoId) && curCoId !=0 ) comps(curCoId).getCurCoPhId else 0
+  def getCurCoPhId: Int = {
+    if (comps.isDefinedAt(curCoId) && curCoId !=0 ) {
+      val curCoPhId = comps(curCoId).getCurCoPhId
+      if (curCoPhId != 0) curCoPhId else { if (cophs.isDefinedAt((curCoId,1))) { comps(curCoId).setCurCoPhId(1); 1 } else 0 } 
+    } else 0
+  }
 
 
   //
@@ -600,15 +631,16 @@ object Tourney {
         try {
           val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields, lics) =
             read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield], Map[String, String])](trnyStr)
+  
           val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
                              tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
+
           trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)
           trny.comps = collection.mutable.Map(comps.map(x => (x.id, x)): _*)
           trny.clubs = collection.mutable.Map(clubs.map(x => (x.id, x)): _*)
           trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*)
-          trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx(x)).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
+          trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx(x)        ).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
           trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*)
-          
           trny.licenses = lics
 
           // for(license <- licenses) { 
@@ -642,7 +674,6 @@ object Tourney {
 
 }
 
-             
 
 object TourneyTyp extends Enumeration {
   val UNKN = Value(0,  "UNKN")

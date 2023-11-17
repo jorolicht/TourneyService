@@ -99,11 +99,14 @@ class PostActionCtrl @Inject()
       // def regSingle(coId: Long, pl: Player): Future[Either[Error, String]]
       // registers a player with a competition, returns playerId
       case "regSingle" => {
+        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.code))
+        val coId = getParam(pMap, "coId", 0L)
+
         (for {
           data    <- EitherT(Future( encEParam(reqData)))
           player  <- EitherT(Future( Player.decode(data("player")) ))
           pl      <- EitherT(tsv.addPlayer(player))
-          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, getParam(pMap, "coId", 0L), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id)))))
+          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, coId, pStatus )))
         } yield { (pl, result) }).value.map {
           case Left(err)  => BadRequest(err.add("regSingle").encode)
           case Right(res) => Ok(Return(res._1.id).encode) 
@@ -112,13 +115,16 @@ class PostActionCtrl @Inject()
 
       //def regDouble(coId: Long, pl1: Player, pl2: Player): Future[Either[Error, String]]
       case "regDouble" => {
+        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.code))
+        val coId    = getParam(pMap, "coId", 0L)
+
         (for {
           data <- EitherT(Future( encEParam(reqData)))
           pl1  <- EitherT(Future( Player.decode(data("player1")) ))
           pl2  <- EitherT(Future( Player.decode(data("player2")) ))
           p1   <- EitherT(tsv.setPlayer(pl1))
           p2   <- EitherT(tsv.setPlayer(pl2))
-          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, getParam(pMap, "coId", 0L), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id)))) )
+          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, coId, pStatus)) )
         } yield { (p1.id, p2.id) }).value.map { 
           case Left(err)  => BadRequest(err.add("regDouble").encode)
           case Right(res) => Ok(write(res)) 
@@ -389,12 +395,16 @@ class PostActionCtrl @Inject()
 
 
       case "addCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        tsv.addCompPhase(getParam(pMap, "coId", -1L),
-                          getParam(pMap, "baseCoPhId", -1),
-                          getParam(pMap, "cfgWinner", true),
-                          getParam(pMap, "coPhCfg", CompPhase.CPC_UNKN),
-                          getParam(pMap, "name", ""),
-                          getParam(pMap, "noWinSets", 0)).map { 
+
+        val name    = getParam(pMap, "name", "")
+        val coPhCfg = CompPhaseCfg(getParam(pMap, "coPhCfg", CompPhaseCfg.UNKN.id))
+        if (name != "") tsv.addCompPhase(getParam(pMap, "coId", -1L), name).map { 
+            case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+            case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode)
+          }
+        else tsv.addCompPhase(getParam(pMap, "coId", -1L), getParam(pMap, "baseCoPhId", -1),
+                        getParam(pMap, "cfgWinner", true), coPhCfg,
+                        getParam(pMap, "name", ""), getParam(pMap, "noWinSets", 0)).map { 
           case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
           case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode)
         }
@@ -435,6 +445,34 @@ class PostActionCtrl @Inject()
 
         }
       }
+
+      // resetMatch
+      // def resetMatch(coId: Long, coPhId:Int, gameNo: Int)(implicit tse :TournSVCEnv): Future[Either[Error, List[Int]]] 
+      case "resetMatch" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        val coId   = getParam(pMap, "coId", 0L)
+        val coPhId = getParam(pMap, "coPhId", 0)
+        val gameNo = getParam(pMap, "gameNo", 0)
+        val resetPantA = getParam(pMap, "resetPantA", false)
+        val resetPantB = getParam(pMap, "resetPantB", false)        
+
+        tsv.resetMatch(coId, coPhId, gameNo, resetPantA, resetPantB)(tse).map {
+          case Left(err)    => BadRequest(err.encode)
+          case Right(gList) => Ok( write[List[Int]](gList) )
+        }
+      } 
+
+      // resetMatches
+      // def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]]  
+      case "resetMatches" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        val coId   = getParam(pMap, "coId", 0L)
+        val coPhId = getParam(pMap, "coPhId", 0)     
+
+        tsv.resetMatches(coId, coPhId)(tse).map {
+          case Left(err)    => BadRequest(err.encode)
+          case Right(gList) => Ok( write[List[Int]](gList) )
+        }
+      } 
+
 
       // inputReferee = inputMatch without overwrite functionality
       case "inputReferee" => {

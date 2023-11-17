@@ -7,6 +7,10 @@ object TourneyAction extends Enumeration {
   val Delete    = Value(3, "Delete")
   val View      = Value(4, "View")
   val Select    = Value(5, "Select")
+
+  implicit class TourneyActionValue(tav: Value) {
+    def code = s"TourneyAction_${tav.id}"
+  }
 }
 
 object DownloadType extends Enumeration { 

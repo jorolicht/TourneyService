@@ -568,7 +568,7 @@ object TIO {
     } yield (res1)) match {
       case Failure(f) => { logger.error(f.toString); Left(Error("err0146.fileaccess.config", fNCfg, "cache")) }   
       case Success(cfgFile) => Tourney.decode(cfgFile) match {
-        case Left(err)   => logger.error(s"cache -> decode config file: ${cfgFile.take(20)}"); Left(err.add("cache(cfg)"))
+        case Left(err)   => logger.error(s"cache -> decode config file: ${cfgFile.take(50)}"); Left(err.add("cache(cfg)"))
         case Right(trny) => {
             try {
               // setup complete tourney

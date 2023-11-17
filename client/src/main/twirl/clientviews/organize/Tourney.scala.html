@@ -2,7 +2,8 @@
  * Template Organize Tourney (Homepage)
  *@
 @import shared.model.TournBase
-@import shared.utils.UseCaseParam  
+@import shared.utils.UseCaseParam
+@import shared.utils.TourneyAction 
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.organize.tourney.html._
@@ -16,7 +17,7 @@
 				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("main.card.hdr")</h6>
 			</a> 
 		 </div>
-		 <div class="mt-1 mr-2">@actionButton("New", "std.btn.new", "btn-xs")</div>
+		 <div class="mt-1 mr-2">@actionButton(TourneyAction.New.code, "std.btn.new", "btn-outline-secondary btn-xs")</div>
 	</div>
 	<div @id("TourneyCard") class="tuse-card-body pb-2 collapse"></div>
 </div>
@@ -29,7 +30,6 @@
 			</a>
 		</div>
 	</div>
-
 
 	<div @id("UploadCard")' class="card-body pb-2 pt-0 collapse">
 		@UploadCard(msg_("app.lang"))

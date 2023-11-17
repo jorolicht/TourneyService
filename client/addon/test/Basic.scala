@@ -33,6 +33,7 @@ object AddonBasic extends UseCase("AddonBasic")
       case 1 => test_1(param)
       case 2 => test_2()
       case 3 => test_3(param)
+      case 4 => test_4(param)
       case _ => println("Invalid BASIC test option")
     }
   }
@@ -93,6 +94,21 @@ object AddonBasic extends UseCase("AddonBasic")
     println(s"Generate csv: ${CSVConverter[CCTest].to(cct2)}")
 
   }  
+
+  // Test 4 - Enum function
+  def test_4(param: String) = {
+    import shared.model.CompStatus
+    import shared.model.CompTyp
+
+    val cs = CompStatus.EIN
+    val ct = CompTyp.SINGLE
+
+    println(s"START Test Enum Function param->${param}")
+    println(s"Get CompStatus message code: ${gM(cs.msgCode,"VORRRUNDE")}")
+    println(s"Get CompTyp message code: ${gM(CompTyp.SINGLE.msgCode)}")
+
+  }
+
 
 
 }

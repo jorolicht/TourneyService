@@ -543,15 +543,16 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
     } 
 
 
-  def resetMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, List[Int]]] =
-    TIO.get(toId).map {
+  def resetMatch(coId: Long, coPhId:Int, gameNo: Int, resetPantA: Boolean, resetPantB: Boolean)
+                (implicit tse :TournSVCEnv): Future[Either[Error, List[Int]]] =
+    TIO.getTrny(tse, true).map { 
       case Left(err)    => Left(err)
       case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
                            else  trny.cophs((coId, coPhId)).resetMatch(gameNo) 
     } 
 
-  def resetMatches(toId: Long, coId: Long, coPhId:Int): Future[Either[Error,List[Int]]] =
-    TIO.get(toId).map {
+  def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]] =
+    TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
                            else trny.cophs((coId, coPhId)).resetMatches()
@@ -672,7 +673,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   // Competition Phase Routines
   // 
 
-  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
@@ -685,6 +686,21 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         }
       }
     }
+
+  def addCompPhase(coId: Long, name: String)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => {
+        trny.addCompPhase(coId, name) match {
+          case Left(err)   => Left(err)
+          case Right(coph) => {
+            if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
+            Right(coph)
+          }
+        }
+      }
+    }
+
 
   /** setCompPhase - set competition phases 
    */

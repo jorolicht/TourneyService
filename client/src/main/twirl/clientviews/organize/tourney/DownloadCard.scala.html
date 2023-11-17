@@ -22,5 +22,11 @@
   </div>
 }
 
-@radioCard("DownloadPlayer", "TourneyDownload", "download.notify.list", content(msg("download.notify.info"), DownloadType.Player))
-@radioCard("DownloadClickTTResult", "TourneyDownload", "download.clickTT.list", content(msg("download.clickTT.info"), DownloadType.ClickTT))
+@if(toId!=0){
+  @radioCard("DownloadPlayer", "TourneyDownload", "download.notify.list", content(msg("download.notify.info"), DownloadType.Player))
+  @radioCard("DownloadClickTTResult", "TourneyDownload", "download.clickTT.list", content(msg("download.clickTT.info"), DownloadType.ClickTT))
+}else{
+  <div class="alert alert-info text-center mb-0 mt-2" role="alert">
+    <span class="tuse-font-1">@msg("notselected")</span>
+  </div>
+}

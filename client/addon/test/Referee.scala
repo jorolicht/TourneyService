@@ -50,10 +50,10 @@ object AddonReferee extends UseCase("AddonReferee")
   def test_0(toId: Long, coId: Long, phase: Int, param: String): Future[Boolean]  = {
     AddonMain.setOutput(s"START Test Schiri/Referee Notes: toId->${toId} coId->${coId} phase->${phase} param->${param}")
     AddonMain.setLoginLoad(toId).map {
-      case false => false
-      case true  => {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Schiri/Referee Notes"); false
+      case Right(res) => {
         App.execUseCase("OrganizeCompetitionReferee", "", "")
-        AddonMain.addOutput(s"SUCCESS Test Schiri/Referee Notes: ")
+        AddonMain.addOutput(s"SUCCESS Test Schiri/Referee Notes")
         true
       }
     }

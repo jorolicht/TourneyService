@@ -1,9 +1,11 @@
 @*
-* Template for displaying errors
-*@
-@(msgTop: String, msgBottom: String, lang: String)
+ * error template
+ *@
+@import play.filters.csrf._
+@(errMsg: String, errTip: String)
+
 <!DOCTYPE html>
-<html lang="@lang">
+<html lang='en'>
 	<head>
 	  <meta charset="utf-8">
 	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,43 +13,88 @@
 	  <meta name="description" content="TTC Turnierprogramm - Turnierservice - Tourney Service">
 	  <meta name="author" content="Robert Lichtenegger">
 	  
-    <title>Error Page</title>
-    
+	  <title>Tourney Service Error Page</title>
+		
+		<!-- update bootstrap  -->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap-4.3.1/css/bootstrap.min.css")'>	  
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/atom-one-light.css")'>
+	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
+
+	  <!-- update bootstrap datetimepicker-->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "css/bootstrap-datetimepicker.min.css")'>
+
+	  @scalajs.html.scripts("client", routes.Assets.at("/public", _).toString, name => getClass.getResource(s"/public/$name") != null)  
+	  
 	  <!--
 	    Autor: Robert Lichtenegger / Copyright: Robert Lichtenegger - Cloud Service Lifecycle Management
 	    Turnierprogramm TTC Freising Lerchenfeld
 	    Tourney Service / Tournament Service
-	    Date: 2020/02/26
+	    Date: 2023/11/16
 	  -->
-    <style>
-      .amensic-image-wrapper{
-        max-width:60%;
-        height:auto;
-        position: relative;
-        display:block;
-        margin:0 auto;
-        }
-        .amensic-image-wrapper img{
-        width:100% !important;
-        height:auto !important;
-        display:block;
-        }
-      </style>
-
+	  
 	</head>
-	<body>  
+	<body class="fixed-nav sticky-footer bg-dark sidenav-toggler" id="page-top">
+	  
+	  <!-- NAVIGATION -->
+	  <nav id="mainNav" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-print-none" >
+	    <a class="navbar-brand" onclick='InputCtrl.redirect("home"); return false;'>
+	      <span id="APP__Title" class="text-white"><strong>Tourney Service Program - Error Page</strong></span>
+				<span id="APP__Spinner" class="text-white" role="status" aria-hidden="true"></span>
+	    </a>
+	    
+	    <button id="navbarResponsiveButton" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive">
+	      <span class="navbar-toggler-icon"></span>
+	    </button>
+	    
+	    <div class="collapse navbar-collapse" id="navbarResponsive">
+	      <ul class="navbar-nav sidenav-toggler" id="appMainToggler">
+          <li class="nav-item">
+            <a class="nav-link text-center" id="sidenavToggler"><i class="fa fa-fw fa-angle-left"></i></a>
+          </li>
+        </ul>
+   
+	    </div>
+	  </nav>
+	    
+	  <!-- Start Content -->
+	  <div class="content-wrapper">
+	    
+	    <span class="d-print-none" id="APP__Headline">
+        <footer class="tuse-sticky-header">
+          <div class="container-fluid text-secondary text-center"><small id="APP__Headline__Content"></small></div>                  
+        </footer>
+        <div class="container-fluid mb-3"></div>
+      </span>
+     
+	    <div class="container-fluid">
+				
+	      <!-- Main Content -->
+					
+	      <div id="mainContent" class="mb-5">
+					<div align="center"><h3>@errMsg</h3></div>
+					<div class="text-center m-3"><img src="/content/img/error.gif" /></div>
+					<div align="center"><h4>@errTip</h4></div>
+				</div>	          
+	    </div>
+	    
+	   
+	    <!-- Scroll to Top Button-->
+	    <a class="scroll-to-top rounded" href="#page-top"><i class="fa fa-angle-up"></i></a>
 
-    <div align="center">
-      <h2>@msgTop</h2>
-    </div>
+		</div>
+		<!-- End Content -->
 
-    <div class="amensic-image-wrapper">
-      <img src="/content/img/error.gif" />
-    </div>
+		<!-- Bootstrap core JavaScript-->
+		<!-- <script src='@routes.Assets.at("/public", "js/jquery-3.4.1.min.js")'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script> -->
+		
+		<script src='@routes.Assets.at("/public", "jQuery-3.6.3/jquery.slim.min.js")'></script>
+		<script src='@routes.Assets.at("/public", "bootstrap-4.3.1/js/bootstrap.bundle.min.js")'></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js" integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script> 
+    <script src='@routes.Assets.at("/public", "js/sb-admin.min.js")'></script>
 
-    <div align="center">
-      <h3>@msgBottom</h3>
-    </div>
-      
 	</body>
 </html>

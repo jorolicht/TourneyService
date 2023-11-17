@@ -340,15 +340,15 @@ trait TourneySvc extends WrapperSvc
   // Register Interface (Single/Double)
   //
   /* regSingle register single player */  
-  def regSingle(coId: Long, pl: Player, status: Int): Future[Either[Error, Long]] = 
-    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status}", s"player=${enc(pl.encode)}", true).map {
+  def regSingle(coId: Long, pl: Player, status: PantStatus.Value): Future[Either[Error, Long]] = 
+    postAction("regSingle", App.tourney.id, s"coId=${coId}&status=${status.code}", s"player=${enc(pl.encode)}", true).map {
       case Left(err)     => Left(err.add("regSingle"))
       case Right(result) => Return.decode2Long(result, "reqSingle")
     }
 
   /* regDouble register double player */  
-  def regDouble(coId: Long, pl1: Player, pl2: Player): Future[Either[Error, (Long, Long)]] = 
-    postAction("regDouble", App.tourney.id, s"coId=${coId}", s"player1=${enc(pl1.encode)}&player2=${enc(pl2.encode)}", true).map {
+  def regDouble(coId: Long, pl1: Player, pl2: Player, status: PantStatus.Value = PantStatus.REDY): Future[Either[Error, (Long, Long)]] = 
+    postAction("regDouble", App.tourney.id, s"coId=${coId}&status=${status.code}", s"player1=${enc(pl1.encode)}&player2=${enc(pl2.encode)}", true).map {
       case Left(err)     => Left(err.add("regDouble"))
       case Right(result) => {
         try Right( read[(Long, Long)](result) )  
@@ -553,7 +553,7 @@ trait TourneySvc extends WrapperSvc
         case Left(err)  => Left(err.add("postAction/inputReferee"))
         case Right(res) => {
           try Right(read[List[Int]](res))  
-          catch { case _:Throwable => Left(Error("err0223.svc.inputMatch.decodeResult", "", "", "inputRefere")) }    
+          catch { case _:Throwable => Left(Error("err0231.svc.inputReferee.decodeResult", "", "", "inputReferee")) }    
           } 
       }
 
@@ -588,6 +588,19 @@ trait TourneySvc extends WrapperSvc
       }
     }  
   }
+
+
+  // getMatch - get a match 
+  def getMatch(toId: Long, coId: Long, coPhId: Int, gameNo: Int): Future[Either[Error, MEntry]] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    if   (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) 
+    else try   Future(Right(App.tourney.cophs((coId, coPhId)).getMatch(gameNo)))
+         catch { case _: Throwable => Future(Left(Error("err0232.svc.getMatch.error", gameNo.toString)))}
+  }
+
+
 
   // resetMatchRemote - reset a match locally result, returns affected game numbers 
   def resetMatchRemote(toId: Long, coId: Long, coPhId: Int, gameNo: Int,  
@@ -636,12 +649,12 @@ trait TourneySvc extends WrapperSvc
   //
   //  COMPETITION PHASE Interface
   //
-  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: Int, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
+  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int): Future[Either[Error, CompPhase]] = 
     App.tourney.addCompPhase(coId, baseCoPhId, cfgWinner, coPhCfg, name, noWinSets) match {
       case Left(err)  => Future(Left(err))
       case Right(lCoPh ) => postAction("addCompPhase", App.tourney.id, 
-                              s"coId=${coId}&baseCoPhId=${baseCoPhId}" +
-                              s"&cfgWinner=${cfgWinner}&coPhCfg=${coPhCfg}&noWinSets=${noWinSets}", "", true).map {
+                              s"coId=${coId}&baseCoPhId=${baseCoPhId}&cfgWinner=${cfgWinner}" +
+                              s"&coPhCfg=${coPhCfg.id.toString}&noWinSets=${noWinSets}", "", true).map {
         case Left(err)      => Left(err)
         case Right(rCoPhE)  => CompPhase.decode(rCoPhE) match {
           case Left(err)       => Left(err)
@@ -649,6 +662,21 @@ trait TourneySvc extends WrapperSvc
         }    
       }     
     }
+
+
+  def addCompPhase(coId: Long, name: String): Future[Either[Error, CompPhase]] = 
+    App.tourney.addCompPhase(coId, name) match {
+      case Left(err)  => Future(Left(err))
+      case Right(lCoPh ) => postAction("addCompPhase", App.tourney.id, s"coId=${coId}&name=${name}", "", true).map {
+        case Left(err)      => Left(err)
+        case Right(rCoPhE)  => CompPhase.decode(rCoPhE) match {
+          case Left(err)       => Left(err)
+          case Right(rCoPh)    => if (lCoPh.coPhId == rCoPh.coPhId) Right(lCoPh) else Left(Error("err0215.sync")) 
+        }    
+      }     
+    }
+
+
 
   // getCompPhase - fetches whole competition phase from server
   def getCompPhase(coId: Long, coPhId: Int): Future[Either[Error, CompPhase]] = 

@@ -13,8 +13,10 @@
  * 
  *@
 
-@(compInfos: Seq[(Competition, Int, Int)], lang: String)(implicit ucc: UseCaseParam)
+@(compInfos: Seq[(Competition, Int, Int)], selected: Long, lang: String)(implicit ucc: UseCaseParam)
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
+@selRow(value: Boolean) = @{ if(value) Html("class='text-white bg-secondary'") }
+
 
 <table @id("MainTbl") class="table table-sm small table-hover tuse-border">
 	<tbody>
@@ -25,8 +27,7 @@
 			<td class="text-left tuse-height"><strong>@msg("main.tbl.hdr.ttr")</strong></td>
 			<td class="text-center tuse-height"><strong>@msg("main.tbl.hdr.count")</strong></td>
 			<td class="text-right tuse-height"><strong>@msg("main.tbl.hdr.status")</strong></td>
-			<td class="text-center tuse-height"><strong>@msg("main.tbl.hdr.signup")</strong></td>
-			<td class="text-right tuse-height"></td>
+			<td class="text-right tuse-height"><strong>@msg("main.tbl.hdr.action")</strong></td>
 		</tr>	
 
 	@if(compInfos.isEmpty) {
@@ -39,29 +40,29 @@
 		</tr>
 	} else {			
 		@for(co <- compInfos) {	
-			<tr data-coId='@co._1.id' @id(s"${co._1.id}") @actionEvent("SelectCompetition", "onclick")>  
+			<tr data-coId='@co._1.id' @id(s"${co._1.id}")  @selRow(co._1.id==selected)
+				 @actionEvent("SelectCompetition", "onclick")>  
 				<td class="text-left tuse-height"><strong>@co._1.id</strong</td>
 				<td class="text-left tuse-height">@co._1.genName(msg_)</td>
 				<td class="text-left tuse-height">@co._1.formatTime(lang)</td>
 				<td class="text-left tuse-height">@co._1.genRange</td>
 				<td @id(s"Counter_${co._1.id}") class="text-center tuse-height">@co._2/@co._3</td>
-				<td @id(s"Status_${co._1.id}") class="text-right tuse-height">@co._1.getStatusName(msg_)</td>
-				<td class="text-center tuse-height"> 
-					<div class="form-check-inline">
-						@if(co._1.status==CompStatus.READY){
-						  <input data-coId='@co._1.id' class="form-check-input" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(co._1.getWebRegister) >
-						}	
-					</div>
+				<td @id(s"Status_${co._1.id}") class="text-right tuse-height">
+					@co._1.getStatusName(msg_) 
+          &nbsp;|&nbsp;
+					@if(co._1.status==CompStatus.READY||co._1.status==CompStatus.CFG){
+						<input data-coId='@co._1.id' class="" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(co._1.getWebRegister) >
+					}	else {
+						<input data-coId='@co._1.id' class="" type="checkbox" value="" disabled >
+					}
 				</td>
+
 				<td class="text-right tuse-height">
-					@if(co._1.status==CompStatus.READY){
+					@if(co._1.status==CompStatus.READY||co._1.status==CompStatus.CFG){
 					  <a @id("icon.edit") @tit("edit") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
 					}
 					<a @tit("view") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
 					<a @tit("delete") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>
-					@if(co._1.status==CompStatus.READY){
-					  <a @id("icon.start") @tit("start") data-coId='@co._1' class="text-dark" href="#" @actionEvent("StartCompetition", "onclick")><i class="fa fa-play"></i></a>		 
-					}
 				</td>
 			</tr>
 		}

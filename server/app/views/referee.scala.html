@@ -58,6 +58,9 @@
 	  <div class="content-wrapper mt-4">
 
 	    <div class="container-fluid">
+				<div id="Referee_Registered" style='display:none' class="row justify-content-center text-center ml-2 mr-2 mt-2">
+					<span class="font-3 text-danger">@getMsg("registered")</span>
+			 </div>
 				<div class="row justify-content-center border ml-2 mr-2 mt-2">
            <span class="font-1" id="Referee_TourneyName">Meisterschft YYY</span>
 				</div>
@@ -107,7 +110,7 @@
 		  </div>
 
 			@if(!finished){
-				<div class="container-fluid mt-3 mb-3">
+				<div id="Referee_Buttons" class="container-fluid mt-3 mb-3">
 					<div class="row justify-content-between ml-4 mr-4">
 						<button id="Referee_BtnCancel" type="button" class="btn btn-xs btn-outline-secondary pl-2 pr-2" onclick="Referee.cancel(this)">
 							@getMsg("btn.cancel")

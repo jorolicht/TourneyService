@@ -39,7 +39,7 @@
     <div class="col ml-2 mr-2">
       <p>
         @{ Html(msg("confirm.entercode", ctx("email").str)) }
-        @actionButton("codeResend", "code.resend", "btn-xs")
+        @actionButton("codeResend", "code.resend", "btn-outline-secondary btn-xs")
       </p>
     </div>
 
@@ -64,10 +64,10 @@
 
   <div class="form-group row mt-2 alert-primary justify-content-between">
     <div class="col ml-1 pt-2 pb-2">
-      @actionButton("FullBack", "full.back", "btn-sm")
+      @actionButton("FullBack", "full.back", "btn-outline-secondary btn-sm")
     </div>
     <div class="col pt-2 pb-2 text-right">
-      @actionButton("FullConfirm", "full.confirm", "btn-sm")
+      @actionButton("FullConfirm", "full.confirm", "btn-outline-secondary btn-sm")
     </div>
   </div>
 

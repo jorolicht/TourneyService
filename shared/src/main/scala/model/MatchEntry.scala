@@ -287,7 +287,7 @@ case class MEntryGr(
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
       |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
       |    depend: ${depend} trigger: ${trigger} playfield: ${playfield} 
-      |    status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: ${result}
+      |    status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: '${result}'
   """.stripMargin('|')
 
   def setPantA(sNoA: String) = stNoA = sNoA
@@ -377,7 +377,7 @@ object MEntry {
    *  game identifier = tripple (competition identifier, competition phase identifier, game number)
    */
   def addPlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
-    println(s"addPlayerRunning: ${plId} game: ${gaId._3}")
+    // println(s"addPlayerRunning: ${plId} game: ${gaId._3}")
     if (plId != 0) { if (playing.contains(plId)) { playing(plId) += gaId } else { playing(plId) = HashSet(gaId) } }  
   }  
   def removePlayerRunning(plId: Long, gaId: (Long,Int,Int)) = {
@@ -386,13 +386,13 @@ object MEntry {
 
   def getPlayerRunning(plId1: Long, plId2: Long=0 ): Boolean = {  
     if (playing.contains(plId1) && playing.contains(plId2)) {
-      println(s"getPlayerRunning plId1: ${plId1} plId2: ${plId2} Map1: ${playing(plId1).toString} Map2: ${playing(plId2).toString}")
+      // println(s"getPlayerRunning plId1: ${plId1} plId2: ${plId2} Map1: ${playing(plId1).toString} Map2: ${playing(plId2).toString}")
       (playing(plId1).size > 0) | (playing(plId2).size > 0) 
     } else if (playing.contains(plId1)){
-      println(s"getPlayerRunning plId1: ${plId1} Map1: ${playing(plId1).toString}")
+      // println(s"getPlayerRunning plId1: ${plId1} Map1: ${playing(plId1).toString}")
       playing(plId1).size > 0
     } else {
-      println(s"getPlayerRunning false (no entry)")
+      // println(s"getPlayerRunning false (no entry)")
       false
     }
   } 

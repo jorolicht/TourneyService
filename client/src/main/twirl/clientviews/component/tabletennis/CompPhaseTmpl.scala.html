@@ -18,7 +18,7 @@
 		<li class="nav-item">
       <a class="nav-link @if(i==0){active}" id=@id(s"coph_${i}") data-toggle="tab" href="@idRef(cophs(i).coId,cophs(i).coPhId)" role="tab">
 				<span class="tuse-font-2 text-dark">
-				  @msg_("competition.phase."+cophs(i).coPhId)
+					@{s"${cophs(i).name}  ${msg_(cophs(i).coPhTyp.msgCode)}" }
 				</span>
 			</a>
 		</li>
