@@ -1,0 +1,15 @@
+###
+# Referee Entries
+###
+referee.lang                                        = en
+referee.title                                       = Tourney Match Result
+referee.header.set                                  = Set
+referee.gameNo                                      = Game Number: {0}
+referee.matchstatus.input                           = Result Input
+referee.matchstatus.view                            = Result View
+referee.btn.cancel                                  = CANCEL
+referee.btn.submit                                  = SUBMIT
+referee.registered                                  = REGISTERED
+referee.dlg.hdr.confirm                             = Save Match Result
+referee.dlg.result.message                          = {0} - {1} = <strong>({2}:{3})</strong> {4} 
+

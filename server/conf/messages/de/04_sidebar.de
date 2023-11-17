@@ -1,0 +1,48 @@
+###
+# Sidebar labels an titles
+###
+sidebar.label.HomeSearch                            = Turniersuche
+sidebar.label.InfoEnabled                           = TurnierInfo
+sidebar.label.InfoDisabled                          = TurnierInfo
+sidebar.label.InfoSchedule                          = Ausschreibung
+sidebar.label.InfoCompetition                       = Wettbewerbe
+sidebar.label.InfoPlayer                            = Teilnehmer
+sidebar.label.InfoResult                            = Ergebnisse
+sidebar.label.InfoPlayfield                         = Tischbelegung
+sidebar.label.InfoCertificate                       = Urkunden
+sidebar.label.OrganizeTourney                       = Turniere
+sidebar.label.OrganizeCompetition                   = Wettbewerbe
+sidebar.label.OrganizePlayer                        = Spieler
+sidebar.label.OrganizePlayfield                     = Tischbelegung
+sidebar.label.OrganizeCertificate                   = Urkunden
+sidebar.label.OrganizeReport                        = Berichte
+sidebar.label.Admin                                 = Administration
+sidebar.label.AdminLicense                          = Lizenz
+sidebar.label.AdminDatabase                         = Database
+sidebar.label.AdminReport                           = Berichte
+sidebar.label.OrganizeCompetitionCtrl               = Steuerung
+sidebar.label.OrganizeCompetitionDraw               = Auslosung
+sidebar.label.OrganizeCompetitionInput              = Eingabe
+sidebar.label.OrganizeCompetitionView               = Anzeige
+sidebar.label.OrganizeCompetitionReferee            = Schiri 
+
+sidebar.title.HomeSearch                            = Turniersuche
+sidebar.title.Info                                  = Turnier-Information
+sidebar.title.InfoDisabled                          = Turnier-Information erfordert Turnierauswahl
+sidebar.title.InfoSchedule                          = Turnierausschreibung
+sidebar.title.InfoCompetition                       = Wettbewerbe
+sidebar.title.InfoPlayer                            = Turnierteilnehmer
+sidebar.title.InfoResult                            = Ergebnisse
+sidebar.title.InfoPlayfield                         = Tischbelegung
+sidebar.title.InfoCertificate                       = Spielerplatzierung und Urkundendruck
+sidebar.title.OrganizeTourney                       = Turnierauswahl - Turnierleitung-Homepage
+sidebar.title.OrganizeCompetition                   = Auswahl der Wettbewerbe eines Turniers
+sidebar.title.OrganizePlayer                        = Spieler (Anmeldung, Warteliste)
+sidebar.title.OrganizePlayfield                     = Tischbelegung verwalten
+sidebar.title.OrganizeCertificate                   = Urkunden verwalten
+sidebar.title.OrganizeReport                        = Berichte und Reports
+sidebar.title.Admin                                 = Administration
+sidebar.title.AdminLicense                          = Lizenzverwaltung
+sidebar.title.AdminDatabase                         = Datenverwaltung
+sidebar.title.AdminReport                           = Berichte und Reports
+

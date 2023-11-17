@@ -1,0 +1,151 @@
+###
+# Usecase: Home Main & Error
+###
+home.main.LoginRequired                             = Login required!
+home.main.UnknownPage                               = Sorry, page not found!
+home.main.Welcome                                   = Welcome!
+home.main.GoodBye                                   = Bye!
+home.main.Error                                     = An error occurred!
+home.main.Cookie                                    = Unfortunately, nothing works without cookies!
+home.main.prompt                                    = Enter command:
+home.error.title                                      = ERROR!
+home.error.image                                      = showError
+home.error.alt                                        = An error occurred
+
+
+###
+# Usecase: Home Console
+###
+home.console.title                                    = Console
+home.console.btn.submit                               = Submit
+
+
+###
+# Usecase: Home Register
+###
+home.register.hdg.start                               = Registration
+home.register.hdg.free.confirm                        = Confirm Registration
+home.register.hdg.free.finish                         = Registration Completed
+home.register.hdg.full.confirm                        = Confirm Registration and Order
+home.register.hdg.full.finish                         = Registration Successful / Invoice
+home.register.license.header                          = License
+home.register.plh.zip                                 = ZIP
+home.register.plh.city                                = Anytown
+home.register.plh.street                              = Example Hwy
+home.register.lbl.zip                                 = ZIP Code
+home.register.lbl.city                                = City
+home.register.lbl.street                              = Street with House Number
+home.register.lbl.radio.free                          = free License
+home.register.lbl.radio.full                          = full License
+home.register.hlp.clubname.inuse                      = Name of the club or keyword already in use
+home.register.hlp.zip                                 = Please enter a valid zip code (at least 2 characters)
+home.register.hlp.city                                = Please enter a valid city (at least 2 characters)
+home.register.hlp.street                              = Please enter a valid street including house number (at least 2 characters)
+home.register.hlp.country                             = Please select a country
+home.register.hlp.code                                = &nbsp; Unfortunately, the confirmation code is incorrect.
+home.register.hlp.ConfirmCondition                    = Please accept cancellation policy and terms and conditions
+home.register.onefreeLicense                          = <ul class = "mb-0"> <li> oneFree </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.onefullLicense                          = <ul class = "mb-0"> <li> oneFull </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.multifreeLicense                        = <ul class = "mb-0"> <li> multiFree </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.multifullLicense                        = <ul class = "mb-0"> <li> multiFull </li> <li> xxBing </li> <li> xxAsk.com </li> </ul>
+home.register.oneCompVersion                          = A competition version
+home.register.multiCompVersion                        = MORE competition version
+home.register.btn.free.back                           = BACK
+home.register.btn.free.request                        = Request a Free License
+home.register.btn.free.confirm                        = Send license
+home.register.btn.full.back                           = BACK
+home.register.btn.full.request                        = Request a Paid License
+home.register.btn.full.confirm                        = Order with License-Fee
+home.register.btn.code.resend                         = SEND AGAIN
+home.register.address.for.nameclub                    = License for <strong> {0} {1} </strong> - club: <strong> {2} </strong>
+home.register.freeconfirm.name                        = Free license for <strong> {0} </strong>
+home.register.confirm.entercode                       = <small> Please enter the 4-digit confirmation code that we sent to: <strong> {0} </strong>. </small>
+home.register.address.for.email                       = Email: <strong> {0} </strong>
+home.register.freefinish.prolog                       = <p> Thank you for registering, </h5> <p> below is the license string (= & # 60; club name / license code &#62;). Simply enter all of this bold text in the setup menu with cut / paste. The file can then be saved and copied as required for each tournament (there is no copy protection or similar). </p>home.register.freefinish.epilog = <h5> The documentation can be found <a href="https://turnier-service.info/doc/"> here </a>. Wishes and suggestions for improvement are gladly accepted at <a href="mailto:info@turnier-service.org"> info@turnier-service.org</a><p> Sporty greetings and good luck with your tournaments </p>
+home.register.freefinish.epilog                       = Here you can find the documentation  <a href="https://turnier-service.org/">hier</a>. Any suggestions to <a href="mailto:info@turnier-service.org">info@turnier-service.org</a><p>Greetings and good luck at your tournaments</p>
+home.register.fullconfirm.name                        = Paid/Full License for <strong> {0} </strong>
+home.register.fullconfirm.clubname                    = Club: <strong> {0} </strong>
+home.register.fullfinish.prolog                       = <h5> Thank you for registering, </h5> <p> below you find the license string (= &#60; club name/license code &#62;). Simply copy/paste the bold text into the setup menu. The file can then be saved and copied as required for each tournament (there is no copy protection or similar).</p>
+home.register.fullfinish.epilog                       = <p> The documentation can be found <a href="https://turnier-service.org/"> here </a>. Any  suggestions for improvement are gladly accepted at <a href="mailto:info@turnier-service.org"> info@turnier-service.org </a> <p> The license string and the invoice was sent to the specified email address.</p><p> Greetings and good luck with your tournaments </p>
+home.register.fullconfirm.item.hdl                    = tournament service usage license (full) at a price of € 39.50
+home.register.fullconfirm.item.cnt                    = 2
+home.register.fullconfirm.item.content.1              = Unrestricted local use of the Excel-based software
+home.register.fullconfirm.item.content.2              = 1 year of use of the online tournament services (max. 3 tournaments) from the date of purchase
+home.register.check.withdrawal                        = I have read the <a href="#" onclick='InputCtrl.setContent("/content/withdrawal.md")'> cancellation policy </a> and hereby accept them.
+home.register.lbl.gtc                                 = I have read the <a href="#" onclick='InputCtrl.setContent("/content/gtc.md")'> general terms and conditions </a> and I agree to them.
+home.register.lbl.withdrawal                          = The cancellation policy and terms and conditions must be recognized and accepted.
+
+
+###
+# Usecase: Home Login
+###
+home.login.hdg                                      = Tournament Management - Login
+home.login.btn.req.newPassword                      = FORGOT PASSWORD
+home.login.btn.req.authPassword                     = LOGIN
+home.login.btn.req.authGoogle                       = Login with Google
+home.login.lbl.user                                 = Email or License Key
+home.login.hlp.user                                 = Please enter your email address or the first part of your license key
+home.login.plh.user                                 = john.doe@toodle-oh.com
+home.login.bye                                      = Goodbye!
+home.login.dlg.hdg                                  = Login Error
+home.login.dlg.text                                 = Email / License String and/or Password not Correct.
+home.login.dlg.title.err.reqPw                      = Password Reset Error
+home.login.dlg.wrongemail.hdg                       = Error Resetting Password
+home.login.dlg.wrongemail.text                      = Please enter the correct email address.
+home.login.dlg.title.ok.reqPw                       = Reset the password
+home.login.dlg.body.ok.reqPw                        = New password was sent to {0}. Check the spam filter settings or the mailbox for unwanted e-mail (junk mail folder) if you have not received an e-mail. Change the newly received password in the settings.
+
+
+###
+# Usecase: Home Setting - Change User / Club Settings
+###
+home.setting.hdg                                    = Settings
+home.setting.password.hdg                           = Change Password
+home.setting.contact.hdg                            = Change Contact Details
+home.setting.btn.req.contactChange                  = SAVE
+home.setting.hlp.city                               = Please enter a valid city (at least 2 characters)
+home.setting.hlp.street                             = Please enter a valid street including house number (at least 2 characters)
+home.setting.hlp.zip                                = Please enter a valid zip code
+home.setting.lbl.zip                                = ZIP Code
+home.setting.lbl.city                               = City
+home.setting.lbl.street                             = Street with House Number
+home.setting.lbl.country                            = Country
+home.setting.plh.zip                                = ZIP Code
+home.setting.plh.city                               = e.g. NYC
+home.setting.plh.street                             = e.g. Housten Street
+home.setting.plh.country                            = e.g. NY
+home.setting.contactChange.failure.dlg.hdg          = Update failed
+home.setting.contactChange.success.dlg.text         = The contact details have been updated successfully
+home.setting.btn.req.pwChange                       = CHANGE PASSWORD
+home.setting.pwChange.failure.dlg.hdg               = Update failed
+home.setting.pwChange.success.dlg.hdg               = Update finished
+home.setting.pwChange.success.dlg.text              = Password update successful
+
+
+###
+# Use case: Home Search
+###
+home.search.hint                                    = Name of the tournament or club
+home.search.label                                   = Tournament Search
+home.search.dlg.hdg                                 = Search Failed
+home.search.headline                                = Welcome!
+home.search.info                                    = Please enter your search term and then click on ENTER/RETURN. You can click on the listed tourneys
+home.search.noEntryMsg                              = No matching tourney fond
+home.search.table.date                              = Date
+home.search.table.club                              = Club
+home.search.table.tourney                           = Tournament
+home.search.lbl.typ                                 = <strong> Sport </strong>
+home.search.lbl.year                                = <strong> Year </strong>
+home.search.lbl.string                              = <strong> Tournament Search </strong>
+home.search.plh.string                              = Name of the Tournament or Club
+
+
+###
+# Usecase Common
+###
+common.certificate.noentry                            = Final results not yet available
+common.certificate.hdr.place                          = Placement
+common.certificate.hdr.name                           = Name
+common.certificate.hdr.club                           = Club
+common.certificate.place                              = {0} Place
+

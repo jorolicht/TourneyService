@@ -1,0 +1,253 @@
+###
+# General Labels
+###
+number.1                                            = one
+number.2                                            = two
+number.3                                            = three
+number.4                                            = four
+number.5                                            = five
+number.6                                            = six
+number.7                                            = seven
+number.8                                            = eight
+number.9                                            = nine 
+
+tourney.typ.name                                    = type of sport
+tourney.typ.0                                       = any
+tourney.typ.1                                       = table tennis
+tourney.typ.2                                       = sheep's head
+tourney.typ.3                                       = chess
+tourney.typ.4                                       = football
+tourney.typ.5                                       = basketball
+tourney.typ.6                                       = tennis
+tourney.typ.7                                       = golf
+tourney.typ.8                                       = darts
+tourney.typ.9                                       = ski race
+tourney.typ.10                                      = handball
+tourney.typ.11                                      = volleyball
+tourney.typ.12                                      = agility
+              
+tourney.visibility                                  = Visibility              
+tourney.privat                                      = private
+tourney.public                                      = public
+tourney.error.startDate                             = Invalid date for tournament start
+tourney.error.endDate                               = Invalid date for the end of the tournament
+tourney.error.name                                  = The tournament name must be at least 8 characters long
+tourney.error.typ                                   = Please select type of sport
+tourney.error.privat                                = Please set visibility
+
+CompStatus.UNKN                                     = UNKNOWN
+CompStatus.CFG                                      = CONFIGURATION
+CompStatus.Status                                   = Status
+CompStatus.RUN                                      = RUNNING                           
+CompStatus.AUS                                      = {0} DRAW 
+CompStatus.EIN                                      = {0} RESULT INPUT
+CompStatus.FIN                                      = {0} FINISHED
+CompStatus.READY                                    = READY TO START
+CompStatus.VRAUS                                    = PRELIMINARY DRAW
+CompStatus.VREIN                                    = PRELIMINARY RESULT INPUT
+CompStatus.VRFIN                                    = PRELIMINARY ROUND FINISHED
+CompStatus.ZRAUS                                    = INTERMEDIATE DRAW
+CompStatus.ZREIN                                    = INTERMEDIATE RESULT INPUT
+CompStatus.ZRFIN                                    = INTERMEDIATE ROUND FINISHED
+CompStatus.ERAUS                                    = FINAL DRAW
+CompStatus.EREIN                                    = FINAL RESULT INPUT
+CompStatus.ERFIN                                    = FINAL ROUND FINISHED
+
+
+CompTyp.UNKN                                        = UNKNOWN
+CompTyp.Typ                                         = Typ
+CompTyp.SINGLE                                      = SINGLE
+CompTyp.DOUBLE                                      = DOUBLE
+CompTyp.MIXED                                       = MIXED
+CompTyp.TEAM                                        = TEAM
+
+CompClass.plh                                       = Class
+CompClass.1                                         = A-Class
+CompClass.2                                         = B-Class
+CompClass.3                                         = C-Class
+CompClass.4                                         = D-Class
+CompClass.5                                         = E-Class
+
+
+CompAgeGroup.plh                                    = Age Group*
+CompAgeGroup.1                                      = Women
+CompAgeGroup.2                                      = Gentlemen
+CompAgeGroup.3                                      = Girls
+CompAgeGroup.4                                      = Boys
+CompAgeGroup.5                                      = Student
+CompAgeGroup.6                                      = Schoolgirls
+CompAgeGroup.7                                      = Youth 18
+CompAgeGroup.8                                      = Youth 15
+CompAgeGroup.9                                      = Youth 14
+CompAgeGroup.10                                     = Youth 13
+CompAgeGroup.11                                     = Youth 12
+CompAgeGroup.12                                     = Youth 11
+CompAgeGroup.13                                     = Seniors 40
+CompAgeGroup.14                                     = Seniors 45
+CompAgeGroup.15                                     = Seniors 50
+CompAgeGroup.16                                     = Seniors 55
+CompAgeGroup.17                                     = Seniors 60
+CompAgeGroup.18                                     = Seniors 65
+CompAgeGroup.19                                     = Seniors 70
+CompAgeGroup.20                                     = Seniors 75
+CompAgeGroup.21                                     = Seniors 80
+
+competition.koRound.7                               = Round of 128
+competition.koRound.6                               = Round of 64
+competition.koRound.5                               = Round of 32
+competition.koRound.4                               = Round of 16
+competition.koRound.3                               = Quarterfinals
+competition.koRound.2                               = Semifinals
+competition.koRound.1                               = Final
+competition.koRound.0                               = Match 3rd Place
+
+competition.GrRound                                 = Round {0}
+
+competition.sex.0                                   = Restriction
+competition.sex.1                                   = Men only
+competition.sex.2                                   = Women only
+competition.sex.3                                   = Men and Women
+
+CompPhaseStatus.Name                                = ROUND STATUS
+CompPhaseStatus.UNKN                                = UNKNOWN
+CompPhaseStatus.CFG                                 = CONFIGURATION
+CompPhaseStatus.AUS                                 = DRAW
+CompPhaseStatus.EIN                                 = INPUT
+CompPhaseStatus.FIN                                 = FINISHED
+CompPhaseStatus.DEP                                 = FOLLOWING ROUND STARTED
+
+CompPhaseTyp.UNKN                                   = UNKNOWN
+CompPhaseTyp.GR                                     = Group System
+CompPhaseTyp.KO                                     = KO System
+CompPhaseTyp.SW                                     = Switz System
+
+CompPhaseCfg.UNKN                                   = UNKNOWN
+CompPhaseCfg.CFG                                    = Select Game System
+CompPhaseCfg.VRGR                                   = Preliminary Group Round
+CompPhaseCfg.ZRGR                                   = Intermediate Group Round
+CompPhaseCfg.ERGR                                   = Final Group Round
+CompPhaseCfg.TRGR                                   = Consolation Group Round
+CompPhaseCfg.VRKO                                   = Preliminary KO Round
+CompPhaseCfg.ERKO                                   = Final KO Round
+CompPhaseCfg.TRKO                                   = Consolation KO Round
+CompPhaseCfg.GR3to9                                 = Round with Groups of Size 3-9
+CompPhaseCfg.GRPS3                                  = Round with Groups of Size 3
+CompPhaseCfg.GRPS34                                 = Round with Groups of Size 3 and 4
+CompPhaseCfg.GRPS4                                  = Round with Groups of Size 4
+CompPhaseCfg.GRPS45                                 = Round with Groups of Size 4 and 5
+CompPhaseCfg.GRPS5                                  = Round with Groups of Size 5
+CompPhaseCfg.GRPS56                                 = Round with Groups of Size 5 and 6
+CompPhaseCfg.GRPS6                                  = Round with Groups of Size 6
+CompPhaseCfg.JGJ                                    = Round Robin
+CompPhaseCfg.KO                                     = KO-System
+CompPhaseCfg.SW                                     = Swiss-System
+
+CompPhaseCfgInfo.UNKN                               = UNKNOWN
+CompPhaseCfgInfo.CFG                                = Select Game System
+CompPhaseCfgInfo.VRGR                               = Preliminary Group Round
+CompPhaseCfgInfo.ZRGR                               = Intermediate Group Round
+CompPhaseCfgInfo.ERGR                               = Final Group Round
+CompPhaseCfgInfo.TRGR                               = Consolation Group Round
+CompPhaseCfgInfo.VRKO                               = Preliminary KO Round
+CompPhaseCfgInfo.ERKO                               = Final KO Round
+CompPhaseCfgInfo.TRKO                               = Consolation KO Round
+CompPhaseCfgInfo.GR3to9                             = Configuration with {0} Groups
+CompPhaseCfgInfo.GRPS3                              = Configuration with {0} <span class="h5">&#x2682;</span>-Groups
+CompPhaseCfgInfo.GRPS34                             = Configuration with {0} <span class="h5">&#x2682;</span>-Group(s) and {1} <span class="h5">&#x2683;</span>-Group(s)
+CompPhaseCfgInfo.GRPS4                              = Configuration with {0} <span class="h5">&#x2683;</span>-Groups
+CompPhaseCfgInfo.GRPS45                             = Configuration with {0} <span class="h5">&#x2683;</span>-Group(s) and {1} <span class="h5">&#x2684;</span>-Group(s)
+CompPhaseCfgInfo.GRPS5                              = Configuration with {0} <span class="h5">&#x2684;</span>-Groups
+CompPhaseCfgInfo.GRPS56                             = Configuration with {0} <span class="h5">&#x2684;</span>-Group(s) and {1} <span class="h5">&#x2685;</span>-Group(s)
+CompPhaseCfgInfo.GRPS6                              = Configuration with {0} <span class="h5">&#x2685;</span>-Groups
+CompPhaseCfgInfo.JGJ                                = Configuration {0}-Field Round Robin
+CompPhaseCfgInfo.KO                                 = Configuration {0}-Field KO-System
+CompPhaseCfgInfo.SW                                 = Configuration {0}-Field Swiss System  
+
+certificate.place.range                             = {0}. - {1}. place
+certificate.place.value                             = {0}. place
+certificate.title                                   = Certificate {0}
+certificate.hdr                                     = Tournament Certificates
+certificate.locationdate                            = {0}, the {1}
+
+download.typ.1                                      = TourneyRegistrations.csv
+download.typ.2                                      = ClickTT_Result.xml
+
+ParticipantList.noEntry                               = no tournament selected / no tournament data found
+ParticipantList.clickHint                             = Click on competition to get players
+
+
+###
+# Group / KO round
+###
+group.name                                          = Group {0}
+group.hdr.name                                      = Name
+group.hdr.balls                                     = Balls
+group.hdr.sets                                      = Sets
+group.hdr.games                                     = Games
+group.hdr.position                                  = Place
+ko.last128                                          = 128 Field
+ko.last64                                           = 64 Field
+ko.last32                                           = 32 Field
+ko.last16                                           = Round of 16
+ko.quarterfinal                                     = Quarterfinals
+ko.semifinal                                        = Semi-Finals
+ko.final                                            = Final
+ko.winner                                           = Winner
+ko.3rdPlaceMatch                                    = 3rd Place
+
+
+###
+# Input labels, placeholder and help
+###
+input.email.lbl                                     = Club Contact / Email Address
+input.email.hlp                                     = Please enter a valid email address
+input.email.plh                                     = john.doe@domain.com
+input.password.lbl                                  = Password
+input.password.new.lbl                              = New Password (min. 6 characters)
+input.password.repeat.lbl                           = Repeat Password
+input.password.hlp                                  = Password must be at least 6 characters long, contain one uppercase and one lowercase letter and a number
+input.password.repeat.hlp                           = Passwords must match
+input.name.lbl                                      = Club Contact (last name, first name)
+input.name.hlp                                      = Please enter club contact in the format &lt;last name&gt;, &lt;first name&gt;
+input.name.plh                                      = Doe, John
+input.country.lbl                                   = Country
+input.country.hlp                                   = Please select a country
+input.club.lbl                                      = Club Name / Keyword
+input.club.hlp                                      = Special characters allowed, but at least 8 characters [a-z] [A-Z], maximum 64 characters
+input.club.plh                                      = Jacksonville Buccaneers
+
+
+###
+# Standard buttons
+###
+std.btn.ok                                          = OK
+std.btn.start                                       = START
+std.btn.config                                      = CONFIGURATION
+std.btn.submit                                      = SUBMIT
+std.btn.demo                                        = DEMO
+std.btn.edit                                        = EDIT  
+std.btn.save                                        = SAVE
+std.btn.delete                                      = DELETE
+std.btn.update                                      = UPDATE
+std.btn.upload                                      = UPLOAD
+std.btn.download                                    = DOWNLOAD
+std.btn.new                                         = NEW
+std.btn.add                                         = ADD
+std.btn.cancel                                      = CANCEL
+std.btn.reset                                       = RESET
+std.btn.close                                       = CLOSE
+std.btn.xclose                                      = <span>&times;</span>
+std.plh.email                                       = john.doe@email.de
+
+
+###
+# Messages
+###
+msg.processing                                      = Please wait ...
+
+
+###
+# Default values
+###
+default.country                                     = Germany
+

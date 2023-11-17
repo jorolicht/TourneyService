@@ -1,0 +1,49 @@
+###
+# Usecase Tourney Administrator License
+###
+admin.notallowed.header                               = Security-Check 
+admin.notallowed.body                                 = You are not allowed to do administrative tasks
+admin.upload.header                                   = Upload Licenses
+admin.button.upload                                   = UPLOAD
+admin.upload.info                                     = License-Datei in CSV Format
+admin.license.view                                    = Lizenzverwaltung
+admin.license.club                                    = Verein
+admin.license.placeholder.club                        = Vereinsname 
+admin.license.clubid                                  = ClubId
+admin.license.placeholder.clubid                      = VereinsNr
+admin.license.directory                               = Verzeichnis
+admin.license.placeholder.directory                   = Club-Directory/Club-Pfad
+admin.license.name                                    = Name
+admin.license.placeholder.name                        = Name, Vorname
+admin.license.info                                    = Info
+admin.license.email                                   = E-Mail-Kontakt
+admin.license.placeholder.email                       = max.mustermann@googlemail.com
+admin.license.license                                 = Lizenz
+admin.license.placeholder.license                     = <clubdir/licensecode>
+admin.license.delete.header                           = Lizenz löschen
+admin.license.delete.body                             = Soll die Lizenz von {0} wirklich gelöscht werden?
+admin.license.delete.body.error                       = Bitte zuerst eine Lizenz auswählen!
+admin.license.delete.button.cancel                    = ABBRUCH
+admin.license.delete.button.ok                        = LÖSCHEN
+admin.license.delete.button.error.ok                  = OK
+admin.license.update.header                           = Lizenz Aktualisierung
+admin.license.update.body                             = Soll die Lizenz von {0} wirklich geändert werden?
+admin.license.update.button.cancel                    = ABBRUCH
+admin.license.update.button.ok                        = AKTUALISIERUNG
+admin.license.yes                                     = Ja
+admin.license.no                                      = Nein
+
+
+###
+# Usecase Tourney Administrator Database
+###
+admin.database.view                                   = Verwaltung Turnierdatenbanken
+admin.database.tourneyid                              = TurnierNr
+admin.database.placeholder.tourneyid                  = #
+admin.database.club                                   = Verein
+admin.database.placeholder.club                       = Vereinsname
+admin.database.date                                   = Datum
+admin.database.placeholder.date                       = Format: JJJJMMDD
+admin.database.orgdir                                 = Club-Path
+admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
+

@@ -1,0 +1,28 @@
+###
+# Email messages
+###
+email.code.from                                     = Turnier Service <info@turnier-service.org>
+email.code.subject                                  = Turnier-Programm Verification Code
+email.code.title                                    = Verifizierung Code
+email.code.greeting                                 = Lieber Sportsfreund {0},
+email.code.body.html                                = <p>Der Verifizierungscode lautet: <strong>{0}</strong></p><p>Bitte diesen Code in die Registrierungsseite eingeben.</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
+email.code.body.plain                               = Der Verifizierungscode lautet: {0} \n  Bitte diesen Code in die Registrierungsseite eingeben.\n\n  Viele Grüße\n\n  Turnier-Service Team
+email.password.from                                 = Turnier Service <info@turnier-service.org>
+email.password.subject                              = Turnier-Programm Authentisierungsinformation
+email.password.title                                = Passwort-Reset
+email.password.greeting                             = Lieber Sportsfreund {0},
+email.password.body.html                            = <p>das neue Passwort lautet: <strong>{0}</strong></p><p>Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen)</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
+email.password.body.plain                           = das neue Passwort lautet: {0} \n Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen).\n\n  Viele Grüße\n\n  Turnier-Service Team
+email.license.from                                  = Turnier Service <info@turnier-service.org>
+email.license.subject                               = Turnier-Programm Lizenzcode
+email.license.title                                 = Turnier-Programm Lizenzcode
+email.license.greeting                              = Lieber Sportsfreund {0},
+email.license.prolog.html                           = <p>anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
+email.license.html                                  = <h5>{0}</h5>
+email.license.full.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
+email.license.free.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
+email.license.prolog.plain                          = \n\n anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).\n
+email.license.plain                                 = \n\n {0} \n\n
+email.license.full.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
+email.license.free.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
+

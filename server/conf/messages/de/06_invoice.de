@@ -1,0 +1,43 @@
+###
+#  Invoice Messages
+###
+invoice.title                                       = Turnier-Service Rechnung
+invoice.lang                                        = de
+invoice.literally                                   = Rechnung
+invoice.myaddress.name                              = Robert Lichtenegger
+invoice.myaddress.street                            = Finkenstr. 36a
+invoice.myaddress.zip                               = 85356
+invoice.myaddress.city                              = Freising
+invoice.myaddress.country                           = Deutschland
+invoice.taxNr                                       = 115/244/90953
+invoice.description                                 = Position
+invoice.amount                                      = Betrag
+invoice.label.date                                  = Rechnungsdatum: 
+invoice.label.number                                = Rechnungsnummer:
+invoice.label.bank.name                             = Bank
+invoice.label.bank.iban                             = IBAN
+invoice.label.bank.bicSwift                         = BIC/Swift
+invoice.label.bank.recipient                        = Empfänger
+invoice.label.duedate                               = Zahlungsfrist:
+invoice.duedate                                     = Zahlbar innerhalb von 30 Tagen
+invoice.bank.url                                    = https://www.ing.de/
+invoice.bank.name                                   = ING
+invoice.bank.iban                                   = DE97 5001 0517 0216 8999 55
+invoice.bank.bicSwift                               = INGDDEFFXXX
+invoice.bank.recipient                              = Robert Lichtenegger
+invoice.label.vat                                   = Im Rechnungsbetrag sind 19 % Umsatzsteuer enthalten
+invoice.label.paypal.recipient                      = <span style="color:#0000FF">Pay</span><span style="color:#1E90FF">Pal</span>
+invoice.paypal.recipient                            = robert.lichtenegger@icloud.com
+invoice.transfer.withInvoiceNumber                  = Bitte Rechnungsnummer als Verwendungszweck angeben
+invoice.footer.thanks                               = Danke für den Kauf der Lizenz und viel Freude beim Durchführen der Turniere. Fragen und Verbesserungsvorschläge bitte an <a href= 'mailto:info@turnier-serivce.org'>info@turnier-service.org</a>
+invoice.footer.url                                  = Internet:&nbsp;<a href="https://www.turnier-service.info"><span style="text-decoration: underline;">www.turnier-service.info</span></a>
+invoice.label.taxNr                                 = Steuernummer:
+invoice.label.total                                 = Gesamtsumme:
+invoice.label.transferTo                            = Bitte überweisen Sie die Gesamtsumme an:
+invoice.label.alternativ                            = oder:
+invoice.vat                                         = 19.00
+invoice.currency                                    = EUR
+invoice.item1.description                           = Turnierprogramm Lizenz(full)
+invoice.item1.price                                 = 39.50
+invoice.email.name                                  = Rechnung.pdf
+

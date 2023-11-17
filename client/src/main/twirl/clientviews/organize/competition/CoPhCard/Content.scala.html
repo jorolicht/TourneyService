@@ -1,0 +1,88 @@
+@*
+ * Template Competition Phase Phase Content/ Round Content
+ *@
+
+@import shared.model.CompPhase
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
+
+<div class="row m-1 mb-2 pb-2 border-bottom">
+  <div class="col-2"><strong>@msg("coph.state.lbl")</strong></div>
+  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"Status_${coph.coId}_${coph.coPhId}")>AUSLOSUNG</strong></button></div>
+  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"NoPlayer_${coph.coId}_${coph.coPhId}")>28 Spieler konfiguriert</strong></button></div>
+  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"NoGames_${coph.coId}_${coph.coPhId}")>0 von 0 Spiele(n) beendet</strong></button></div>
+</div>
+
+<div class="row m-1 mb-2 pb-2 border-bottom">
+  <div class="col-2"><strong>@msg("coph.action.lbl")</strong></div>
+  <div class="col-auto">@actionButton("StartDraw", "coph.start.draw", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  <div class="col-auto">@actionButton("StartInput", "coph.start.input", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  <div class="col-auto">@actionButton("ResetRound", "std.btn.reset", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  <div class="col-auto">@actionButton("DeleteRound", "std.btn.delete", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+</div>
+
+<div class="row m-1 mb-2 pb-2">
+  <div class="col-2"><strong>@msg("coph.config.lbl")</strong></div>
+
+  <div class="col-auto">
+    <select @id(s"GameSystem_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' @actionEvent("GameSystem", "onchange") >
+      <option value='0'>@msg("coph.GameSystem.plh") &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+      <option value='1'>3er Gruppn</option>
+      <option value='2'>4er und 5er Gruppn</option>
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <select @id(s"Winset_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' @actionEvent("Winset", "onchange") >
+      <option value='0' selected>@msg("coph.winsets.lbl")</option>
+      <option value='2'>2</option>
+      <option value='3' >3</option>
+      <option value='4'>4</option>
+    </select>
+  </div>
+
+  @if(coph.coPhId!=1) {
+    <div class="col-auto">
+      <select @id("cophPreSelectCoPh") class="form-select form-control-xs" >
+        <option value="0" selected>@msg("coph.pantPreSelect.plh")</option>
+        <option value="1">One</option>
+        <option value="2">Two</option>
+        <option value="3">Three</option>
+      </select>
+    </div>
+
+    <div class="col-auto align-self-end">
+      <div @id("cophPreSelectWinLoo") class="float-right">
+        <input type="radio" @id("PantWinner") class="ml-2" @name("PantSelect") value="1" @actionEvent("PantSelect", "onchange")>
+        <label @forAttr("PantWinner")>Gewinner</label>
+        <input type="radio" @id("PantLooser") class="ml-2" @name("PantSelect") value="2" @actionEvent("PantSelect", "onchange")>
+        <label @forAttr("PantLooser")>Verlierer</label>
+        <input type="radio" @id("PantAll") class="ml-2" @name("PantSelect") value="0" checked @actionEvent("PantSelect", "onchange")>
+        <label class="col-form-label-sm" @forAttr("PantAll")>Alle</label>         
+      </div>
+    </div>
+  } 
+</div>
+
+@if(coph.coPhId!=1) {
+  <div class="row m-1 mb-2 pb-2">
+    
+    <div class="card pb-0"> <!--  Box for participants --> 
+      <div class="tuse-card-header">		
+        <div class="float-left mt-2">
+          <a @Html(collapse("PantCard")) >
+            <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("pants")</h6>
+          </a>
+        </div>
+      </div>
+    
+      <div @id("PantCard")' class="card-body pb-2 pt-0 collapse"></div>
+    </div>    
+
+  </div>
+}
+
+

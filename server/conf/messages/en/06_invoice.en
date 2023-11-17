@@ -1,0 +1,43 @@
+###
+# Invoice Messages
+###
+invoice.title                                       = Tournament Service Invoice
+invoice.lang                                        = en
+invoice.literally                                   = Invoice
+invoice.myaddress.name                              = Robert Lichtenegger
+invoice.myaddress.street                            = Finkenstr. 36a
+invoice.myaddress.zip                               = 85356
+invoice.myaddress.city                              = Freising
+invoice.myaddress.country                           = Germany
+invoice.taxNr                                       = 115/244/90953
+invoice.description                                 = Invoice Line
+invoice.amount                                      = Amount
+invoice.label.date                                  = Invoice Date:
+invoice.label.number                                = Invoice Number:
+invoice.label.bank.name                             = Bank
+invoice.label.bank.iban                             = IBAN
+invoice.label.bank.bicSwift                         = BIC / Swift
+invoice.label.bank.recipient                        = Recipient
+invoice.label.duedate                               = Payment Deadline:
+invoice.duedate                                     = Payable within 30 days
+invoice.bank.url                                    = https://www.ing.de/
+invoice.bank.name                                   = ING
+invoice.bank.iban                                   = DE97 5001 0517 0216 8999 55
+invoice.bank.bicSwift                               = INGDDEFFXXX
+invoice.bank.recipient                              = Robert Lichtenegger
+invoice.label.vat                                   = 19% sales tax is included in the invoice amount
+invoice.label.paypal.recipient                      = <span style="color: #0000FF"> Pay </span> <span style="color: #1E90FF">Pal</span>
+invoice.paypal.recipient                            = robert.lichtenegger@icloud.com
+invoice.transfer.withInvoiceNumber                  = Please enter the invoice number as the purpose
+invoice.footer.thanks                               = Thank you for purchasing the license and have fun with your tourneys. Please send questions and suggestions to <a href='mailto:info@turnier-serivce.org'> info@turnier-service.org</a>
+invoice.footer.url                                  = Internet: &nbsp; <a href="https://www.turnier-service.info"> <span style="text-decoration:underline;"> www.turnier-service.info</span></a>
+invoice.label.taxNr                                 = Tax Number:
+invoice.label.total                                 = Total Amount:
+invoice.label.transferTo                            = Please transfer the total amount to:
+invoice.label.alternativ                            = or:
+invoice.vat                                         = 19.00
+invoice.currency                                    = EUR
+invoice.item1.description                           = Tournament Program License (full)
+invoice.item1.price                                 = 39.50
+invoice.email.name                                  = invoice.pdf
+

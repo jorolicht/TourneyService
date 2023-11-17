@@ -1,0 +1,28 @@
+@*
+ * Template Competition Phase / Round Card
+ *@
+
+@import shared.model.Competition
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coId: Long, coPhNameId:List[(String, Int)])(implicit ucc: UseCaseParam)
+
+<div class="container-fluid d-print-none">
+  <div class="row mb-2">
+    <div class="col-12 ml-0 mr-0 pr-0 pl-0" id='CoPhCardLinks'>
+        <ul class="nav nav-tabs">
+          @for(elem<-coPhNameId){
+            <li class="nav-item">
+              <a data-coId='@coId' data-coPhId='@elem._2' class='nav-link' href="#" @actionEvent("SelectCoPh", "onclick")>@elem._1</a>
+            </li>
+          }
+        </ul>
+    </div>
+  </div>
+</div>
+
+<div id='CoPhCardContent'>
+  @for(elem<-coPhNameId){ <section id='CoPhCardContent_@{coId}_@{elem._2}' style="display:none;"></section> }
+</div>

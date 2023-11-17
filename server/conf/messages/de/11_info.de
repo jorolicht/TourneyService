@@ -1,0 +1,106 @@
+###
+# Usecase Info General
+###
+info.disabled.title                                   = HINWEIS
+info.disabled.image                                   = notlucky
+info.disabled.alt                                     = Turnierinformationen nicht verfügbar - Turnierauswahl erforderlich
+info.disabled.description                             = Turnierinformationen sind erst nach der Auswahl eines Turnieres verfügbar. Die Selektion erfolgt über die Turniersuche.
+info.enabled.title                                    = Turnierinformation
+info.enabled.image                                    = tourneydata
+info.enabled.description                              = für {0}
+info.enabled.alt                                       = Turnierinformationen für {0}
+
+
+###
+# Usecase Info Player
+###                                     
+info.player.count                                     = Anzahl Spieler: 
+info.player.noEntry                                   = Keine Wettbewerbe mit gemeldeten Spielern vorhanden 
+info.player.count                                     = Anzahl Spieler: 
+info.player.header.nr                                 = #
+info.player.header.name                               = Name
+info.player.header.club                               = Verein
+info.player.header.place                              = Platzierung
+info.player.header.ttr                                = TTR
+info.player.noplayer                                  = Keine Spieler gemeldet
+
+
+###
+# Usecase Info Competition
+###   
+info.competition.description                          = Wettbewerb
+info.competition.ttrRange                             = TTR Bereich
+info.competition.startTime                            = StartZeit
+info.competition.cntPlayer                            = #Spieler
+info.competition.status                               = Status
+info.competition.noEntry                              = Keine Einträge für Wettbewerbe vorhanden
+
+
+###
+# Usecase Info Playfield
+###   
+info.playfield.tableNo                                = Tisch
+info.playfield.compName                               = Wettbewerb
+info.playfield.playerA                                = Spieler A
+info.playfield.playerB                                = Spieler B
+info.playfield.info                                   = Info
+info.playfield.noEntry                                = Keine Tischeinträge vorhanden
+
+
+###
+# Usecase  Info Schedule
+###   
+info.schedule.register                                = Anmeldung
+info.schedule.description                             = Wettbewerb
+info.schedule.ttrRange                                = TTR Bereich
+info.schedule.startTime                               = StartZeit
+info.schedule.competitions                            = Wettbewerbe
+info.schedule.competition                             = Wettbewerb
+info.schedule.noEntry                                 = z.Z. keine Einträge für Wettbewerbe vorhanden
+info.schedule.optionalinfo                            = Turnierhinweise
+info.schedule.info                                    = Turnier
+info.schedule.date                                    = Datum
+info.schedule.email                                   = E-Mail-Adresse
+info.schedule.date.range                              = {0} - {1}
+info.schedule.selcompetition                          = Auswahl des Wettbewerb
+info.schedule.plh.playerdata                          = Spielerdaten
+info.schedule.plh.name                                = Name, Vorname
+info.schedule.plh.club                                = Club/Verein
+info.schedule.plh.email                               = max.mustermann@domain.com
+info.schedule.plh.ttr                                 = TTR-Wert
+info.schedule.plh.year                                = Jahrgang
+info.schedule.button.submit                           = ANMELDEN
+info.schedule.hint                                    = Zzt. sind keine weiteren Hinweise vom Veranstalter hinterlegt.
+info.schedule.comps.header.startTime                  = Startzeit
+info.schedule.comps.header.description                = Wettbewerb
+info.schedule.comps.header.ttrRange                   = TTR-Bereich
+info.schedule.comps.header.status                     = Status
+info.schedule.comps.header.noEntry                    = Zzt. sind keine Wettbewerbe vom Veranstalter konfiguriert.
+info.schedule.comps.header.noParts                    = Anmeldungen
+info.schedule.signup.invalidComp                      = Bitte einen Wettbewerb auswählen.
+info.schedule.signup.invalidname                      = Bitte Namen im Format: <Name>, <Vorname> eingeben.
+info.schedule.signup.closed                           = Keine Voranmeldungen mehr möglich.
+info.schedule.signup.notyetopen                       = Zzt. (noch) keine Voranmeldungen möglich
+info.schedule.signup.error                            = Bitte nutzen Sie E-Mail zur Anmeldung.
+info.schedule.signup.ok                               = Ihre Anmeldung wurde an den Turnierleiter gesendet.
+info.schedule.signup.error.header                     = Fehler bei der Registrierung:
+info.schedule.signup.ok.header                        = Anmeldung registriert:
+info.schedule.consent.text                            = Einwilligung zur elektronischen Datenverarbeitung. Die angegebenen Daten werden ausschließlich zur Durchführung des Turnieres verwendet. Dies beinhaltet eine Weitergabe der Daten und Spielergebnisse an den Organisator und eventuell eine Weiterleitung der Ergebnisse an zuständige Sportverbände sowie eine Veröffentlichung der Spielergebnisse mit Namen und Vereinsnamen.
+
+
+###
+# Usecase Info Misc
+###  
+info.results.noEntries                                = Bisher keine Wettbewerbe gestartet
+info.certificate.btn.print                            = URKUNDE
+
+
+###
+# Usecase Fullscreen
+###
+fullscreen.playfields.header.table                    = Tisch
+fullscreen.playfields.header.match                    = Begegnung
+fullscreen.playfields.header.info                     = Info
+fullscreen.playfields.noEntryMsg                      = zur Zeit keine Eintragungen für Tische
+fullscreen.playfields.title                           = Tischanzeige
+   

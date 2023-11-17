@@ -1,0 +1,38 @@
+@*
+ * Template for Participants in competition phase configuration
+ *@
+
+@import scala.collection.mutable.ArrayBuffer 
+@import shared.utils.UseCaseParam   
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+@import clientviews.component.input.html._
+@import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
+
+@(pants: ArrayBuffer[PantSelect])(implicit ucc: UseCaseParam)
+
+@checked(value: Boolean) = @{ if(value) "checked" else "" } 
+
+<div class="w-100 pr-3" style="max-height: 250px; overflow: auto;">  
+  <table @id("PantTbl") class="table table-sm small table-hover tuse-border">
+    <tbody>
+      <tr style="border-bottom:2px solid #ccc;">
+        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.no")</strong></td>
+        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
+        <td class="text-center tuse-height"></td>
+        <td class="text-right tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
+      </tr>	
+
+      @for(index <- 0 until pants.length){
+        <tr style="border-bottom:2px solid #ccc;">
+          <td class="text-left tuse-height">@(index+1)</td>
+          <td class="text-left tuse-height">@pants(index).name</td>
+          <td class="text-left tuse-height">@pants(index).info</td>
+          <td class="text-right tuse-height">
+            <input data-sno='@pants(index).sno.value' class='' type='checkbox' value='@index' @checked(pants(index).checked) @actionEvent("Check", "onclick") >
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

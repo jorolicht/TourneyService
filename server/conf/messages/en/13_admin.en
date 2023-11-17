@@ -1,0 +1,49 @@
+###
+# Use case Tourney Program Administrator
+###
+admin.notallowed.header                               = Security Check
+admin.notallowed.body                                 = You are not allowed to do administrative tasks
+admin.upload.header                                   = Upload Licenses
+admin.button.upload                                   = UPLOAD
+admin.upload.info                                     = License file in CSV format
+admin.license.view                                    = License Management
+admin.license.club                                    = Club
+admin.license.placeholder.club                        = Club Name
+admin.license.clubid                                  = ClubId
+admin.license.placeholder.clubid                      = Club Number
+admin.license.directory                               = Directory
+admin.license.placeholder.directory                   = Club Directory / Club Path
+admin.license.name                                    = Name
+admin.license.placeholder.name                        = Last Name, First Name
+admin.license.info                                    = Info
+admin.license.email                                   = Email Contact
+admin.license.placeholder.email                       = john.doe@domain.com
+admin.license.license                                 = License
+admin.license.placeholder.license                     = <clubdir / licensecode>
+admin.license.delete.header                           = Delete License
+admin.license.delete.body                             = Are you sure to delete {0} 's license?
+admin.license.delete.body.error                       = Please select a license first!
+admin.license.delete.button.cancel                    = CANCEL
+admin.license.delete.button.ok                        = DELETE
+admin.license.delete.button.error.ok                  = OK
+admin.license.update.header                           = License Update
+admin.license.update.body                             = Are you sure to change {0} 's license?
+admin.license.update.button.cancel                    = CANCEL
+admin.license.update.button.ok                        = UPDATE
+admin.license.yes                                     = Yes
+admin.license.no                                      = No.
+
+
+###
+# Usecase Tourney Administrator Database
+###
+admin.database.View                                   = Administration of Tourney Databases
+admin.database.tourneyid                              = Tourney Identifier
+admin.database.placeholder.tourneyid                  = #
+admin.database.club                                   = Club
+admin.database.placeholder.club                       = Club Name
+admin.database.date                                   = Date
+admin.database.placeholder.date                       = Format: YYYYMMDD
+admin.database.orgdir                                 = Club Path
+admin.database.placeholder.orgdir                     = <path> / <directory>
+

@@ -1,0 +1,28 @@
+###
+# Email messages
+###
+email.code.from                                     = Tournament Service <info@turnier-service.org>
+email.code.subject                                  = Tournament Program Verification Code
+email.code.title                                    = Verification Code
+email.code.greeting                                 = Dear sports fan {0},
+email.code.body.html                                = <p>The verification code is: <strong>{0}</strong></p><p>Please enter this code in the registration page. </p> <p>Kind regards</p><p> Tournament Service Team </p>
+email.code.body.plain                               = The verification code is: {0} \n Please enter this code in the registration page. \n\n Best regards \n\n Tournament Service Team
+email.password.from                                 = Tournament Service <info@turnier-service.org>
+email.password.subject                              = Tournament Program Authentication Information
+email.password.title                                = Password Reset
+email.password.greeting                             = Dear sports fan {0},
+email.password.body.html                            = <p>your new password: <strong>{0}</strong></p><p> Please log in with the new password and change it immediately (in settings) </p><p>Kind regards</p><p>Tournament Service Team</p>
+email.password.body.plain                           = your new password: {0} \n Please log in with the new password and change it immediately (in settings). \n\n Kind regards \n\n Tournament Service Team
+email.license.from                                  = Tournament Service <info@turnier-service.org>
+email.license.subject                               = Tournament Program License Code
+email.license.title                                 = Tournament Program License Code
+email.license.greeting                              = Dear sports fan {0},
+email.license.prolog.html                           = <p>attached the license string (= &#60;club name / license code&#62;). Simply enter the whole bold text in the setup menu with cut/paste. The Excel file can then be saved and copied as required for each tournament (there is no copy protection or similar). </p>
+email.license.html                                  = <h5>{0}</h5>
+email.license.full.epilog.html                      = <p>The license string works with the free and full version. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the <a href="https://turnier-service.org/">documentation</a> here. THANK YOU!</p><p> Sporty greetings and good luck with your tournaments</p><p> Robert / Tournament Service Team </p>
+email.license.free.epilog.html                      = <p>The license string works with the free and full version with restrictions. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the <a href="https://turnier-service.org/">documentation</a> here. THANK YOU!</p><p>Sporty greetings and good luck with your tournaments</p><p> Robert / Tournament Service Team</p>
+email.license.prolog.plain                          = \n\n attached you find the license string (= &#60;club name / license code&#62;). Simply enter the whole bold text in the setup menu with cut/paste. The Excel file can then be saved and copied as required for each tournament (there is no copy protection or similar). \n
+email.license.plain                                 = \n\n {0} \n\n
+email.license.full.epilog.plain                     = \n The license string works with the free and full version. If you have any suggestions for improvements or if you notice any errors, please contact us. You can find the documentation here: "https://turnier-service.org/". THANKS! \n\n Sporty greetings and good luck with your tournaments \n\n Robert / Tournament Service Team \n
+email.license.free.epilog.plain                     = \nThe license string works with the free and full version to a limited extent. If you have any suggestions for improvements or noticed any errors, please get in touch. You can find the documentation here: "https://turnier-service.org/". THANKS! \n\n Sporty greetings and good luck with your tournaments \n\n Robert / Tournament Service Team \ n
+

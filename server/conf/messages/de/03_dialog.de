@@ -1,0 +1,168 @@
+###
+#  Dialogs
+###
+dlg.canceled                                        = Dialog wurde abgebrochen
+dlg.box.cancel                                      = ABBRUCH
+dlg.box.update                                      = AKTUALISIERUNG
+dlg.box.new                                         = NEU
+dlg.box.ok                                          = OK
+dlg.box.yes                                         = JA
+dlg.box.no                                          = NEIN
+dlg.box.cookietitle                                 = Ja, auch diese Webseite verwendet Cookies.
+dlg.box.cookiemessage                               = Wir verwenden Cookies nur intern in unserer Web-Applikation für den Sessionstatus und um Inhalte zu personalisieren. Wir geben keine Informationen über die Verwendung unserer Webseite an Dritte weiter. Wenn Sie unsere Webseite weiterhin nutzen wollen, müssen Sie auf OK drücken und geben damit die Einwilligung zu unseren Cookies. Falls Sie keine Cookies wollen, schließen Sie einfach das Browserfenster, ansonsten werden Sie auf unsere statische Web-Seite weitergeleitet.
+dlg.box.save.verify.hdr                             = Dateisicherung bestätigen
+dlg.box.save.verify.msg                             = Soll die Datei {0} im Download-Bereich gesichert werden? 
+
+dlg.ShowError.hdr                                   = Eingaben überprüfen
+
+dlg.card.tourney.new.hdr                               = Eingabe Turnierdaten 
+dlg.card.tourney.update.hdr                            = Aktualisierung Turniergrunddaten
+dlg.card.tourney.view.hdr                              = Anzeige Turniergrunddaten
+dlg.card.tourney.edit.hdr                              = Turniergrunddaten editieren
+dlg.card.tourney.lbl.Name                              = Turniername
+dlg.card.tourney.lbl.StartDate                         = Startdatum
+dlg.card.tourney.lbl.EndDate                           = Enddatum
+dlg.card.tourney.optional.hdr                          = Optionale Angaben
+dlg.card.tourney.plh.Name                              = Name mind. 10 Zeichen
+dlg.card.tourney.hlp.Name                              = Mindestens 10 Zeichen für den Name des Turniers notwendig
+dlg.card.tourney.hlp.Typ                               = Bitte eine Sportart auswählen
+dlg.card.tourney.hlp.nowDate                           = Startdatum muss in der Zukunft liegen
+dlg.card.tourney.hlp.endDate                           = Enddatum muss zeitlich nach dem Startdatum liegen
+dlg.card.tourney.hlp.Visibility                        = Bitte Sichtbarkeit auswählen
+dlg.card.tourney.plh.contact.name                      = Name, Vorname (Mustermann, Max)
+dlg.card.tourney.plh.contact.email                     = E-Mail
+dlg.card.tourney.plh.contact.phone                     = Telefonnummer
+dlg.card.tourney.plh.addr.description                  = z.B. Name der Turnhalle
+dlg.card.tourney.plh.addr.zip                          = PLZ
+dlg.card.tourney.plh.addr.street                       = Straße mit Hausnummer
+dlg.card.tourney.plh.addr.city                         = Stadt
+
+dlg.card.comp.Title                                   = Wettbewerb
+dlg.card.comp.plh.name                                = Name des Wettbewerbs
+dlg.card.comp.plh.startTime                           = Startzeit &#128197;
+dlg.card.comp.lbl.NameCompose                         = Name aus Typ, Altersklasse und Spielklasse generieren
+dlg.card.comp.plh.TTRFrom                             = vonTTR*
+dlg.card.comp.plh.TTRTo                               = bisTTR*
+dlg.card.comp.lbl.optionals                           = Optionale Angaben
+dlg.card.comp.plh.AgeGroup                            = Altersklasse*
+dlg.card.comp.plh.Class                               = Spielklasse*
+dlg.card.comp.input.optional                          = *) Eingabe optional
+dlg.card.comp.hlp.name                                = Bitte gültigen Namen für den Wettbewerb eingeben (mind. 3 Zeichen)
+dlg.card.comp.hlp.typ                                 = Bitte den Typ des Wettbewerbs setzten
+dlg.card.comp.hlp.status                              = Bitte den Status des Wettbewerbs setzten
+dlg.card.comp.hlp.startTime                           = Startzeit des Wettbewerbs muss innerhalb des Turnierstart- und Turnierendedatums liegen
+
+dlg.upload.header                                   = Turnierinformation hinzufügen
+dlg.upload.body                                     = Die Turnierinformationen (z.B. Turnierauschreibung) müssen im Markdown-Format vorliegen. Markdown-Dokumente sind reine Textdateien und ohne weitere Konvertierung leicht lesbar. Eine gute Einführung gibts <a href="https://www.heise.de/mac-and-i/artikel/Markdown-bei-Mac-und-iOS-Apps-Tipps-und-Cheat-Sheet-2105025.html">hier</a>. 
+dlg.upload.cancel                                   = ABBRUCH
+dlg.upload.submit                                   = HOCHLADEN
+
+dlg.playfield.header                                = Spielfeldeintrag hinzufügen
+dlg.playfield.body                                  = Bitte Spielfeldnummer (Tischnummer), Wettbewerb und Spielerdaten eingeben.
+dlg.playfield.button.submit                         = EINTRAGEN
+dlg.playfield.button.cancel                         = ABBRECHEN
+dlg.playfield.playerA                               = Spieler A
+dlg.playfield.playerB                               = Spieler B
+dlg.playfield.competition                           = Wettbewerb
+dlg.playfield.club                                  = Verein (optional)
+dlg.playfield.name                                  = Name, Vorname
+dlg.playfield.info                                  = Information (optional, z.B. Finale)
+dlg.playfield.nr                                    = Tisch
+dlg.playfield.help1                                 = Bitte Eingaben korrigieren, die Felder für Wettbewerb und die Namen der Spielen dürfen nicht leer sein.
+dlg.playfield.help2                                 = Bitte Eingaben korrigieren, Spielfeld Nummer (Tisch) eintragen.
+dlg.playfield.option.game                           = Spiel
+dlg.playfield.option.event                          = Turnier
+
+dlg.emailplayer.hdr.accept                          = Bestätigung senden
+dlg.emailplayer.body.accept                         = Soll eine Bestätigungsmail den den Spieler gesendet werden?
+dlg.emailplayer.hdr.reject                          = Ablehnung senden
+dlg.emailplayer.body.reject                         = Ablehnung der Anmeldung an den Spieler senden.
+dlg.emailplayer.msg.option.accept                   = Nachricht hinzufügen:
+dlg.emailplayer.msg.option.reject                   = Bitte geben Sie eine kurze Begründung ein:
+dlg.emailplayer.msg.plh                             = Optionale Nachricht an den Spieler
+dlg.emailplayer.btn.yes                             = JA
+dlg.emailplayer.btn.no                              = NEIN
+
+dlg.input.btn.exec                                  = EXECUTE
+dlg.info.download.error.hdr                         = Download-Fehler
+
+dlg.card.player.Title                           = &nbsp; Spieler #{0}
+dlg.card.player.lbl.Name                        = Name
+dlg.card.player.lbl.License                     = Lizenznummer  
+dlg.card.player.lbl.TTR                         = TTR-Wert
+dlg.card.player.lbl.Club                        = Verein
+dlg.card.player.lbl.Email                       = E-Mail
+dlg.card.player.lbl.Year                        = Jahrgang
+dlg.card.player.plh.Name                        = <Nachname, Vorname>
+dlg.card.player.plh.License                     = <Lizenznummer>
+dlg.card.player.plh.Club                        = <Vereinsname>
+dlg.card.player.plh.Email                       = max.mustermann@email.de
+dlg.card.player.notSpecified                    = keine Angaben
+dlg.card.player.licInfo                         = {0}, {1} [{2}] TTR:{3} Jahr:{4}
+dlg.card.player.delete.hdr                      = Löschbestätigung
+dlg.card.player.delete.msg                      = Lizenz ({0}) des Spielers {1} löschen
+
+dlg.card.reg.single.Title                           = Einzel
+dlg.card.reg.single.lbl.Name                        = Name
+dlg.card.reg.single.lbl.TTR                         = TTR-Wert
+dlg.card.reg.single.lbl.Club                        = Verein
+dlg.card.reg.single.lbl.Email                       = E-Mail
+dlg.card.reg.single.lbl.Year                        = Jahrgang
+dlg.card.reg.single.plh.Name                        = <Nachname, Vorname>
+dlg.card.reg.single.plh.Club                        = <Vereinsname>
+dlg.card.reg.single.plh.Email                       = max.mustermann@email.de
+dlg.card.reg.single.notSpecified                    = keine Angaben
+dlg.card.reg.single.status.hdr                      = Spielerstatus für Wettbewerb:
+dlg.card.reg.single.status.register                 = (vor-)angemeldet
+dlg.card.reg.single.status.participate              = teilnehmend
+
+dlg.card.reg.double.Title                           = Doppel
+dlg.card.reg.double.lbl.Name1                       = Name Spieler 1
+dlg.card.reg.double.plh.Name1                       = <Nachname, Vorname>
+dlg.card.reg.double.lbl.Name2                       = Name Spieler 2
+dlg.card.reg.double.plh.Name2                       = <Nachname, Vorname>
+dlg.card.reg.double.status.hdr                      = Status des Doppels für Wettbewerb:
+dlg.card.reg.double.status.register                 = (vor-)angemeldet
+dlg.card.reg.double.status.participate              = teilnehmend
+
+dlg.card.cfg.compphase.Title                          = Wettbewerb-Konfiguration 
+dlg.card.cfg.compphase.lbl.Selection                  = Spielsystemauswahl für {0} Teilnehmer
+dlg.card.cfg.compphase.plh.Name                       = Name Spielabschnitt
+dlg.card.cfg.compphase.option.100                     = Spielrunde mit 3er-9er Gruppen
+dlg.card.cfg.compphase.option.101                     = Spielrunde mit 3er-Gruppen 
+dlg.card.cfg.compphase.option.102                     = Spielrunde mit 3er- und 4er-Gruppen
+dlg.card.cfg.compphase.option.103                     = Spielrunde mit 4er-Gruppen
+dlg.card.cfg.compphase.option.104                     = Spielrunde mit 4er- und 5er-Gruppen
+dlg.card.cfg.compphase.option.105                     = Spielrunde mit 5er-Gruppen
+dlg.card.cfg.compphase.option.106                     = Spielrunde mit 5er- und 6er-Gruppen
+dlg.card.cfg.compphase.option.107                     = Spielrunde mit 6er-Gruppen
+dlg.card.cfg.compphase.option.108                     = Gruppe jeder-gegen-jeden
+dlg.card.cfg.compphase.option.109                     = KO-System
+dlg.card.cfg.compphase.option.110                     = Schweizer System
+dlg.card.cfg.compphase.option.info.1                  = Bitte Namen auswählen oder eingeben
+dlg.card.cfg.compphase.option.info.2                  = Bitte Konfiguraton und Namen auswählen/eingeben
+dlg.card.cfg.compphase.option.info.100                = Konfiguration mit {0} Gruppen
+dlg.card.cfg.compphase.option.info.101                = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppen
+dlg.card.cfg.compphase.option.info.102                = Konfiguration mit {0} <span class="h5">&#x2682;</span>-Gruppe(n) und {1} <span class="h5">&#x2683;</span>-Gruppe(n)
+dlg.card.cfg.compphase.option.info.103                = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppen
+dlg.card.cfg.compphase.option.info.104                = Konfiguration mit {0} <span class="h5">&#x2683;</span>-Gruppe(n) und {1} <span class="h5">&#x2684;</span>-Gruppe(n)
+dlg.card.cfg.compphase.option.info.105                = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppen
+dlg.card.cfg.compphase.option.info.106                = Konfiguration mit {0} <span class="h5">&#x2684;</span>-Gruppe(n) und {1} <span class="h5">&#x2685;</span>-Gruppe(n)
+dlg.card.cfg.compphase.option.info.107                = Konfiguration mit {0} <span class="h5">&#x2685;</span>-Gruppen
+dlg.card.cfg.compphase.option.info.108                = Konfiguration {0}-Feld Jeder-gegen-Jeden
+dlg.card.cfg.compphase.option.info.109                = Konfiguration {0}-Feld KO-System
+dlg.card.cfg.compphase.option.info.110                = Konfiguration {0}-Feld Schweizer System     
+dlg.card.cfg.compphase.lbl.Winset                     = Gewinnsätze
+dlg.card.cfg.compphase.btn.draw                       = START AUSLOSUNG
+dlg.card.cfg.compphase.pants                          = Auswahl Teilnehmer
+dlg.card.cfg.compphase.pants.select                   = Auswahl Teilnehmer
+dlg.card.cfg.compphase.tbl.hdr.no                     = #
+dlg.card.cfg.compphase.tbl.hdr.name                   = Name, Vorname
+dlg.card.cfg.compphase.tbl.hdr.club                   = Verein
+dlg.card.cfg.compphase.tbl.hdr.pos                    = Position
+dlg.card.cfg.compphase.tbl.hdr.signup                 = Check
+dlg.card.cfg.compphase.name.1                         = Vorrunde
+dlg.card.cfg.compphase.name.2                         = Zwischenrunde
+dlg.card.cfg.compphase.name.3                         = Hauptrunde
+dlg.card.cfg.compphase.name.4                         = Trostrunde
+

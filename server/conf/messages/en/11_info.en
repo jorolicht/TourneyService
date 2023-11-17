@@ -1,0 +1,106 @@
+###
+# Usecase Info General
+###
+info.disabled.title                                   = HINT
+info.disabled.image                                   = notlucky
+info.disabled.alt                                     = Tournament information not available - tournament selection required
+info.disabled.description                             = Tournament information is only available after selecting a tournament. Selection through tourney search.
+info.enabled.title                                    = Tourneydata
+info.enabled.image                                    = tourneydata
+info.enabled.description                              = for {0}
+info.enabled.alt                                      = Tourneydata for {0}
+
+
+###
+# Usecase Info Player
+###    
+info.player.count                                     = Number of players:
+info.player.noEntry                                   = There are no competitions with registered players
+info.player.count                                     = Number of players:
+info.player.header.nr                                 = #
+info.player.header.name                               = Name
+info.player.header.club                               = Club
+info.player.header.place                              = Placement
+info.player.header.ttr                                = TTR
+info.player.noplayer                                  = No players registered
+
+
+###
+# Usecase Info Competition
+###  
+info.competition.description                          = Competition
+info.competition.ttrRange                             = TTR range
+info.competition.startTime                            = StartTime
+info.competition.cntPlayer                            = #Player
+info.competition.status                               = Status
+info.competition.noEntry                              = There are no competition entries
+
+   
+###
+# Usecase Info Playfield
+###      
+info.playfield.tableNo                                = Table
+info.playfield.compName                               = Competition
+info.playfield.playerA                                = Player A
+info.playfield.playerB                                = Player B
+info.playfield.info                                   = Info
+info.playfield.noEntry                                = No table entries available
+
+
+###
+# Usecase  Info Schedule
+###   
+info.schedule.register                                = Registration
+info.schedule.description                             = Competition
+info.schedule.ttrRange                                = TTR Range
+info.schedule.startTime                               = StartTime
+info.schedule.competitions                            = Competitions
+info.schedule.competition                             = Competition
+info.schedule.noEntry                                 = Currently no competition entries available
+info.schedule.optionalinfo                            = Tournament Information
+info.schedule.info                                    = Tournament
+info.schedule.date                                    = Date
+info.schedule.email                                   = Email Address
+info.schedule.date.range                              = {0} - {1}
+info.schedule.selcompetition                          = Competition Selection
+info.schedule.plh.playerdata                          = Player Data
+info.schedule.plh.name                                = Lastname, First Name
+info.schedule.plh.club                                = Club
+info.schedule.plh.email                               = john.doe@domain.com
+info.schedule.plh.ttr                                 = TTR Value
+info.schedule.plh.year                                = Year
+info.schedule.button.submit                           = SIGN UP
+info.schedule.hint                                    = Currently no further information has been provided by the organizer.
+info.schedule.comps.header.startTime                  = Start Time
+info.schedule.comps.header.description                = Competition
+info.schedule.comps.header.ttrRange                   = TTR Range
+info.schedule.comps.header.status                     = Status
+info.schedule.comps.header.noEntry                    = Currently no competitions configured by organizer.
+info.schedule.comps.header.noParts                    = Registrations
+info.schedule.signup.invalidComp                      = Please select a competition.
+info.schedule.signup.invalidname                      = Please enter your name in the format: <lastname>, <first name>.
+info.schedule.signup.closed                           = Registrations are no longer possible.
+info.schedule.signup.notyetopen                       = Currently no registrations are possible (yet)
+info.schedule.signup.error                            = Please use your email to register.
+info.schedule.signup.ok                               = Your registration has been sent to the tourney manager
+info.schedule.signup.error.header                     = Error during registration:
+info.schedule.signup.ok.header                        = Registration approved:
+info.schedule.consent.text                            = Consent to electronic data processing. The provided data will solely be used for the tourney management. This includes passing game results to the organizer and possibly forwarding results to responsible sports associations as well as publication of the game results with names and club names.
+
+
+###
+# Usecase Info Misc
+###  
+info.results.noEntries                                = Competitions not yet started
+info.certificate.btn.print                            = CERTIFICATE
+
+
+###
+# Use case full screen
+###
+fullscreen.playfields.header.table                    = Table
+fullscreen.playfields.header.match                    = Match
+fullscreen.playfields.header.info                     = Info
+fullscreen.playfields.noEntryMsg                      = Currently no Table Entries
+fullscreen.playfields.title                           = Table View
+
