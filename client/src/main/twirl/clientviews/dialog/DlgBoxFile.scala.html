@@ -1,0 +1,42 @@
+@*
+ * Template for Standard File Dialog
+ *@
+@import clientviews.component.helper.html._
+
+@(header: String, body: String, sameSize: Boolean = true)(msg: (String, Seq[String])=>String)
+
+<!-- START Modal Dialog Box for file input  -->
+<div class="modal fade" id='DlgBoxFile_Modal' tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">@header</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="small"   id='DlgBoxFile_Body')>@body</p>
+        <p><input type="file" id="DlgBoxFile_Input"></p> 
+      </div>
+
+      <div class="modal-footer" id='DlgBoxFile_Footer'>
+        @if(sameSize){
+          <div class="container">
+            <div class="row">
+              <div class="col"><button id='DlgBoxFile_BtnCancel' class="btn btn-outline-secondary btn-xs btn-block" type="button" >@msg("std.btn.cancel",Seq())</button></div>
+              <div class="col"><button id='DlgBoxFile_BtnUpload' class="btn btn-outline-secondary btn-xs btn-block" type="button" >@msg("std.btn.upload",Seq())</button></div>
+            </div>
+          </div>
+        }else{
+          <button id='DlgBoxFile_BtnCancel' class="btn btn-outline-secondary btn-xs" type="button" autofocus>@msg("std.btn.cancel",Seq())</button>
+          <button id='DlgBoxFile_BtnUpload' class="btn btn-outline-secondary btn-xs" type="button">@msg("std.btn.upload", Seq())</button>
+        }
+      </div>
+      
+    </div>
+  </div>
+</div>
+<!-- END Modal File Dialog Box  -->
+
+
