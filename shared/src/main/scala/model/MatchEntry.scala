@@ -149,7 +149,7 @@ case class MEntryKo(
   val coId: Long,                         // competition identifier
   val coTyp: CompTyp.Value,                         // competition typ, e.g. CT_SINGLE, CT_DOUBLE
   val coPhId: Int,                        // competition phase identifier
-  val coPhTyp: CompPhaseTyp.Value,        // competition phase system, eg. CPT_GR, CPT_KO
+  val coPhTyp: CompPhaseTyp.Value,        // competition phase type
   var gameNo: Int,                        //(0) game number within phase
   
   var stNoA:  String,                     //(1) participant A start number
@@ -316,7 +316,7 @@ case class MEntryTx(coId: Long, coTyp: Int, coPhId: Int, coPhTyp: Int, content: 
   def decode: MEntry = {
     val cophtype = CompPhaseTyp(coPhTyp)
     cophtype match {
-      case CompPhaseTyp.GR => {
+      case CompPhaseTyp.GR | CompPhaseTyp.RR => {
       try { 
           val m = content.split("\\^")
           val (gameNo,     stNoA, stNoB, round,      grId,       wgw1,       wgw2,       depend, trigger, playfield, info, startTime, endTime, status,      sets1,       sets2,       winSets,     result) =

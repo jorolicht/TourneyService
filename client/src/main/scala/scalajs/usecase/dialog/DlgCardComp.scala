@@ -79,8 +79,7 @@ object DlgCardComp extends BasicHtml
   // getInput
   def getInput(): Competition = {
 
-    val comp = Competition(getData(gUE("Form"),"id", 0L), getData(gUE("Form"),"hashKey",""), 
-                           getInput(gUE("name")), CompTyp(getInput(gUE("typ"), 0)),
+    val comp = Competition(getData(gUE("Form"),"id", 0L), getInput(gUE("name")), CompTyp(getInput(gUE("typ"), 0)),
                            parseStartTime(getInput(gUE("startTime"))),
                            CompStatus(getInput(gUE("status"), CompStatus.CFG.id)), getData(gUE("Form"), "options", ""))
     // set optional values                       
@@ -97,7 +96,6 @@ object DlgCardComp extends BasicHtml
         
     // setting data-foo
     setData(gUE("Form"), "id", comp.id)
-    setData(gUE("Form"), "hashKey", comp.hashKey)
     setData(gUE("Form"), "name", comp.name)
     setData(gUE("Form"), "typ", gMTyp(comp.typ)) 
     setData(gUE("Form"), "options", comp.options)
@@ -133,7 +131,8 @@ object DlgCardComp extends BasicHtml
     setInputFields(mode == DlgOption.View)
     setVisible("Compose", mode != DlgOption.View)
     setVisible("Optional", mode != DlgOption.View)
-    if (comp.status > CompStatus.READY) setDisabled("status", true)
+    //if (comp.status > CompStatus.READY) setDisabled("status", true)
+    setDisabled("status", true)
   }
 
   // setButton

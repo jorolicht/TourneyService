@@ -8,7 +8,7 @@
 @import clientviews.component.helper.html._ 
 
 @import shared.model.Group
-@import shared.model.PantEntry
+@import shared.model.Pant
 
 @(coId: Long, coPh: Int, groups: ArrayBuffer[Group])(implicit ucc: UseCaseParam)
 @idBalls(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPh}_Balls_${grId}_${pos}" """) }

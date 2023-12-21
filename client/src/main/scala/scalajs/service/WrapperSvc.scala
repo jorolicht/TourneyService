@@ -83,7 +83,7 @@ trait WrapperSvc {
    *
    */ 
   def postJson(route: String, params: String, data: String="", contType: String = "text/plain; charset=utf-8"): Future[Either[Error, String]] = {
-    AppEnv.info("postJson", s"route: ${route}  params: ${params} \n data: ${data} \n Csrf-Token: ${AppEnv.getCsrf}")
+    //AppEnv.info("postJson", s"route: ${route}  params: ${params} \n data: ${data} \n Csrf-Token: ${AppEnv.getCsrf}")
     Ajax.post(genPath(route,params), data, headers = Map("Content-Type"->s"${contType}", "Csrf-Token" -> AppEnv.getCsrf))
       .map(_.responseText).map(content => Right(content))
       .recover({

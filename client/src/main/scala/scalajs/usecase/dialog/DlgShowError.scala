@@ -29,7 +29,7 @@ object DlgShowError extends BasicHtml
 
   // set dialog input fields
   def set(eList: List[Error]): Unit = {
-    setHtml("Content", "")
+    setHtml(gUE("Content"), "")
     eList.foreach {
       err => insertHtml(gE(uc("Content")), "beforeend", s"""<p class="text-danger mb-0">${getError(err)}</p>""")
     }
@@ -52,7 +52,7 @@ object DlgShowError extends BasicHtml
     }
     
     loadModal(html.DlgShowError(), ucp)
-    setHtml("Header", getMsg("hdr"))
+    setHtml(gUE("Header"), getMsg("hdr"))
     set(eList)
 
     // register routines for cancel and submit

@@ -55,7 +55,7 @@ object AddonMatch extends UseCase("AddonMatch")
     
     (for {
       valid   <- EitherT(AddonMain.setLoginLoad(toId))
-      result  <- EitherT(resetMatch(toId, coId, phase, game))
+      result  <- EitherT(resetMatch(coId, phase, game))
     } yield { (valid, result) }).value.map {
       case Left(err)   => AddonMain.addOutput(s"ERROR Test Reset Match ${err.toString}"); false
       case Right(res)  => {

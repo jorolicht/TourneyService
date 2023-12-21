@@ -112,18 +112,44 @@ class TourneyServiceImpl @Inject()()(  implicit
     }
 
 
-  // def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]] =
-  //   TIO.get(toId).map {
-  //     case Left(err)   => Left(err)
-  //     case Right(trny) => {
-  //       if (trny.players.isDefinedAt(plId)) { 
-  //         trny.players(plId).email = email
-  //         Right(trny.players(plId)) 
-  //       } else { 
-  //         Left(Error("err0024.svc.setPlayerEmail.notFound", plId.toString))
-  //       }
-  //     }  
-  //   }
+  def regSingle(coId: Long, pl: Player, pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, SNO]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.regSingle(coId, pl, pStatus) match {
+        case Left(err)     => Left(err)
+        case Right(result) => Right(result)
+      } 
+    }
+
+
+  def regSingle(coId: Long, pList: List[Player], pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, List[SNO]]] =
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.regSingle(coId, pList, pStatus) match {
+        case Left(err)     => Left(err)
+        case Right(result) => Right(result)
+      } 
+    }
+
+
+  def regDouble(coId: Long, pls: (Long,Long), pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, SNO]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.regDouble(coId, pls, pStatus) match {
+        case Left(err)     => Left(err)
+        case Right(result) => Right(result)
+      } 
+    }
+
+
+  def regDouble(coId: Long, ppList: List[(Long,Long)], pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, List[SNO]]] =
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.regDouble(coId, ppList, pStatus) match {
+        case Left(err)     => Left(err)
+        case Right(result) => Right(result)
+      } 
+    }
 
     
   //
@@ -186,34 +212,34 @@ class TourneyServiceImpl @Inject()()(  implicit
       case Right(trny)  => Right(trny.pl2co.values.toSeq)
     }
 
-  def getPantPlace(toId: Long, coId: Long, sno: String) : Future[Either[Error, String]] =
+  def getPantPlace(toId: Long, coId: Long, sno: SNO) : Future[Either[Error, String]] =
     TIO.get(toId).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if ( trny.pl2co.isDefinedAt((sno,coId)) ) { 
-          Right(trny.pl2co((sno,coId)).placement)   
+        if ( trny.pl2co.isDefinedAt((sno.value,coId)) ) { 
+          Right(trny.pl2co((sno.value,coId)).placement)   
         } else { 
-          Left(Error("err0025.svc.getParticipantPlacement", sno, coId.toString)) 
+          Left(Error("err0025.svc.getParticipantPlacement", sno.value, coId.toString)) 
         }
       }  
     }
 
 
-  def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv) : Future[Either[Error, Placement]] = 
+  def setPantPlace(coId: Long, sno: SNO, place: String)(implicit tse :TournSVCEnv) : Future[Either[Error, Placement]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if ( trny.pl2co.isDefinedAt((sno,coId)) ) { 
-          trny.pl2co((sno,coId)).placement = place
-          trny.pl2co((sno,coId)).getPlacement()  
+        if ( trny.pl2co.isDefinedAt((sno.value,coId)) ) { 
+          trny.pl2co((sno.value,coId)).placement = place
+          trny.pl2co((sno.value,coId)).getPlacement()  
         } else { 
-          Left(Error("err0026.svc.setParticipantPlacement", sno, coId.toString)) 
+          Left(Error("err0026.svc.setParticipantPlacement", sno.value, coId.toString)) 
         }
       }
     }    
 
 
-  def setPantStatus(coId: Long, sno: String, status: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, PantStatus.Value]] = 
+  def setPantStatus(coId: Long, sno: SNO, status: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, PantStatus.Value]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => trny.setPantStatus(coId, sno, status)
@@ -432,7 +458,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   def addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv): Future[Either[Error, Competition]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => trny.addComp(co, Crypto.genHashComp(co))
+      case Right(trny)  => trny.addComp(co)
     }
 
 
@@ -442,13 +468,13 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
       case Left(err)    => Left(err)
       case Right(trny)  => {
         val (eList, cList) = (comps.map { co => 
-          if (co.id == 0) trny.addComp(co, Crypto.genHashComp(co)) else trny.setComp(co)
+          if (co.id == 0) trny.addComp(co) else trny.setComp(co)
         }).partitionMap(identity)  
         Right(cList)
       }
     }
 
-  def setCompStatus(coId: Long, status: CompStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] = 
+  def setCompStatus(coId: Long, status: CompStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => trny.setCompStatus(coId, status)
@@ -671,32 +697,15 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
 
   // 
   // Competition Phase Routines
-  // 
-
-  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
-    TIO.getTrny(tse, true).map {
-      case Left(err)    => Left(err)
-      case Right(trny)  => {
-        trny.addCompPhase(coId, baseCoPhId, cfgWinner, coPhCfg, name, noWinSets) match {
-          case Left(err)   => Left(err)
-          case Right(coph) => {
-            if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
-            Right(coph)
-          }
-        }
-      }
-    }
-
+  //
   def addCompPhase(coId: Long, name: String)(implicit tse :TournSVCEnv): Future[Either[Error, CompPhase]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => {
-        trny.addCompPhase(coId, name) match {
-          case Left(err)   => Left(err)
-          case Right(coph) => {
-            if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
-            Right(coph)
-          }
+      case Right(trny)  => trny.addCompPhase(coId, name) match {
+        case Left(err)   => Left(err)
+        case Right(coph) => {
+          if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
+          Right(coph)
         }
       }
     }
@@ -704,14 +713,10 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
 
   /** setCompPhase - set competition phases 
    */
-  def setCompPhase(coph: CompPhase)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]  =
+  def setCompPhase(coph: CompPhase)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]  =
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => {
-        trny.cophs((coph.coId, coph.coPhId)) = coph
-        if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
-        Right(true)
-      }
+      case Right(trny)  => trny.setCompPhase(coph)
     }      
   
 

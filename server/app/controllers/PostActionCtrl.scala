@@ -99,38 +99,40 @@ class PostActionCtrl @Inject()
       // def regSingle(coId: Long, pl: Player): Future[Either[Error, String]]
       // registers a player with a competition, returns playerId
       case "regSingle" => {
-        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.code))
-        val coId = getParam(pMap, "coId", 0L)
-
-        (for {
-          data    <- EitherT(Future( encEParam(reqData)))
-          player  <- EitherT(Future( Player.decode(data("player")) ))
-          pl      <- EitherT(tsv.addPlayer(player))
-          result  <- EitherT(tsv.setPant2Comp(Pant2Comp.single(pl.id, coId, pStatus )))
-        } yield { (pl, result) }).value.map {
-          case Left(err)  => BadRequest(err.add("regSingle").encode)
-          case Right(res) => Ok(Return(res._1.id).encode) 
+        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))
+        val coId = getParam(pMap, "coId", 0L)        
+        val bulk = getParam(pMap, "bulk", false)    
+        if (bulk) {
+          try tsv.regSingle(coId, read[List[Player]](reqData), pStatus).map {
+            case Left(err)      => BadRequest(err.add("regSingle").encode)
+            case Right(snoList) => Ok(write[List[SNO]](snoList))
+          } catch { case _: Throwable => Future(BadRequest(Error("err0240.svc.regSingle").encode)) }
+        } else {
+          try tsv.regSingle(coId, read[Player](reqData), pStatus).map {
+            case Left(err) => BadRequest(err.add("regSingle").encode)
+            case Right(sno) => Ok(write[SNO](sno))
+          } catch { case _: Throwable => Future(BadRequest(Error("err0240.svc.regSingle").encode)) }
         }
-      }
+      }  
+
 
       //def regDouble(coId: Long, pl1: Player, pl2: Player): Future[Either[Error, String]]
       case "regDouble" => {
-        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.code))
-        val coId    = getParam(pMap, "coId", 0L)
-
-        (for {
-          data <- EitherT(Future( encEParam(reqData)))
-          pl1  <- EitherT(Future( Player.decode(data("player1")) ))
-          pl2  <- EitherT(Future( Player.decode(data("player2")) ))
-          p1   <- EitherT(tsv.setPlayer(pl1))
-          p2   <- EitherT(tsv.setPlayer(pl2))
-          res  <- EitherT(tsv.setPant2Comp(Pant2Comp.double(p1.id, p2.id, coId, pStatus)) )
-        } yield { (p1.id, p2.id) }).value.map { 
-          case Left(err)  => BadRequest(err.add("regDouble").encode)
-          case Right(res) => Ok(write(res)) 
+        val pStatus = PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))
+        val coId = getParam(pMap, "coId", 0L)        
+        val bulk = getParam(pMap, "bulk", false)    
+        if (bulk) {
+          try tsv.regDouble(coId, read[List[(Long,Long)]](reqData), pStatus).map {
+            case Left(err)     => BadRequest(err.add("regDouble").encode)
+            case Right(snoList) => Ok(write[List[SNO]](snoList))
+          } catch { case _: Throwable => Future(BadRequest(Error("err0241.svc.regDouble").encode)) }
+        } else {
+          try tsv.regDouble(coId, read[(Long,Long)](reqData), pStatus).map {
+            case Left(err)  => BadRequest(err.add("regDouble").encode)
+            case Right(sno) => Ok(write[SNO](sno))
+          } catch { case _: Throwable => Future(BadRequest(Error("err0241.svc.regDouble").encode)) }
         }
-      }
-
+      } 
 
       //
       // Pant Action Routines (Pant could be Single,Double or Team (future) 
@@ -161,7 +163,7 @@ class PostActionCtrl @Inject()
       // setPantStatus sets the status of a Pant within a competition, returns status
       // def setPantStatus(coId: Long, sno: String, status: Int): Future[Either[Error, Int]]
       case "setPantStatus" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        tsv.setPantStatus(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))).map {
+        tsv.setPantStatus(getParam(pMap, "coId", 0L), SNO(getParam(pMap, "sno")), PantStatus(getParam(pMap, "status", PantStatus.UNKN.id))).map {
           case Left(err)  => BadRequest(err.encode)
           case Right(res) => Ok(Return(res.id).encode)
         }
@@ -188,7 +190,7 @@ class PostActionCtrl @Inject()
       // setPantPlace sets the place of a participant within a competition, returns placement
       // setPantPlace(coId: Long, sno: String, place: String): Future[Either[Error, Placement]]
       case "setPantPlace" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        tsv.setPantPlace(getParam(pMap, "coId", 0L), getParam(pMap, "sno"), getParam(pMap, "place")).map {
+        tsv.setPantPlace(getParam(pMap, "coId", 0L), SNO(getParam(pMap, "sno")), getParam(pMap, "place")).map {
           case Left(err)     => BadRequest(err.encode)
           case Right(result) => Ok(Placement.encode(result))          
         }  
@@ -377,7 +379,7 @@ class PostActionCtrl @Inject()
         if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
           tsv.setCompStatus(getParam(pMap, "coId", -1L), CompStatus(getParam(pMap, "status", CompStatus.UNKN.id)) ).map {
             case Left(err)   => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.add(s"${cmd}").encode)
-            case Right(res)  => logger.info(s"${cmd}: execution Ok");    Ok(Return(res).encode)
+            case Right(res)  => logger.info(s"${cmd}: execution Ok"); Ok("")
           } 
         }
       }     
@@ -395,20 +397,23 @@ class PostActionCtrl @Inject()
 
 
       case "addCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-
         val name    = getParam(pMap, "name", "")
         val coPhCfg = CompPhaseCfg(getParam(pMap, "coPhCfg", CompPhaseCfg.UNKN.id))
-        if (name != "") tsv.addCompPhase(getParam(pMap, "coId", -1L), name).map { 
+        tsv.addCompPhase(getParam(pMap, "coId", -1L), name).map { 
             case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
-            case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode)
-          }
-        else tsv.addCompPhase(getParam(pMap, "coId", -1L), getParam(pMap, "baseCoPhId", -1),
-                        getParam(pMap, "cfgWinner", true), coPhCfg,
-                        getParam(pMap, "name", ""), getParam(pMap, "noWinSets", 0)).map { 
-          case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
-          case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode)
+            case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode())
         }
       }
+      
+      case "saveCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {
+        CompPhase.decode(reqData) match {
+          case Left(err)  => Future(BadRequest(err.encode))
+          case Right(coph) => tsv.setCompPhase(coph).map { 
+            case Left(err)  => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+            case Right(res) => logger.info(s"${cmd}: execution Ok");  Ok("")
+          }
+        }
+      }  
 
 
       //

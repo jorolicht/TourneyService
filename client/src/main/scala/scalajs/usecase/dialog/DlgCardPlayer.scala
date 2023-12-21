@@ -32,7 +32,7 @@ object DlgCardPlayer extends BasicHtml
   implicit val ucp     = UseCaseParam("APP__DlgCardPlayer", "dlg.card.player", "DlgCardPlayer", "dlgcardplayer", scalajs.AppEnv.getMessage _ )
   implicit var tourney = Tourney.init
 
-  var player = Player(0L, "", 0L, "", "", "", 0, "", SexTyp.UNKN)
+  var player = Player(0L, 0L, "", "", "", 0, "", SexTyp.UNKN)
 
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
@@ -139,10 +139,10 @@ object DlgCardPlayer extends BasicHtml
     }
     
     // setting visible data
-    setHtml("Title", getMsg("Title", player.id.toString))
+    setHtml(gUE("Title"), getMsg("Title", player.id.toString))
     setInput("Name", player.getName(0))
     setInput("Club", player.getClub(0))
-    setHtml("ClubList", (for ((id, c) <- trny.clubs) yield s"""<option>${c.getName(1)}</option>""").mkString(" ") )  
+    setHtml(gUE("ClubList"), (for ((id, c) <- trny.clubs) yield s"""<option>${c.getName(1)}</option>""").mkString(" ") )  
 
     setInput("Email", player.email)
     setInput("TTR", player.getTTR)
@@ -163,7 +163,7 @@ object DlgCardPlayer extends BasicHtml
     if (!hasLicense) {
       val liList = (for ((license, cttPlInfo) <- trny.licenses) yield (getLicInfo(cttPlInfo), license))
                    .toList.sortBy(_._1).map(x => s"""<option value='${x._2}'>${x._1}</option>""").mkString(" ")
-      setHtml("LicenseList", liList)
+      setHtml(gUE("LicenseList"), liList)
     }
 
     setVisible("BtnDeleteLicense", hasLicense)

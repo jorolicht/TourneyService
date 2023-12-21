@@ -40,9 +40,9 @@ object DlgInputTxt extends BasicHtml
     
     def dialogBoxClick(e: raw.Event) = {     
       if (!p.isCompleted) { 
-        val inTxt = getInput(gE(uc("Input")), "")
+        val inTxt = getInput(gUE("Input"), "")
         check(inTxt) match {
-          case Left(msg)  => { setHtml("Error", msg);  setVisible("Error", true)  }
+          case Left(msg)  => { setHtml(gUE("Error"), msg);  setVisible("Error", true)  }
           case Right(res) => { p success Right(inTxt); $("#DlgInputTxt").modal("hide") }
         }         
       }
@@ -51,11 +51,11 @@ object DlgInputTxt extends BasicHtml
     loadModal(html.DlgInputTxt())
 
     // initialize values
-    setHtml("Header", header)
-    setHtml("Body", body)
-    setHtml("Close", btnClose)
-    setHtml("Start", btnStart)
-    setPlaceholder(gE(uc("Input")), placeholder)
+    setHtml(gUE("Header"), header)
+    setHtml(gUE("Body"), body)
+    setHtml(gUE("Close"), btnClose)
+    setHtml(gUE("Start"), btnStart)
+    setPlaceholder(gUE("Input"), placeholder)
     setVisible("Error", false)
     setInput("Input", "")
 

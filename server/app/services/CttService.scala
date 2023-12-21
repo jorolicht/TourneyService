@@ -170,7 +170,7 @@ object CttService  {
   // cttPers2Player convert ctt person to player
   //                ctt player is implemented by playerComp mapping table
   def cttPers2Player(cttp: CttPerson) : Player = {
-    val pl = new Player(0L, "", 0L, cttp.clubName, cttp.firstname, cttp.lastname, cttp.getBY(), "", SexTyp(cttp.sex), "_")
+    val pl = new Player(0L, 0L, cttp.clubName, cttp.firstname, cttp.lastname, cttp.getBY(), "", SexTyp(cttp.sex), "_")
 
     pl.setInternalNr(cttp.internalNr)
     pl.setLicense(CttLicense(cttp.licenceNr))
@@ -196,7 +196,7 @@ object CttService  {
         s"${cttComp.ageGroup} ${cttComp.ttrRemarks} ${msg("competition.typ."+tVal)}"
       }
 
-    val co = new Competition(0L, "", name, tVal, parseStartTime(cttComp.startDate), CompStatus.READY, "_")
+    val co = new Competition(0L, name, tVal, parseStartTime(cttComp.startDate), CompStatus.READY, "_")
 
     co.setAgeGroup(cttComp.ageGroup)
     co.setRatingRemark(cttComp.ttrRemarks)

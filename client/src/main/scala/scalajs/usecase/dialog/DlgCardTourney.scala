@@ -142,7 +142,7 @@ object DlgCardTourney  extends BasicHtml
     }
     
     loadModal(html.DlgCardTourney(), ucp)
-    setHtml("Header", getMsg(s"${dlgMode}.hdr"))
+    setHtml(gUE("Header"), getMsg(s"${dlgMode}.hdr"))
     set(dlgMode, tournBase)
 
     // register routines for cancel and submit

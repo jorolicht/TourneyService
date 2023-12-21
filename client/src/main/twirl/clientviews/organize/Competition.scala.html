@@ -28,10 +28,10 @@
 	<div class="tuse-card-header d-flex justify-content-between">		
 		<div class="mt-2 ml-1">  
 			<a href="javascript:OrganizeCompetition.actionEvent('CollapseCoPh', this, event)" >
-				<h6 @id("CoPhCardHdr") class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("coph.card")</h6>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i><span @id("CoPhCardHdr")>@msg("coph.card")</span></h6>
 			</a> 
 		 </div>
-		 <div class="mt-1 mr-2">@actionButton("AddCompPhase", "std.btn.add", "btn-xs btn-outline-secondary")</div>
+		 <div class="mt-1 mr-2">@actionButton("AddCoPh", "std.btn.add", "btn-xs btn-outline-secondary")</div>
 	</div>
 	<div @id("CoPhCard") class="tuse-card-body pb-2 collapse"></div>
 </div>
@@ -41,10 +41,10 @@
 	<div class="tuse-card-header d-flex justify-content-between">		
 		<div class="mt-2 ml-1">  
 			<a @Html(collapse("ParticipantCard"))>
-				<h6 @id("ParticipantCardHdr")  class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("participant.card")</h6>
+				<h6 class="text-dark"><i class="fa fa-fw fa-bars"></i><span @id("ParticipantCardHdr")>@msg("participant.card")</span></h6>
 			</a> 
-		 </div>
-		 <div class="mt-1 mr-2">@actionButton("RegParticipant", "std.btn.add", "btn-xs btn-outline-secondary")</div>
+		</div>		
+		<div class="mt-1 mr-2">@actionButton("RegParticipant", "std.btn.add", "btn-xs btn-outline-secondary")</div>
 	</div>
 	<div @id("ParticipantCard") class="tuse-card-body pb-2 collapse"></div>
 </div>

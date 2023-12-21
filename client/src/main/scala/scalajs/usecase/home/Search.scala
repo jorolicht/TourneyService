@@ -46,7 +46,7 @@ object HomeSearch
     import scalajs.usecase.dialog._ 
     findTournBases(sString, sTyp, sYear).map { 
       case Left(err)    => DlgInfo.show(getMsg("dlg.hdg"), getError(err), "danger")
-      case Right(trnys) => setHtml("Result", clientviews.home.html.ListTourney(trnys, AppEnv.msgs).toString)      
+      case Right(trnys) => setHtml(gUE("Result"), clientviews.home.html.ListTourney(trnys, AppEnv.msgs).toString)      
     } 
   }
 

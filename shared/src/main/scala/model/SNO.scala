@@ -44,18 +44,18 @@ case class SNO(value: String) {
     }
   }
 
-  // getPantEntry returns Participant Entry
-  def getPantEntry(coId: Long, place: (Int,Int) = (0,0))(implicit trny: Tourney): PantEntry = {
+  // getPant returns Participant Entry
+  def getPant(coId: Long, place: (Int,Int) = (0,0))(implicit trny: Tourney): Pant = {
     trny.comps(coId).typ match {
        case CompTyp.SINGLE => getSinglePlayer() match {
-         case Left(err)       => PantEntry(value, "", "", 0, (0,0)) 
-         case Right(p)        => PantEntry(value, p.getName(), p.clubName, p.getRating, place)
+         case Left(err)       => Pant(value, "", "", 0, "", (0,0)) 
+         case Right(p)        => Pant(value, p.getName(), p.clubName, p.getRating, "", place)
        }
        case CompTyp.DOUBLE => getDoublePlayers() match {
-         case Left(err)       => PantEntry(value, "", "", 0, (0,0)) 
-         case Right((p1, p2)) => PantEntry(value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2), place)
+         case Left(err)       => Pant(value, "", "", 0, "", (0,0)) 
+         case Right((p1, p2)) => Pant(value, p1.getDoubleName(p2), p1.getDoubleClub(p2), p1.getDoubleRating(p2), "", place)
        }
-       case _         => PantEntry(value, "", "", 0, (0,0))    
+       case _         => Pant(value, "", "", 0, "", (0,0))    
     }
   }  
 

@@ -50,7 +50,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
         val toId = App.tourney.id
         tournBases = trnys
         //debug("update", s"TournBases: ${tournBases}")
-        setHtml("TourneyCard", html.TourneyCard(toId, trnys))
+        setHtml(gUE("TourneyCard"), html.TourneyCard(toId, trnys))
 
         selTableRow(uc(s"TableRow_${toId}"))
         setViewTournBase(App.tourney)
@@ -91,7 +91,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
         }   
       }  
 
-          // do file upload depending on upload type
+      // do file upload depending on upload type
       case s"TourneyAction_$id"    => {
         val trnyActionType = TourneyAction(id.toIntOption.getOrElse(0))
         val toId = getData(elem, "toId", 0L)

@@ -53,12 +53,12 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
         case CompTyp.SINGLE => {
           val pl1 = tourney.players(p2ce.getPlayerId)
           
-          (PantEntry.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, 0L, pl1.getLicense.value)
+          (Pant.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, 0L, pl1.getLicense.value)
         }
         case CompTyp.DOUBLE | CompTyp.MIXED => {
           val (plId1, plId2) = p2ce.getDoubleId
           val (pl1, pl2) = (tourney.players(plId1), tourney.players(plId2))
-          (PantEntry.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
+          (Pant.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
         }
         case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
       }
@@ -76,9 +76,9 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     player = view4PlayerRegister()
 
-    setHtml("MainCard", clientviews.organize.player.html.MainCard(player.filter(_._4 >= PantStatus.REGI))) 
-    setHtml("WaitCard", clientviews.organize.player.html.WaitCard(player.filter(_._4 == PantStatus.WAIT))) 
-    setHtml("RejectCard", clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC)))
+    setHtml(gUE("MainCard"), clientviews.organize.player.html.MainCard(player.filter(_._4 >= PantStatus.REGI))) 
+    setHtml(gUE("WaitCard"), clientviews.organize.player.html.WaitCard(player.filter(_._4 == PantStatus.WAIT))) 
+    setHtml(gUE("RejectCard"), clientviews.organize.player.html.RejectCard(player.filter(_._4 == PantStatus.RJEC)))
   
     // check if there are players with need signup commitment
     setBadge(player.filter(_._4 == PantStatus.PEND.id).length)
@@ -88,8 +88,8 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
     val sicoCnt = if (cnt == -1 ) view4PlayerRegister.filter(_._4 == PantStatus.PEND).length else cnt    
     if (sicoCnt > 0) {
        // add badge if not already added, do it now
-      setHtml("SidebarBadge", sicoCnt.toString)
-      setHtml("CardBadge", if (sicoCnt == 1) getMsg("badge.waiting.one") else getMsg("badge.waiting.more", sicoCnt.toString))    
+      setHtml(gUE("SidebarBadge"), sicoCnt.toString)
+      setHtml(gUE("CardBadge"), if (sicoCnt == 1) getMsg("badge.waiting.one") else getMsg("badge.waiting.more", sicoCnt.toString))    
     }
     //setVisible("SidebarBadge", sicoCnt > 0)
     setVisible("CardBadge", sicoCnt > 0)
@@ -171,7 +171,7 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
     def setPlayerStatusUpdate(coId: Long, sno: String, status: PantStatus.Value): Unit = {
       App.tourney.pl2co(sno, coId).status = status
-      setPantStatus(coId, sno, status).map { _ => update() }
+      setPantStatus(coId, SNO(sno), status).map { _ => update() }
     }
 
     status match {
@@ -185,12 +185,12 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
 
   @JSExport
   def onchangeCheckActiv(elem: HTMLInputElement): Unit = {
-    val coId = getData(elem, "coId", 0L)
-    val sno  = getData(elem, "sno", "")
+    val coId = getCoId(elem)
+    val sno = SNO(getSNO(elem))
     val status = if (elem.checked) PantStatus.REDY else PantStatus.REGI
     setPantStatus(coId, sno, status).map { 
-      case Left(err)  => error("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno}") 
-      case Right(res) => info("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno}") 
+      case Left(err)  => error("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno.value}") 
+      case Right(res) => info("onclickCheckActiv", s"coId: ${coId} status: ${status} sno: ${sno.value}") 
     }
   }
 

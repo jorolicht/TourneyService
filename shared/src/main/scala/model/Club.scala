@@ -19,6 +19,7 @@ case class Club (
 ) 
 {
   def this(name: String) = this(0L, name, "_")
+  def hash = name.hashCode()
   def getClubNr: String       = getMDStr(options, 0);    def setClubNr(value: String)      = { options = setMD(options, value, 0) }
   def getClubFedNick: String  = getMDStr(options, 1);    def setClubFedNick(value: String) = { options = setMD(options, value, 1) }
 

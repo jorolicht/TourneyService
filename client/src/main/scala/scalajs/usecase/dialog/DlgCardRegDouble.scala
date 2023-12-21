@@ -41,15 +41,15 @@ object DlgCardRegDouble extends BasicHtml
   @JSExport
   def actionEvent(key: String, elem: HTMLElement, event: Event) = {
     def setNameList(name: String, trny: Tourney, coId: Long, setId: Long, skipId: Long): Unit = {
-      setHtml(name, genPlayerOption(name, trny, coId, setId, skipId))
+      setHtml(gUE(name), genPlayerOption(name, trny, coId, setId, skipId))
       setInput(name, setId.toString)
     }
 
 
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
-      case "Name1" => setNameList("Name2", tourney, selCoId, getInput(gE(uc("Name2")), 0L), getInput(gE(uc("Name1")), 0L) )        
-      case "Name2" => setNameList("Name1", tourney, selCoId, getInput(gE(uc("Name1")), 0L), getInput(gE(uc("Name2")), 0L) ) 
+      case "Name1" => setNameList("Name2", tourney, selCoId, getInput(gUE("Name2"), 0L), getInput(gUE("Name1"), 0L) )        
+      case "Name2" => setNameList("Name1", tourney, selCoId, getInput(gUE("Name1"), 0L), getInput(gUE("Name2"), 0L) ) 
       case "Close" => offEvents(gE(uc("Modal")), "hide.bs.modal"); doModal(gE(uc("Modal")), "hide")
       case _       => {}
     }
@@ -58,7 +58,7 @@ object DlgCardRegDouble extends BasicHtml
   /** validate input of dialog for Double, return valid tupel of player id or a List of Errors
    * 
    */ 
-  def validate(coId: Long)(implicit trny: Tourney): Either[List[Error], (Long, Long, Int)] = {
+  def validate(coId: Long)(implicit trny: Tourney): Either[List[Error], ((Long, Long), PantStatus.Value)] = {
     import shared.utils.Routines._
     import scala.collection.mutable.ListBuffer
     
@@ -66,14 +66,14 @@ object DlgCardRegDouble extends BasicHtml
     val status = getRadioBtn("PlayerStatus", -1)
     debug("validate", s"status: ${status}")
  
-    val id1 = getInput(gE(uc("Name1")), 0L)
-    val id2 = getInput(gE(uc("Name2")), 0L)
+    val id1 = getInput(gUE("Name1"), 0L)
+    val id2 = getInput(gUE("Name2"), 0L)
 
     if (id1 <= 0L) eList += Error("err0164.RegDouble.Name.missing", "1")
     if (id2 <= 0L) eList += Error("err0164.RegDouble.Name.missing", "2" )
 
     /* read relevant input and verify it */
-    if (eList.length > 0) Left(eList.toList) else Right((id1, id2, status))
+    if (eList.length > 0) Left(eList.toList) else Right( ((id1, id2), PantStatus(status)))
   }
 
   def setNameList(name: String, trny: Tourney, coId: Long, setId: Long, skipId: Long): Unit = {
@@ -86,7 +86,7 @@ object DlgCardRegDouble extends BasicHtml
     debug("setNameList", s"plIds: ${plIds} pl2co: ${pl2co} diffSet: ${diffSet}     ")
 
     val nameOptions = (for ((id) <- diffSet) yield s"""<option value="${id}">${trny.players(id).getName(1)} (${trny.players(id).getClub(0)})</option>""").mkString(" ") 
-    setHtml(name, "<option value='0'>---</option>" + nameOptions)
+    setHtml(gUE(name), "<option value='0'>---</option>" + nameOptions)
     setInput(name, setId.toString)
   }
 
@@ -98,12 +98,12 @@ object DlgCardRegDouble extends BasicHtml
     setNameList("Name1", trny, coId, 0, 0)
     setNameList("Name2", trny, coId, 0, 0)
     setRadioBtnByValue("PlayerStatus", PantStatus.REDY.toString)
-    setHtml("Class", trny.getCompName(coId))
+    setHtml(gUE("Class"), trny.getCompName(coId))
   }
   
   // show dialog return result (Future) or Failure when canceled
-  def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, (Long, Long, Int)]] = {
-    val p     = Promise[(Long, Long, Int)]()
+  def show(coId: Long, trny: Tourney, lang: String): Future[Either[Error, ((Long, Long), PantStatus.Value)]] = {
+    val p     = Promise[((Long, Long), PantStatus.Value)]()
     val f     = p.future
 
     def cancel() = {
@@ -127,9 +127,9 @@ object DlgCardRegDouble extends BasicHtml
     init(trny, coId)
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
-    onClick(gE(uc("Submit")), (e: Event) => submit(e))
-    doModal(gE(uc("Modal")), "show")
+    onEvents(gUE("Modal"), "hide.bs.modal", () => cancel())
+    onClick(gUE("Submit"), (e: Event) => submit(e))
+    doModal(gUE("Modal"), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

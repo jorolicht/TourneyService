@@ -75,8 +75,8 @@ object InfoSchedule extends UseCase("InfoSchedule")
     val cYear = date.getFullYear().toInt
     val plYears = clientviews.component.html.OptionListYear(cYear-4, cYear-100, getMsg("placeholder.year")).toString
 
-    setHtml("PlayerYear", plYears)
-    setHtml("PlayerYear2", plYears)
+    setHtml(gUE("PlayerYear"), plYears)
+    setHtml(gUE("PlayerYear2"), plYears)
 
     // check if there is a competition with allows registering users
     setVisible("RegisterCard", App.tourney.comps.toSeq.filter(_._2.getWebRegister).length > 0)
@@ -86,7 +86,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
       case Left(value)     => addClass(gE(uc("HintCard")), "hidden-xl-down")
       case Right(content)  => {
         removeClass(gE(uc("HintCard")), "hidden-xl-down")
-        setHtml("HintBodyContent", s"""<article class="markdown-body">$content</article>""") 
+        setHtml(gUE("HintBodyContent"), s"""<article class="markdown-body">$content</article>""") 
       }  
     }
   } 
@@ -102,7 +102,7 @@ object InfoSchedule extends UseCase("InfoSchedule")
 
   
   def showHelpSchedule(msg: String="", visible: Boolean=false) = {
-    setHtml("HelpText", msg)
+    setHtml(gUE("HelpText"), msg)
     setVisible("Help", visible)
   }
 
@@ -166,24 +166,33 @@ object InfoSchedule extends UseCase("InfoSchedule")
       }
     }
 
-    def doRegDPlayer(coId: Long, pl1: Player, pl2: Player) {
-        regDouble(coId, pl1, pl2).map {
+    def doRegDPlayer(coId: Long, pl1: Player, pl2: Player) = {
+      import shared.model.PantStatus
+      import cats.data.EitherT
+      import cats.implicits._
+    
+      (for {
+        p1 <- EitherT(addPlayer(pl1))
+        p2 <- EitherT(addPlayer(pl2))
+      } yield { (p1, p2) }).value.map {
+        case Left(err)  => showResult(true, getMsg("signup.ok.error"), getMsg("signup.error"), "danger")
+        case Right(res) => regDouble(coId, (res._1.id, res._2.id), PantStatus.REGI).map {
           case Left(err)  => showResult(true, getMsg("signup.ok.error"), getMsg("signup.error"), "danger")
           case Right(res) => showResult(true, getMsg("signup.ok.header"), getMsg("signup.ok"), "success")
         }
+      }
     }
 
     // hide help
     showHelpSchedule()
-    val (lastname, firstname) = getInput(gE(uc("PlayerName")),"").split(",")  match { 
+    val (lastname, firstname) = getInput(gUE("PlayerName"),"").split(",")  match { 
       case Array(s1,s2) => (s1.trim,s2.trim)
       case _            => ("","") 
     }
-    val pl = Player(0L,"",0L,getInput(gE(uc("PlayerClub"))),firstname,lastname,
-                    getInput(gE(uc("PlayerYear")), 0), getInput(gE(uc("PlayerEmail"))), SexTyp.UNKN, "_")
-    pl.setTTR(getInput(gE(uc("PlayerTTR"))))
+    val pl = Player(0L, 0L, getInput(gUE("PlayerClub")), firstname, lastname, getInput(gUE("PlayerYear"), 0), getInput(gUE("PlayerEmail")), SexTyp.UNKN, "_")
+    pl.setTTR(getInput(gUE("PlayerTTR")))
 
-    val (coId, cTyp) = getInput(gE(uc("Competition")),"").split("__") match {
+    val (coId, cTyp) = getInput(gUE("Competition"),"").split("__") match {
       case Array(s1,s2) => (s1.toLong, s2) 
       case _            => (0L,0) 
     }
@@ -191,9 +200,9 @@ object InfoSchedule extends UseCase("InfoSchedule")
     verifyComp match {
       case 1 => doRegSPlayer(coId, pl)
       case 2 => {
-        val (lastname2, firstname2) = getInput(gE(uc("PlayerName2"))).split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
-        val pl2 = Player(0L,"",0L,getInput(gE(uc("PlayerClub2"))), firstname2, lastname2, getInput(gE(uc("PlayerYear2")), 0), "", SexTyp.UNKN, "_")
-        pl2.setTTR(getInput(gE(uc("PlayerTTR2"))))
+        val (lastname2, firstname2) = getInput(gUE("PlayerName2")).split(",") match { case Array(s1,s2) => (s1.trim,s2.trim); case _ => ("","") }
+        val pl2 = Player(0L, 0L, getInput(gUE("PlayerClub2")), firstname2, lastname2, getInput(gUE("PlayerYear2"), 0), "", SexTyp.UNKN, "_")
+        pl2.setTTR(getInput(gUE("PlayerTTR2")))
         doRegDPlayer(coId, pl, pl2)
       }
       case _ =>  debug("buttonSignUp", "unknown competition type")

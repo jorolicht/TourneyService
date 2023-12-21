@@ -3,85 +3,149 @@
  *@
 
 @import shared.model.CompPhase
+@import shared.model.CompPhaseStatus
+@import shared.model.QualifyTyp
+@import shared.model.CompPhaseCfg
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
+@import clientviews.component.input.html.inputCheckbox
 
 @(coph: CompPhase)(implicit ucc: UseCaseParam)
+@enabled(value: Boolean) = @{ if(value) "" else "disabled" } 
+@checked(value: Boolean) = @{ if(value) "checked" else "" } 
+@selected(value: Boolean) = @{ if(value) "selected" else "" }  
+
 
 <div class="row m-1 mb-2 pb-2 border-bottom">
   <div class="col-2"><strong>@msg("coph.state.lbl")</strong></div>
-  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"Status_${coph.coId}_${coph.coPhId}")>AUSLOSUNG</strong></button></div>
-  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"NoPlayer_${coph.coId}_${coph.coPhId}")>28 Spieler konfiguriert</strong></button></div>
-  <div class="col-auto"><button type='button' class='btn btn-outline-info btn-xs' disabled><strong @id(s"NoGames_${coph.coId}_${coph.coPhId}")>0 von 0 Spiele(n) beendet</strong></button></div>
+  <div class="col-auto">
+    <button type='button' class='btn btn-outline-info btn-xs' data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}'
+      @enabled(coph.status==CompPhaseStatus.AUS || coph.status==CompPhaseStatus.EIN || coph.status==CompPhaseStatus.FIN)
+      @actionEvent("Click2Status","onclick")>
+      <strong @id(s"Status_${coph.coId}_${coph.coPhId}")>@msg_(coph.status.msgCode)</strong>
+    </button>
+  </div>
+  <div class="col-auto">
+    <button type='button' class='btn btn-outline-info btn-xs' disabled>
+      <strong @id(s"NoPlayer_${coph.coId}_${coph.coPhId}")>@msg("coph.noPlayers", coph.noPlayers.toString)</strong>
+    </button>
+  </div>
+  <div class="col-auto">
+    <button type='button' class='btn btn-outline-info btn-xs' disabled>
+      <strong @id(s"NoGames_${coph.coId}_${coph.coPhId}")>@msg("coph.noGames", coph.mFinished.toString, coph.mTotal.toString)</strong>
+    </button>
+  </div>
 </div>
 
 <div class="row m-1 mb-2 pb-2 border-bottom">
   <div class="col-2"><strong>@msg("coph.action.lbl")</strong></div>
-  <div class="col-auto">@actionButton("StartDraw", "coph.start.draw", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
-  <div class="col-auto">@actionButton("StartInput", "coph.start.input", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
-  <div class="col-auto">@actionButton("ResetRound", "std.btn.reset", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  <div class="col-auto"> <!-- drop down START butten  -->
+    <div class="dropdown">
+      <button @id(s"StartBtn_${coph.coId}_${coph.coPhId}") class="btn btn-xs btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" 
+              @enabled((coph.status==CompPhaseStatus.CFG || coph.status==CompPhaseStatus.AUS) && (coph.coPhId==1 || coph.baseCoPhId != None))>
+        @msg_("std.btn.start")
+      </button>
+      <div class="dropdown-menu" >
+        <button data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' class="dropdown-item" type="button" @actionEvent("StartDrawCoPh","onclick")  
+          @enabled(coph.status==CompPhaseStatus.CFG && coph.coPhCfg!=CompPhaseCfg.CFG && coph.noWinSets!=0)>
+          <small>@msg_(CompPhaseStatus.AUS.msgCode)</small>
+        </button>
+        <button data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' class="dropdown-item" type="button" @actionEvent("StartInputCoPh","onclick") @enabled(coph.status==CompPhaseStatus.AUS)><small>@msg_(CompPhaseStatus.EIN.msgCode)</small></button>
+      </div>
+    </div> 
+  </div>
+
+  <div class="col-auto"> <!-- drop down RESET butten  -->
+    <div class="dropdown">
+      <button @id(s"StartBtn_${coph.coId}_${coph.coPhId}") class="btn btn-xs btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" 
+              @enabled(coph.status==CompPhaseStatus.AUS ||  coph.status==CompPhaseStatus.EIN  ||  coph.status==CompPhaseStatus.FIN)>
+        @msg_("std.btn.reset")
+      </button>
+      <div class="dropdown-menu" >
+        <button class="dropdown-item" data-coPhId='@coph.coPhId' data-coId='@coph.coId' type="button" @actionEvent("ResetCfgCoPh", "onclick")
+          @enabled(coph.status==CompPhaseStatus.AUS || coph.status==CompPhaseStatus.EIN || coph.status==CompPhaseStatus.FIN)>
+          <small>@msg("coph.back2config")</small>
+        </button>
+        <button class="dropdown-item" data-coPhId='@coph.coPhId' data-coId='@coph.coId' type="button" @actionEvent("ResetDrawCoPh", "onclick")
+            @enabled(coph.status==CompPhaseStatus.EIN  || coph.status==CompPhaseStatus.FIN)>
+            <small>@msg("coph.back2draw")</small>
+        </button>
+        <button class="dropdown-item" data-coPhId='@coph.coPhId' data-coId='@coph.coId' type="button" @actionEvent("ResetInputCoPh", "onclick") 
+            @enabled(coph.status==CompPhaseStatus.EIN  || coph.status==CompPhaseStatus.FIN)>
+            <small>@msg("coph.resetInput")</small>
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="col-auto">@actionButton("DeleteRound", "std.btn.delete", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  <div class="col-auto">@inputCheckbox("DemoBtn", "mb-0", coph.coId, coph.coPhId, coph.demo)</div>
 </div>
 
-<div class="row m-1 mb-2 pb-2">
+<div class="row m-1">
   <div class="col-2"><strong>@msg("coph.config.lbl")</strong></div>
 
   <div class="col-auto">
-    <select @id(s"GameSystem_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' @actionEvent("GameSystem", "onchange") >
-      <option value='0'>@msg("coph.GameSystem.plh") &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-      <option value='1'>3er Gruppn</option>
-      <option value='2'>4er und 5er Gruppn</option>
+    <select @id(s"GameSystem_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' 
+      @enabled(coph.status==CompPhaseStatus.CFG) @actionEvent("GameSystem", "onchange")>
     </select>
   </div>
 
   <div class="col-auto">
-    <select @id(s"Winset_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' @actionEvent("Winset", "onchange") >
-      <option value='0' selected>@msg("coph.winsets.lbl")</option>
-      <option value='2'>2</option>
-      <option value='3' >3</option>
-      <option value='4'>4</option>
+    <select @id(s"Winset_${coph.coId}_${coph.coPhId}") class="form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' 
+      @enabled(coph.status==CompPhaseStatus.CFG) @actionEvent("Winset", "onchange") >
+      <option value='0' @selected(coph.noWinSets==0)>@msg("coph.winsets.lbl")</option>
+      <option value='2' @selected(coph.noWinSets==2)>2</option>
+      <option value='3' @selected(coph.noWinSets==3)>3</option>
+      <option value='4' @selected(coph.noWinSets==4)>4</option>
     </select>
   </div>
 
   @if(coph.coPhId!=1) {
     <div class="col-auto">
-      <select @id("cophPreSelectCoPh") class="form-select form-control-xs" >
-        <option value="0" selected>@msg("coph.pantPreSelect.plh")</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
+      <select @id(s"BaseCoPh_${coph.coId}_${coph.coPhId}") class="form-select form-control-xs" data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' 
+        @enabled(coph.status==CompPhaseStatus.CFG) @actionEvent("BaseCoPh", "onchange")>
       </select>
     </div>
 
-    <div class="col-auto align-self-end">
-      <div @id("cophPreSelectWinLoo") class="float-right">
-        <input type="radio" @id("PantWinner") class="ml-2" @name("PantSelect") value="1" @actionEvent("PantSelect", "onchange")>
-        <label @forAttr("PantWinner")>Gewinner</label>
-        <input type="radio" @id("PantLooser") class="ml-2" @name("PantSelect") value="2" @actionEvent("PantSelect", "onchange")>
-        <label @forAttr("PantLooser")>Verlierer</label>
-        <input type="radio" @id("PantAll") class="ml-2" @name("PantSelect") value="0" checked @actionEvent("PantSelect", "onchange")>
-        <label class="col-form-label-sm" @forAttr("PantAll")>Alle</label>         
-      </div>
-    </div>
+    @if(coph.baseCoPhId!=None && coph.baseCoPhId!=Some(0)) {
+      <div class="col-auto align-self-end">
+        <div @id(s"QualifyTyp_${coph.coId}_${coph.coPhId}") class="float-right">
+          <input type="radio" @id("Winner") data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' class="ml-2"
+            @enabled(coph.status==CompPhaseStatus.CFG)
+            @name(s"QualifyTypName_${coph.coId}_${coph.coPhId}") value='@{QualifyTyp.WIN.id}' 
+            @checked(coph.quali==QualifyTyp.WIN) @actionEvent("QualifyTyp", "onchange")>
+          <label class="col-form-label-sm pb-0 mb-0" @forAttr("Winner")>@msg("coph.lbl.winner")</label>
+          <input type="radio" @id("Looser") data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' class="ml-2" 
+            @enabled(coph.status==CompPhaseStatus.CFG)
+            @name(s"QualifyTypName_${coph.coId}_${coph.coPhId}") value='@{QualifyTyp.LOO.id}' 
+            @checked(coph.quali==QualifyTyp.LOO) @actionEvent("QualifyTyp", "onchange")>
+          <label class="col-form-label-sm pb-0 mb-0" @forAttr("Looser")>@msg("coph.lbl.looser")</label>
+          <input type="radio" @id("All") data-coId='@{coph.coId}' data-coPhId='@{coph.coPhId}' class="ml-2" 
+            @enabled(coph.status==CompPhaseStatus.CFG)
+            @name(s"QualifyTypName_${coph.coId}_${coph.coPhId}") value='@{QualifyTyp.ALL.id}' 
+            @checked(coph.quali==QualifyTyp.ALL) @actionEvent("QualifyTyp", "onchange")>
+          <label class="col-form-label-sm pb-0 mb-0" @forAttr("All")>@msg("coph.lbl.all")</label> 
+        </div>
+      </div> 
+    }
   } 
 </div>
 
 @if(coph.coPhId!=1) {
-  <div class="row m-1 mb-2 pb-2">
-    
-    <div class="card pb-0"> <!--  Box for participants --> 
-      <div class="tuse-card-header">		
-        <div class="float-left mt-2">
-          <a @Html(collapse("PantCard")) >
-            <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("pants")</h6>
-          </a>
+  <div class="row m-1 pl-2">
+    <div class="col-12 pl-0">
+      <div class="card mt-2">
+        <div class="tuse-card-header d-flex justify-content-between">		
+          <div class="mt-2 ml-1">  
+            <a @Html(collapse(s"PantCard_${coph.coId}_${coph.coPhId}"))>
+              <h6 class="text-dark"><i class="fa fa-fw fa-bars"></i>@msg("coph.pants", coph.name)</h6>
+            </a> 
+          </div>
         </div>
+        <div @id(s"PantCard_${coph.coId}_${coph.coPhId}") class="tuse-card-body pb-2 collapse"></div>
       </div>
-    
-      <div @id("PantCard")' class="card-body pb-2 pt-0 collapse"></div>
-    </div>    
-
+    </div>
   </div>
 }
 

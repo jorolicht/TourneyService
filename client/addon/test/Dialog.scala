@@ -42,6 +42,7 @@ object AddonDialog extends UseCase("AddonDialog")
     number match {
       case 0 => test_0(toId, param)
       case 1 => test_1(toId, plId).flatMap(identity)
+      case 2 => test_2(param)
       case _ => AddonMain.setOutput(s"ERROR invalid test dialog number ${number}"); Future(false)
     }
   }
@@ -86,6 +87,22 @@ object AddonDialog extends UseCase("AddonDialog")
       }
     }
   }  
+
+  // Test 2 - File Input Dialog Test
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20dialog%20%2Dn%202%20%2D%2Dparam%20gen 
+  def test_2(param: String):Future[Boolean] = {
+    import scalajs.usecase.dialog.DlgBoxFile
+
+    val test = s"START Test Dialog 2 Input File -> ${param}"
+    AddonMain.setOutput(test)
+
+    DlgBoxFile.show("DlgBoxFile_Header", "DlgBoxFile_Body", true).map { 
+      case Left(err) => {}
+      case Right(content) => println(s"CONTENT: ${content}") 
+    } 
+
+    Future(true)
+  }
 
 
 

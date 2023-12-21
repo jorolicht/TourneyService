@@ -175,7 +175,7 @@ class GetActionCtrl @Inject()
       }
 
       // getPantPlace delivers placement string or error
-      case "getPantPlace" => tsv.getPantPlace(toId, Crypto.getParam(pMap, "coId", -1L), Crypto.getParam(pMap, "sno")).map {
+      case "getPantPlace" => tsv.getPantPlace(toId, Crypto.getParam(pMap, "coId", -1L), SNO(Crypto.getParam(pMap, "sno"))).map {
         case Left(err)     => BadRequest(err.add("getPantPlace").encode)
         case Right(result) => Ok(result)
       } 

@@ -5,38 +5,35 @@
  * configuration phases (e.g. Preliminary Round, KO-Round, ...)
  * test -s compphase -n 1
  *@
-@import shared.model.Competition
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
 @(coId: Long, coPhNameIdList:List[(String, Int)])(implicit ucc: UseCaseParam)
 
+@if(coId == 0 || coPhNameIdList.length == 0){
+  <div class="container-fluid d-print-none">
+    @msg("noComptitionPhase")
+  </div>
+}else{
   <div class="container-fluid d-print-none">
     <div class="row mb-2">
       <div class="col-12 ml-0 mr-0 pr-0 pl-0" @id("Links")>
-          <ul class="nav nav-tabs">
-            @for(coPhNameIdElem<-coPhNameIdList){
-              <li class="nav-item">
-                <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
-              </li>
-            }
-          </ul>
-      </div>  
-      <!-- <div class="col-auto d-flex justify-content-end mt-2 border-bottom">
-        <span>&nbsp;</span>  
-        @actionButton("Demo", "demo", "btn-xs btn-info m-1")
-        @actionButton("Reset", "reset", "btn-xs btn-danger m-1")
-        @actionButton("Start", "start", "btn-xs btn-success m-1")
-      </div> -->
+        <ul class="nav nav-tabs">
+          @for(coPhNameIdElem<-coPhNameIdList){
+            <li class="nav-item">
+              <a data-coId='@coId' data-coPhId='@coPhNameIdElem._2' class="nav-link" href="#" @actionEvent("SelectCoPh", "onclick")>@coPhNameIdElem._1</a>
+            </li>
+          }
+        </ul>
+      </div>
     </div>
   </div>
 
-  
-<div @id("Content")>
-  @for(i<-List("Ctrl","Draw","Input","View","Referee")){
-    <div id='@{i}Content_@{coId}'>
-      @for(coPhNameIdElem<-coPhNameIdList){ <section style="display:none;" data-section='@{i}' data-coPhId='@coPhNameIdElem._2'></section> }
-    </div> 
-  }
-</div>
+  <div id='TabContent_@{coId}'>
+    @for(i<-List("Draw","Input","View","Referee","Error"); coPhNameIdElem<-coPhNameIdList ){
+      <div data-cophContent='@coPhNameIdElem._1' id='@{i}Content_@{coId}_@{coPhNameIdElem._2}' style="display:none;"></div> 
+    }
+  </div>
+}
+

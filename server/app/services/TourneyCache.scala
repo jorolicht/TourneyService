@@ -397,17 +397,15 @@ object TIO {
           val license2id:  scala.collection.mutable.Map[String, Long] = scala.collection.mutable.Map().withDefaultValue(0L)
           tourney(tony.id) = Tourney.init(tony)
           for((club,i) <- ctt.getClubs.zipWithIndex) {
-            tourney(tony.id).clubs(i+1) = club.copy(id = i + 1)      
-            tourney(tony.id).club2id(club.name) = (i+1)
-            // generate hash value
-            tourney(tony.id).club2id(Crypto.genHashClub(club)) = (i+1)
+            tourney(tony.id).clubs(i+1) = club.copy(id = i+1)      
+            tourney(tony.id).club2id(club.hash) = (i+1)
             tourney(tony.id).clubIdMax = i+1
           }
           for((person,i) <- ctt.getPersons.zipWithIndex) {
             val pl =  CttService.cttPers2Player(person)
-            tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName))
+            tourney(tony.id).players(i+1) = pl.copy(id=i+1, clubId=tourney(tony.id).club2id(pl.clubName.hashCode()))
             // generate hash value
-            tourney(tony.id).player2id(Crypto.genHashPlayer(pl)) = i+1
+            tourney(tony.id).player2id(pl.hash) = i+1
             license2id(pl.getLicense.value) = i+1
             tourney(tony.id).playerIdMax = i+1
             tourney(tony.id).licenses(person.licenceNr) = CSVConverter[CttPerson].to(person)
@@ -418,7 +416,7 @@ object TIO {
             tourney(tony.id).comps(i+1) = comp.copy(id=i+1)
             //tourney(tony.id).coName2id(comp.hash) = i+1
             // generate hash value
-            tourney(tony.id).comp2id(Crypto.genHashComp(comp)) = i+1          
+            tourney(tony.id).comp2id(comp.hash()) = i+1          
             tourney(tony.id).compIdMax = i+1
             val coId = tourney(tony.id).compIdMax 
             // ctt players map to pl2co or do2co entries. 
@@ -568,7 +566,10 @@ object TIO {
     } yield (res1)) match {
       case Failure(f) => { logger.error(f.toString); Left(Error("err0146.fileaccess.config", fNCfg, "cache")) }   
       case Success(cfgFile) => Tourney.decode(cfgFile) match {
-        case Left(err)   => logger.error(s"cache -> decode config file: ${cfgFile.take(50)}"); Left(err.add("cache(cfg)"))
+        case Left(err)   => {
+          logger.error(s"cache -> ${err}")
+          logger.error(s"cache -> decode config file: ${cfgFile.take(50)}"); Left(err.add("cache(cfg)"))
+        }  
         case Right(trny) => {
             try {
               // setup complete tourney

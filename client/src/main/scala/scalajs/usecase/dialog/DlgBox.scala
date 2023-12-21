@@ -51,12 +51,12 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        offEvents(gE(uc("Modal")), "hide.bs.modal")
-        doModal(gE(uc("Modal")), "hide")
+        offEvents(gUE("Modal"), "hide.bs.modal")
+        doModal(gUE("Modal"), "hide")
       }         
     }
     
-    setHtml("Load", html.DlgBox(header, body, buttons, defaultButton, sameSize))
+    setHtml(gUE("Load"), html.DlgBox(header, body, buttons, defaultButton, sameSize))
 
     // register routines for cancel and submit
     onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
@@ -93,7 +93,7 @@ object DlgBox extends BasicHtml
       }         
     }
     
-    setHtml("Load", html.DlgBoxStd(header, body, buttons, defaultButton, true))
+    setHtml(gUE("Load"), html.DlgBoxStd(header, body, buttons, defaultButton, true))
     onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
     onClick2("[id^=APP__DlgBox__Click_]", (e: Event) => dialogBoxClick(e))
     doModal(gE(uc("Modal")), "show")

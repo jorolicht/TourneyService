@@ -21,7 +21,7 @@ trait ViewServices {
 
 
  /** genSingleTblData
-   *  returns Sequence of Single Participants (sno, lastname, firstname, clubname, birthyear, status) 
+   *  returns Sequence of Single Participants (sno, lastname, firstname, ttr, clubname, birthyear, status) 
    */
   def genSingleTblData(trny: Tourney, coId: Long): Seq[(String, String, String, String, String, Int, Int)] = {
     val p2cs = if (coId > 0) trny.pl2co.values.filter(_.coId == coId).toSeq else trny.pl2co.values.toSeq
@@ -107,7 +107,7 @@ trait ViewServices {
     (for {  
       (coId, comp) <- App.tourney.comps
     } yield { 
-      if (comp.status == CompStatus.ERFIN) {
+      if (comp.chkStatus(CompStatus.ERFIN)) {
         (coId, comp.name, getPlacements(coId, comp.typ, App.tourney))
       } else {
         (coId, comp.name, Seq())

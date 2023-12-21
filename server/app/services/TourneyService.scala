@@ -26,6 +26,12 @@ trait TourneyService {
   def updPlayers(pls: Seq[Player])(implicit tse: TournSVCEnv): Future[Either[Error, Seq[Player]]]
   def delPlayers(tse: TournSVCEnv): Future[Either[Error, Int]]
 
+  def regSingle(coId: Long, pl: Player, pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, SNO]]
+  def regSingle(coId: Long, pList: List[Player], pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, List[SNO]]]
+  def regDouble(coId: Long, pp: (Long,Long), pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, SNO]]
+  def regDouble(coId: Long, ppList: List[(Long,Long)], pStatus: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, List[SNO]]]
+
+
   // setPlayerEMail setPlayerLicense
   //def setPlayerEMail(toId: Long, plId: Long, email: String): Future[Either[Error, Player]]
   
@@ -45,9 +51,9 @@ trait TourneyService {
   def delPant2Comps(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
   def getPant2Comps(toId: Long): Future[Either[Error, Seq[Pant2Comp]]]
 
-  def getPantPlace(toId: Long, coId: Long, sno: String): Future[Either[Error, String]]
-  def setPantPlace(coId: Long, sno: String, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
-  def setPantStatus(coId: Long, sno: String, status: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, PantStatus.Value]]
+  def getPantPlace(toId: Long, coId: Long, sno: SNO): Future[Either[Error, String]]
+  def setPantPlace(coId: Long, sno: SNO, place: String)(implicit tse :TournSVCEnv): Future[Either[Error, Placement]]
+  def setPantStatus(coId: Long, sno: SNO, status: PantStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, PantStatus.Value]]
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, PantStatus.Value)])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   //
@@ -77,7 +83,7 @@ trait TourneyService {
   def updComps(comps: Seq[Competition])(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Seq[Competition]]]
   def addComp(co: Competition)(implicit msgs: Messages, tse :TournSVCEnv):Future[Either[Error, Competition]]
 
-  def setCompStatus(coId: Long, status: CompStatus.Value)(implicit tse: TournSVCEnv): Future[Either[Error, Boolean]] 
+  def setCompStatus(coId: Long, status: CompStatus.Value)(implicit tse: TournSVCEnv): Future[Either[Error, Unit]] 
   def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
   def setCompRatingUpperLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
 
@@ -106,9 +112,8 @@ trait TourneyService {
 
 
   // Competition Phase Interface
-  def addCompPhase(coId: Long, baseCoPhId: Int, cfgWinner: Boolean, coPhCfg: CompPhaseCfg.Value, name: String, noWinSets: Int)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
   def addCompPhase(coId: Long, name: String)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
-  def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]] 
+  def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
   def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]  
    
 

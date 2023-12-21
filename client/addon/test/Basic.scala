@@ -21,20 +21,32 @@ import scalajs.usecase.component._
 import scalajs.service._
 import scalajs.{ App, AppEnv }
 
+import org.scalajs.dom
+
+
+@JSExportTopLevel("AddonBasic")
 object AddonBasic extends UseCase("AddonBasic") 
   with TourneySvc with LicenseSvc with AuthenticateSvc with WrapperSvc
 {
   
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def execTest(number: Int, param: String)= {
+  def execTest(number: Int, param: String):Future[Boolean]= {
     number match {
-      case 0 => test_0(param)
-      case 1 => test_1(param)
-      case 2 => test_2()
-      case 3 => test_3(param)
-      case 4 => test_4(param)
-      case _ => println("Invalid BASIC test option")
+      case 0 => test_0(param); Future(true)
+      case  1 => test_1(param); Future(true)
+      case  2 => test_2();      Future(true)
+      case  3 => test_3(param); Future(true)
+      case  4 => test_4(param); Future(true)
+      case  5 => test_5(param)
+      case  6 => test_6(param)
+      case  7 => test_7(param)
+      case  8 => test_8(param)
+      case  9 => test_9(param)
+      case 10 => test_10(param)
+      case 11 => test_11(param)
+
+      case _ => AddonMain.setOutput(s"ERROR: invalid test number ${number}"); Future(true)
     }
   }
 
@@ -100,13 +112,305 @@ object AddonBasic extends UseCase("AddonBasic")
     import shared.model.CompStatus
     import shared.model.CompTyp
 
-    val cs = CompStatus.EIN
+    val cs = CompStatus.RUN
     val ct = CompTyp.SINGLE
 
     println(s"START Test Enum Function param->${param}")
     println(s"Get CompStatus message code: ${gM(cs.msgCode,"VORRRUNDE")}")
     println(s"Get CompTyp message code: ${gM(CompTyp.SINGLE.msgCode)}")
 
+  }
+
+
+  // Test 5 - Bootstrap Functionality
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%205%20%2Dp%20HALLOOOOO 
+  def test_5(param: String): Future[Boolean] = {
+
+    val test = s"START Test Basic 5 -> ${param}"
+    AddonMain.setOutput(test)
+
+    val content = """ 
+      <div class="dropdown">
+        <button class="btn btn-xs btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown">
+          Dropdown button
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="javascript:AddonBasic.callbackTest5('cfg',this)">zurück zur Konfiguration</a>
+          <a class="dropdown-item" href="javascript:AddonBasic.callbackTest5('aus',this)">zurück zur Ausloung</a>
+          <a class="dropdown-item" href="javascript:AddonBasic.callbackTest5('ein',this)">Ergebniseingabe löschen</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-xs btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown">
+          Dropdown
+        </button>
+        <div class="dropdown-menu" >
+          <button class="dropdown-item" type="button" disabled>Action</button>
+          <button class="dropdown-item" type="button">Another action</button>
+          <button class="dropdown-item" type="button">Something else here</button>
+        </div>
+      </div>
+
+    """
+
+    App.execUseCase("HomeMain", "Test", content)
+
+    Future(true)
+  }  
+
+  @JSExport
+  def callbackTest5(cmd: String, elem: dom.raw.HTMLElement): Unit = {
+    
+    val level = getData(elem, "level", "")
+    dom.window.alert(s"Data from button: ${cmd}")
+
+  }  
+
+
+  // Test 6 - Basic Test write Option[Int] -> Json
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%206%20%2Dparam%208 
+  def test_6(param: String):Future[Boolean] = {
+    import upickle.default._
+    import upickle.default.{ReadWriter => RW, macroRW}
+
+    val test = s"START Test Basic 6 encode Option[Int]-> ${param}"
+    AddonMain.setOutput(test)
+
+    val testInt = param.toIntOption
+
+    AddonMain.setOutput(s"Write ${testInt} as JSON: ${write(testInt)}")
+    Future(true)
+  }
+
+  // Test 7 - Basic Test for Shapeless HList
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%207%20%2D2Dparam%20gen 
+  def test_7(param: String):Future[Boolean] = {
+    import scala.collection.mutable.ArrayBuffer
+    import shapeless.{::, HList, HNil}
+    import shapeless.Generic
+
+    class MyClass[H <: HList](hs: H)
+    object MyClass {
+      def apply[P <: Product, L <: HList](p: P)(implicit gen: Generic.Aux[P, L]) = new MyClass[L](gen.to(p))
+    }
+
+    val test = s"START Test Basic 7 Shapeless HList -> ${param}"
+    AddonMain.setOutput(test)
+
+    val x = MyClass(2,4)
+    type MyHList = Int :: String :: HNil
+
+    val xxx = new ArrayBuffer[MyClass[Int :: String :: HNil]]()
+    val testInt = param.toIntOption
+
+    Future(true)
+  }
+
+
+
+
+
+  // Test 8 - Basic Test Read File Input
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%208%20%2D%2Dparam%20gen 
+  def test_8(param: String):Future[Boolean] = {
+    import org.scalajs.dom.{ Event, FileReader, UIEvent}
+    import scala.collection.mutable.ArrayBuffer
+
+    val test = s"START Test Basic 8 Read Input File -> ${param}"
+    AddonMain.setOutput(test)
+
+    val content = """ 
+      <input type="file" id="myFile" > 
+    """
+    App.execUseCase("HomeMain", "Test", content)
+
+    val fileInput = dom.document.getElementById("myFile").asInstanceOf[dom.html.Input]
+
+    fileInput.onchange = e => {
+      val reader = new dom.FileReader()
+      reader.readAsText(fileInput.files(0))
+      reader.onload = (e:UIEvent) => {
+        val contents = reader.result.asInstanceOf[String]
+        dom.console.log(contents)
+      }
+    }
+    // Name, Vorname, Club, TTR, Year
+    Future(true)
+  }
+
+
+  // Test 9 - Basic Test generate hashCode
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%209%20%2D%2Dparam%20gen 
+  def test_9(param: String):Future[Boolean] = {
+
+    val test = s"START Test 9 - Basic Test generate hashCode -> ${param}"
+    val hCodeTest = "Abcde@ß"
+    AddonMain.setOutput(test)
+    AddonMain.addOutput(s"Hashcode from ${param} -> ${param.hashCode.toString}")
+    AddonMain.addOutput(s"Hashcode from ${hCodeTest} -> ${hCodeTest.hashCode.toString}")
+
+    Future(true)
+  }
+
+  // Test 10 - Basic Test Tree Structure
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%2010%20%2D%2Dparam%20gen 
+  def test_10(param: String):Future[Boolean] = {
+    import shared.model.DrawTree
+
+    val test = s"START Test 10 - Basic Test Tree Structure -> ${param}"
+    //AddonMain.setOutput(test)
+    val x = DrawTree.init[Long](1,16, 0L)
+
+    x match {
+      case None        => {}
+      case Some(tree)  => {
+        tree.addItem[Long](tree, 2, 1001L)
+        tree.addItem[Long](tree, 16, 1002L)
+        tree.addItem[Long](tree, 3, 1001L)
+        tree.addItem[Long](tree, 4, 1003L)
+        tree.addItem[Long](tree, 15, 1003L)
+      }
+    }
+
+    DrawTree.treePrint(x)
+    //val tree = BTree[Int](4, Some(BTree(1)), Some(BTree(2, Some(BTree(5)), Some(BTree(6)))))
+
+    val y = DrawTree.init[String](1,16, "")
+    y match {
+      case None        => {}
+      case Some(tree)  => {
+        tree.addItem[String](tree, 2, "A")
+        tree.addItem[String](tree, 16, "B")
+        tree.addItem[String](tree, 3, "C")
+        tree.addItem[String](tree, 4, "D")
+        tree.addItem[String](tree, 15,"A")
+      }
+    }
+    DrawTree.treePrint(y)
+
+    Future(true)
+  }
+
+  // Test 11 - Basic Test Basic Test Pairing Tables by Richard Schurig
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%2011%20%2D%2Dparam%207 
+  def test_11(param: String):Future[Boolean] = {
+  
+    def getBye(pair: (Int,Int), value: Int) = if (value == pair._1) pair._2 else pair._1
+
+    def rotateLeft[A](seq: Seq[A], i: Int): Seq[A] = {
+      val size = seq.size
+      seq.drop(i % size) ++ seq.take(i % size)
+    }
+
+    def rotateRight[A](seq: Seq[A], i: Int): Seq[A] = {
+      val size = seq.size
+      seq.drop(size - (i % size)) ++ seq.take(size - (i % size))
+    }
+
+    def rotateUntilByeIsHead(seq: Array[(Int,Int)], bye: Int ): Array[(Int,Int)] = {
+      val index = seq.indexWhere(elem => (elem._1 == bye) || (elem._2 == bye))
+      rotateLeft(seq, index).to(Array)
+    }  
+
+    def rotateNotHead(seq: Array[(Int,Int)], last: (Int,Int)): Int = 
+      seq.indexWhere(elem => (elem._1 != last._1) && (elem._1 != last._2)  && (elem._2 != last._1) && (elem._2 != last._2) )
+
+    def rotateUntilLastIsNotHead(seq: Array[(Int,Int)], last: (Int,Int)): Array[(Int,Int)] = {
+      val index = seq.indexWhere(elem => (elem._1 != last._1) && (elem._1 != last._2)  && (elem._2 != last._1) && (elem._2 != last._2) )
+      rotateLeft(seq, index).to(Array)
+    } 
+
+    val test = s"START Test 11 - Basic Test Pairing Tables by Richard Schurig -> ${param}"
+    val size = param.toIntOption.getOrElse(0)
+
+    // examples
+    // size  = 3  4  5  6  7  8  
+    // even  = 4  4  6  6  8  8 
+    // noMpR = 2' 2  3' 3  4' 4   number of matches per Round incl bye(') 
+    // rnds  = 3  3  5  5  7  7 
+                                                       
+    val even    = size + size%2                        
+    val noMpR   = even/2                                                            
+    val rnds    = even - 1                           
+    val rsArray = Array.ofDim[Int](rnds, noMpR)
+    val rs2Array = Array.ofDim[Int](rnds, noMpR)
+
+    val rsPair  = Array.ofDim[(Int,Int)](rnds, noMpR)
+    val rsPair1 = Array.ofDim[(Int,Int)](rnds, noMpR)
+    val rsPair2 = Array.ofDim[(Int,Int)](rnds, noMpR)
+
+    // fill array as Richard Schurig stated
+    var cnt = 1
+    for (i<-0 until rnds; j<-0 until noMpR) {
+      rsArray(i)(j) = if ((cnt % (rnds)) == 0) rnds else (cnt % (rnds))
+      cnt = cnt +1 
+    }
+    
+    // construct 2nd table
+    for (i<-0 until rnds; j<-0 until noMpR) {
+      // val row = (i+1)%rnds
+      // val col = if (j!=0) noMpR-j-1
+      rs2Array(i)(j) = if (j!=0) rsArray((i+1)%rnds)(noMpR-j-1) else even
+    }
+  
+    // generate paaring, swap first column entry on every second row
+    for (i<-0 until rnds; j<-0 until noMpR) {
+      rsPair(i)(j) = if ((i%2)==1 && j==0)  (rs2Array(i)(j), rsArray(i)(j)) else (rsArray(i)(j), rs2Array(i)(j))
+    }
+
+    println(s"Step 1 - GENERATE PAIRING")
+    // step 1 - change rounds (first keep first .. last goes 2nd)
+    for (i<-0 until rnds) {
+      val j = if (i==0) 0 else rnds-i 
+      rsPair1(i) = rsPair(j)
+    }
+
+    // step 2 - fix time to next game for each player/team
+    println(s"Step 2 - OPTIMIZE") 
+    if (size%2 == 1) { 
+      // odd sized groups
+      for (i<-0 until rnds) {
+        // first line  
+        if (i == 0) { 
+          // println(s"odd (${i+1})")
+          // println(s"odd (${i+1}) ${rsPair1(0).drop(1).mkString(":")}")
+          // println(s"odd (${i+1}) ${rsPair1(0).take(1)}")
+
+          rsPair2(0) = rsPair1(0).drop(1) ++ rsPair1(0).take(1)
+          
+        } else {
+          //println(s"odd (${i+1}) bye: ${getBye(rsPair1(i-1)(0), even)} ") 
+          //bye in one round should have first match in next round
+          val bye    = getBye(rsPair1(i-1)(0), even) 
+          //println(s"odd rotate (${i+1})") 
+          rsPair2(i) = rotateUntilByeIsHead(rsPair1(i).drop(1), bye) ++ rsPair1(i).take(1)
+        }
+      }
+    } else {          
+      // even sized groups
+      for (i<-0 until rnds) {
+        // keep first line
+        if (i == 0) { 
+          rsPair2(0) = rsPair1(0) 
+        } else {
+          //get last of previous round, should not be first in next round
+          val last = rsPair2(i-1)(noMpR-1)
+          //println(s"rotate(${i+1}) ${rsPair1(i).mkString(":")} last ${last} times: ${rotateNotHead(rsPair1(i),last)}")
+          rsPair2(i) = rotateUntilLastIsNotHead(rsPair1(i), last)
+        }
+      }
+    }
+ 
+
+    println(s"Step 3 - PRINT" ) 
+    if (size%2 == 1) {
+      for (i<-0 until rnds) println(s"Runde ${i+1} -> ${rsPair2(i).dropRight(1).mkString(":")}")
+    } else {
+      for (i<-0 until rnds) println(s"Runde ${i+1} -> ${rsPair2(i).mkString(":")}")
+    }
+
+    Future(true)
   }
 
 

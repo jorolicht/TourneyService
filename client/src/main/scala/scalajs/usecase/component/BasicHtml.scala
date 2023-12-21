@@ -100,19 +100,23 @@ class BasicHtml
   
   /** setHtml
     *
-    * @param elemId  - id of html element
+    * @param elem    - HTMLElement
     * @param content - html content of element
     */ 
 
-  def setHtml[I,C](idElt: I, content: C = "")(implicit ucp: UseCaseParam=UseCaseParam("","","","", (x:String,y:Seq[String])=>"")): Unit = {
-    val value = content match {
+  def setHtml[C](elem: HTMLElement, content: => C = ""): Unit = {
+    val value = try content match {
         case _:String => content.asInstanceOf[String]
         case _        => content.toString
-    }     
-    try idElt match {
-      case _:String => gE(uc(idElt.asInstanceOf[String])).innerHTML = value 
-      case _        => idElt.asInstanceOf[HTMLElement].innerHTML = value
-    } catch { case _: Throwable => error("setHtml", s"idElt: ${idElt} usecase: ${ucp.idBase} content: ${value.take(10)}") }
+    } catch { case _: Throwable => 
+      if   (elem == null) s"setHtml -> invalid content elem: ${elem}" 
+      else                s"setHtml -> invalid content elem: ${elem} id: ${elem.id}" 
+    }
+    try    elem.innerHTML = value
+    catch { case _: Throwable => 
+      if   (elem == null) AppEnv.error("setHtml", s"elem: ${elem} content: ${value.take(20)}") 
+      else AppEnv.error("setHtml", s"elem: ${elem} id: ${elem.id} content: ${value.take(20)}") 
+    }
   }
 
   def setText(id: String, content: String)(implicit ucp: UseCaseParam): Unit = 
@@ -139,7 +143,7 @@ class BasicHtml
 
   def setDisabled(elem: HTMLElement, value: Boolean): Unit = {
     try elem.asInstanceOf[Input].disabled = value
-    catch { case _: Throwable => AppEnv.logger.error(s"setDisabled__ -> value: ${value}") } 
+    catch { case _: Throwable => AppEnv.logger.error(s"setDisabled elem: ${elem} value: ${value}") } 
   }
 
   def setDisabledByName(name: String, value: Boolean)(implicit ucp: UseCaseParam): Unit = {
@@ -285,6 +289,10 @@ class BasicHtml
     try elem.setAttribute(s"data-${attr}", value.toString)
     catch { case _: Throwable => AppEnv.error("setData", s"attribute: ${attr} value: ${value}") }
   }
+
+  def getCoId(elem: HTMLElement):Long  = getData(elem, "coId", 0L)
+  def getCoPhId(elem: HTMLElement):Int = getData(elem, "coPhId", 0)
+  def getSNO(elem: HTMLElement):String = getData(elem, "sno", "")
 
   /**
     * getInput read input value from Html input element 
@@ -482,12 +490,12 @@ class BasicHtml
     } catch { case _: Throwable => AppEnv.error("setRadioBtnByValue", s"name: ${name} -> ${value}") } 
   }
 
-  def selectOptionByValue(elem: HTMLElement, value: String): Unit = {
-    try {
-      val elems = elem.childNodes.asInstanceOf[NodeListOf[Input]]
-      elems.map { e => if (e.value==value) e.setAttribute("selected","true") else e.setAttribute("selected","false")  }
-    } catch { case _: Throwable => AppEnv.error("selectOptionByValue", s"elem: ${elem} -> ${value}") } 
-  }
+  // def selectOptionByValue(elem: HTMLElement, value: String): Unit = {
+  //   try {
+  //     val elems = elem.childNodes.asInstanceOf[NodeListOf[Input]]
+  //     elems.map { e => if (e.value==value) e.setAttribute("selected","true") else e.setAttribute("selected","false")  }
+  //   } catch { case _: Throwable => AppEnv.error("selectOptionByValue", s"elem: ${elem} -> ${value}") } 
+  // }
 
 
 
@@ -581,7 +589,7 @@ class BasicHtml
     case _:shared.model.CompStatus.Value      => gM(value.asInstanceOf[shared.model.CompStatus.Value].msgCode, in)
     case _:shared.model.CompPhaseStatus.Value => gM(value.asInstanceOf[shared.model.CompPhaseStatus.Value].msgCode, in)
     case _:shared.model.CompPhaseTyp.Value    => gM(value.asInstanceOf[shared.model.CompPhaseTyp.Value].msgCode, in)
-
+    
     case _                                    => "XXX"
   }
 
@@ -609,12 +617,19 @@ class BasicHtml
   } 
 
   def gE(id: String): HTMLElement = 
-    try document.getElementById(id).asInstanceOf[HTMLElement]
-    catch { case _: Throwable => AppEnv.error("gE", s"id: ${id}"); null } 
+    try {
+      val elem = document.getElementById(id).asInstanceOf[HTMLElement]
+      if (elem == null) AppEnv.warn("gE", s"id: ${id} null")
+      elem
+    } catch { case _: Throwable => AppEnv.error("gE", s"id: ${id}"); null } 
 
-  def gUE(id: String)(implicit ucp: UseCaseParam) : HTMLElement = 
-    try document.getElementById(uc(id)).asInstanceOf[HTMLElement]
-    catch { case _: Throwable => AppEnv.error("gUE", s"id: ${uc(id)}"); null } 
+  def gUE(id: String)(implicit ucp: UseCaseParam): HTMLElement = 
+    try {
+      val elem = document.getElementById(uc(id)).asInstanceOf[HTMLElement]
+      document.getElementById(uc(id)).asInstanceOf[HTMLElement]
+      if (elem == null) AppEnv.warn("gUE", s"id: ${uc(id)} null")
+      elem
+    } catch { case _: Throwable => AppEnv.error("gUE", s"id: ${uc(id)}"); null } 
 
 
   def gEqS(id: String, qS: String): HTMLElement = 

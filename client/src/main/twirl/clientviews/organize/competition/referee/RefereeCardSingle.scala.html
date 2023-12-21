@@ -9,7 +9,7 @@
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
 
-@(coph: CompPhase, gameNo: Int, trnyName: String, compName: String, 
+@(coph: CompPhase, gameNo: Int, trnyName: String, dateTime: String, compName: String, 
   compTyp: String, compInfo1: String, compInfo2: String, 
   player1: String, player2: String, club1: String, club2: String)(implicit ucc: UseCaseParam)
 
@@ -21,8 +21,8 @@
   <div class="RefereeTableInfo1">@Html(msg("tableInfo1"))</div>
   <div class="RefereeTableInfo2">@Html(msg("tableInfo2"))</div>
   <div class="RefereeGameNo">@gameNo</div>
-  <div class="RefereeLabelGameNo">Spielnummer</div>
-  <div class="RefereeDateTime">DateTime</div>
+  <div class="RefereeLabelGameNo">@msg("gameNo")</div>
+  <div class="RefereeDateTime">@dateTime</div>
   <div id='QRCode_@{coph.coId}_@{coph.coPhId}_@{gameNo}' class="RefereeQRCode mt-2"></div>
   <div class="RefereeLabelSet0 justify-content-end">
     <a href="" id='QRCodeLink_@{coph.coId}_@{coph.coPhId}_@{gameNo}'>
@@ -34,43 +34,42 @@
   </div>
   <div class="RefereePlayer1">@player1</div>
   <div class="RefereePlayer2">@player2</div>
-  <div class="RefereeLabelSet">LabelSet</div>
+  <div class="RefereeLabelSet">&nbsp;</div>
   <div class="RefereeClub1">@club1</div>
   <div class="RefereeClub2">@club2</div>
 
-  <div class="RefereeLabelSet1">Satz 1</div>
+  <div class="RefereeLabelSet1">@msg("set1")</div>
   <div class="RefereePlayer1Set1"></div>
   <div class="RefereePlayer2Set1"></div>
   
-  <div class="RefereeLabelSet2">Satz 2</div>
+  <div class="RefereeLabelSet2">@msg("set2")</div>
   <div class="RefereePlayer1Set2"></div>
   <div class="RefereePlayer2Set2"></div>
 
-  <div class="RefereeLabelSet3">Satz 3</div>
+  <div class="RefereeLabelSet3">@msg("set3")</div>
   <div class="RefereePlayer1Set3"></div>
   <div class="RefereePlayer2Set3"></div>
 
-  <div class="RefereeLabelSet4">Satz 4</div>
+  <div class="RefereeLabelSet4">@if(coph.noWinSets==3)@{msg("set4")}</div>
   <div class="RefereePlayer1Set4"></div>
   <div class="RefereePlayer2Set4"></div>
   
-  <div class="RefereeLabelSet5">Satz 5</div>
+  <div class="RefereeLabelSet5">@if(coph.noWinSets==3)@{msg("set5")}</div>
   <div class="RefereePlayer1Set5"></div>
   <div class="RefereePlayer2Set5"></div>
   
-  <div class="RefereeLabelSet6">Satz 6</div>
+  <div class="RefereeLabelSet6">@if(coph.noWinSets==4)@{msg("set6")}</div>
   <div class="RefereePlayer1Set6"></div>
   <div class="RefereePlayer2Set6"></div>
   
-  <div class="RefereeLabelSet7">Satz 7</div>
+  <div class="RefereeLabelSet7">@if(coph.noWinSets==4)@{msg("set7")}</div>
   <div class="RefereePlayer1Set7"></div>
   <div class="RefereePlayer2Set7"></div>
 
-
-  <div class="RefereeLabelSets">Sätze</div>
+  <div class="RefereeLabelSets">@msg("sets")</div>
   <div class="RefereePlayer1Sets"></div>
   <div class="RefereePlayer2Sets"></div>
 
-  <div class="RefereeLabelWinner">Sieger</div>
+  <div class="RefereeLabelWinner">@msg("winner")</div>
   <div class="RefereePlayer1Winner"></div>
   <div class="RefereePlayer2Winner"></div>

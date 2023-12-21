@@ -60,7 +60,6 @@ object CSVConverter {
 
 
   // HList
-
   implicit def deriveHNil: CSVConverter[HNil] =
     new CSVConverter[HNil] {
       def from(s: String): Try[HNil] = s match {

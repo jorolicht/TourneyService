@@ -137,10 +137,11 @@ package object twirlhelper {
   }
 
 
-  def _actionButton(key: String, caption: String, _class: String, coId:Long, coPhId:Int)(implicit ucp: UseCaseParam): String = {
+  def _actionButton(key: String, caption: String, _class: String, coId:Long, coPhId:Int, enabled: Boolean)(implicit ucp: UseCaseParam): String = {
     val bName  = if (caption.startsWith("std.btn.")) msg_(caption) else msg("btn." + caption)
     val bClass = if (_class == "close") _class else s"btn ${_class}"
-    s"""<button id='${ucp.idBase + "__Btn" + key}' data-coId=${coId} data-coPhId=${coPhId}  type='button' class='${bClass}' ${_actionEvent(key, "onclick")}>${bName}</button> """   
+    if (enabled) s"""<button id='${ucp.idBase + "__Btn" + key}' data-coId=${coId} data-coPhId=${coPhId}  type='button' class='${bClass}' ${_actionEvent(key, "onclick")}>${bName}</button> """   
+    else         s"""<button id='${ucp.idBase + "__Btn" + key}' data-coId=${coId} data-coPhId=${coPhId}  type='button' class='${bClass}' ${_actionEvent(key, "onclick")} disabled>${bName}</button> """   
   }
 
   /*

@@ -69,7 +69,7 @@ object DlgPrompt extends BasicHtml
     }
 
     $("#DlgPrompt__Modal").modal("show")
-    setHtml("Title", title)
+    setHtml(gUE("Title"), title)
     setInput("Input", initValue)
     $("#DlgPrompt__Modal").on("hide.bs.modal", () => dialogBoxCancel())
     f.map {

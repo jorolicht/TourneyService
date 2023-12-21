@@ -104,7 +104,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
           }
 
           case RegisterState.FreeConfirm  => {
-            setHtml("FreeConfirm", clientviews.home.register.html.FreeConfirm(ctx).toString )
+            setHtml(gUE("FreeConfirm"), clientviews.home.register.html.FreeConfirm(ctx).toString )
             setVisibleByAttr("view", "free-confirm", true)
             sendLicenseVerifyCode(ctx("time").num.toInt, ctx("email").str, s"${ctx("name").str}") 
           }
@@ -114,7 +114,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
             
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(gM("msg.processing","")).toString)
+            setHtml(gUE("Processing"), clientviews.component.html.Spinner(gM("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
             val result = (for {
               licIdCpn <- EitherT(requestLicense(licReq))
@@ -123,19 +123,19 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
               case Left(err)   => {
                 setVisibleByAttr("view", "processing", false)
                 setVisibleByAttr("view", "error", true)
-                setHtml("ErrorMsg", getError(err))
+                setHtml(gUE("ErrorMsg"), getError(err))
               }   
               case Right(res)  => {
                 setVisibleByAttr("view", "processing", false)
                 setVisibleByAttr("view", "free-finish", true); 
-                setHtml("FreeLicenseCode", res._1)
+                setHtml(gUE("FreeLicenseCode"), res._1)
                 RegisterData.reset()
               }
             }            
           }
 
           case RegisterState.FullConfirm  => {
-            setHtml("FullConfirm", clientviews.home.register.html.FullConfirm(ctx).toString )
+            setHtml(gUE("FullConfirm"), clientviews.home.register.html.FullConfirm(ctx).toString )
             setVisibleByAttr("view", "full-confirm", true)
             sendLicenseVerifyCode(ctx("time").num.toInt, ctx("email").str, s"${ctx("name").str}") 
           }
@@ -154,7 +154,7 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
             val licReq = LicRequest(ctx("name").str, ctx("email").str, addr.encode, pw.getBytes.toBase64, ctx("clubname").str, false, false)
             // Process Request:                        
             // request a license, generate an invoice and send it to the user
-            setHtml("Processing", clientviews.component.html.Spinner(gM("msg.processing","")).toString)
+            setHtml(gUE("Processing"), clientviews.component.html.Spinner(gM("msg.processing","")).toString)
             setVisibleByAttr("view", "processing", true)
 
             println("RegisterState.FullFinish 2")
@@ -167,12 +167,12 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
               case Left(err)   => {
                 setVisibleByAttr("view", "processing", false)
                 setVisibleByAttr("view", "error", true) 
-                setHtml("ErrorMsg", getError(err))
+                setHtml(gUE("ErrorMsg"), getError(err))
               }  
               case Right(res)  => {
                 setVisibleByAttr("view", "processing", false)
                 setVisibleByAttr("view", "error", false)
-                setHtml("FullFinish", clientviews.home.register.html.FullFinish(res._1, res._2, res._3).toString)
+                setHtml(gUE("FullFinish"), clientviews.home.register.html.FullFinish(res._1, res._2, res._3).toString)
                 setVisibleByAttr("view", "full-finish", true)
                 RegisterData.reset()
               }
@@ -326,12 +326,12 @@ object HomeRegister extends UseCase("HomeRegister") with LicenseSvc
     ctx("state").str match {
       case "FreeConfirm" => {
         setVisibleByName("view", false)
-        setHtml("FreeConfirm", clientviews.home.register.html.FreeConfirm(ctx).toString )
+        setHtml(gUE("FreeConfirm"), clientviews.home.register.html.FreeConfirm(ctx).toString )
         setVisibleByAttr("view", "free-confirm", true)
       }
       case "FullConfirm" => {
         setVisibleByName("view", false)
-        setHtml("FullConfirm", clientviews.home.register.html.FullConfirm(ctx).toString )
+        setHtml(gUE("FullConfirm"), clientviews.home.register.html.FullConfirm(ctx).toString )
         setVisibleByAttr("view", "full-confirm", true)
       }
 

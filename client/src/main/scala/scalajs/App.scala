@@ -45,7 +45,7 @@ object App extends BasicHtml with TourneySvc
                     InfoPlayfield, InfoResult, InfoSchedule,
                     OrganizeCertificate, OrganizeCompetition, OrganizePlayer, 
                     OrganizePlayfield, OrganizeReport, OrganizeTourney,
-                    OrganizeCompetitionCtrl, OrganizeCompetitionDraw, OrganizeCompetitionInput, 
+                    OrganizeCompetitionDraw, OrganizeCompetitionInput, 
                     OrganizeCompetitionView, OrganizeCompetitionReferee,
                     OrganizeReport, 
                     AdminDatabase, AdminLicense 

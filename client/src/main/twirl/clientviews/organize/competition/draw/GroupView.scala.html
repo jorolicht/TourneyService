@@ -18,12 +18,12 @@
 
 @grpContent(g: Group, gPos:Int, tdSuffix: String) = @{ Html(s"""
   <td rowspan="2" style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">${g.drawPos+gPos}</small></td>
-  <td rowspan="2" data-drawSelectField='${gPos}'  contenteditable='true' style="width:30px; font-size:small;" 
+  <td rowspan="2" data-drawSelectField='${gPos}' contenteditable='true' style="width:30px; font-size:small;" 
       data-drawPos='${g.drawPos+gPos}' class="border-top border-bottom border-right text-center p-1 font-weight-bold text-info">${g.drawPos+gPos}
   </td>
   <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-name='${g.drawPos+gPos}'>${g.pants(gPos).name}</small></td>
   <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-club='${g.drawPos+gPos}'>${g.pants(gPos).club}</small></td>
-  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-rating='${g.drawPos+gPos}' >${g.pants(gPos).getRating}</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-rating='${g.drawPos+gPos}' >${g.pants(gPos).getRatingInfo}</small></td>
   ${tdSuffix}
 """)  
 }
@@ -72,6 +72,12 @@
     @groupView(group, 3, tdrb + tdr  + tdr,  td   + tdr  + tdr )  
     @groupView(group, 4, tdb  + tdrb + tdr,  td   + td   + tdr ) 
     @groupView(group, 5, tdb  + tdb  + tdrb, td   + td   + td  ) 
+  }
+
+  case _ => {
+    @for(i<-0 until group.size){
+      @groupView(group, i, td   + td   + td,   td  + td  + td)
+    } 
   }
 
 }

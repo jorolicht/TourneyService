@@ -23,7 +23,7 @@ case class CttPerson(
 
   // toPlayer convert ctt person to player
   def toPlayer(plId: Long = 0L, clubId: Long = 0L, email: String ="") : Player = {
-    val pl = new Player(plId, "", clubId, clubName, firstname, lastname, getBY(), email, SexTyp(sex), "_")
+    val pl = new Player(plId, clubId, clubName, firstname, lastname, getBY(), email, SexTyp(sex), "_")
    
     pl.setInternalNr(internalNr)
     pl.setLicense(CttLicense(licenceNr))

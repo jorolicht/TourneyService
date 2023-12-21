@@ -1,14 +1,17 @@
 @*
- * Template for input a KO-results
+ * Template for input a Group-results
  *@
+@import shared.model.CompPhase  
+@import shared.model.CompPhaseStatus 
 @import shared.utils.UseCaseParam  
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coId: Long, coPhId: Int, maxRound: Int, winSets:Int)(implicit ucc: UseCaseParam)
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
+@enabled(value: Boolean) = @{ if(value) "" else "disabled" } 
 
 <div class="m-1">
-  <table id='Input_@{coId}_@{coPhId}'>
+  <table id='Input_@{coph.coId}_@{coph.coPhId}'>
     <tbody>
       <tr contenteditable='false' class='border-bottom'>
         <th colspan='1' class="border-left border-right font-weight-bold text-center"><small class="ml-1 mr-1">@msg("group")</small></th>
@@ -20,24 +23,25 @@
         <th class="border-left border-right font-weight-bold"><small class="ml-1 mr-1">@msg("table")</small></th>
         <th class="border-left border-right"></th>
 
-        <th colspan='@{((winSets*2)-1)}' class="border-left border-right text-center"><small class="ml-1 mr-1">@msg("balls")</small></th>
+        <th colspan='@{((coph.noWinSets*2)-1)}' class="border-left border-right text-center"><small class="ml-1 mr-1">@msg("balls")</small></th>
         <th class="border-left border-right font-weight-bold"><small class="ml-1 mr-1">@msg("sets")</small></th>
         <th class="text-right">
-          <button id='InputDemoBtn_@{coId}_@{coPhId}' data-coId='@coId' data-coPhId='@coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
+          <button id='InputDemoBtn_@{coph.coId}_@{coph.coPhId}' data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
            style='display:none' @actionEvent("Demo", "onclick")>@msg_("std.btn.demo")</button> 
         </th>
         <th class="text-right">
-          <button data-coId='@coId' data-coPhId='@coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
-           disabled @actionEvent("DeleteAll", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 
+          <button data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
+           @enabled(coph.status==CompPhaseStatus.EIN || coph.status==CompPhaseStatus.FIN)
+           @actionEvent("DeleteAll", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 
         </th>
       </tr>      
     </tbody>
 
-    @for(i <- 1 to maxRound) {
+    @for(i <- 1 to coph.getMaxRnds) {
       <tbody>
         <tr contenteditable='false'><th colspan='16'><small class="font-weight-bold">@msg_(s"competition.GrRound", i.toString)</small></th></tr>
       </tbody>
-      <tbody id='InputRound_@{coId}_@{coPhId}_@{i}'></tbody>
+      <tbody id='InputRound_@{coph.coId}_@{coph.coPhId}_@{i}'></tbody>
     } 
   </table>
 </div>

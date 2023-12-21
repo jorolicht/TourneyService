@@ -50,18 +50,10 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with Tou
     var coPhId =  App.tourney.getCurCoPhId
     
     debug("render", s"coId: ${coId} coPhId: ${coPhId} section: ${selSection}")
-
-    // if (coId == 0) {                            
-    //   DlgInfo.show("XXXFehlende Auswahl", "XXXBitte einen Wettbewerb auswählen", "alert")
-    //   OrganizeCompetition.render()
-    //   unmarkSBEntry("OrganizeCompetition")
-    // } else if (coPhId == 0) {
-    //   DlgInfo.show("XXXKein Spielrunde konfiguriert/gestartet", "XXXBitte einen Wettbewerb auswählen und starten", "alert")
-    //   OrganizeCompetition.render()
-    //   unmarkSBEntry("OrganizeCompetition")
-    // } else {
-      selFrame(coId, coPhId, section)(App.tourney.cophs((coId, coPhId))) 
-    // }  
+    App.tourney.getCoPh(coId, coPhId) match {
+      case Left(err)   => setMainContent(clientviews.organize.competition.html.TabCard(coId, List()))
+      case Right(coph) => selFrame(coph, section)
+    }
   } 
 
   def checkCompPhaseName(name: String): Either[String, Boolean] = {
@@ -70,12 +62,9 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with Tou
 
 
   def initFrame(coId: Long, coPhId: Int, section: String):Unit = {
-    debug("initFrame", s"coId: ${coId} coPhId: ${coPhId} section: ${section}")
     val coPhNameIds = App.tourney.cophs.filter(x => x._1._1 == coId).values.map(x => (x.name, x.coPhId)).toList
     // check whether element exists
-    val secElem = gEqS(s"${section}Content_${coId}}", s"[data-coPhId='${coPhId}']")
-    debug("initFrame", s"secElem: ${secElem} for ${section}")
-    if (secElem == null) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
+    if (gE(s"${section}Content_${coId}_${coPhId}") == null) setMainContent(clientviews.organize.competition.html.TabCard(coId, coPhNameIds))
   }
 
 
@@ -84,7 +73,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with Tou
     import shared.utils.Routines._ 
     import org.scalajs.dom.document
     
-    val (coPhase, coId, coPhId) = getCompEnv(elem) 
+    val (coph, coId, coPhId) = getCompEnv(elem) 
     debug("actionEvent", s"key: ${key} coId: ${coId} coPhId: ${coPhId}")
     key match {
 
@@ -107,7 +96,7 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with Tou
         debug("DrawRefresh", s"orgList: ${orgList}  newList: ${newList} reassign: ${reassign}")
       }      
 
-      case "SelectCoPh"  => selFrame(coId, coPhId, selSection)(coPhase)
+      case "SelectCoPh"  => selFrame(coph, selSection)
 
       case _             => debug("actionEvent(error)", s"unknown key: ${key} event: ${event.`type`}")
     }
@@ -118,39 +107,35 @@ object OrganizeCompetitionTab extends UseCase("OrganizeCompetitionTab") with Tou
   // select a competition phase e.g. click on tab  
   // constraint: coId, coPhId <> 0
   
-  def selFrame(coId: Long, coPhId: Int, section: String)(implicit coPhase: CompPhase) = {
-    initFrame(coId, coPhId, section)
+  def selFrame(coph: CompPhase, section: String) = {
+    initFrame(coph.coId, coph.coPhId, section)
 
-    val aNodes = gE(uc("Links")).getElementsByTagName("a")  
+    val aNodes = gUE("Links").getElementsByTagName("a")  
     // set register/tab active
     for( i <- 0 to aNodes.length-1) {
-      if (aNodes.item(i).asInstanceOf[HTMLElement].getAttribute("data-coPhId") == coPhId.toString) {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.add("active")
-      } else {
-        aNodes.item(i).asInstanceOf[HTMLElement].classList.remove("active")
-      }
+      val elem = aNodes.item(i).asInstanceOf[HTMLElement]
+      setClass(elem, getData(elem, "coPhId", 0)==coph.coPhId, "active" )
     }  
 
     // remember selection
-    App.tourney.comps(coId).setCurCoPhId(coPhId)
-
-    section match {
-      case "Ctrl"    => OrganizeCompetitionCtrl.setPage(coPhase)
-      case "Draw"    => OrganizeCompetitionDraw.setPage(coId, coPhId)
-      case "Input"   => OrganizeCompetitionInput.setPage(coPhase)
-      case "View"    => OrganizeCompetitionView.setPage(coId, coPhId)
-      case "Referee" => OrganizeCompetitionReferee.setPage(coPhase)
-    }  
-
-    // set relevant section visible
-    doTry("selFrame setting section") {
-      val contentNodes = gE(uc("Content")).getElementsByTagName("section")
-      for( i <- 0 to contentNodes.length-1) {
-        val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
-        elem.style.display = if (getData(elem, "coPhId", 0) == coPhId & getData(elem, "section", "") == section) "block" else "none"
-      }
+    App.tourney.comps(coph.coId).setCurCoPhId(coph.coPhId)
+    
+    // set relevant tab content visible
+    val contentNodes = gEqSA(s"TabContent_${coph.coId}", s"[data-cophContent]")
+    for( i <- 0 to contentNodes.length-1) {
+      val elem = contentNodes.item(i).asInstanceOf[HTMLElement]
+      elem.style.display = if (elem.id == s"${section}Content_${coph.coId}_${coph.coPhId}") "block" else "none"
     }
 
+    if (List(CompPhaseStatus.CFG, CompPhaseStatus.UNKN).contains(coph.status)) 
+      OrganizeCompetitionError.setPage(coph)
+    else section match {
+      case "Draw"    => OrganizeCompetitionDraw.setPage(coph)
+      case "Input"   => OrganizeCompetitionInput.setPage(coph)
+      case "View"    => OrganizeCompetitionView.setPage(coph)
+      case "Referee" => OrganizeCompetitionReferee.setPage(coph)
+      case _         => OrganizeCompetitionError.setPage(coph)
+    }
   }  
 
 }

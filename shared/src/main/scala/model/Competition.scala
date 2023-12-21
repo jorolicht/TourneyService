@@ -33,7 +33,6 @@ import shared.utils.Constants._
 
 case class Competition(      
   val id:           Long,             // auto increment primary key
-  val hashKey:      String,           // hashKey to unique identify competition (name and typ to be unique)
   val name:         String,           // if empty initialised with ageGroup, ratingRemark, compType                     
   var typ:          CompTyp.Value,    // 0=UNDEFINED 1=EINZEL, 2=DOPPEL, 3=MIXED, 4=TEAM 
   val startDate:    String,           // Format: yyyymmdd#hhmm
@@ -41,6 +40,10 @@ case class Competition(
   var status:       CompStatus.Value, // 0=READY, 100=RUNNING 
   var options:      String = ""
 ) {
+
+  def hash(): Int = s"${name}${typ.id.toString}${startDate}${getFromTTR}${getToTTR}".hashCode
+
+
   // mapping of licence to player identification accoridng to clickTT participant list
   // currently only for single player 
   var cttLic2player: Map[String, String] = Map().withDefaultValue("")
@@ -52,6 +55,8 @@ case class Competition(
     case "team"              => CompTyp.TEAM
     case _                   => CompTyp.Typ
   } 
+
+  def chkStatus(chkWith: CompStatus.Value*): Boolean = chkWith.contains(status)
 
   def setTyp(value : String)= { typ = getTyp(value) }
 
@@ -92,6 +97,8 @@ case class Competition(
     }
   }
 
+  def getStartDate(mfun:(String, Seq[String])=>String, format:Int=0) = formatTime(mfun("app.lang",Seq()), format )
+
   // validateDate - startDate is in range
   def validateDate(trnyStart: Int, trnyEnd: Int): Boolean = {
     val (year, month, day, hour, minute) = ymdHM(startDate)
@@ -125,7 +132,7 @@ case class Competition(
   }
 
   def equal(co: Competition): Boolean = hash == co.hash
-  def hash = s"${name}^${typ}^${startDate}^${getFromTTR}^${getToTTR}"
+  
   def encode = write[Competition](this)
 
   def matchClickTT(ageGroup: String, ttrFrom: String, ttrTo: String, ttrRemark: String, cttType: String): Boolean = {
@@ -148,8 +155,8 @@ object Competition {
   implicit def rw: RW[Competition] = macroRW
 
   def tupled = (this.apply _).tupled
-  def init             = new Competition(0L, "", "",  CompTyp.Typ, "", CompStatus.CFG, "")
-  def get(name: String)= new Competition(0L, "", name,  CompTyp.Typ, "", CompStatus.CFG, "")
+  def init             = new Competition(0L, "",  CompTyp.Typ, "", CompStatus.CFG, "")
+  def get(name: String)= new Competition(0L, name,  CompTyp.Typ, "", CompStatus.CFG, "")
 
   def decode(s: String): Either[shared.utils.Error, Competition] = {
     try Right(read[Competition](s))
@@ -181,8 +188,6 @@ object CompStatus extends Enumeration {
   val Status = Value(98,  "Status")
   val CFG    = Value(99,  "CFG")
   val RUN    = Value(100, "RUN")
-  val AUS    = Value(101, "AUS")
-  val EIN    = Value(102, "EIN")
   val FIN    = Value(103, "FIN")
 
   val READY  = Value(  0, "READY")

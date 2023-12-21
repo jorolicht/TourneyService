@@ -9,8 +9,7 @@
 
 @(coph: CompPhase)(implicit ucc: UseCaseParam)
 
-<div class="m-1">
-  <table id='Draw_@{coph.coId}_@{coph.coPhId}'>
+  <table class="m-1">
     <tr>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.group")</small></th>
       <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
@@ -34,4 +33,3 @@
     </tr>
     @for(grp<-coph.groups) { @GroupView(coph.coId, coph.coPhId, grp) }
   </table>
-</div> 

@@ -43,8 +43,8 @@ object DlgInput extends BasicHtml
         App.ucMap(ucName).actionEvent("ArrowUp", elem, e)
       }
     }
-    setHtml("Title", title)
-    setHtml("BtnSubmit", btnName)
+    setHtml(gUE("Title"), title)
+    setHtml(gUE("BtnSubmit"), btnName)
     $("#APP__DlgInput").on("shown.bs.modal", () => $("#APP__DlgInput__Input").focus() )
 
   }
@@ -74,7 +74,7 @@ object DlgInput extends BasicHtml
   def hide = { $("#APP__DlgInput").modal("hide") }
   def get = getInput(gE(uc("Input")), "")  
   def add(content: String) = DlgInput.set(getInput(gE(uc("Output")), "") + "\n" + content)
-  def set(value: String) = setHtml("Output", value)
+  def set(value: String) = setHtml(gUE("Output"), value)
   def clear = setInput("Input", "")
   def focus = dom.document.getElementById("APP__DlgInput__Input").asInstanceOf[raw.HTMLInputElement].focus()
 

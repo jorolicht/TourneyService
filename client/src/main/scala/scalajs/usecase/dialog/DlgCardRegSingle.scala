@@ -46,8 +46,8 @@ object DlgCardRegSingle extends BasicHtml
       }
     
       case "Close"   => {  
-        offEvents(gE(uc("Modal")), "hide.bs.modal")
-        doModal(gE(uc("Modal")), "hide")
+        offEvents(gUE("Modal"), "hide.bs.modal")
+        doModal(gUE("Modal"), "hide")
       }    
 
       case _         => {}
@@ -93,10 +93,10 @@ object DlgCardRegSingle extends BasicHtml
     val player = if (lfid._3 > 0) {
       trny.players(lfid._3)
     } else {
-      val pl = Player(0L, "", clubId._2, clubId._1, lfid._2, lfid._1, bYear, email, gender, "") 
+      val pl = Player(0L, clubId._2, clubId._1, lfid._2, lfid._1, bYear, email, gender, "") 
       pl.setTTR(getInput(gE(uc("TTR")), "")) 
         // check if player already exists ...
-      if (trny.player2id.isDefinedAt(genHashPlayer(pl))) eList += Error("err0162.Player.already.exists")
+      if (trny.player2id.isDefinedAt(pl.hash)) eList += Error("err0162.Player.already.exists")
       pl 
     }
 
@@ -140,12 +140,12 @@ object DlgCardRegSingle extends BasicHtml
     
     def setNameList(name: String, trny: Tourney, coId: Long, setId: Long): Unit = {
       val nameList = (for (id <- freePlayers(trny, coId, setId)) yield s"""<option value="${trny.players(id).getName(1)}">${trny.players(id).getClub(0)}</option>""").mkString(" ") 
-      setHtml(name, nameList)
+      setHtml(gUE(name), nameList)
     }
 
     def setClubList(trny: Tourney): Unit = {
       val clubList = (for ((id, c) <- trny.clubs) yield s"""<option>${c.getName(0)}</option>""").mkString(" ") 
-      setHtml("ClubList", clubList)    
+      setHtml(gUE("ClubList"), clubList)    
     }
 
     setNameList("NameList", trny, coId, 0L)
@@ -153,7 +153,7 @@ object DlgCardRegSingle extends BasicHtml
     setPlayerView("","", 0L)(trny)
 
     setRadioBtnByValue(uc("PantStatus"), PantStatus.REDY.code)
-    setHtml("Class", trny.getCompName(coId))
+    setHtml(gUE("Class"), trny.getCompName(coId))
   }
   
   // show dialog return result (Future) or Failure when canceled

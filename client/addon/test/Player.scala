@@ -45,6 +45,8 @@ object AddonPlayer extends UseCase("AddonPlayer")
       case 3 => test_3(toId, plId).flatMap(identity)
       case 4 => test_4(toId, plId, param)
       case 5 => test_5(toId, plId, param)
+      case 6 => test_6(toId, plId)
+      case 7 => test_7(param)
     }
   }
 
@@ -187,6 +189,41 @@ object AddonPlayer extends UseCase("AddonPlayer")
       case Left(err)  => AddonMain.addOutput(s"ERROR Test Player 5 set lastname failed with: ${getError(err)}"); false
       case Right(res) => AddonMain.addOutput(s"SUCCESS Test Player 5 set lastname: ${res._3.lastname}"); true
     }
+  }
+
+
+
+
+  // Test 7 - Player test set and read pant card
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20player%20%2Dn%207%20%2D%2Dparam%20write
+
+  def test_7(param: String):Future[Boolean] = {
+    import scala.collection.mutable.ArrayBuffer
+    import org.scalajs.dom.raw.HTMLElement
+
+    val (coId, coPhId) = (1L,1)
+    val test = s"START Test Player 7 set and read pant card -> ${param}"
+    AddonMain.setOutput(test)
+
+    val pInfo       = ArrayBuffer[(Pant, Boolean)]() 
+    pInfo += ((Pant("000007", "Bond, James",  "MI5 Secret", 1700, "A 1",          (1,1)), true  ))
+    pInfo += ((Pant("000008", "Juany, Marie", "SG Smoking Grasland", 1500, "A 2", (4,4)), true  ))
+    pInfo += ((Pant("000009", "Bo, Harry",    "TuS Sweethome", 1501, "B 1",       (5,5)), false ))
+    pInfo += ((Pant("000010", "Otter, Rob",   "SV Maschinenland", 1502, "B 2",    (3,3)), false ))
+    pInfo += ((Pant("000011", "Glör, John",   "TTC Zirkus", 1503, "B 3",          (2,2)), true  ))
+    val drawInfoHdr = "Group Pos"  
+
+    if (param == "write") {
+      //setMainContent(clientviews.organize.competition.CoPhCard.html.Pants(coph) )
+    } else {
+
+      val inputNodes = gEqSA(s"PantTbl_${coId}_${coPhId}", "input[data-sno]")
+      val res = (inputNodes.map { elt => 
+        if (elt.asInstanceOf[HTMLInputElement].checked) getSNO(elt.asInstanceOf[HTMLElement]) else "" 
+      }).toList.filter(_ != "") 
+      println(s"SELECTED: ${res}")
+    }
+    Future(true)
   }
 
 

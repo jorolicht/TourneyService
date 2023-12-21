@@ -7,32 +7,59 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 @import clientviews.component.input.html._
-@import scalajs.usecase.dialog.DlgCardCfgCompPhase.PantSelect
+@import shared.model.Pant
+@import shared.model.CompPhase
+@import shared.model.CompPhaseStatus
 
-@(pants: ArrayBuffer[PantSelect])(implicit ucc: UseCaseParam)
-
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
+@enabled(value: Boolean) = @{ if(value) "" else "disabled" } 
 @checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
-<div class="w-100 pr-3" style="max-height: 250px; overflow: auto;">  
-  <table @id("PantTbl") class="table table-sm small table-hover tuse-border">
-    <tbody>
-      <tr style="border-bottom:2px solid #ccc;">
-        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.no")</strong></td>
-        <td class="text-left tuse-height"><strong>@msg("tbl.hdr.name")</strong></td>
-        <td class="text-center tuse-height"></td>
-        <td class="text-right tuse-height"><strong>@msg("tbl.hdr.signup")</strong></td>
-      </tr>	
-
-      @for(index <- 0 until pants.length){
+@if(coph.candidates.length>0){
+  <div class="w-100 pr-3" style="max-height: 250px; overflow: auto;">  
+    <table id='PantCandTbl_@{coph.coId}_@{coph.coPhId}' class="table table-sm small table-hover tuse-border">
+      <tbody>
         <tr style="border-bottom:2px solid #ccc;">
-          <td class="text-left tuse-height">@(index+1)</td>
-          <td class="text-left tuse-height">@pants(index).name</td>
-          <td class="text-left tuse-height">@pants(index).info</td>
-          <td class="text-right tuse-height">
-            <input data-sno='@pants(index).sno.value' class='' type='checkbox' value='@index' @checked(pants(index).checked) @actionEvent("Check", "onclick") >
+          <td class="text-left tuse-height">
+            <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='sno' @actionEvent("SortPant", "onclick")><strong>@msg("tbl.hdr.no")&nbsp;<i class="fa fa-sort"></i></strong></a>
           </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
+          <td class="text-left tuse-height">
+            <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='name' @actionEvent("SortPant", "onclick")><strong>@msg("tbl.hdr.name")&nbsp;<i class="fa fa-sort"></i></strong></a>
+          </td>
+          <td class="text-left tuse-height">
+            <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='club' @actionEvent("SortPant", "onclick")><strong>@msg("tbl.hdr.club")&nbsp;<i class="fa fa-sort"></i></strong></a>
+          </td>
+          <td class="text-left tuse-height">
+            <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='ttr' @actionEvent("SortPant", "onclick")><strong>@msg("tbl.hdr.ttr")&nbsp;<i class="fa fa-sort"></i></strong></a>
+          </td>
+          @if(coph.candInfo !=""){       
+            <td class="text-right tuse-height">
+              <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='info' @actionEvent("SortPant", "onclick")><strong>@coph.candInfo &nbsp;<i class="fa fa-sort"></i></strong></a>
+            </td>
+          }
+          <td class="text-right tuse-height">
+            <a href="#" class="text-secondary" data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-sortDir='none' data-sort='signup' @actionEvent("SortPant", "onclick")><strong>@msg("tbl.hdr.signup")&nbsp;<i class="fa fa-sort"></i></strong></a>
+          </td>
+        </tr>	
+
+        @for(index <- 0 until coph.candidates.length){
+          <tr style="border-bottom:2px solid #ccc;">
+            <td class="text-left tuse-height">@coph.candidates(index)._1.sno</td>
+            <td class="text-left tuse-height">@coph.candidates(index)._1.name</td>
+            <td class="text-left tuse-height">@coph.candidates(index)._1.club</td>
+            <td class="text-left tuse-height">@coph.candidates(index)._1.getRatingInfo</td>
+            @if(coph.candInfo !=""){                
+              <td class="text-right tuse-height">@coph.candidates(index)._1.qInfo</td>
+            }
+            <td class="text-right tuse-height">
+              <input data-coId='@coph.coId' data-coPhId='@coph.coPhId' data-index='@index' data-sno='@coph.candidates(index)._1.sno' class='' type='checkbox' value='@index' 
+                @enabled(coph.status==CompPhaseStatus.CFG) 
+                @checked(coph.candidates(index)._2) 
+                @actionEvent("CheckPantCand", "onclick") >
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

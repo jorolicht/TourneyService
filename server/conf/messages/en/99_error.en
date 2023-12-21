@@ -71,7 +71,7 @@ err0066.decode.Int                                  = Decoding error data type I
 err0067.decode.Long                                 = Decoding error data type Long: {0}
 err0068.decode.Boolean                              = Decoding error data type Boolean: {0}
 err0069.decode.String                               = Decoding error data type String: {0}
-err0070.decode.Tourney                              = Decoding error data type Tourney: {0}
+err0070.decode.Tourney                              = Decoding error data type Tourney step {0}: {1}
 err0071.decode.TournRun                             = Decoding error, data type TournRun: {0}
 err0080.access.invalidRights                        = Insufficient access rights
 err0081.database.add                                = Database error while adding records
@@ -221,6 +221,13 @@ err0234.coph.already.exists                         = Round {0} already exists
 err0235.coph.name.short                             = Name to short (at least two characters)
 err0236.decode.koRound                              = Error decoding KO-Round
 err0237.getCoPh.notFound                            = Error in routine getCoPh, round not found/defined {0} {1}
+err0238.decode.Pant                                 = Decoding error data type Pant: {0}
+err0239.decode.csv.player                           = Could not read player data: {0}
+err0240.svc.regSingle                               = Error in routine regSingle
+err0241.svc.regDouble                               = Error in routine regDouble
+err0242.setCompPhase                                = Error in routine setCompPhase {0} {1}
+err0243.systemKO.draw.size                          = Draw KO-System, size or number of rounds not correct
+err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
 
-
+return001.csv.hdr.player                            = CSV header for player
 

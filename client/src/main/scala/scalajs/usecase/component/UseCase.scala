@@ -58,7 +58,7 @@ abstract class UseCase(val name: String) extends BasicHtml
     try {
       val (coId, coPhId) = (getData(elem, "coId", 0L), getData(elem, "coPhId", 0))
       (App.tourney.cophs((coId, coPhId)), coId, coPhId)
-    } catch { case _: Throwable => error(s"getCompEnv", s"data elements for coId and coPhId not found"); (CompPhase.get() ,0L ,0) }  
+    } catch { case _: Throwable => error(s"getCompEnv", s"data elements for coId and coPhId not found"); (CompPhase.dummy ,0L ,0) }  
   }
 }
 

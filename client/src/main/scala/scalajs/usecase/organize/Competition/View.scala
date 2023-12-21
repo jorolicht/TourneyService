@@ -37,25 +37,27 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
   }
 
   // set view page for a competition phase(round), coId != 0 and coPhId != 0
-  def setPage(coId: Long, coPhId: Int)(implicit coPhase: CompPhase): Unit = {
-    debug("setPage", s"coId: ${coId} coPhId: ${coPhId}")
-    if (gE(uc(s"View_${coId}_${coPhId}")) == null) {
-      // init page
-      val elem = gEqS(s"ViewContent_${coId}", s"[data-coPhId='${coPhId}']")
-      val coPhTyp = coPhase.coPhTyp
-      coPhTyp match {
-        case CompPhaseTyp.GR => setHtml(elem, clientviews.organize.competition.view.html.GroupCard(coId, coPhId, coPhase.groups))
-        case CompPhaseTyp.KO => setHtml(elem, clientviews.organize.competition.view.html.KoCard(coId, coPhId, coPhase.ko))
-        case CompPhaseTyp.SW => setHtml(elem, "input for switz-system")
-        case _      => setHtml(elem, showAlert(getMsg("invalidSection")))
+  def setPage(coph: CompPhase): Unit = {
+    val contentElement = gE(s"ViewContent_${coph.coId}_${coph.coPhId}")
+    if (contentElement.innerHTML == "") {
+      debug("setPage", s"View init: coId: ${coph.coId} coPhId: ${coph.coPhId}")
+      coph.getTyp match {
+        case CompPhaseTyp.GR => setHtml(contentElement, clientviews.organize.competition.view.html.GroupCard(coph.coId, coph.coPhId, coph.groups))
+        case CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.view.html.GroupCard(coph.coId, coph.coPhId, coph.groups))
+        case CompPhaseTyp.KO => setHtml(contentElement, clientviews.organize.competition.view.html.KoCard(coph.coId, coph.coPhId, coph.ko))
+        case CompPhaseTyp.SW => ???
+        case _               => error("setPage", s"View init invalid typ, coId: ${coph.coId} coPhId: ${coph.coPhId}")
       }
-    }
-    // update page
-    coPhase.coPhTyp match {
-      case CompPhaseTyp.KO => showKoResult(coId, coPhId, coPhase.ko)      
-      case CompPhaseTyp.GR => for (grp <- coPhase.groups ) showGrResult(coId, coPhId, grp)
-      case CompPhaseTyp.SW => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
-      case _      => error("setContent", s"invalid type coId: ${coId} coPhId: ${coPhId}")
+    }  
+
+    debug("setPage", s"View: coId: ${coph.coId} coPhId: ${coph.coPhId}")
+    // update view page
+    coph.getTyp match {
+      case CompPhaseTyp.KO => showKoResult(coph.coId, coph.coPhId, coph.ko)      
+      case CompPhaseTyp.GR => for (grp <- coph.groups ) showGrResult(coph.coId, coph.coPhId, grp)
+      case CompPhaseTyp.RR => showGrResult(coph.coId, coph.coPhId, coph.groups(0))
+      case CompPhaseTyp.SW => ???
+      case _               => error("setPage", s"View update invalid typ, coId: ${coph.coId} coPhId: ${coph.coPhId}")
     }
   }
 
@@ -98,7 +100,7 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
 
   // show results of ko round
   def showGrResult(coId: Long, coPhId: Int, group: Group) = {
-    debug("showGrResult", s"APP__GrRound_${coId}_${coPhId}")
+    debug("showGrResult", s"APP__GrRound_${coId}_${coPhId} for Group: ${group.grId}")
 		for(i <- 0 to group.size-1) {
 			for(j <- 0 to group.size-1) {
 				if(i!=j){
@@ -107,9 +109,13 @@ object OrganizeCompetitionView extends UseCase("OrganizeCompetitionView")
           //debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1} -> ${res}")
         }
       }
+      debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_Line")
       val balls  = group.balls(i)._1.toString + ":" + group.balls(i)._2.toString  
+      debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_balls: ${balls}")
       val sets   = group.sets(i)._1.toString + ":" + group.sets(i)._2.toString  
+      debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_sets: ${sets}")
       val points = group.points(i)._1.toString + ":" + group.points(i)._2.toString
+      debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_points: ${points}")
       setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Balls_${group.grId}_${i}"), balls)
       setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Sets_${group.grId}_${i}"), sets)
       setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Points_${group.grId}_${i}"), points)

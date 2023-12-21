@@ -8,7 +8,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 
 import shared.utils.Routines._
 import shared.model.MEntryGr
-import shared.model.PantEntry
+import shared.model.Pant
 import shared.model.Utility._
 import shared.utils.Error
 
@@ -35,18 +35,6 @@ object GroupEntry {
     try Right( if   (re.valid) GroupEntry(true, getPoints(re.sets, noSets), re.sets, getBalls(re.balls, noSets), re.balls)
                else            GroupEntry(false))
     catch { case _: Throwable => Left(Error("GroupEntry.fromResultEntry")) }
-
-
-  def obify(gREStr: String): GroupEntry = {
-    val g = gREStr.split(";")
-    try { 
-      if (g.length > 7) {
-        GroupEntry(g(0).toBoolean, (g(1).toInt,g(2).toInt), (g(3).toInt,g(4).toInt), (g(5).toInt,g(6).toInt), g(7).split('·'))
-      } else {
-        GroupEntry(g(0).toBoolean, (g(1).toInt,g(2).toInt), (g(3).toInt,g(4).toInt), (g(5).toInt,g(6).toInt), Array[String]())
-      }
-    } catch { case _: Throwable => GroupEntry(false) }
-  }
 }
 
 
@@ -54,12 +42,16 @@ object GroupEntry {
  * Group Definition for Table Tennis
  * val tup2     = """\((\d+),(\d+)\)""".r 
  */
-class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSets: Int) {
-  var pants      = Array.fill[PantEntry](size) (PantEntry("0", "", "", 0, (0,0)))                      
+class Group(val grId: Int, val size: Int, val quali: Int, val name: String, noWinSets: Int) {
+  var pants      = Array.fill[Pant](size) (Pant("0", "", "", 0, "", (0,0)))                      
   val results    = Array.fill[GroupEntry](size, size) (GroupEntry(false, (0,0), (0,0), (0,0), Array("")))
-  var points     = Array.ofDim[(Int, Int)](size)
-  var sets       = Array.ofDim[(Int, Int)](size)
-  var balls      = Array.ofDim[(Int, Int)](size) 
+  var points     = Array.fill[(Int, Int)](size) ((0,0))
+  var sets       = Array.fill[(Int, Int)](size) ((0,0))
+  var balls      = Array.fill[(Int, Int)](size) ((0,0))
+
+  // var points     = Array.ofDim[(Int, Int)](size)
+  // var sets       = Array.ofDim[(Int, Int)](size)
+  // var balls      = Array.ofDim[(Int, Int)](size) 
 
   // helper info
   var drawPos       = 0        // start position of group for draw 
@@ -68,7 +60,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
   var occu: Map[String, Int] = Map[String, Int]().withDefaultValue(0)
 
   // add participant
-  def addPant(pant: PantEntry, avgPantRating: Int) = {
+  def addPant(pant: Pant, avgPantRating: Int) = {
     pants(fillCnt) = pant
     fillCnt = fillCnt +  1
     if (pant.club != "") occu(pant.club) = occu(pant.club) + 1
@@ -82,7 +74,7 @@ class Group(val grId: Int, val size: Int, quali: Int, val name: String, noWinSet
     for (pant <- pants) { if (pant.club != "") occu(pant.club) = occu(pant.club) + 1 }
   }
 
-  def init(pls: List[PantEntry]): Boolean = if (pls.length == size) { pants = pls.toArray; true } else false
+  def init(pls: List[Pant]): Boolean = if (pls.length == size) { pants = pls.toArray; true } else false
 
   override def toString() = {
     val str = new StringBuilder(s"  Group ${name} (Id:${grId}/Size:${size}/Quali:${quali}) WinSets: ${noWinSets}\n")
@@ -245,6 +237,39 @@ object Group {
     } catch { case _: Throwable => Left(error.add("Group.fromTx")) }
   }
 
+
+  def fromTx1(grtx: GroupTx1, drawPos: Int = 0): Either[Error, Group] = {
+    var error = Error.dummy
+    try {
+      val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
+
+      // set participants
+      gr.pants  = grtx.pants.map { _.toPant()}
+
+      // add matches
+      for (resEntry <- grtx.results) {
+        //println(s"Group from Tx: resEntrys: ${resEntry.toString}")
+        if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
+          GroupEntry.fromResultEntry(resEntry, grtx.noWinSets) match {
+            case Left(err)  => error = err
+            case Right(res) => {
+              gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = res
+              gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
+            }  
+          }
+        } 
+      }
+
+
+      gr.drawPos = drawPos
+      gr.genOccuRating
+      gr.calc
+
+      Right(gr)
+    } catch { case _: Throwable => Left(error.add("Group.fromTx")) }
+  }
+
+
   /** genGrpSplit - check whether the numbers of players can be
    *  configurated with groups of size and size+1
    */ 
@@ -319,10 +344,26 @@ case class GroupTx (
   val size:      Int, 
   val quali:     Int, 
   val noWinSets: Int,
-  var pants:     Array[PantEntry]   = Array[PantEntry](),
+  var pants:     Array[Pant] = Array[Pant](),
   var results:   Array[ResultEntry] = Array[ResultEntry]()
 ) 
 
 object GroupTx  {
   implicit def rw: RW[GroupTx] = macroRW
+}
+
+
+// Group transfer representation
+case class GroupTx1 (
+  val name:      String,
+  val grId:      Int, 
+  val size:      Int, 
+  val quali:     Int, 
+  val noWinSets: Int,
+  var pants:     Array[Pant1] = Array[Pant1](),
+  var results:   Array[ResultEntry] = Array[ResultEntry]()
+) 
+
+object GroupTx1  {
+  implicit def rw: RW[GroupTx1] = macroRW
 }

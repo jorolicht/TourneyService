@@ -19,7 +19,6 @@ import collection.mutable.HashMap
  */
 case class Player(                                             
   var id:          Long,                    // primary key
-  var hashKey:     String,                  // hashKey to unique identify player cross environments
   var clubId:      Long,                    // plubId primary key of plub = Players Club
   var clubName:    String,                  // club-name CDATA #IMPLIED  
   var firstname:   String,             
@@ -73,7 +72,7 @@ case class Player(
     if (getRating == 0 | player2.getRating == 0) rating else rating / 2
   }  
 
-  def genHash() =  s"${lastname.take(2)}${lastname.takeRight(2)}${firstname.take(2)}${firstname.takeRight(2)}${clubName.take(2)}${clubName.takeRight(2)}${getTTR}${getBYearStr()}"
+  def hash =  s"${lastname}${firstname}${clubName}${getTTR}${getBYearStr()}".hashCode()
 
   def getInternalNr: String  = getMDStr(options,0); def setInternalNr(value: String) = { options = setMD(options, value, 0) }
   
@@ -115,8 +114,39 @@ object Player {
   implicit def rw: RW[Player] = macroRW
   def tupled = (this.apply _).tupled
 
+  def get(lastname: String, firstname: String, clubName: String, birthyear: Int, ttr: Int, sex: SexTyp.Value) = {
+    val p = new Player(0L, 0L, clubName, firstname, lastname, birthyear, "", sex, "_")
+    p.setTTR(ttr.toString)
+  }
+
+  def fromCSV(value: String): Either[Error, Player] = 
+    try {
+      val p = value.split(',')
+      val (lastname, firstname, club, ttr, birthyear, gender, email) = p.length match {
+        case 7 => (p(0).trim, p(1).trim, p(2).trim, p(3).trim.toInt, p(4).trim.toInt, SexTyp(p(5).trim.toInt), p(6).trim) 
+        case 6 => (p(0).trim, p(1).trim, p(2).trim, p(3).trim.toInt, p(4).trim.toInt, SexTyp(p(5).trim.toInt), "") 
+        case 5 => (p(0).trim, p(1).trim, p(2).trim, p(3).trim.toInt, p(4).trim.toInt, SexTyp(0), "") 
+        case 4 => (p(0).trim, p(1).trim, p(2).trim, p(3).trim.toInt, 0, SexTyp(0), "") 
+        case 3 => (p(0).trim, p(1).trim, p(2).trim, 0, 0, SexTyp(0), "")  
+        case _ => ("", "", "", 0, 0, SexTyp(0), "")  
+      }
+      lastname.toLowerCase() match {
+        case "name"      => Left(Error("return001.csv.hdr.player"))
+        case "lastname"  => Left(Error("return001.csv.hdr.player"))
+        case ""          => Left(Error("err0239.decode.csv.player", value))
+        case _           => {
+          val player = Player(0L, 0L, club, firstname, lastname, birthyear, email, gender) 
+          player.setTTR(ttr.toString)
+          Right(player)
+        }      
+      } 
+    } catch { case _: Throwable => Left(Error("err0239.decode.csv.player", value)) }
+
+
+
+
   def get(lastname: String, firstname: String, clubName: String, birthyear: Int, email: String, sex: SexTyp.Value) = {
-    new Player(0L, "", 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
+    new Player(0L, 0L, clubName, firstname, lastname, birthyear, email, sex, "_")
   }
   def format(name: String, fmt: Int = 0) = {
     val na = name.split(",")

@@ -36,7 +36,7 @@ object DlgInfo extends BasicHtml
       case "success" => removeClass(gE(uc("Content")), "border-danger", "border-secondary"); addClass(gE(uc("Content")), "border-success")
       case _         => warn("show", s"alertTyp: ${alertTyp}")
     }
-    setHtml("Title", title)
+    setHtml(gUE("Title"), title)
     setHtmlVisible("Body", body!="", body)
   }
 }

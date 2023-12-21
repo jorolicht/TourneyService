@@ -50,7 +50,7 @@
 				<td @id(s"Status_${co._1.id}") class="text-right tuse-height">
 					@co._1.getStatusName(msg_) 
           &nbsp;|&nbsp;
-					@if(co._1.status==CompStatus.READY||co._1.status==CompStatus.CFG){
+					@if(co._1.chkStatus(CompStatus.READY,CompStatus.CFG)){
 						<input data-coId='@co._1.id' class="" type="checkbox" value="" @actionEvent("CheckCompetition", "onclick") @checked(co._1.getWebRegister) >
 					}	else {
 						<input data-coId='@co._1.id' class="" type="checkbox" value="" disabled >
@@ -58,8 +58,9 @@
 				</td>
 
 				<td class="text-right tuse-height">
-					@if(co._1.status==CompStatus.READY||co._1.status==CompStatus.CFG){
-					  <a @id("icon.edit") @tit("edit") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
+					@if(co._1.chkStatus(CompStatus.READY, CompStatus.CFG)){
+					  <a @id("icon.upload") @tit("upload") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("UploadPant", "onclick")><i class="fa fa-upload"></i></a>
+						<a @id("icon.edit") @tit("edit") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("EditCompetition", "onclick")><i class="fa fa-pencil-square-o"></i></a>
 					}
 					<a @tit("view") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("ShowCompetition", "onclick")><i class="fa fa-eye"></i></a>
 					<a @tit("delete") data-coId='@co._1.id' class="text-dark" href="#" @actionEvent("DeleteCompetition", "onclick")><i class="fa fa-trash"></i></a>

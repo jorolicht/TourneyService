@@ -250,7 +250,7 @@ object AddonMain extends TestUseCase("AddonMain")
               |   Options:
               |""".stripMargin)
 
-      val scope  = choice(name="scope", choices=Seq("type", "tourney", "competition", "compphase", "player", "basic", "dialog", "ctt", "referee", "download", "match"))
+      val scope  = choice(name="scope", choices=Seq("type", "tourney", "comp", "coph", "player", "basic", "dialog", "ctt", "referee", "download", "match"))
       val number = opt[Int](name="number")
       val param  = opt[String](name="param")
 
@@ -276,15 +276,17 @@ object AddonMain extends TestUseCase("AddonMain")
     scope match {
       case "basic"     => AddonBasic.execTest(number, param);     Future(false)
       case "dialog"    => AddonDialog.execTest(number, toId, plId, param)
-      case "compphase" => AddonCompPhase.execTest(number, param)
+      case "coph"      => AddonCompPhase.execTest(number, toId, coId, phase, param)
       case "ctt"       => AddonCtt.execTest(number, param);       Future(false)
       case "player"    => AddonPlayer.execTest(number, toId, plId, param)
       case "referee"   => AddonReferee.execTest(number, toId, coId, phase, param)
       case "match"     => AddonMatch.execTest(number, toId, coId, phase, game, param)
       case "download"  => AddonDownload.execTest(number, param);  Future(false)
+      case "comp"      => AddonComp.execTest(number, toId, coId, phase, param)
       case _           => Future(false)
     }
   }
+
 
   /** save command
    * 
@@ -358,22 +360,27 @@ object AddonMain extends TestUseCase("AddonMain")
   def addOutput(msg: String) = {
     import org.scalajs.dom.document
     import org.scalajs.dom.raw.HTMLElement
-    val elt = document.getElementById("DlgPrompt__OutputText").asInstanceOf[HTMLElement]
-    val content = elt.innerText
-    elt.innerText = s"${content}\n${msg}"
+    val elt = gE("DlgPrompt__OutputText")
+    if (elt == null) println(s"addOutput ${msg}") else {
+      val content = elt.innerText
+      elt.innerText = s"${content}\n${msg}"
+    }
   }  
 
-  def setOutput(msg: String) = setHtml(gE("DlgPrompt__OutputText"), msg)
+  def setOutput(msg: String) = {
+    val elt = gE("DlgPrompt__OutputText")
+    if (elt == null) println(s"setOutput ${msg}")
+    else             setHtml(elt, msg)
+  }  
 
   @JSExport
   def console(): Unit = {
     // execute first command if set
     val command = getData(gE("DemoButton"), "command", "")
     if (command != "") setData(gE("DemoButton"), "command", "")
-    println(s"COMMAND: ${command}")
 
     prompt(gM("home.main.prompt"), command).map {
-      case Left(err)  => println("Invalid Console Command or Cancel")
+      case Left(err)  => {} //println(s"Invalid Console Command or Cancel ${err}")
       case Right(cmd) => execute(cmd).map { _ => console() }
     }
   }

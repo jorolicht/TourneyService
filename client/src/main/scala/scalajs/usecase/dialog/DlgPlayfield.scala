@@ -57,8 +57,8 @@ object DlgPlayfield  extends BasicHtml
     }
     
     plNameList = clientviews.playfield.html.PlayerDatafield(playerList).toString
-    setHtml("NameListA", plNameList)
-    setHtml("NameListB", plNameList)
+    setHtml(gUE("NameListA"), plNameList)
+    setHtml(gUE("NameListB"), plNameList)
     debug(s"changeCompetition", s"coId: ${coId}")
   }
 
@@ -85,7 +85,7 @@ object DlgPlayfield  extends BasicHtml
     setInput("ClubA", pf.clubA)
     setInput("NameB", pf.playerB)
     setInput("ClubB", pf.clubB)
-    setHtml("Competition", clientviews.playfield.html.CompOption(App.tourney.getNamesComp(), pf.pClass).toString )
+    setHtml(gUE("Competition"), clientviews.playfield.html.CompOption(App.tourney.getNamesComp(), pf.pClass).toString )
     setInput("Info", pf.info)
 
     if (pf.nr > 0) {

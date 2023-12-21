@@ -39,9 +39,7 @@ CompStatus.UNKN                                     = UNKNOWN
 CompStatus.CFG                                      = CONFIGURATION
 CompStatus.Status                                   = Status
 CompStatus.RUN                                      = RUNNING                           
-CompStatus.AUS                                      = {0} DRAW 
-CompStatus.EIN                                      = {0} RESULT INPUT
-CompStatus.FIN                                      = {0} FINISHED
+CompStatus.FIN                                      = FINISHED
 CompStatus.READY                                    = READY TO START
 CompStatus.VRAUS                                    = PRELIMINARY DRAW
 CompStatus.VREIN                                    = PRELIMINARY RESULT INPUT
@@ -114,7 +112,7 @@ CompPhaseStatus.CFG                                 = CONFIGURATION
 CompPhaseStatus.AUS                                 = DRAW
 CompPhaseStatus.EIN                                 = INPUT
 CompPhaseStatus.FIN                                 = FINISHED
-CompPhaseStatus.DEP                                 = FOLLOWING ROUND STARTED
+
 
 CompPhaseTyp.UNKN                                   = UNKNOWN
 CompPhaseTyp.GR                                     = Group System

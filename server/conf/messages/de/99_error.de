@@ -71,7 +71,7 @@ err0066.decode.Int                                  = Dekodierfehler Datentyp In
 err0067.decode.Long                                 = Dekodierfehler Datentyp Long: {0}
 err0068.decode.Boolean                              = Dekodierfehler Datentyp Boolean: {0}
 err0069.decode.String                               = Dekodierfehler Datentyp String: {0}
-err0070.decode.Tourney                              = Dekodierfehler Datentyp Tourney: {0}
+err0070.decode.Tourney                              = Dekodierfehler Datentyp Tourney step {0}: {1}
 err0071.decode.TournRun                             = Dekodierfehler Datentyp TournRun: {0}
 err0080.access.invalidRights                        = Ungenügende Zugriffsrechte
 err0081.database.add                                = Datenbank-Fehler beim Hinzufügen von Datensätzen
@@ -221,3 +221,13 @@ err0234.coph.already.exists                         = Spielrunde {0} existiert b
 err0235.coph.name.short                             = Name zu kurz (mind. zwei Zeichen erforderlich)
 err0236.decode.koRound                              = Dekodierfehler Datentyp KO-Round
 err0237.getCoPh.notFound                            = Fehler in Routine getCoPh, Spielrunde nicht definiert/gefunden {0} {1}
+err0238.decode.Pant                                 = Dekodierfehler Datentyp Pant: {0}
+err0239.decode.csv.player                           = Datensatz für Spieler nicht lesbar: {0}
+err0240.svc.regSingle                               = Fehler in der Routine regSingle
+err0241.svc.regDouble                               = Fehler in der Routine regDouble
+err0242.setCompPhase                                = Fehler in Routine setCompPhase {0} {1}
+err0243.systemKO.draw.size                          = Auslosung KO-System, fehlerhafte Größe oder Anzahl der Runden
+err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
+
+
+return001.csv.hdr.player                            = CSV header for player

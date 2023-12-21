@@ -57,10 +57,10 @@ object AdminDatabase extends UseCase("AdminDatabase")
     debug("export", s"${toId} ${clubName} ${toDate}")
 
     expDatabase(toId, clubName, toDate, "Admin").map { 
-      case Left(err)  => setHtml("Content", "Error(${err.code}) ${err.msg})")
+      case Left(err)  => setHtml(gUE("Content"), "Error(${err.code}) ${err.msg})")
       case Right(res) => {
         debug("export", s"result: ${res.take(20)}")
-        setHtml("Content", JSON.stringify(JSON.parse(res), null,2))
+        setHtml(gUE("Content"), JSON.stringify(JSON.parse(res), null,2))
       }
     }
   }

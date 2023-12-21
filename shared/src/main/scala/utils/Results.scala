@@ -4,6 +4,7 @@ import upickle.default
 
 case class Error(msgCode:String, var in1:String="", var in2:String="", var callStack: String="") {
   def equal2Code(code: String): Boolean = { this.msgCode == code }
+  def is(code: String): Boolean = { this.msgCode == code }
   def encode = s"${msgCode}^${in1}^${in2}^${callStack}^_"
   def add(func: String): Error = { callStack = s"${func}:${callStack}"; this} 
   def isDummy = (msgCode == "") 

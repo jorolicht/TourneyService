@@ -37,6 +37,25 @@ object AddonComp extends UseCase("AddonComp")
 {
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
+  def execTest(number: Int, toId: Long=0L, coId: Long=0L, phase: Int=0,  param: String=""):Future[Boolean]= {
+    number match {
+      case 0 => test_0(coId, phase, param)
+      case _ => Future(true)
+    }
+  }
+
+  // Test 0 - show competition participants
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20comp%20%2Dn%200%20%2D%2Dparam%20XXX%20%2D%2DtoId%200%20%2D%2DcoId%201%20%2D%2Dphase%201 
+  def test_0(coId: Long, phase: Int, param: String): Future[Boolean] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    val test = s"START Test 0 Competition participants param->${param} coId->${coId} phase->${phase} "
+    AddonMain.setOutput(test)
+    App.tourney.pl2co.foreach { x => if (x._1._2 == coId) AddonMain.addOutput(s"PantInfo: ${x._2}") }
+    Future(true)
+  } 
+
   def testEncode(testOption: String) = {
     import scala.collection.mutable.{ ArrayBuffer }
     import cats.data.EitherT
@@ -57,7 +76,7 @@ object AddonComp extends UseCase("AddonComp")
     //                      val status: Int, var enabled: Boolean, 
     //                      var size: Int, var noPlayers: Int, noWinSets: Int = 3)
 
-        val coPhGr = new CompPhase("TestGroup", 3L, 2, CompPhaseCfg.CFG, CompPhaseTyp.GR, CompPhaseStatus.FIN, true, 7, 7, 3)
+        val coPhGr = new CompPhase("TestGroup", 3L, 2, CompPhaseCfg.CFG, CompPhaseStatus.FIN, true, 7, 7, 3, None)
         // val initGrRes  = coPhGr.init( ArrayBuffer(
         //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
         //   ParticipantEntry("XXX132", "Lichtenegger, Robert2", "TTC Freising2", 1301, (0,0)),
@@ -71,7 +90,7 @@ object AddonComp extends UseCase("AddonComp")
 
         //case class GroupConfig(id: Int, name: String, size: Int, quali: Int, pos: Int)
 
-        val coPhKO = new CompPhase("TestKO", 3L, 4, CompPhaseCfg.CFG, CompPhaseTyp.KO, CompPhaseStatus.DEP, true, 8, 7, 3)
+        val coPhKO = new CompPhase("TestKO", 3L, 4, CompPhaseCfg.CFG, CompPhaseStatus.CFG, true, 8, 7, 3, None)
         // val initKORes  = coPhKO.init( ArrayBuffer(
         //   ParticipantEntry("XXX131", "Lichtenegger, Robert1", "TTC Freising1", 1207, (0,0)),
         //   ParticipantEntry(SNO.BYE, "bye", "", 0, (0, 0)),
@@ -94,8 +113,8 @@ object AddonComp extends UseCase("AddonComp")
         //   case Right(res)  => println(s"testEncode => RESULT: ${res}")
         // }
 
-        println(s"testEncode => GroupPhase: ${coPhGr.encode}")
-        println(s"testEncode => KOPhase: ${coPhKO.encode}")
+        println(s"testEncode => GroupPhase: ${coPhGr.encode()}")
+        println(s"testEncode => KOPhase: ${coPhKO.encode()}")
 
         val  encResult = App.tourney.encode()
       
@@ -112,5 +131,13 @@ object AddonComp extends UseCase("AddonComp")
       }
     }
   }
+
+
+
+
+
+
+
+
 
 }

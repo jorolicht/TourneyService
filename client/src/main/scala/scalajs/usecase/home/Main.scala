@@ -38,6 +38,7 @@ object HomeMain extends UseCase("HomeMain")
 
       case "Content"           => setContent(ucInfo)
       case "Debug"             => { setData(gE("DemoButton"), "command", ucInfo); gE("DemoButton").click() }
+      case "Test"              => setMainContent(ucInfo)
 
       case "Error"             => setMainContent(clientviews.home.html.Error(ucInfo).toString)
       case "ErrorCode"         => setMainContent(clientviews.home.html.Error(getError(ucInfo)).toString)
