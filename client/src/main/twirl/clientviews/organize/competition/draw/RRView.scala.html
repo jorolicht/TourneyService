@@ -1,0 +1,83 @@
+@*
+ * Template for drawing a group on a position
+ *
+ * Start Test:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+ * 
+ *@
+@import shared.model._ 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coId: Long, coPhId: Int, group: Group)(implicit ucc: UseCaseParam)
+
+@grpHeader(grName: String, size: Int) = @{ Html(s"""
+  <td rowspan="${size*2}" style="width:30px;" class="border p-1 text-center"><h5 class="font-weight-bold">${grName}</h5></td>""")
+}
+
+@grpContent(g: Group, gPos:Int, tdSuffix: String) = @{ Html(s"""
+  <td rowspan="2" style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">${g.drawPos+gPos}</small></td>
+  <td rowspan="2" data-drawSelectField='${gPos}' contenteditable='true' style="width:30px; font-size:small;" 
+      data-drawPos='${g.drawPos+gPos}' class="border-top border-bottom border-right text-center p-1 font-weight-bold text-info">${g.drawPos+gPos}
+  </td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-name='${g.drawPos+gPos}'>${g.pants(gPos).name}</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-club='${g.drawPos+gPos}'>${g.pants(gPos).club}</small></td>
+  <td rowspan="2" class="border-top border-bottom border-right p-1"><small data-rating='${g.drawPos+gPos}' >${g.pants(gPos).getRatingInfo}</small></td>
+  ${tdSuffix}
+""")  
+}
+
+@groupView(g: Group, gPos:Int, td1stRow: String="", td2ndRow: String="")={
+  @Html(s"""<tr data-pantPos='${g.grId}_${gPos}' data-sno='${g.pants(gPos).sno}'>""")
+  @if(false){@grpHeader(g.name, g.size)}
+  @grpContent(g, gPos, td1stRow)
+  @Html(s"""</tr><tr>${td2ndRow}</tr>""")
+}  
+
+@tdrb = @{ s"""<td class="tdDrawGroup border-right border-bottom"></td>""" }
+@tdr  = @{ s"""<td class="tdDrawGroup border-right"></td>""" }
+@tdb  = @{ s"""<td class="tdDrawGroup border-bottom"></td>""" }
+@tdt  = @{ s"""<td class="tdDrawGroup border-top"></td>""" }
+@tdtr = @{ s"""<td class="tdDrawGroup border-top border-right"></td>""" }
+@td   = @{ s"""<td class="tdDrawGroup"></td>""" }
+
+<tr><td colspan="6" style="border-bottom: 1px solid black; height:1px;"></td><td colspan="3" style="height:1px;"></td></tr>
+@group.size match {
+  case 3 => {
+    @groupView(group, 0, tdb + td + td,  tdr + td + td)
+    @groupView(group, 1, tdr + td + td,  tdr + td + td)
+    @groupView(group, 2, tdrb + td + td, td  + td + td)
+  }
+
+  case 4 => {
+    @groupView(group, 0, tdb  + td   + td, tdt  + tdtr + td)
+    @groupView(group, 1, td   + tdr  + td, tdtr + tdr  + td)
+    @groupView(group, 2, tdrb + tdr  + td, td   + tdr  + td)
+    @groupView(group, 3, tdb  + tdrb + td, td   + td   + td)    
+  }
+
+  case 5 => {
+    @groupView(group, 0, tdb  + td   + td, tdt  + tdtr + td)
+    @groupView(group, 1, td   + tdr  + td, tdtr + tdr  + td)
+    @groupView(group, 2, tdr  + tdr  + td, tdr  + tdr  + td)
+    @groupView(group, 3, tdrb + tdr  + td, td   + tdr  + td)  
+    @groupView(group, 4, tdb  + tdrb + td, td   + td   + td) 
+  }
+
+  case 6 => {
+    @groupView(group, 0, td   + td   + td,   tdt  + tdt  + tdtr)
+    @groupView(group, 1, td   + td   + tdr,  tdt  + tdtr + tdr )
+    @groupView(group, 2, td   + tdr  + tdr,  tdtr + tdr  + tdr )
+    @groupView(group, 3, tdrb + tdr  + tdr,  td   + tdr  + tdr )  
+    @groupView(group, 4, tdb  + tdrb + tdr,  td   + td   + tdr ) 
+    @groupView(group, 5, tdb  + tdb  + tdrb, td   + td   + td  ) 
+  }
+
+  case _ => {
+    @for(i<-0 until group.size){
+      @groupView(group, i, td   + td   + td,   td  + td  + td)
+    } 
+  }
+
+}

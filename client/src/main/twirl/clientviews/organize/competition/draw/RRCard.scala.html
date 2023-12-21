@@ -1,0 +1,34 @@
+@*
+ * Template for drawing groups
+ *@
+@import shared.model.CompPhase
+@import shared.model.CompPhaseStatus
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coph: CompPhase)(implicit ucc: UseCaseParam)
+
+  <table class="m-1">
+    <tr>
+      <th><small class="font-weight-bold  ml-1 mr-1">@msg("table.pos")</small></th>
+      <th data-drawSelectField='0'>
+        <div class="text-center ml-1 mr-1">
+          <button  data-coId='@coph.coId' data-coPhId='@coph.coPhId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+          </button>
+        </div>
+      </th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
+      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr")</small></th>
+      <th colspan='3'>
+        @if(coph.status == CompPhaseStatus.AUS) {
+          <button id='DrawStartBtn__@{coph.coId}_@{coph.coPhId}' data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' 
+            class='btn btn-outline-secondary btn-xxs ml-1 mr-1' @actionEvent("Start", "onclick")>@msg_("std.btn.start")
+          </button> 
+        }
+      </th> 
+    </tr>
+    @RRView(coph.coId, coph.coPhId, coph.groups(0))
+  </table>
