@@ -56,8 +56,6 @@ case class Competition(
     case _                   => CompTyp.Typ
   } 
 
-  def chkStatus(chkWith: CompStatus.Value*): Boolean = chkWith.contains(status)
-
   def setTyp(value : String)= { typ = getTyp(value) }
 
   def getOptStr(index: Int): String   = getMDStr(options, index) 
@@ -126,9 +124,8 @@ case class Competition(
   def getToTTR: String   = if (getRatingUpperLevel>0) "%04d".format(getRatingUpperLevel) else "XXXX"
   
   def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(status.msgCode, Seq())
-  def getTypName(mfun:(String, Seq[String])=>String): String = mfun(typ.msgCode,Seq())  
   def genName(fun:(String, Seq[String])=>String): String = {
-    if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${getTypName(fun)}" }
+    if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${typ.name(fun)}" }
   }
 
   def equal(co: Competition): Boolean = hash == co.hash
@@ -179,6 +176,8 @@ object CompTyp extends Enumeration {
   
   implicit class CompTypValue(ct: Value) {
     def msgCode = s"CompTyp.${ct.toString}"
+    def equalsTo(compareWith: Value*):Boolean = compareWith.contains(ct)
+    def name(mfun:(String,Seq[String])=>String, insert:String=""):String = mfun(s"CompTyp.${ct.toString}", Seq(insert))
   }
 }  
 
@@ -205,6 +204,7 @@ object CompStatus extends Enumeration {
 
   implicit class CompStatusValue(cs: Value) {
     def msgCode = s"CompStatus.${cs.toString}"
+    def equalsTo(compareWith: Value*):Boolean = compareWith.contains(cs)
   }
 
 }

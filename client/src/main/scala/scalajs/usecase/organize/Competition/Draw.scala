@@ -78,7 +78,10 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         case CompPhaseTyp.GR => setHtml(contentElement, clientviews.organize.competition.draw.html.GroupCard(coph))
         case CompPhaseTyp.KO => setHtml(contentElement, clientviews.organize.competition.draw.html.KOCard(coph))
         case CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.draw.html.RRCard(coph))        
-        case CompPhaseTyp.SW => setHtml(contentElement, clientviews.organize.competition.draw.html.SwitzCard(coph))
+        case CompPhaseTyp.SW => {
+          val mtchRnds = coph.matches.toList.groupBy(_.round)
+          setHtml(contentElement, clientviews.organize.competition.draw.html.SwissCard(coph, mtchRnds))
+        }  
         case _               => setHtml(contentElement, showAlert(getMsg("invalidSection")))
       }      
     } else {
@@ -88,8 +91,8 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         case CompPhaseTyp.GR  => updateGrView(base, coph.groups, App.tourney.comps(coph.coId).typ)
         case CompPhaseTyp.RR  => updateRrView(base, coph.groups(0), App.tourney.comps(coph.coId).typ)
         case CompPhaseTyp.KO  => updateKoView(base, coph.ko, App.tourney.comps(coph.coId).typ)
-        case CompPhaseTyp.SW => ???
-        case _               => {}
+        case CompPhaseTyp.SW  => ???
+        case _                => {}
       }       
     }
 

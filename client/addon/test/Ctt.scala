@@ -128,10 +128,10 @@ object AddonCtt extends UseCase("AddonCtt")
         DlgSpinner.start("Start Transfer") 
         newCttFile(0L, sDate, formData).map {
           case Left(err)   => println(s"${err}"); DlgSpinner.error( getError(err)) 
-          case Right(toId) => {
-            DlgSpinner.result(s"TourneyId: ${toId}") 
-            App.loadRemoteTourney(toId).map {
-              case Left(err)  => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${getError(err)}")
+          case Right(res) => {
+            DlgSpinner.result(s"TourneyId: ${res._1} Name: ${res._2}") 
+            App.loadRemoteTourney(res._1).map {
+              case Left(err)  => dom.window.alert(s"ERROR: load tourney ${res._1} failed with: ${getError(err)}")
               case Right(res) => {         
                App.tourney.setCurCoId(1)
                App.execUseCase("OrganizeCompetition", "", "")

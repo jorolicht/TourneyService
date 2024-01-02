@@ -228,6 +228,10 @@ err0241.svc.regDouble                               = Fehler in der Routine regD
 err0242.setCompPhase                                = Fehler in Routine setCompPhase {0} {1}
 err0243.systemKO.draw.size                          = Auslosung KO-System, fehlerhafte Größe oder Anzahl der Runden
 err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
+err0245.invalid.sno.double                          = Doppel-Startnummer ungültig: {0}
+err0246.decode.sendCttFile                          = Dekodierfehlerin Routine sendCttFile
+
+
 
 
 return001.csv.hdr.player                            = CSV header for player

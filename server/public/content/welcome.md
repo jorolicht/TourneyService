@@ -5,13 +5,17 @@
   <div class="row"> <!-- ROW --> 
     <div class="col-6">
      <p>
-	      Dies ist eine Online-Plattform um eigenen Turniere zu verwalten und auszutragen. Derzeitig werden nur Tischtennis-Turniere unterstützt. Weitere Sportarten sind in Planung.
-        <br>
-        Durch die Web-Anwendung können sich Spieler für Turniere anmelden, akutelle Turnierergebnisse einsehen, eigene Urkunden ausdrucken sowie die aktuelle Tischbelegung des Turniers anzeigen lassen. Die Webseiten sind optimiert für mobile Geräte und bieten eine sogenannte <b>LIVE-VIEW</b> das heisst, die Anzeigen aktualisieren sich sobald Eingaben durch Turnierleiter erfolgen.  
+        Die Web-Anwendung in der Version 2.0 bietet nun erstmals alle Funktionn für die Online-Durchführung eines Tischtennis-Turniers.
+        Hier einige Funktionen im Überblick:
       </p>
-      <p>
-        LIVE-VIEW erlaubt auch den Bildschirminhalt auf Leinwänden oder Beamer zu streamen. Tischbelegungen werden so umgehend für alle Spieler sichtbar.
-      </p>
+      <ul>
+          <li>Gruppen und KO-Runden Auslosungen bis 128 Teilnehmer</li>
+          <li>LIVE-VIEW erlaubt auch den Bildschirminhalt auf Leinwänden oder Beamer zu streamen</li>
+          <li>Tischbelegungen werden umgehend für alle Spieler sichtbar</li>
+          <li>Spieler können Ergebnisse über QR-Code selbst an mobilen Geräten eingeben und einsehen</li>
+          <li>Spieler können sich Urkunden selbst ausdrucken</li>
+          <li>aktueller Turnierstand durch Spieler einsehbar</li>
+      </ul>
     </div>
 
     <div class="col-6">
@@ -112,16 +116,13 @@
       </div>
 
 
-
-
-
     </div
   </div> <!--/.ROW-->
 
 
   <div class="col-12">
     <p>
-      Für die Auslosung und Ergebnisseingabe ist (noch) das kostenfreie <b>TTC Turnierprogramm</b> (Excel-Datei) erforderlich. Auch dieses Programm wird in Zukunft erweitert und anwenderfreundlich aktualisert (Verbesserungsvorschläge werden gerne entgegengenommen).
+      Es gibt immer noch das kostenfreie <b>TTC Turnierprogramm</b> in der Excel-Version. Auch dieses Programm wird in Zukunft erweitert und anwenderfreundlich aktualisert (Verbesserungsvorschläge werden gerne entgegengenommen).
 
       Ihr könnt das <b>Turnierprogramm</b> <a href="https://turnier-service.org/tischtennis_grundlagen.html">hier</a>  oder über das Menu Turnierleitung herunterladen, dort findet sich auch das    
       <a href="https://turnier-service.org/tischtennis_grundlagen.html">Handbuch</a>.
@@ -134,11 +135,10 @@
 
 ## Neuigkeiten
 
-#### 1. Juli 2021: Turnierservice LIVE Plattform Version 1.4.0
-  * Online Registrierung aktualisiert
+#### 2. Januar 2024: Turnierservice Version 2.0
+  * Komplette Funktionen zur Online-Durchführung eines Turniers
+  * Auslosung für Gruppen und KO-Runde
+  * Anzeige der Tischbelegung für Spieler
+  * Spieler können Ergebnisse anhand von QR-Code selbst am Mobile Phone eingeben
+  * Spieler können eigene Urkunden drucken
 
-#### 12. November 2020: Turnierservice LIVE Plattform Version 1.1.3 
-  * LIVE Anzeige von Ergebnissen und der aktuellen Tischbelegung
-  * Spieler können Urkunden selbst erstellen und drucken
-  * Wettbewerbe und Anmeldungen online
-  * fixe URL für Turniere (QR-Code Unterstützung)

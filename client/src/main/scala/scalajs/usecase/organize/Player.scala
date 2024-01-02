@@ -52,13 +52,14 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
       comp.typ match {
         case CompTyp.SINGLE => {
           val pl1 = tourney.players(p2ce.getPlayerId)
-          
           (Pant.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, 0L, pl1.getLicense.value)
         }
-        case CompTyp.DOUBLE | CompTyp.MIXED => {
-          val (plId1, plId2) = p2ce.getDoubleId
-          val (pl1, pl2) = (tourney.players(plId1), tourney.players(plId2))
-          (Pant.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
+        case CompTyp.DOUBLE | CompTyp.MIXED => p2ce.getDoubleId match {
+          case Left(err) => println(s"ERROR: ${err.toString()}");  ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
+          case Right(id) => {
+            val (pl1, pl2) = (tourney.players(id._1), tourney.players(id._2))
+            (Pant.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
+          }
         }
         case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
       }

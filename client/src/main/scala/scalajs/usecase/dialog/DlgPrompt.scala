@@ -46,7 +46,6 @@ object DlgPrompt extends BasicHtml
     $("[id=DlgPrompt__Close]").click((e: Event)  => dialogBoxCancel()) 
     $("[id=DlgPrompt__Start]").click((e: Event)  => dialogBoxClick(e)) 
     
-
     val elem = dom.document.getElementById("DlgPrompt__Input").asInstanceOf[HTMLInputElement]
     elem.onkeydown = {(e: KeyboardEvent) =>
       if (Seq(13).contains(e.keyCode.toInt)) {
@@ -74,7 +73,9 @@ object DlgPrompt extends BasicHtml
     $("#DlgPrompt__Modal").on("hide.bs.modal", () => dialogBoxCancel())
     f.map {
       case Left(err)  => $("#DlgPrompt__Modal").modal("hide"); Left(err)
-      case Right(res) => $("#DlgPrompt__Modal").modal("hide"); Right(res)
+      //case Right(res) => $("#DlgPrompt__Modal").modal("hide"); Right(res)
+      case Right(res) =>  Right(res)
+
     }
   }
 

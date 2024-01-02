@@ -30,7 +30,7 @@
           <td class="text-left tuse-height">@co._11</td>
           <td class="text-center tuse-height">@co._7</td>
           @if(co._9 != CompStatus.READY){
-            <td class="text-right tuse-height">@msg_(s"competition.status.${co._9}")</td>  
+            <td class="text-right tuse-height">@gMTyp(co._9)</td>  
           } else {
             <td class="text-right tuse-height"></td> 
           }

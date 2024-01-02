@@ -44,18 +44,14 @@ trait ViewServices {
     (for {
       p2ce <- p2cs
     } yield {
-       val (plId1,plId2) = p2ce.getDoubleId
-
-       if (trny.players.contains(plId1) & trny.players.contains(plId2)) {
-        (p2ce.sno, trny.players(plId1).lastname, trny.players(plId2).lastname, trny.players(plId1).clubName, trny.players(plId2).clubName, p2ce.status.id)
-       } else {
-        ("0·0", "", "", "", "", 0)
+       p2ce.getDoubleId match {
+         case Left(err) => println(s"ERROR: ${err.toString()}"); ("0·0", "", "", "", "", 0)
+         case Right(id) => if (trny.players.contains(id._1) & trny.players.contains(id._2)) {
+           (p2ce.sno, trny.players(id._1).lastname, trny.players(id._2).lastname, trny.players(id._1).clubName, trny.players(id._2).clubName, p2ce.status.id)
+         } else { println(s"ERROR: invalid double sno ${id}"); ("0·0", "", "", "", "", 0) }
        }
     }).toSeq.sortBy(s => (s._2,s._3))
   }
-    
-
-
 
 
   /** list all competition and the corresponding players
@@ -86,15 +82,16 @@ trait ViewServices {
                 pa2co.sno)
              }
              case CompTyp.DOUBLE | CompTyp.MIXED => {
-               val (plId1, plId2) = pa2co.getDoubleId
-
-               AppEnv.debug("getPlacements", s"double: ${plId1.toString}  ${plId2.toString}")
-               (pa2co.getPlace()._1, pa2co.getPlaceDesc(AppEnv.getMessage _), 
-                s"${tourney.players(plId1).lastname}/${tourney.players(plId2).lastname}",
-                s"${tourney.players(plId1).clubName}/${tourney.players(plId2).clubName}",
-                pa2co.sno)
+               pa2co.getDoubleId match {
+                 case Left(err) => (0, "0", "", "", "0")
+                 case Right(id) => {
+                  (pa2co.getPlace()._1, pa2co.getPlaceDesc(AppEnv.getMessage _), 
+                    s"${tourney.players(id._1).lastname}/${tourney.players(id._2).lastname}",
+                    s"${tourney.players(id._1).clubName}/${tourney.players(id._2).clubName}",
+                    pa2co.sno)
+                 } 
+               }
              }
-             case CompTyp.TEAM => (0, "0", "", "", "0")
              case _            => (0, "0", "", "", "0")
           }
         } else {
@@ -107,7 +104,7 @@ trait ViewServices {
     (for {  
       (coId, comp) <- App.tourney.comps
     } yield { 
-      if (comp.chkStatus(CompStatus.ERFIN)) {
+      if (comp.status.equalsTo(CompStatus.ERFIN)) {
         (coId, comp.name, getPlacements(coId, comp.typ, App.tourney))
       } else {
         (coId, comp.name, Seq())

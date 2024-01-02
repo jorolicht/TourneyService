@@ -635,7 +635,11 @@ class PostActionCtrl @Inject()
 
           case CompTyp.DOUBLE =>
             trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
-              val plIds  = entry.getDoubleId
+
+              val plIds  = entry.getDoubleId match {
+                case Left(err) => println(s"ERROR: ${err.toString}"); (0L,0L)
+                case Right(id) => id
+              }
               val lic1   = trny.players(plIds._1).getLicense.value
               val lic2   = trny.players(plIds._2).getLicense.value
 
@@ -644,7 +648,7 @@ class PostActionCtrl @Inject()
                   licence2player(s"${lic1}·${lic2}")
                 } else if (licence2player.isDefinedAt(s"${lic2}·${lic1}")) {
                   licence2player(s"${lic2}·${lic1}")
-                } else { ""}  
+                } else { "" }  
             }}
 
           case _ => logger.info(s"coId: ${coId} with competition typ: ${comp.typ} not supported" ) 

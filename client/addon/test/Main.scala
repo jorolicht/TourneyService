@@ -184,18 +184,18 @@ object AddonMain extends TestUseCase("AddonMain")
 
 
       val tourney = new Subcommand("tourney", "tourn") {
-        val toid    = opt[Long](name="toid", required = true)
+        val toId    = opt[Long](name="toId", required = true)
       }
       val comp = new Subcommand("comp", "competition") {
-        val coid = opt[Long](name="coid", required = true)
+        val coId = opt[Long](name="coId", required = true)
       }
-      val phase = new Subcommand("phase", "compphase") {
-        val coid = opt[Long](name="coid", required = true)
-        val phid = opt[Int](name="phid", required = true)
+      val coph = new Subcommand("phase", "coph") {
+        val coId   = opt[Long](name="coId", required = true)
+        val coPhId = opt[Int](name="coPhId", required = true)
       }      
       addSubcommand(tourney)
       addSubcommand(comp)
-      addSubcommand(phase)
+      addSubcommand(coph)
 
       verify()
     }
@@ -203,16 +203,16 @@ object AddonMain extends TestUseCase("AddonMain")
     val conf   = new ConfShow(args)
     conf.subcommand match {
       case Some(conf.tourney) => {
-        val toId = conf.tourney.toid.getOrElse(0L)
-        setOutput("START show tourney")
+        val toId = conf.tourney.toId.getOrElse(0L)
+        setOutput(s"START show tourney -> toId: ${toId}")
         setLoginLoad(toId).map {
           case Left(err)  => false
           case Right(res) => setOutput(s"SUCCESS show tourney: \n ${App.tourney.toString()}"); true
         }
       }  
       case Some(conf.comp)    => {
-        val coId   = conf.phase.coid.getOrElse(0L)
-        println(s"subcommand comp coId: ${coId}")
+        val coId   = conf.coph.coId.getOrElse(0L)
+        println(s"subcommand comp -> coId: ${coId}")
         if (!App.tourney.comps.contains(coId)) {
           error("showCompetition", s"competition coId: ${coId} not found")
         } else {
@@ -220,10 +220,10 @@ object AddonMain extends TestUseCase("AddonMain")
         } 
         Future(false)
       }  
-      case Some(conf.phase)   => {
-        val coId   = conf.phase.coid.getOrElse(0L)
-        val coPhId = conf.phase.phid.getOrElse(0)
-        println(s"subcommand phase coid: ${coId} phid: ${coPhId}")
+      case Some(conf.coph)   => {
+        val coId   = conf.coph.coId.getOrElse(0L)
+        val coPhId = conf.coph.coPhId.getOrElse(0)
+        println(s"subcommand coph -> coId: ${coId} coPhId: ${coPhId}")
         if (!App.tourney.cophs.contains((coId, coPhId))) {
           error("showCompPhase", s"competition phase coId: ${coId} coPhId: ${coPhId} not found")
         } else {
@@ -274,7 +274,7 @@ object AddonMain extends TestUseCase("AddonMain")
     val game   = conf.game.getOrElse(0)
 
     scope match {
-      case "basic"     => AddonBasic.execTest(number, param);     Future(false)
+      case "basic"     => AddonBasic.execTest(number, param)
       case "dialog"    => AddonDialog.execTest(number, toId, plId, param)
       case "coph"      => AddonCompPhase.execTest(number, toId, coId, phase, param)
       case "ctt"       => AddonCtt.execTest(number, param);       Future(false)
@@ -376,12 +376,13 @@ object AddonMain extends TestUseCase("AddonMain")
   @JSExport
   def console(): Unit = {
     // execute first command if set
+    // then reseet command
     val command = getData(gE("DemoButton"), "command", "")
     if (command != "") setData(gE("DemoButton"), "command", "")
 
     prompt(gM("home.main.prompt"), command).map {
       case Left(err)  => {} //println(s"Invalid Console Command or Cancel ${err}")
-      case Right(cmd) => execute(cmd).map { _ => console() }
+      case Right(cmd) => execute(cmd).map { x => println(s"EXECUTED: ${cmd} RESULT: ${x}"); console() }
     }
   }
   
@@ -412,23 +413,25 @@ object AddonMain extends TestUseCase("AddonMain")
       }
     }
 
-    val initVal = if (pHistory.length > 0) { pPosition = 0; pHistory(0) } else { pPosition = -1; "" } 
     
     if (command != "") {
-      loadModal(clientviews.dialog.html.DlgPrompt(), "DlgPrompt__Modal")
-      Future(Right(command))
-    } else {
-      DlgPrompt.show(title, initVal, actionEvent) map {
-        case Left(err)    => Left(err)
-        case Right(input) => {
-          // save history
-          pHistory.insert(0, input)
-          if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
-          AppEnv.setArrayBuffer("AppEnv.prompt", pHistory) 
-          Right(input)
-        }  
-      }
+      pHistory.insert(0, command)
+      if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
+    } 
+
+    val initVal = if (pHistory.length > 0) { pPosition = 0; pHistory(0) } else { pPosition = -1; "" } 
+
+    DlgPrompt.show(title, initVal, actionEvent) map {
+      case Left(err)    => Left(err)
+      case Right(input) => {
+        // save history
+        pHistory.insert(0, input)
+        if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
+        AppEnv.setArrayBuffer("AppEnv.prompt", pHistory) 
+        Right(input)
+      }  
     }
+    
 
   }
 

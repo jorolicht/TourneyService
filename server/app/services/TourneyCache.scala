@@ -179,7 +179,7 @@ object TIO {
    * @return 
    */
   def delete(toId: Long, orgDir: String, sDate: Int=0)(implicit ec: ExecutionContext, tonyDao: TourneyDAO, cfg: Configuration): 
-    Future[Either[Error, Long]] = {
+    Future[Either[Error, String]] = {
     import scala.util.{Try, Success, Failure, Using}
     import scala.util.Using
     import scala.io.Source
@@ -200,10 +200,10 @@ object TIO {
           res1 <- moveFile(fNCfg, xfNCfg)
         } yield (res1)) match {
           case Left(err)  => Left(err.add("Cache.delete"))
-          case Right(res) => Right( tony match { case Some(to) => to.id; case None => 0L} )
+          case Right(res) => Right( tony match { case Some(to) => to.name; case None => ""} )
         }
       } else {
-        Right(0L)
+        Right("")
       } 
     }
   }
@@ -345,13 +345,18 @@ object TIO {
 
               case CompTyp.DOUBLE =>
                 trny.pl2co.filter(_._1._2 == coId).foreach { case (key, entry) => {
-                  val plIds  = entry.getDoubleId
                   // update licence if necessary
-                  setPlayerCttLicense(trny.players(plIds._1), name2person)
-                  setPlayerCttLicense(trny.players(plIds._2), name2person)
-                  val (lic1, lic2)   = (trny.players(plIds._1).getLicense.value, trny.players(plIds._2).getLicense.value)
-                  entry.ident = if (licence2Ident.isDefinedAt(s"${lic1}·${lic2}")) licence2Ident(s"${lic1}·${lic2}") else licence2Ident(s"${lic2}·${lic1}")
-                  if (entry.ident != "") cnt = cnt + 1  
+                  entry.getDoubleId match {
+                    case Left(err) => println(s"ERROR: ${err.toString()}")
+                    case Right(id) => {
+                      setPlayerCttLicense(trny.players(id._1), name2person)
+                      setPlayerCttLicense(trny.players(id._2), name2person)
+                      val (lic1, lic2)   = (trny.players(id._1).getLicense.value, trny.players(id._2).getLicense.value)
+                      entry.ident = if (licence2Ident.isDefinedAt(s"${lic1}·${lic2}")) licence2Ident(s"${lic1}·${lic2}") else licence2Ident(s"${lic2}·${lic1}")
+                      if (entry.ident != "") cnt = cnt + 1  
+                    }
+                  }
+
                 }}
 
               case _ => logger.info(s"coId: ${coId} with competition typ: ${comp.typ} not supported" ) 

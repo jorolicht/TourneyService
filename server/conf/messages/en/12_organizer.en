@@ -74,6 +74,9 @@ organize.tourney.download.notify.filehdr              = Start number, surname, f
 organize.tourney.download.clicktt.list                = ClickTT Result File
 organize.tourney.download.clicktt.info                = ClickTT Result File <date>_<id>_Result.xml to use for import results on clickTT
 organize.tourney.dlg.error                            = Error executing tourney action
+organize.tourney.completion.hdr                       = Completion Message
+organize.tourney.error.hdr                            = Error Message
+organize.tourney.completion.sendCTTFile               = Tourney ({0}) "{1}"" created
 
 
 ###

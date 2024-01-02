@@ -175,6 +175,7 @@ CompPhaseTyp.UNKN                                   = UNKNOWN
 CompPhaseTyp.GR                                     = Group System
 CompPhaseTyp.KO                                     = KO System
 CompPhaseTyp.SW                                     = Switz System
+CompPhaseTyp.RR                                     = Round Robin
 
 CompPhaseCfg.UNKN                                   = UNKNOWN
 CompPhaseCfg.CFG                                    = Select Game System
@@ -193,7 +194,7 @@ CompPhaseCfg.GRPS45                                 = Round with Groups of Size 
 CompPhaseCfg.GRPS5                                  = Round with Groups of Size 5
 CompPhaseCfg.GRPS56                                 = Round with Groups of Size 5 and 6
 CompPhaseCfg.GRPS6                                  = Round with Groups of Size 6
-CompPhaseCfg.JGJ                                    = Round Robin
+CompPhaseCfg.RR                                     = Round Robin
 CompPhaseCfg.KO                                     = KO-System
 CompPhaseCfg.SW                                     = Swiss-System
 
@@ -941,6 +942,9 @@ organize.tourney.download.notify.filehdr              = Start number, surname, f
 organize.tourney.download.clicktt.list                = ClickTT Result File
 organize.tourney.download.clicktt.info                = ClickTT Result File <date>_<id>_Result.xml to use for import results on clickTT
 organize.tourney.dlg.error                            = Error executing tourney action
+organize.tourney.completion.hdr                       = Completion Message
+organize.tourney.error.hdr                            = Error Message
+organize.tourney.completion.sendCTTFile               = Tourney ({0}) "{1}"" created
 
 
 ###
@@ -1449,6 +1453,8 @@ err0241.svc.regDouble                               = Error in routine regDouble
 err0242.setCompPhase                                = Error in routine setCompPhase {0} {1}
 err0243.systemKO.draw.size                          = Draw KO-System, size or number of rounds not correct
 err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
+err0245.invalid.sno.double                          = Startnumber of double invalid: {0}
+err0246.decode.sendCttFile                          = Decoding error in routine sendCttFile
 
 return001.csv.hdr.player                            = CSV header for player
 

@@ -74,6 +74,9 @@ organize.tourney.download.notify.filehdr              = StartNr, Name, Vorname, 
 organize.tourney.download.clickTT.list                = ClickTT Ergebnisdatei
 organize.tourney.download.clickTT.info                = ClickTT Ergebnisdatei: <date>_<id>_Result.xml zum Hochladen der Ergebnisse in clickTT
 organize.tourney.dlg.error                            = Fehler beim Ausführen der Turnieraktion
+organize.tourney.completion.hdr                       = Fertigmeldung
+organize.tourney.error.hdr                            = Fehlermeldung
+organize.tourney.completion.sendCTTFile               = Turnier ({0}) "{1}"" angelegt
 
 
 ###

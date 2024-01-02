@@ -117,8 +117,7 @@ class HomeCtrl @Inject()(
 
 
   def getIpAddress() = Action { implicit request =>
-    //import scala.jdk.CollectionConverters
-    import collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     import java.net._
 
     val enumeration = NetworkInterface.getNetworkInterfaces.asScala.toSeq

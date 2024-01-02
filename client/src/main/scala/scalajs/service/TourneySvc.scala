@@ -107,11 +107,9 @@ trait TourneySvc extends WrapperSvc
         (s"${tourney.players(plId).firstname} ${tourney.players(plId).lastname}", s"${tourney.players(plId).clubName}")
       }
 
-      case CompTyp.DOUBLE | CompTyp.MIXED => {
-        val (plId1, plId2) = tourney.pl2co((sno,coId)).getDoubleId
-
-        //debug("printCert DOUBLE", s"${plId1} ${plId2}")
-        (s"${tourney.players(plId1).lastname}/${tourney.players(plId2).lastname}", s"${tourney.players(plId1).clubName}/${tourney.players(plId2).clubName}")
+      case CompTyp.DOUBLE | CompTyp.MIXED => tourney.pl2co((sno, coId)).getDoubleId match {
+        case Left(err)  => println(s"ERROR: invalid double sno ${sno}"); ("?","?")
+        case Right(id)  =>  (s"${tourney.players(id._1).lastname}/${tourney.players(id._2).lastname}", s"${tourney.players(id._1).clubName}/${tourney.players(id._2).clubName}")           
       }
       case _ => ("?","?")
     }
@@ -159,10 +157,12 @@ trait TourneySvc extends WrapperSvc
     }
   }  
 
-  def newCttFile(toId: Long, sDate: Int, fData: dom.FormData): Future[Either[Error, Long]] = 
+  def newCttFile(toId: Long, sDate: Int, fData: dom.FormData): Future[Either[Error, (Long,String)]] = 
     postForm("/service/sendCttFile", s"toId=${toId}&sDate=${sDate}&uplMode=${UploadMode.New.id}",fData).map {
       case Left(err)  => Left(err.add("newCttFile"))
-      case Right(res) => Return.decode2Long(res, "newCttFile")
+      case Right(res) => try {
+        Right(read[(Long,String)](res))
+      } catch { case _: Throwable => Left(Error("err0246.decode.sendCttFile")) }
     }
 
 
@@ -196,10 +196,10 @@ trait TourneySvc extends WrapperSvc
 
 
   // delete tourney basis information
-  def delTourney(toId: Long): Future[Either[Error, Boolean]] = 
+  def delTourney(toId: Long): Future[Either[Error, String]] = 
     postAction("delTourney", toId, "", "", true).map {
       case Left(err)  => Left(err.add("delTourney"))
-      case Right(res) => Return.decode2Boolean(res, "delTourney")
+      case Right(res) => Return.decode2String(res, "delTourney")
     }
 
   // update tourney basis information

@@ -191,9 +191,9 @@ object CttService  {
     val tVal = cttComp.getTyp
     val name = 
       if (cttComp.ttrRemarks=="") {
-        s"${cttComp.ageGroup} ${msg("competition.typ."+tVal)}"
+        s"${cttComp.ageGroup} ${msg(tVal.msgCode)}"
       } else {
-        s"${cttComp.ageGroup} ${cttComp.ttrRemarks} ${msg("competition.typ."+tVal)}"
+        s"${cttComp.ageGroup} ${cttComp.ttrRemarks} ${msg(tVal.msgCode)}"
       }
 
     val co = new Competition(0L, name, tVal, parseStartTime(cttComp.startDate), CompStatus.READY, "_")

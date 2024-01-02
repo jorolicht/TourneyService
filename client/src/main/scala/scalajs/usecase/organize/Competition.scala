@@ -59,7 +59,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       setHtml(gUE("CoPhCardHdr"), getMsg("coph.card", comp.name))
       setHtml(gUE("ParticipantCardHdr"), getMsg("participant.card", comp.name))
 
-      setDisabled("BtnRegParticipant", !comp.chkStatus(CompStatus.CFG,CompStatus.READY) )
+      setDisabled("BtnRegParticipant", !comp.status.equalsTo(CompStatus.CFG,CompStatus.READY) )
 
       // prepare CompCard
       collapse("CompCard", false)
@@ -75,7 +75,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       
       collapse("CoPhCard", false)
 
-      val editable = comp.chkStatus(CompStatus.CFG,CompStatus.READY)
+      val editable = comp.status.equalsTo(CompStatus.CFG, CompStatus.READY)
 
       // prepare ParticipantCard
       setVisible(gUE("ParticipantCardMain"), coPhId == 1 || coPhId == 0 )
@@ -254,8 +254,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         coph.noPlayers = coph.candidates.filter(_._2).size
         coph.coPhCfg   = CompPhaseCfg.CFG
         updViewCoPhContent(coph)
-        //setViewCoPhGameSystem(coph)
-        //setViewCoPhConfig(coph)
       }}  
   
       case "DemoBtn" => actionDemoBtn(getCoId(elem), getCoPhId(elem), elem.asInstanceOf[HTMLInputElement].checked)
@@ -328,7 +326,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     }
     // calculate no of players selected candidates
     setViewCoPhGameSystem(coph)
-    //setViewCoPhConfig(coph)
     activateCoPhTab(coph)
   }
 
@@ -371,13 +368,6 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
     selectOption(s"BaseCoPh_${coph.coId}_${coph.coPhId}", o2S(coph.baseCoPhId))
   }
   
-  def setViewCoPhConfig(coph: CompPhase) = {
-    //setCheckbox("DemoBtn", coph.demo)
-    //selectOption(s"Winset_${coph.coId}_${coph.coPhId}", coph.noWinSets.toString)
-    //setHtml(gUE(s"Status_${coph.coId}_${coph.coPhId}"), gMTyp(coph.status))
-    //setHtml(gUE(s"NoGames_${coph.coId}_${coph.coPhId}"), gUM("coph.noGames", coph.mFinished.toString, coph.mTotal.toString))
-    //setHtml(gUE(s"NoPlayer_${coph.coId}_${coph.coPhId}"), gUM("coph.noPlayers", coph.noPlayers.toString)) 
-  } 
 
   // setViewGameSystem - calculate possible game systems
   //                     set the corresponding options
@@ -431,28 +421,28 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       if (size % 4 == 0) result += CompPhaseCfg.GRPS4 else result += CompPhaseCfg.GRPS45
       if (size % 5 == 0) result += CompPhaseCfg.GRPS5 else result += CompPhaseCfg.GRPS56
       result += CompPhaseCfg.KO
-      if (size <= 36) result += CompPhaseCfg.JGJ
-      result += CompPhaseCfg.SW
+      if (size <= Tourney.MaxSizeRR) result += CompPhaseCfg.RR
+      // if (size <= Tourney.MaxSizeSW) result += CompPhaseCfg.SW
       result.to(List)
     }
 
     size match {
-      case 3 | 4 | 5 => List(CompPhaseCfg.JGJ,    CompPhaseCfg.KO,     CompPhaseCfg.SW)
-      case 6         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ)
-      case 7         => List(CompPhaseCfg.GRPS34, CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ)
-      case 8         => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.JGJ)
-      case 9         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 10        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 11        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 12        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 13        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 14        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 3 | 4 | 5 => List(CompPhaseCfg.RR,     CompPhaseCfg.KO,     CompPhaseCfg.SW)
+      case 6         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.RR)
+      case 7         => List(CompPhaseCfg.GRPS34, CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.RR)
+      case 8         => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.KO,     CompPhaseCfg.SW,     CompPhaseCfg.RR)
+      case 9         => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 10        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 11        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 12        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 13        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 14        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
       case 15        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS5,  CompPhaseCfg.KO, CompPhaseCfg.SW)
-      case 16        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 17        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 18        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 19        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
-      case 20        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.JGJ)
+      case 16        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS56, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 17        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS56, CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 18        => List(CompPhaseCfg.GRPS3,  CompPhaseCfg.GRPS45, CompPhaseCfg.GRPS6,  CompPhaseCfg.KO, CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 19        => List(CompPhaseCfg.GRPS34, CompPhaseCfg.GRPS45, CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
+      case 20        => List(CompPhaseCfg.GRPS4,  CompPhaseCfg.GRPS5,  CompPhaseCfg.KO,     CompPhaseCfg.SW, CompPhaseCfg.RR)
 
       case i if (i >= 21 && i <= 128) => sysOptions21to128(i)
       case _                          => List()        
@@ -559,7 +549,7 @@ def actionAddCoPh(coId: Long): Unit =
         val lines = content.split("\n")
         lines.zipWithIndex.foreach { case (line, index) => Player.fromCSV(line) match { 
           case Left(err)     => if (!err.is("return001.csv.hdr.player")) lineErrList += (index+1)
-          case Right(player) => if (!List("name","lastname").contains(player.lastname.toLowerCase())  ) pantList += player
+          case Right(player) => if (!List("name","lastname").contains(player.lastname.toLowerCase()) ) pantList += player
         }}
         
         regSingle(coId, pantList.toList, PantStatus.REDY).map {
@@ -580,9 +570,9 @@ def actionAddCoPh(coId: Long): Unit =
     coph.reset(CompPhaseStatus.CFG)
     updViewCoPhContent(coph)
     updateCompStatus(coph.coId).map {
-      case Left(err)  => error("actionStartDrawCoPh", s"updateCompStatus -> ${err}")
+      case Left(err)  => error("actionResetCfgCoPh", s"updateCompStatus -> ${err}")
       case Right(res) => saveCompPhase(coph).map {
-        case Left(err)  => error("actionStartDrawCoPh", s"saveCompPhase -> ${err}")
+        case Left(err)  => error("actionResetCfgCoPh", s"saveCompPhase -> ${err}")
         case Right(res) => info("StartDrawCoPh", s"SUCCESS coId: ${coph.coId} coPhId: ${coph.coPhId}") 
       }
     }
@@ -603,9 +593,9 @@ def actionAddCoPh(coId: Long): Unit =
   def actionResetInputCoPh(coph: CompPhase) = resetMatches(coph.coId, coph.coPhId) map { case Right(res) => 
     updViewCoPhContent(coph)
     updateCompStatus(coph.coId).map {
-      case Left(err)  => error("actionStartDrawCoPh", s"updateCompStatus -> ${err}")
+      case Left(err)  => error("actionResetInputCoPh", s"updateCompStatus -> ${err}")
       case Right(res) => saveCompPhase(coph).map {
-        case Left(err)  => error("actionStartDrawCoPh", s"saveCompPhase -> ${err}")
+        case Left(err)  => error("actionResetInputCoPh", s"saveCompPhase -> ${err}")
         case Right(res) => App.execUseCase("OrganizeCompetitionInput", "", "")
       }
     }
@@ -642,7 +632,7 @@ def actionAddCoPh(coId: Long): Unit =
     import shared.utils.Routines._
 
     val updown = (direction == "none" || direction == "down")  // up -> true else false
-    val editable = App.tourney.comps(coId).chkStatus(CompStatus.CFG,CompStatus.READY)
+    val editable = App.tourney.comps(coId).status.equalsTo(CompStatus.CFG, CompStatus.READY)
     def newDir(updo: Boolean) = if (updo) "up" else "down" 
 
     val singleTbl = sortTyp match {

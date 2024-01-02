@@ -118,6 +118,7 @@ CompPhaseTyp.UNKN                                   = UNKNOWN
 CompPhaseTyp.GR                                     = Group System
 CompPhaseTyp.KO                                     = KO System
 CompPhaseTyp.SW                                     = Switz System
+CompPhaseTyp.RR                                     = Round Robin
 
 CompPhaseCfg.UNKN                                   = UNKNOWN
 CompPhaseCfg.CFG                                    = Select Game System
@@ -136,7 +137,7 @@ CompPhaseCfg.GRPS45                                 = Round with Groups of Size 
 CompPhaseCfg.GRPS5                                  = Round with Groups of Size 5
 CompPhaseCfg.GRPS56                                 = Round with Groups of Size 5 and 6
 CompPhaseCfg.GRPS6                                  = Round with Groups of Size 6
-CompPhaseCfg.JGJ                                    = Round Robin
+CompPhaseCfg.RR                                     = Round Robin
 CompPhaseCfg.KO                                     = KO-System
 CompPhaseCfg.SW                                     = Swiss-System
 

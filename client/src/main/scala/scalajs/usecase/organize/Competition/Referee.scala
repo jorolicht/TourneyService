@@ -55,6 +55,7 @@ object OrganizeCompetitionReferee extends UseCase("OrganizeCompetitionReferee")
                   getMsg("round", m.asInstanceOf[MEntryGr].round.toString),
                   nameA, nameB, clubA, clubB))
         }
+        
         case CompPhaseTyp.RR => {
           setHtml(gE(s"RefereeNote_${coph.coId}_${coph.coPhId}_${idx+1}"), 
                   clientviews.organize.competition.referee.html.RefereeCardSingle(coph, m.gameNo,

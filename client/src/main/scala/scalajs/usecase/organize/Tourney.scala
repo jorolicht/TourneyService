@@ -150,14 +150,19 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     
 
   // Click dustbin on list
-  def actionTourneyDelete(toId: Long) = 
-    if (toId == App.tourney.getToId & toId != 0) 
-      dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.name)) { 
+  def actionTourneyDelete(toId: Long) = {
+    if (toId != 0) {
+      val tBase = tournBases.filter( _.id == toId).head
+      dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", tBase.name)) { 
         delTourney(toId).map { 
           case Left(err)  => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
-          case Right(res) => { App.resetLocalTourney(); render() }
+          case Right(res) => { App.resetLocalTourney(); update() }
         }        
       }
+    } else {
+      println(s"ERROR: actionTourneyDelete ${toId}")
+    }  
+  }    
 
 
 
@@ -243,18 +248,22 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     uplType match {
       case UploadType.ClickTT => uplMode match {
         case UploadMode.Update => updCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
-          case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+          case Left(err)  => stopSpinner(); DlgInfo.error(getMsg("error.hdr"), getError(err)) 
+          case Right(res) => stopSpinner(); DlgInfo.success(getMsg("completion.hdr"), s"TourneyId: ${res}")
         } 
         case UploadMode.New    => newCttFile(App.tourney.getToId, App.tourney.startDate, formData).map {
-          case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
-          case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+          case Left(err)  => stopSpinner(); DlgInfo.error(getMsg("error.hdr"), getError(err)) 
+          case Right(res) => { 
+            stopSpinner() 
+            DlgInfo.success(getMsg("completion.hdr"), getMsg("completion.sendCTTFile", res._1.toString, res._2.toString))
+            update()
+          }  
         } 
-        case UploadMode.UNKNOWN => stopSpinner(); println("Unknown upload mode")
+        case UploadMode.UNKNOWN => stopSpinner(); println("ERROR: Unknown upload mode")
       }
       case _ => uploadFile(App.tourney.getToId, App.tourney.startDate, uplType, formData).map {
-        case Left(err)  => stopSpinner(); DlgInfo.show("Fehlermeldung", getError(err), "danger") 
-        case Right(res) => stopSpinner(); DlgInfo.show("Fertigmeldung", s"TourneyId: ${res}", "success")
+        case Left(err)  => stopSpinner(); DlgInfo.error(getMsg("error.hdr"), getError(err)) 
+        case Right(res) => stopSpinner(); DlgInfo.success(getMsg("completion.hdr"), s"TourneyId: ${res}")
       }
     }
   }

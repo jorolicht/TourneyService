@@ -16,7 +16,7 @@ import scala.concurrent._
 import scala.util.{Success, Failure}
 
 // tourney service client imports
-import shared.model.{ Tourney, TournBase, Player, PantStatus, CompStatus }
+import shared.model.{ Tourney, TournBase, Player, PantStatus, CompStatus, CompTyp }
 import shared.model.Competition._
 import shared.utils._
 
@@ -34,7 +34,9 @@ object InfoPlayer extends UseCase("InfoPlayer")
 {
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     debug(s"render", s"param: ${param} ucInfo: ${ucInfo}")
-    setMainContent(clientviews.info.html.PlayerTmpl(viewCompPlayer).toString)
+    val x = viewCompPlayer
+    debug(s"render", s"${x}")
+    setMainContent(clientviews.info.html.PlayerTmpl(x))
   }
 
   @JSExport
@@ -47,26 +49,24 @@ object InfoPlayer extends UseCase("InfoPlayer")
    *  @return: Seq(CompetitionInfo(id,name,cnt), Seq(PlayerInfo(number,name,club,ttr)))            
    */
   def viewCompPlayer(): Seq[(Long, String, Int, Seq[(String, String, String, String, String)])] = {
-
+    
     def getPlayerInfos(tourney: Tourney, coId: Long): Seq[(String, String, String, String, String)] = {
-      val fromStatus = if (tourney.comps(coId).status > CompStatus.READY ) PantStatus.REDY else PantStatus.REGI
       (for { ((sno,co),info) <- tourney.pl2co if (co == coId) } yield {
-        if (info.status >= fromStatus & tourney.comps(co).typ == 1) { 
+        if (info.status.equalsTo(PantStatus.REDY, PantStatus.REGI, PantStatus.FINI, PantStatus.PLAY) & tourney.comps(co).typ.equalsTo(CompTyp.SINGLE)) { 
           val pl = info.getPlayerId
           /// format "00000" !!!!
-          ("%05d".format(tourney.players(pl).id), 
-            tourney.players(pl).getName(),
-            tourney.players(pl).clubName, 
-            info.getPlaceDesc(gM _), 
-            tourney.players(pl).getTTR)
-        } else if (info.status >= fromStatus &  tourney.comps(co).typ == 2) {
-          // DOUBLE
-          val (pl1,pl2) = info.getDoubleId
-          ("%05d".format(tourney.players(pl1).id) + "·" + "%05d".format(tourney.players(pl2).id),
-          s"${tourney.players(pl1).lastname}/${tourney.players(pl2).lastname}",
-          s"${tourney.players(pl1).clubName}/${tourney.players(pl2).clubName}",
-          info.getPlaceDesc(gM _), 
-          s"${tourney.players(pl1).getTTR}/${tourney.players(pl2).getTTR}")
+          ("%05d".format(tourney.players(pl).id), tourney.players(pl).getName(), tourney.players(pl).clubName, info.getPlaceDesc(gM _), tourney.players(pl).getTTR)
+        } else if (info.status.equalsTo(PantStatus.REDY, PantStatus.REGI, PantStatus.FINI,PantStatus.PLAY) & tourney.comps(co).typ.equalsTo(CompTyp.DOUBLE)) {           
+          info.getDoubleId match {
+            case Left(err) => println(s"ERROR: ${err.toString()}"); ("","","","","")
+            case Right(id) => {
+              ("%05d".format(tourney.players(id._1).id) + "·" + "%05d".format(tourney.players(id._2).id),
+               s"${tourney.players(id._1).lastname}/${tourney.players(id._2).lastname}",
+               s"${tourney.players(id._1).clubName}/${tourney.players(id._2).clubName}",
+               info.getPlaceDesc(gM _), 
+               s"${tourney.players(id._1).getTTR}/${tourney.players(id._2).getTTR}")
+            }   
+          }
         } else {
           ("","","","","")
         }

@@ -25,7 +25,9 @@ object PantStatus extends Enumeration {
   implicit class PantStatusValue(ps: Value) {
     def code       = s"${ps.toString}"
     def msgCode    = s"PantStatus.${ps.toString}"
+    def equalsTo(compareWith: Value*) = compareWith.contains(ps)
   }
+
 
   def apply(value: String): PantStatus.Value = {
     value match {
@@ -88,7 +90,10 @@ case class Pant2Comp (
   def getPlayerId3 = getMDLong(sno, 0)
   def getPlayerId2 = getMDLong(sno, 1)
   def getSingleId  = getMDLong(sno, 0)
-  def getDoubleId  = (getMDLong(sno, 0), getMDLong(sno, 1))
+  def getDoubleId  = { 
+    val dId = (getMDLong(sno, 0), getMDLong(sno, 1))
+    if (dId._1 != 0 && dId._2 != 0) Right(dId) else Left(Error("err0245.invalid.sno.double", sno))
+  }  
 }
 
 

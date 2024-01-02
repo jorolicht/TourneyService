@@ -760,8 +760,8 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   /** delTourney deletes tourney from database 
    *  
    */
-  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Long]] = TIO.delete(toId, tse.orgDir)
-  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Long]] = TIO.delete(0L, tse.orgDir, sDate)
+  def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, String]] = TIO.delete(toId, tse.orgDir)
+  def delTourney(sDate: Int)(implicit tse :TournSVCEnv): Future[Either[Error, String]] = TIO.delete(0L, tse.orgDir, sDate)
 
   /** addTournBase adds a tourney from a tournBase, returns tourney, error if a tourney with same 
     * startdate and organization already exists 

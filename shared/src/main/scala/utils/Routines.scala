@@ -1,6 +1,7 @@
 package shared.utils
 
 package object Routines {
+  import scala.collection.mutable.ArrayBuffer
   import scala.util.{Try, Success, Failure}
   private val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
 
@@ -191,6 +192,13 @@ package object Routines {
   implicit def tryToEither[A](t: Try[A]): ToEither[Throwable, A] = new ToEither[Throwable, A] {
     def toEither = t.map(Right(_)).recover{ case e => Left(e) }.get
   }
+
+
+  def swap[T](x: ArrayBuffer[T], i: Int, j: Int): Unit = {
+     val tmp = x(i)
+     x(i)    = x(j)
+     x(j)    = tmp
+  } 
 
 }
 

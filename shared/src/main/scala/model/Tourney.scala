@@ -104,10 +104,9 @@ case class Tourney(
       if (p2c.coId == coId)  {
         comps(coId).typ match {
           case CompTyp.SINGLE => ( players(p2c.getPlayerId).getClub(), players(p2c.getPlayerId).getName() )
-          case CompTyp.DOUBLE => {
-            val (id1,id2) = p2c.getDoubleId
-            ( s"${players(id1).getClub()}/${players(id2).getClub()}", 
-              s"${players(id1).lastname}/${players(id2).lastname}" ) 
+          case CompTyp.DOUBLE => p2c.getDoubleId match {
+            case Left(err)  => println(s"ERROR: invalid double sno ${p2c.sno}"); ("", "")
+            case Right(id)  => ( s"${players(id._1).getClub()}/${players(id._2).getClub()}", s"${players(id._1).lastname}/${players(id._2).lastname}" )             
           }
           case _ => ("","")
         }
@@ -642,6 +641,8 @@ object Tourney {
   def init(tBase: TournBase) = Tourney(tBase.id, tBase.name, tBase.organizer, tBase.orgDir, tBase.startDate, tBase.endDate, tBase.ident, TourneyTyp(tBase.typ))
 
   val defaultEncodingVersion: Int = 2
+  val MaxSizeRR = 32
+  val MaxSizeSW = 32
 
   def decode(trnyStr: String): Either[Error, Tourney] = {
     val trnyStrStart = trnyStr.take(8)

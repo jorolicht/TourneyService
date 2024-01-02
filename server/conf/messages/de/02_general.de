@@ -114,6 +114,7 @@ CompPhaseTyp.UNKN                                   = UNBEKANNT
 CompPhaseTyp.GR                                     = Gruppen System
 CompPhaseTyp.KO                                     = KO System
 CompPhaseTyp.SW                                     = Schweizer System
+CompPhaseTyp.RR                                     = Jeder-gegen-Jeden
 
 CompPhaseCfg.UNKN                                   = UNBEKANNT
 CompPhaseCfg.CFG                                    = Auswahl des Spielsystems
@@ -132,7 +133,7 @@ CompPhaseCfg.GRPS45                                 = Spielsystem mit 4er- und 5
 CompPhaseCfg.GRPS5                                  = Spielsystem mit 5er-Gruppen
 CompPhaseCfg.GRPS56                                 = Spielsystem mit 5er- und 6er-Gruppen
 CompPhaseCfg.GRPS6                                  = Spielsystem mit 6er-Gruppen
-CompPhaseCfg.JGJ                                    = Spielsystem jeder-gegen-jeden
+CompPhaseCfg.RR                                     = Spielsystem jeder-gegen-jeden
 CompPhaseCfg.KO                                     = KO-System
 CompPhaseCfg.SW                                     = Schweizer System
 
@@ -165,10 +166,11 @@ certificate.locationdate                            = {0}, den {1}
 
 download.typ.1                                      = TurnierAnmeldungen.csv
 download.typ.2                                      = ClickTT_Result.xml
+
  
 ParticipantList.noEntry                               = kein Turnier ausgewählt / keine Turnierdaten gefunden
 ParticipantList.clickHint                             = Click auf Wettbewerb listet die Spieler
-   
+
 
 ###
 #  Group/KO-Round
@@ -232,6 +234,7 @@ std.btn.close                                       = SCHLIESSEN
 std.btn.reset                                       = ZURÜCKSETZEN
 std.btn.xclose                                      = <span>&times;</span>
 std.plh.email                                       = max.mustermann@email.de
+
 
 
 ###

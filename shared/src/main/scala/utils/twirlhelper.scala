@@ -29,6 +29,16 @@ package object twirlhelper {
   def msg(name: String, arg: String*)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.${name}", arg)
   def msg_(name: String, arg: String*)(implicit ucp: UseCaseParam): String = ucp.msgfunc(name, arg)
 
+
+  def gMTyp[T](value: T, in: String="")(implicit ucp: UseCaseParam): String = value match {
+    case _:shared.model.CompTyp.Value         => msg_(value.asInstanceOf[shared.model.CompTyp.Value].msgCode, in)
+    case _:shared.model.CompStatus.Value      => msg_(value.asInstanceOf[shared.model.CompStatus.Value].msgCode, in)
+    case _:shared.model.CompPhaseStatus.Value => msg_(value.asInstanceOf[shared.model.CompPhaseStatus.Value].msgCode, in)
+    case _:shared.model.CompPhaseTyp.Value    => msg_(value.asInstanceOf[shared.model.CompPhaseTyp.Value].msgCode, in)
+    case _                                    => "unknown msg typ"
+  }
+
+
   def msgLabel(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.label.${name}", Seq())
   def msgHelp(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.help.${name}", Seq())
   def msgCheck(name: String)(implicit ucp: UseCaseParam): String = ucp.msgfunc(s"${ucp.msgPrefix}.check.${name}", Seq())

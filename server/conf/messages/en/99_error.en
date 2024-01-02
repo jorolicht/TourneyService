@@ -228,6 +228,8 @@ err0241.svc.regDouble                               = Error in routine regDouble
 err0242.setCompPhase                                = Error in routine setCompPhase {0} {1}
 err0243.systemKO.draw.size                          = Draw KO-System, size or number of rounds not correct
 err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
+err0245.invalid.sno.double                          = Startnumber of double invalid: {0}
+err0246.decode.sendCttFile                          = Decoding error in routine sendCttFile
 
 return001.csv.hdr.player                            = CSV header for player
 

@@ -321,7 +321,7 @@ class FileCtrl @Inject()
               
               case UploadMode.New => tsv.addTournCTT(cttTrny, ctx.orgDir, ctx.organizer).map { 
                 case Left(err)   => BadRequest(err.encode)
-                case Right(trny) => Ok(Return(trny.id).encode)
+                case Right(trny) => Ok(write[(Long,String)] ((trny.id, trny.name)) )
               }
 
               case UploadMode.UNKNOWN => Future(BadRequest(Error("err0204.upload.file.mode").encode))

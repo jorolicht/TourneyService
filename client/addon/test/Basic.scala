@@ -45,6 +45,7 @@ object AddonBasic extends UseCase("AddonBasic")
       case  9 => test_9(param)
       case 10 => test_10(param)
       case 11 => test_11(param)
+      case 12 => test_12(param)
 
       case _ => AddonMain.setOutput(s"ERROR: invalid test number ${number}"); Future(true)
     }
@@ -409,9 +410,36 @@ object AddonBasic extends UseCase("AddonBasic")
     } else {
       for (i<-0 until rnds) println(s"Runde ${i+1} -> ${rsPair2(i).mkString(":")}")
     }
-
     Future(true)
   }
+
+
+  // Test 12 - Basic Test PantStatus Check
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%2012%20%2D%2Dparam%207 
+  def test_12(param: String):Future[Boolean] = {
+    import shared.model.PantStatus
+    import shared.model.CompTyp
+
+    val test = s"START Test 12 - Basic Test PantStatus Check -> ${param}"
+    AddonMain.addOutput(test)
+
+    val x = PantStatus.REDY
+    val a = x.equalsTo(PantStatus.REDY)
+    val b = x.equalsTo(PantStatus.REGI, PantStatus.FINI)
+    val c = x.equalsTo(PantStatus.REGI, PantStatus.FINI, PantStatus.REDY)
+
+
+    val xt = CompTyp.SINGLE.name(gM)
+
+    AddonMain.addOutput(s"Check PantStatus.REDY with PantStatus.REDY  ${a}")
+    AddonMain.addOutput(s"Check PantStatus.REDY with PantStatus.REGI, PantStatus.FINI ${b}")
+    AddonMain.addOutput(s"Check PantStatus.REDY with PantStatus.REGI, PantStatus.FINI, PantStatus.REDY ${c}")
+
+    AddonMain.addOutput(s"Get CompTyp.SINGLE name ${xt}")
+
+    Future(true)
+  }    
+
 
 
 

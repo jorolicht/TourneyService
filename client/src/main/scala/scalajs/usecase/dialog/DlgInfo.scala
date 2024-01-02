@@ -39,4 +39,7 @@ object DlgInfo extends BasicHtml
     setHtml(gUE("Title"), title)
     setHtmlVisible("Body", body!="", body)
   }
+
+  def success(title: String, body: String) = show(title, body, "success")
+  def error(title: String, body: String)   = show(title, body, "danger")
 }

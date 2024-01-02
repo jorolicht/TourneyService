@@ -256,8 +256,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       val maxRnd  = coph.getMaxRnds
       val winSets = coph.noWinSets
       coph.getTyp match {
-        case CompPhaseTyp.GR => setHtml(contentElement, clientviews.organize.competition.input.html.GroupCard(coph))
-        case CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.input.html.GroupCard(coph))
+        case CompPhaseTyp.GR | CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.input.html.GroupCard(coph))
         case CompPhaseTyp.KO => {
           setHtml(contentElement, clientviews.organize.competition.input.html.KoCard(coph))
           var gameNo = 0
@@ -283,7 +282,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     setVisible(gE(s"InputStartBtn_${coId}_${coPhId}"), coph.status==CompPhaseStatus.AUS) 
 
     coph.getTyp match {
-      case CompPhaseTyp.GR | CompPhaseTyp.RR => {
+      case CompPhaseTyp.GR | CompPhaseTyp.RR  => {
         val matchMap = coph.matches.groupBy(mEntry=>mEntry.round)
         val maxRnd = coph.getMaxRnds
         for (rnd <- 1 to maxRnd) {
@@ -293,7 +292,6 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
             for (m <- matchMap(rnd).sortBy(mEntry => mEntry.gameNo)) {
               val rowElem = gE(tableId).asInstanceOf[HTMLTableElement].insertRow(-1)
               rowElem.setAttribute(s"data-game_${m.gameNo}", "row")
-              // rowElem.setAttribute("contenteditable", "true")
               setGrMatch(coph, rowElem, m.asInstanceOf[MEntryGr])
             }
           } catch { case _: Throwable => error("update", s"matchMap.size: ${matchMap.size} maxRnd: ${maxRnd}") }
@@ -328,7 +326,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
   //  GROUP-SECTION
   //  
   def setGrMatch(coph: CompPhase, elem: HTMLElement, m: MEntryGr) = {
-    val (grpName, wgw) = (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
+    val (grpName, wgw) = coph.getTyp match {
+      case CompPhaseTyp.GR => (Group.genName(m.grId), s"${m.wgw._1}-${m.wgw._2}")
+      case CompPhaseTyp.RR => ("", s"${m.wgw._1}-${m.wgw._2}")
+    }
     elem.innerHTML = clientviews.organize.competition.input.html.GrMatchEntry(
       coph.coId, coph.coPhId, grpName, wgw, m.gameNo, coph.noWinSets).toString
     setMatchViewContent(elem, m, coph.status) 

@@ -37,12 +37,12 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
 {
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def execTest(number: Int, toId: Long=0L, coId: Long=0L, phase: Int=0,  param: String=""):Future[Boolean]= {
+  def execTest(number: Int, toId: Long=0L, coId: Long=0L, phase: Int=0,  param: String=""): Future[Boolean]= {
     number match {
       case 0 => test_0(param); Future(true)
       case 1 => test_1(param); Future(true)
-      case 2 => Future(true)
-      case 3 => Future(true) 
+      case 2 => test_2(toId, coId, phase, param)
+      case 3 => test_3(toId, coId, phase, param)
       case 4 => test_4(param)
     }
   }
@@ -86,6 +86,85 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
       }
     }
   }
+
+
+  // Test 2 - Swiss Tournamnt
+  // %2D => -
+  // %20 => <space>
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20coph%20%2Dn%202%20%2D%2DtoId%20186%20%2D%2DcoId%203%20%2D%2Dphase%203%20%2D%2Dparam%20gen 
+  def test_2(toId: Long, coId: Long, phase: Int, param: String): Future[Boolean]  = {
+    AddonMain.setOutput(s"START Test Swiss Tournament: toId->${toId} coId->${coId} phase->${phase} param->${param}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
+      case Right(res) => {
+        val pantList = scala.collection.mutable.ListBuffer[Player]()
+        val content = """
+          Name, Vorname, Club, TTR, Jahrgang, Geschlecht, EMail
+          A, , TTC Freising, 1610, 1963, 2, ro.li@icloud.com
+          B, , TTC Kranzberg, 1200, 1962, 2
+          C, , TTC Finkenstr, 1111, 1969, 1
+          D, , DSK Fernsehen, 1234, 1960, 2
+          E, , FSK Grünanlage, 1236, 1945, 2
+          F, , TTC Egal, 1423, 1935, 2
+          G, , FC Zigaretten, 1534, 1996, 2
+          H, , TTC Tennisschläger, 1611, 1998, 2
+          I, , ASV Terroreinheit, 1534, 1966, 2
+          J, , LK Kühlschrank, 1333, 1978, 2
+          K, , HJ Nichtnormal, 1442, 1999, 1
+          L, , TJK Südafrika, 1327, 1958, 1     
+        """
+
+        val lines = content.split("\n")
+        lines.zipWithIndex.foreach { case (line, index) => Player.fromCSV(line) match { 
+          case Left(err)     => if (!err.is("return001.csv.hdr.player")) println("ERROR reading lines")
+          case Right(player) => if (!List("name","lastname").contains(player.lastname.toLowerCase()) ) pantList += player
+        }}
+        
+        regSingle(coId, pantList.toList, PantStatus.REDY).map {
+          case Left(err)   => println("ERROR register single")
+          case Right(res)  => {
+            println("SUCCESS loading single")
+
+          }  
+        }
+        true
+      }
+    }
+  }  
+
+
+  // Test 3 - Test Swiss Tournament Draw
+  // %2D => -
+  // %20 => <space>
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20coph%20%2Dn%203%20%2D%2DtoId%20186%20%2D%2DcoId%203%20%2D%2Dphase%203%20%2D%2Dparam%20gen 
+  def test_3(toId: Long, coId: Long, coPhId: Int, param: String): Future[Boolean]  = {
+    AddonMain.setOutput(s"START Test Swiss Tournament: toId->${toId} coId->${coId} coPhId->${coPhId} param->${param}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test 3 Swiss Tournament Draw"); false
+      case Right(res) => {
+        if (!App.tourney.cophs.contains((coId, coPhId))) error("App.tourney.cophs.contains", s"Test 3 Swiss Tournament Draw can't find competition phase")
+        val coph = App.tourney.cophs((coId, coPhId)) 
+        coph.draw(App.tourney.comps(coph.coId).typ, App.tourney.getCoPhList(coId, coPhId)) match {
+          case Left(err)  => error("coph.draw", s"${err}"); false
+          case Right(res) => {
+            App.execUseCase("OrganizeCompetitionDraw", "", "")
+            true
+          }
+        }
+      }
+    }
+  } 
+
+
+
+  //  def showRrResult(coId: Long, coPhId: Int, group: Group) = {
+  //   if (group.size <= 12) showGrResult(coId, coPhId, group) else {
+  //     (for(i<-0 until group.size) yield {
+  //       (group.pants(i).place._1, group.pants(i).name, group.pants(i).club, 
+  //        group.balls(i)._1.toString + ":" + group.balls(i)._2.toString, 
+  //        group.sets(i)._1.toString + ":" + group.sets(i)._2.toString,
+  //        group.points(i)._1.toString + ":" + group.points(i)._2.toString)
+  //     }).sortBy(_._1).zipWithIndex.map { e => {
 
 
   // def test_2(text: String) = {
@@ -207,6 +286,8 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
   // }
 
   // Test 4 - File Input Dialog Test
+  // %2D => -
+  // %20 => <space>
   // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20coph%20%2Dn%204%20%2D%2Dparam%20gen 
 
 
