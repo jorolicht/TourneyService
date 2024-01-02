@@ -1,0 +1,51 @@
+@*
+ * Template for drawing swiss system
+ *
+ * Start Test:
+ * http://localhost:9000/start?ucName=TestMain&ucParam=OrganizeCompetitionDraw
+ * 
+ *@
+@import shared.model.MEntry  
+@import shared.model.CompPhase 
+@import shared.utils.UseCaseParam  
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._
+
+@(coph: CompPhase, matchRounds: Map[Int,List[MEntry]])(implicit ucc: UseCaseParam)
+
+<table id='Draw_@{coph.coId}_@{coph.coPhId}'>
+  <tr>
+    <th><small class="font-weight-bold">@msg("table.pos")</small></th>
+    <th>
+      <div class="text-center">
+        <button data-coId='@coph.coId' data-cophId='@coph.coPhId' type="button" class="btn btn-xs btn-outline-info pl-2 pr-2" @actionEvent("DrawRefresh", "onclick")>
+          <i class="fa fa-refresh" aria-hidden="true"></i>
+        </button>
+      </div>
+    </th>
+    <th><small class="font-weight-bold">@msg("table.name")</small></th>
+    <th><small class="font-weight-bold">@msg("table.club")</small></th>
+    <th><small class="font-weight-bold">@msg("table.ttr")</small></th>
+  </tr>
+
+  @for(i <- 1 to coph.size){
+    <tr>
+      <td rowspan="2"><div style="width:30px;" class="border p-1 text-center"><small class="font-weight-bold">@i</small></div></td>
+      <td rowspan="2" contenteditable='true'>
+        <div style="width:30px;" class="border-top border-bottom border-right p-1 text-center">
+          <small data-drawPos='@i' data-sno='' class="font-weight-bold text-info">@i</small>
+        </div>
+      </td>
+      <td rowspan="2"><div class="border-top border-bottom border-right p-1"><small data-drawName='@i'>Lastname, Firstname</small></div></td>
+      <td rowspan="2"><div class="border-top border-bottom border-right p-1"><small data-drawClub='@i'>Club</small ></div></td>
+      <td rowspan="2"><div class="border-top border-bottom border-right p-1"><small data-drawTTR='@i' >TTR</small></div></td>
+      <td>
+        <div style="width:10px; height:15px;" @if(i%2==1) {class="border-bottom"}else{class="border-bottom border-right"}></div>
+      </td>
+
+    </tr>
+    <tr>
+      <td><div style="width:10px; height:15px;" @if(i%2==1){ class="border-right" }></div></td>
+    </tr> 
+  }
+</table>

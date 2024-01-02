@@ -1,0 +1,77 @@
+@*
+* Template for displaying group results
+*@
+
+@import scala.collection.mutable.ArrayBuffer
+@import shared.utils.UseCaseParam
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+
+@import shared.model.Group
+@import shared.model.Pant
+
+@(coId: Long, coPhId: Int, group: Group)(implicit ucc: UseCaseParam)
+@idBalls(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPhId}_Balls_${grId}_${pos}" """) }
+@idSets(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPhId}_Sets_${grId}_${pos}" """) }
+@idPoints(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPhId}_Points_${grId}_${pos}" """) }
+@idPlaces(grId: Int, pos:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPhId}_Places_${grId}_${pos}" """) }
+@idSet(grId: Int, wgw1:Int, wgw2:Int) = @{ Html( s""" id="APP__GrRound_${coId}_${coPhId}_Set_${grId}_${wgw1}_${wgw2}" """) }
+
+@if(group.size <= 12){
+<div class="card" style="border:none;">
+	<table class="table table-bordered table-sm groupresult">
+		<thead>
+			<tr>
+				<th class="playernumber" scope="col">#</th>
+				@for(i <- 1 to group.size) { <th class="playernumber" scope="col">@i</th> }
+				<th class="playerballs"  scope="col">@msg_("group.hdr.balls")</th>
+				<th class="playersets"   scope="col">@msg_("group.hdr.sets")</th>
+				<th class="playergames"  scope="col">@msg_("group.hdr.games")</th>
+				<th class="playerpos"    scope="col">@msg_("group.hdr.position")</th>
+			</tr>
+		</thead>
+		<tbody class="groupresult">
+			@for(i <- 0 to group.size-1) {
+				<tr>
+					<td><p class="playername">@{group.pants(i).name}</p><p class="playerclub"><small>@{group.pants(i).club}</small></p></td>
+					@for(j <- 0 to group.size-1) {
+						@if(i==j){ <td class="noresult"></td> }else{ <td @idSet(group.grId,i+1,j+1) class="result"></td> }
+					}	 			
+					<td @idBalls(group.grId,i)  class="result"></td>
+					<td @idSets(group.grId,i)   class="result"></td>
+					<td @idPoints(group.grId,i) class="result"></td>
+					<td @idPlaces(group.grId,i) class="position"></td>	
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+} else {
+	<div class="card" style="border:none;">
+		<table class="table table-bordered table-sm groupresult">
+			<thead>
+        <tr class="d-flex">
+            <th class="col-1 playerpos">@msg_("group.hdr.position")</th>
+            <th class="col-4 playernumber">Name</th>
+            <th class="col-4 playernumber">Club</th>
+						<th class="col-1 playerballs">@msg_("group.hdr.balls")</th>
+						<th class="col-1 playersets">@msg_("group.hdr.sets")</th>
+						<th class="col-1 playergames">@msg_("group.hdr.games")</th>
+        </tr>
+      </thead>
+			<tbody class="groupresult">
+				@for(i <- 0 until group.size) {
+					<tr class="d-flex">
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Places"}' class="col-1 position"></td>
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Name"}'   class="col-4 playername"></td>
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Club"}'   class="col-4 playerclub"></td>
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Balls"}'  class="col-1 result"></td>
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Sets"}'   class="col-1 result"></td>
+						<td id='@{s"RRView_${coId}_${coPhId}_${i}_Points"}' class="col-1 result"></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+}	
