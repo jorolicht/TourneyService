@@ -230,6 +230,9 @@ err0243.systemKO.draw.size                          = Draw KO-System, size or nu
 err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
 err0245.invalid.sno.double                          = Startnumber of double invalid: {0}
 err0246.decode.sendCttFile                          = Decoding error in routine sendCttFile
+err247.deleteCoPh.notPossible                       = Delete round {0} not possible, because dependend round(s) {1} exist
+err248.delCompPhase.invalid.param                   = Error in routine delCompPhase invalid parameter {0}/{1}
+
 
 return001.csv.hdr.player                            = CSV header for player
 

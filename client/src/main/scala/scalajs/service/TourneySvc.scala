@@ -712,14 +712,23 @@ trait TourneySvc extends WrapperSvc
       }     
     }
 
+
   def saveCompPhase(coph: CompPhase): Future[Either[Error, Unit]] = {
-    println(s"saveCompPhase -> coId: ${coph.coId} coPhId: ${coph.coPhId}")
+    //println(s"saveCompPhase -> coId: ${coph.coId} coPhId: ${coph.coPhId}")
     postAction("saveCompPhase", App.tourney.id, "", coph.encode(), true).map {
       case Left(err)  => Left(err)
       case Right(res) => Right({})  
     }
-  }  
+  } 
 
+  // delCompPhase - delete competition phase if it exists (and possible)
+  def delCompPhase(coId: Long, coPhId: Int): Future[Either[Error, Unit]] = 
+    App.tourney.delCompPhase(coId, coPhId) match {
+      case Left(err)  => Future(Left(err))
+      case Right(res) => postAction("delCompPhase", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}", "", true).map {
+        case Left(err)  => Left(err)
+        case Right(res) => Right({})  
+    }}
 
   // getCompPhase - fetches whole competition phase from server
   def getCompPhase(coId: Long, coPhId: Int): Future[Either[Error, CompPhase]] = 
@@ -730,7 +739,6 @@ trait TourneySvc extends WrapperSvc
         case Right(result)   => Right(result)
       }      
     }
-
 
 
   //

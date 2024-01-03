@@ -62,7 +62,10 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         coph.setStatus(CompPhaseStatus.EIN)
         saveCompPhase(coph) map {
           case Left(err)   => error("StartInputCoPh", s"${err}") 
-          case Right(res)  => App.execUseCase("OrganizeCompetitionInput", "", "")  
+          case Right(res)  => {
+            setVisible(gE(s"DrawStartBtn_${coph.coId}_${coph.coPhId}"), false)
+            App.execUseCase("OrganizeCompetitionInput", "", "") 
+          }   
         }
       }}  
 
@@ -114,6 +117,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
   def updateGrView(base: HTMLElement, groups: ArrayBuffer[Group], coTyp: CompTyp.Value) =
     for (g <- groups) {
+      println(s"updateGrView ${base}")
       g.pants.zipWithIndex.foreach { case (pant, index) => {
         val pantBase = base.querySelector(s"[data-pantPos='${g.grId}_${index}']").asInstanceOf[HTMLElement]
         setDrawPosition(pantBase, pant, coTyp, s"${g.grId}_${index}")

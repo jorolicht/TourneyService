@@ -151,7 +151,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
 
   // Click dustbin on list
   def actionTourneyDelete(toId: Long) = {
-    if (toId != 0) {
+    if (toId <= 0) println(s"ERROR: actionTourneyDelete ${toId}") else {
       val tBase = tournBases.filter( _.id == toId).head
       dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", tBase.name)) { 
         delTourney(toId).map { 
@@ -159,9 +159,7 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
           case Right(res) => { App.resetLocalTourney(); update() }
         }        
       }
-    } else {
-      println(s"ERROR: actionTourneyDelete ${toId}")
-    }  
+    }
   }    
 
 

@@ -710,6 +710,14 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
       }
     }
 
+  def delCompPhase(coId: Long, coPhId: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => trny.delCompPhase(coId, coPhId) match {
+        case Left(err)    => Left(err)
+        case Right(res)   => Right({})
+      }
+    }
 
   /** setCompPhase - set competition phases 
    */

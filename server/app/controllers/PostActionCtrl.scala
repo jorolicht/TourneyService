@@ -395,22 +395,28 @@ class PostActionCtrl @Inject()
         }           
       }
 
-
       case "addCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         val name    = getParam(pMap, "name", "")
         val coPhCfg = CompPhaseCfg(getParam(pMap, "coPhCfg", CompPhaseCfg.UNKN.id))
         tsv.addCompPhase(getParam(pMap, "coId", -1L), name).map { 
             case Left(err)      => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
-            case Right(newCoPh) => logger.info(s"${cmd}: execution Ok");    Ok(newCoPh.encode())
+            case Right(newCoPh) => logger.info(s"${cmd}: execution Ok"); Ok(newCoPh.encode())
         }
       }
       
+      case "delCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
+        tsv.delCompPhase(getParam(pMap, "coId", -1L), getParam(pMap, "coPhId", -1)).map { 
+            case Left(err)  => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+            case Right(res) => logger.info(s"${cmd}: execution Ok"); Ok("")
+        }
+      }
+
       case "saveCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {
         CompPhase.decode(reqData) match {
           case Left(err)  => Future(BadRequest(err.encode))
           case Right(coph) => tsv.setCompPhase(coph).map { 
             case Left(err)  => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
-            case Right(res) => logger.info(s"${cmd}: execution Ok");  Ok("")
+            case Right(res) => logger.info(s"${cmd}: execution Ok"); Ok("")
           }
         }
       }  

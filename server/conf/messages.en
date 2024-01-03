@@ -300,6 +300,7 @@ std.plh.email                                       = john.doe@email.de
 # Messages
 ###
 msg.processing                                      = Please wait ...
+msg.error.hdr                                       = Error Message
 
 
 ###
@@ -1102,8 +1103,11 @@ organize.competition.confirm.resetDraw.hdr            = Reset Confirmation
 organize.competition.confirm.resetDraw.msg            = Round {0} reset back to draw?
 organize.competition.confirm.resetCfg.hdr             = Reset Confirmation
 organize.competition.confirm.resetCfg.msg             = Round {0} reset back to configuration?
-organize.competition.confirm.resetInput.hdr           = Deletion Confirmation
+organize.competition.confirm.resetInput.hdr           = Reset Confirmation
 organize.competition.confirm.resetInput.msg           = Delete all results of {0}?
+organize.competition.confirm.delete.hdr               = Deletion Confirmation
+organize.competition.confirm.delete.msg               = Delete round {0}?
+
 
 organize.competition.referee.gameNo                   = Game Number
 organize.competition.referee.set1                     = Set 1
@@ -1455,6 +1459,9 @@ err0243.systemKO.draw.size                          = Draw KO-System, size or nu
 err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
 err0245.invalid.sno.double                          = Startnumber of double invalid: {0}
 err0246.decode.sendCttFile                          = Decoding error in routine sendCttFile
+err247.deleteCoPh.notPossible                       = Delete round {0} not possible, because dependend round(s) {1} exist
+err248.delCompPhase.invalid.param                   = Error in routine delCompPhase invalid parameter {0}/{1}
+
 
 return001.csv.hdr.player                            = CSV header for player
 

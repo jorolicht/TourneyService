@@ -241,6 +241,8 @@ std.plh.email                                       = max.mustermann@email.de
 #  Messages
 ###
 msg.processing                                      = Bitte warten ...
+msg.error.hdr                                       = Fehlermeldung
+
 
 
 ###

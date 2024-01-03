@@ -230,8 +230,7 @@ err0243.systemKO.draw.size                          = Auslosung KO-System, fehle
 err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
 err0245.invalid.sno.double                          = Doppel-Startnummer ungültig: {0}
 err0246.decode.sendCttFile                          = Dekodierfehlerin Routine sendCttFile
-
-
-
+err247.deleteCoPh.notPossible                       = Löschen der Spielrunde {0} nicht möglich, da abhängige Runde(n) {1} existieren
+err248.delCompPhase.invalid.param                   = Fehler in Routine delCompPhase ungültige Parameter {0}/{1}
 
 return001.csv.hdr.player                            = CSV header for player

@@ -234,8 +234,11 @@ organize.competition.confirm.resetDraw.hdr            = Reset Confirmation
 organize.competition.confirm.resetDraw.msg            = Round {0} reset back to draw?
 organize.competition.confirm.resetCfg.hdr             = Reset Confirmation
 organize.competition.confirm.resetCfg.msg             = Round {0} reset back to configuration?
-organize.competition.confirm.resetInput.hdr           = Deletion Confirmation
+organize.competition.confirm.resetInput.hdr           = Reset Confirmation
 organize.competition.confirm.resetInput.msg           = Delete all results of {0}?
+organize.competition.confirm.delete.hdr               = Deletion Confirmation
+organize.competition.confirm.delete.msg               = Delete round {0}?
+
 
 organize.competition.referee.gameNo                   = Game Number
 organize.competition.referee.set1                     = Set 1

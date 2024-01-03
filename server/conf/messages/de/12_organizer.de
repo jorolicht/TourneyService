@@ -236,6 +236,8 @@ organize.competition.confirm.resetCfg.hdr             = Zurücksetzten bestätig
 organize.competition.confirm.resetCfg.msg             = Soll die {0} zur Konfiguration zurückgesetzt werden (alle Eingaben werden gelöscht)?
 organize.competition.confirm.resetInput.hdr           = Löschbestätigung
 organize.competition.confirm.resetInput.msg           = Alle Ergebniseingaben der {0} löschen?
+organize.competition.confirm.delete.hdr               = Löschbestätigung
+organize.competition.confirm.delete.msg               = Spielrunde {0} löschen?
 
 organize.competition.referee.gameNo                   = Spielnummer
 organize.competition.referee.set1                     = Satz 1

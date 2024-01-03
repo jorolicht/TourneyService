@@ -114,9 +114,9 @@ trait TourneyService {
   // Competition Phase Interface
   def addCompPhase(coId: Long, name: String)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
   def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
+  def delCompPhase(coId: Long, coPhId: Int)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
   def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]  
    
-
   // Tourney Inteface
   def addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
   def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, String]]

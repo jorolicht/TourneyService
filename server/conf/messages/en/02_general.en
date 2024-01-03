@@ -243,6 +243,7 @@ std.plh.email                                       = john.doe@email.de
 # Messages
 ###
 msg.processing                                      = Please wait ...
+msg.error.hdr                                       = Error Message
 
 
 ###

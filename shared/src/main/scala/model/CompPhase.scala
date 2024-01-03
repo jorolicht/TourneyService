@@ -151,12 +151,11 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   }
 
 
-
   def reassignDraw(reassign: scala.collection.immutable.Map[Int,Int], compTyp: CompTyp.Value): Either[Error, Int] = {
     val pants = ArrayBuffer.fill[Pant](size)(Pant("0", "", "", 0, "", (0,0)))
     getTyp match {
       case CompPhaseTyp.GR | CompPhaseTyp.RR => {
-        groups.foreach { g => g.pants.zipWithIndex.foreach { case (pant, index) => pants(reassign(g.drawPos + index) - 1) = pant }}     
+        groups.foreach { g => g.pants.zipWithIndex.foreach { case (pant, index) => pants(reassign(g.drawPos + index) - 1) = pant }}  
         groups.foreach { g => pants.slice(g.drawPos - 1, g.drawPos + g.size - 1).copyToArray(g.pants) }
         initGrMatches(compTyp) match {
           case Left(err)  => Left(err)
@@ -323,6 +322,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   def drawGr(pants: ArrayBuffer[Pant], compTyp: CompTyp.Value, baseCoPhs: ArrayBuffer[CompPhase]): Either[Error, Int] = {
     val grpCfg: List[GroupConfig] = Group.genGrpConfig(coPhCfg, pants.size).toList
 
+    size = pants.size 
     // generate groups
     groups = ArrayBuffer[Group]() 
     for (gEntry <- grpCfg) { groups = groups :+ new Group(gEntry.id, gEntry.size, gEntry.quali, gEntry.name, noWinSets) } 
@@ -871,6 +871,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   def encode(version: Int=0) = write[CompPhaseTx](toTx())
 
   def toTx(): CompPhaseTx = {
+    println(s"??? CompPhase toTx size: ${size}")
     CompPhaseTx(name, coId, coPhId, coPhCfg.id, status.id, demo, size, noPlayers, noWinSets, baseCoPhId, quali.id, candInfo, candidates, matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
   }
     

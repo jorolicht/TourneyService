@@ -119,7 +119,7 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
         event.stopPropagation()
         dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coName)) { 
           delComp(coId).map { 
-            case Left(err)  => DlgInfo.show("FEHLER", getError(err), "danger")
+            case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
             case Right(res) => App.tourney.setCurCoId(0); updViewComp(0)
           }
         }
@@ -215,6 +215,10 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       case "ResetInputCoPh" => App.tourney.getCoPh(getCoId(elem), getCoPhId(elem)) map { coph =>
         dlgCancelOk(getMsg("confirm.resetInput.hdr"), getMsg("confirm.resetInput.msg", coph.name)) { actionResetInputCoPh(coph) }
       }
+
+      case "DeleteCoPh" => App.tourney.getCoPh(App.tourney.getCurCoId, App.tourney.getCurCoPhId) map { coph => {
+        dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coph.name)) { actionDeleteCoPh(coph) } 
+      }}
 
       case "CollapseCoPh" => App.tourney.getCoPh(App.tourney.getCurCoId, App.tourney.getCurCoPhId) map { coph => {
         updViewCoPhContent(coph) 
@@ -553,7 +557,7 @@ def actionAddCoPh(coId: Long): Unit =
         }}
         
         regSingle(coId, pantList.toList, PantStatus.REDY).map {
-          case Left(err)   => DlgInfo.show(gM("uploadCSVError"), getError(err), "danger")
+          case Left(err)   => DlgInfo.error(gM("uploadCSVError"), getError(err))
           case Right(res)  => updViewComp(coId) 
         }
       }  
@@ -600,6 +604,13 @@ def actionAddCoPh(coId: Long): Unit =
       }
     }
   }  
+
+  def actionDeleteCoPh(coph: CompPhase) = 
+    delCompPhase(coph.coId,coph.coPhId) map {
+      case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
+      case Right(res) => render()
+    }
+    
 
   //ArrayBuffer[(Pant, Boolean)]() 
 

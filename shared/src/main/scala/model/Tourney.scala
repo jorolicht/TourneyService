@@ -488,10 +488,21 @@ case class Tourney(
     } else {
       val coph = CompPhase(name, coId, coPhId, CompPhaseCfg.CFG, CompPhaseStatus.CFG, false, 0, 0, 0, preCoPhId)
       cophs((coId, coph.coPhId)) = coph
-      println(s"addCompPhase ${cophs.mkString(":")}")
+      //println(s"addCompPhase ${cophs.mkString(":")}")
       Right(coph)
     }
   }
+
+  // delete competition phase if no dependend round exists
+  // get all competition phases (e.g. rounds) that are dependend from this round
+  // first filter all relevant cophs and generate dependend list names
+  def delCompPhase(coId: Long, coPhId: Int): Either[Error, Unit] = 
+    if (!cophs.contains((coId,coPhId))) Left(Error("err248.delCompPhase.invalid.param")) else {
+      val cophList = cophs.filter( x => (x._1._1 == coId && x._1._2 != coPhId )).map( _._2)
+      val depList = (for (co <- cophList) yield { if (co.baseCoPhId.getOrElse(0) == coPhId) co.name else "" }).filter( _ != "").to(List)
+      if (depList.length > 0) Left(Error("err247.deleteCoPh.notPossible", cophs((coId,coPhId)).name, depList.mkString(" ") ))
+      else { cophs.remove((coId,coPhId)); updateCompStatus(coId) match { case _ => Right({}) } } 
+    }
 
   def getCoPh(coId: Long, coPhId: Int): Either[Error, CompPhase] = 
     if ( coId==0 || coPhId == 0 | !cophs.isDefinedAt((coId,coPhId))) {
@@ -501,7 +512,6 @@ case class Tourney(
       Right(cophs((coId,coPhId))) 
     }  
 
-
   def getCoPhList(coId: Long, coPhId: Int): ArrayBuffer[CompPhase] = 
     if (!cophs.isDefinedAt((coId, coPhId))) ArrayBuffer[CompPhase]() else cophs((coId,coPhId)).baseCoPhId match {
       case None           => ArrayBuffer[CompPhase]()
@@ -510,18 +520,16 @@ case class Tourney(
       } else { ArrayBuffer[CompPhase]() }
     }
 
-  def delCompPhase(coId: Long, coPhId: Int) = if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId))
-
   def delCompPhases(coId: Long, coPhIds: List[Int]) = coPhIds.foreach { coPhId => if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId)) }
 
-  def getCompPhaseFollowing(coId: Long, coPhId: Int): List[Int] = {
-    var result = scala.collection.mutable.ListBuffer[Int]()
-    if (coPhId != 0 & coId != 0) {
-      if (cophs.isDefinedAt((coId, coPhId*2)))   result.append(coPhId*2) ++ getCompPhaseFollowing(coId, coPhId*2)
-      if (cophs.isDefinedAt((coId, coPhId*2+1))) result.append(coPhId*2+1) ++ getCompPhaseFollowing(coId, coPhId*2+1) 
-    }
-    result.toList
-  }  
+  // def getCompPhaseFollowing(coId: Long, coPhId: Int): List[Int] = {
+  //   var result = scala.collection.mutable.ListBuffer[Int]()
+  //   if (coPhId != 0 & coId != 0) {
+  //     if (cophs.isDefinedAt((coId, coPhId*2)))   result.append(coPhId*2) ++ getCompPhaseFollowing(coId, coPhId*2)
+  //     if (cophs.isDefinedAt((coId, coPhId*2+1))) result.append(coPhId*2+1) ++ getCompPhaseFollowing(coId, coPhId*2+1) 
+  //   }
+  //   result.toList
+  // }  
 
   def getCompPhaseNames(coId: Long, coPhIds: List[Int]): List[String] = {
     for (coPhId <- coPhIds) yield { cophs((coId, coPhId)).name }  
