@@ -67,13 +67,13 @@ trait TourneyService {
   // Playfield Interface
   //
   def getPlayfields(toId: Long): Future[Either[Error, Seq[Playfield]]]
-  def getPlayfield(toId: Long, pfNr: Int): Future[Either[Error, Playfield]]
+  def getPlayfield(toId: Long, pfNo: String): Future[Either[Error, Playfield]]
 
-  def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv) : Future[Either[Error, Int]] 
-  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-  def delPlayfield(no: Int, code: String, verify: Boolean = false)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
+  def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
+  def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv) : Future[Either[Error, Unit]] 
+  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
+  def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
+  def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
 
   //
   // Competition Interface
@@ -115,7 +115,8 @@ trait TourneyService {
   def addCompPhase(coId: Long, name: String)(implicit tcp :TournSVCEnv):  Future[Either[Error, CompPhase]]
   def setCompPhase(coph: CompPhase)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
   def delCompPhase(coId: Long, coPhId: Int)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
-  def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]  
+  def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]
+  def updateCompPhaseStatus(coId: Long, coPhId: Int, status: CompPhaseStatus.Value)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]
    
   // Tourney Inteface
   def addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]

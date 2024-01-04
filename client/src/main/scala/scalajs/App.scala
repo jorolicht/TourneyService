@@ -306,12 +306,15 @@ object App extends BasicHtml with TourneySvc
     }
 
   def updatePlayfield(toId: Long): Future[Boolean] = {
-    getPlayfields(toId).map {
+    getAction("getPlayfields", App.tourney.id, "").map {
       case Left(err)     => error("updatePlayfield", getError(err)); false
       case Right(pfSeq)  => {
-        tourney.playfields = collection.mutable.HashMap( pfSeq.map { p => { p.nr -> p }} : _*)
-        saveLocalTourney(tourney)
-        true
+        try {
+          val pfS = read[Seq[Playfield]](pfSeq)
+          tourney.playfields = collection.mutable.HashMap( pfS.map { p => { p.nr -> p }} : _*)
+          saveLocalTourney(tourney)
+          true
+        } catch { case _:Throwable => false}
       }
     }
   }    
@@ -358,7 +361,6 @@ object App extends BasicHtml with TourneySvc
         true
       }
     }
-
 
   def updatePlayer(toId: Long): Future[Boolean]  = 
     getTournPlayers(toId).map {

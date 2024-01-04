@@ -323,7 +323,7 @@ class TourneyServiceImpl @Inject()()(  implicit
   // 
 
   /** delivers all used playfields of the tourney */
-  def getPlayfields(toId:Long): Future[Either[Error, Seq[Playfield]]] = 
+  def getPlayfields(toId: Long): Future[Either[Error, Seq[Playfield]]] = 
     TIO.get(toId).map {
       case Left(err)   => Left(err)
       case Right(trny) => Right(trny.playfields.values.toSeq)
@@ -331,54 +331,24 @@ class TourneyServiceImpl @Inject()()(  implicit
 
 
   /** delivers the playfield with pfnr of the tourney */
-  def getPlayfield(toId: Long, pfnr: Int): Future[Either[Error,Playfield]] = 
+  def getPlayfield(toId: Long, pfnr: String): Future[Either[Error, Playfield]] = 
     TIO.get(toId).map {
       case Left(err)   => Left(err)
-      case Right(trny) => {
-        if (trny.playfields.isDefinedAt(pfnr)) {
-          Right(trny.playfields(pfnr))
-        } else {
-          Left(Error("err0029.svc.getPlayfield", pfnr.toString))
-        }
-      }  
-    } 
+      case Right(trny) => trny.getPlayfield(pfnr)
+    }  
 
   /** set playfield of the tourney */
-  def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
+  def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => Right(_setPlayfield(pf, trny))
+      case Right(trny) => Right(trny.setPlayfield(pf))
     } 
 
-  def _setPlayfield(pf: Playfield, trny: Tourney): Int = {
-    if (pf.used) {
-      // add/set playfield
-      trny.playfields(pf.nr) = pf
-      pf.nr
-    } else {
-      // remove playfield with this code
-      val pfSel = trny.playfields.filter( _._2.code == pf.code)
-      if (pfSel.size > 0) {
-        trny.playfields = trny.playfields.filter( _._2.code != pf.code)
-        pfSel.head._2.nr
-      } else {
-        0
-      }
-    }    
-  }  
-
   /** set/delete sequence of playfield for tourney */
-  def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv): Future[Either[Error, Int]]= 
+  def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]= 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => {
-        var cnt = 0
-        for (pf <- pfs) {
-          _setPlayfield(pf, trny)
-          if (pf.used) { cnt = cnt + 1 }
-        }
-        Right(cnt)
-      }  
+      case Right(trny) => Right(trny.setPlayfields(pfs))
     }  
 
 
@@ -388,7 +358,7 @@ class TourneyServiceImpl @Inject()()(  implicit
     * @param  implicit tse tourney service environment
     * @return playfield number
     */
-  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = {
+  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = {
     import java.time.LocalDateTime
     import java.time.format.DateTimeFormatter
 
@@ -409,41 +379,24 @@ class TourneyServiceImpl @Inject()()(  implicit
           // remove the entry from the map with same code
           trny.playfields = trny.playfields.filter( _._2.code != pfi.code)
         }
-        Right(pfi.nr)
+        Right({})
       }
     }
   }
 
 /** delete all playfield entries of tourney */
-def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] = 
+def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
   TIO.getTrny(tse, true).map {
     case Left(err)   => Left(err)
-    case Right(trny) => {
-      val cnt = trny.playfields.size
-      trny.playfields = HashMap()
-      Right(cnt)
-    }    
+    case Right(trny) => Right(trny.delPlayfields())
   }  
 
   /** delete a playfield based on its code  */
-  def delPlayfield(no: Int, code: String, verify: Boolean = false)(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
+  def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => {
-        val delCandidate = trny.playfields.filter( _._2.nr == no)
-        if (delCandidate.size == 1) {
-          if (!verify | trny.playfields(no).code == code) {
-            trny.playfields = trny.playfields.filter( _._2.nr != no) 
-            Right(1)
-          } else {
-            Right(0)
-          }
-        } else {
-          Left(Error("err0127.svc.delPlayfield", s"${no}/${code}"))
-        } 
-      }    
+      case Right(trny) => Right(trny.delPlayfield(code))
     }
-
 
 
   // 
@@ -564,8 +517,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
   def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] =
     TIO.get(toId).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
-                           else  trny.cophs((coId, coPhId)).inputMatch(gameNo, sets, result, info, playfield)
+      case Right(trny)  => trny.inputMatch(coId, coPhId, gameNo, sets, result, info, playfield)
     } 
 
 
@@ -573,15 +525,13 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
                 (implicit tse :TournSVCEnv): Future[Either[Error, List[Int]]] =
     TIO.getTrny(tse, true).map { 
       case Left(err)    => Left(err)
-      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
-                           else  trny.cophs((coId, coPhId)).resetMatch(gameNo) 
+      case Right(trny)  => trny.resetMatch(coId, coPhId, gameNo)
     } 
 
   def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]] =
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => if (!trny.cophs.isDefinedAt((coId, coPhId))) Left(Error("err0222.svc.invalidCompetitionPhase")) 
-                           else trny.cophs((coId, coPhId)).resetMatches()
+      case Right(trny)  => trny.resetMatches(coId, coPhId)
     } 
 
 
@@ -709,6 +659,19 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Int]] =
         }
       }
     }
+
+  def updateCompPhaseStatus(coId: Long, coPhId: Int, status: CompPhaseStatus.Value)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => trny.updateCompPhaseStatus(coId, coPhId, status) match {
+        case Left(err)   => Left(err)
+        case Right(res)  => {
+          if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
+          Right(res)
+        }
+      }
+    }
+
 
   def delCompPhase(coId: Long, coPhId: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
     TIO.getTrny(tse, true).map {

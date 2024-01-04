@@ -230,7 +230,13 @@ err0243.systemKO.draw.size                          = Auslosung KO-System, fehle
 err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
 err0245.invalid.sno.double                          = Doppel-Startnummer ungültig: {0}
 err0246.decode.sendCttFile                          = Dekodierfehlerin Routine sendCttFile
-err247.deleteCoPh.notPossible                       = Löschen der Spielrunde {0} nicht möglich, da abhängige Runde(n) {1} existieren
-err248.delCompPhase.invalid.param                   = Fehler in Routine delCompPhase ungültige Parameter {0}/{1}
+err0247.deleteCoPh.notPossible                      = Löschen der Spielrunde {0} nicht möglich, da abhängige Runde(n) {1} existieren
+err0248.delCompPhase.invalid.param                  = Fehler in Routine delCompPhase ungültige Parameter {0}/{1}
+err0249.genGrMatchDependencies                      = Fehler in Routine genGrMatchDependencies
+err0250.updateCompPhaseStatus.invalid.param         = Fehler in Routine updateCompPhaseStatus ungültige Parameter {0}/{1}
+err0251.resetMatches.invalid.param                  = Fehler in Routine resetMatches ungültige Parameter {0}/{1}
+err0252.resetMatch.invalid.param                    = Fehler in Routine resetMatch ungültige Parameter {0}/{1}
+err0253.inputMatch.invalid.param                    = Fehler in Routine inputMatch ungültige Parameter {0}/{1}
+
 
 return001.csv.hdr.player                            = CSV header for player

@@ -84,37 +84,23 @@ object OrganizePlayfield extends UseCase("OrganizePlayfield")
   @JSExport
   def onclickDelete(elem: dom.raw.HTMLInputElement, pfCode: String, pfNrStr: String) = {
     debug("onclickDelete", s"${elem.id} ${pfCode}")
-    val pfNo = pfNrStr.toIntOption.getOrElse(-1)
     delPlayfield(pfCode).map { 
-      case Left(err)  => debug("onclickDelete", s"${getError(err)}") 
-      case Right(no) => {
-        if (App.tourney.playfields.isDefinedAt(no)) App.tourney.playfields -= no
-        render()
-      }
+      case Left(err) => error("onclickDelete", s"delPlayfield ${getError(err)}") 
+      case Right(no) => render()
     }
   }
  
 
   @JSExport
-  def onclickEdit(elem: dom.raw.HTMLInputElement, pfCode: String, pfNrStr: String) = {
-    debug("onclickEdit", s"${elem.id} ${pfNrStr}") 
-    val pfNo = pfNrStr.toIntOption.getOrElse(-1)
+  def onclickEdit(elem: dom.raw.HTMLInputElement, pfCode: String, pfNo: String) = {
+    debug("onclickEdit", s"${elem.id} ${pfNo}") 
     DlgPlayfield.show(App.tourney.playfields(pfNo)).map { 
       pfdlg => setPlayfield(pfdlg).map { 
-        case Left(err)  => debug("onclickEdit", s"error: ${getError(err)}") 
-        case Right(res) => {
-          App.tourney.playfields(pfNo) = pfdlg
-          if (pfNo != pfdlg.nr) {
-            delPlayfield(pfCode).map {
-              case Left(err)  => debug("onclickEdit", s"error: ${getError(err)}") 
-              case Right(res) => { if (App.tourney.playfields.isDefinedAt(pfNo)) App.tourney.playfields -= pfNo; render() }
-            }
-          }
-          render()
-        }
+        case Left(err)  => debug("onclickEdit", s"setPlayfield ${getError(err)}") 
+        case Right(res) => render()
       }
-    } 
-  } 
+    }
+  }  
 
 
 }

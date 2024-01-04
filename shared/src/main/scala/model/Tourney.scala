@@ -47,7 +47,7 @@ case class Tourney(
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
-  var playfields: Map[Int, Playfield]                   = Map(),  // map (playfieldNo)   -> Playfield
+  var playfields: Map[String, Playfield]                = Map().withDefaultValue(Playfield("",false,"","","","","","","","")),
   var licenses:   Map[String, String]                   = Map().withDefaultValue("")
 )
 {
@@ -228,8 +228,9 @@ case class Tourney(
     if (comps.isDefinedAt(coId)) { comps(coId).status = status; Right({}) }
     else Left(Error("err0014.trny.compNotFound", coId.toString))
   
-  def updateCompStatus(coId: Long): Either[Error, CompStatus.Value] = {
-    if (!comps.isDefinedAt(coId)) Left(Error("err0014.trny.compNotFound", coId.toString)) else {
+  // update competition status, if changed return true  
+  def updateCompStatus(coId: Long): Either[Error, Boolean] = {
+    if (!comps.isDefinedAt(coId)) Left(Error("err0014.trny.compNotFound", coId)) else {
       val statusList = (cophs.filter( _._1._1 == coId).values.map { _.status }).toList
       val sizeMap = statusList.groupBy(identity).mapValues(_.size)
       val size = statusList.length
@@ -239,8 +240,8 @@ case class Tourney(
         else if (sizeMap.isDefinedAt(CompPhaseStatus.AUS) && sizeMap(CompPhaseStatus.AUS) > 0)     CompStatus.RUN
         else if (sizeMap.isDefinedAt(CompPhaseStatus.CFG) && sizeMap(CompPhaseStatus.CFG) > 0)     CompStatus.CFG
         else                                                                                       CompStatus.UNKN
-      comps(coId).status = result
-      Right(result)
+      // return true if status has changed
+      if (comps(coId).status == result) Right(false) else { comps(coId).status = result; Right(true) }
     }
   }
 
@@ -493,14 +494,26 @@ case class Tourney(
     }
   }
 
+
+  // update compatition phase status, check if necessary, optional also update competition status
+  def updateCompPhaseStatus(coId: Long, coPhId: Int, status: CompPhaseStatus.Value): Either[Error, Boolean] = 
+    if (!cophs.contains((coId,coPhId))) Left(Error("err0250.updateCompPhaseStatus.invalid.param", coId, coPhId)) else {
+      if (cophs((coId,coPhId)).status == status) Right(false) else {
+        cophs((coId,coPhId)).status = status
+        updateCompStatus(coId)
+        Right(true)
+      }
+    }  
+
+
   // delete competition phase if no dependend round exists
   // get all competition phases (e.g. rounds) that are dependend from this round
   // first filter all relevant cophs and generate dependend list names
   def delCompPhase(coId: Long, coPhId: Int): Either[Error, Unit] = 
-    if (!cophs.contains((coId,coPhId))) Left(Error("err248.delCompPhase.invalid.param")) else {
+    if (!cophs.contains((coId,coPhId))) Left(Error("err0250.updateCompPhaseStatus.invalid.param",coId)) else {
       val cophList = cophs.filter( x => (x._1._1 == coId && x._1._2 != coPhId )).map( _._2)
       val depList = (for (co <- cophList) yield { if (co.baseCoPhId.getOrElse(0) == coPhId) co.name else "" }).filter( _ != "").to(List)
-      if (depList.length > 0) Left(Error("err247.deleteCoPh.notPossible", cophs((coId,coPhId)).name, depList.mkString(" ") ))
+      if (depList.length > 0) Left(Error("err0247.deleteCoPh.notPossible", cophs((coId,coPhId)).name, depList.mkString(" ") ))
       else { cophs.remove((coId,coPhId)); updateCompStatus(coId) match { case _ => Right({}) } } 
     }
 
@@ -535,9 +548,15 @@ case class Tourney(
     for (coPhId <- coPhIds) yield { cophs((coId, coPhId)).name }  
   } 
 
+  def getCoPhNoWinSets(coId: Long, coPhId: Int): Int = {
+    if (cophs.isDefinedAt((coId, coPhId))) { cophs((coId, coPhId)).noWinSets }
+    else { println(s"ERROR: getCoPhNoWinSets(${coId},${coPhId}) doesn't exist");  0 }
+  }
+
+
   def getCompPhaseName(coId: Long, coPhId: Int): String = {
     if (cophs.isDefinedAt((coId, coPhId))) { cophs((coId, coPhId)).name }
-    else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "" }
+    else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "UNKNOWN" }
   }
 
   def getCompPhaseMatches(coId: Long, coPhId: Int): String = {
@@ -554,9 +573,9 @@ case class Tourney(
     }
   } 
 
-  //def getCompName(coId: Long=0L, fmt:Int=0) = "ffffffff"
-
-
+  // ***
+  // MATCH ROUTINES
+  // ***
   def getCompMatches(coId: Long) = {
     val result = new StringBuilder("<matches>")
     cophs.filter(_._1._1==coId).foreach { elem => result.append(getCompPhaseMatches(elem._1._1, elem._1._2)) }
@@ -564,9 +583,86 @@ case class Tourney(
     result.toString()
   }
 
-  //
-  //  Mgmt Routines
-  // 
+  // resetMatches - reset a matches locally result, returns affected game numbers 
+  def resetMatches(coId: Long, coPhId: Int): Either[Error, List[Int]] = 
+    if (!cophs.isDefinedAt((coId, coPhId))) Left(Error("err0251.resetMatches.invalid.param", coId, coPhId)) else {
+      val status = cophs((coId, coPhId)).status
+      cophs((coId, coPhId)).resetMatches() match {
+        case Left(err)   => Left(err)
+        case Right(list) => {
+          val changed = !(status == cophs((coId, coPhId)).status)
+          if (changed) updateCompStatus(coId)
+          Right(list)
+        } 
+      }  
+    }
+
+
+  // resetMatch - reset a match locally result, returns affected game numbers 
+  def resetMatch(coId: Long, coPhId: Int, gameNo: Int, rPantA: Boolean=false, rPantB: Boolean=false): Either[Error, List[Int]] = 
+    if (!cophs.isDefinedAt((coId, coPhId))) Left(Error("err0252.resetMatch.invalid.param", coId, coPhId)) else {
+      val status = cophs((coId, coPhId)).status
+      cophs((coId, coPhId)).resetMatch(gameNo, rPantA, rPantB) match {
+        case Left(err)   => Left(err)
+        case Right(list) => {
+          val changed = !(status == cophs((coId, coPhId)).status)
+          if (changed) updateCompStatus(coId)
+          Right(list)
+        } 
+      }  
+    }
+
+
+   // inputMatch - input match result, returns affected game numbers 
+  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String): Either[Error, List[Int]] = 
+    if (!cophs.isDefinedAt((coId, coPhId))) Left(Error("err0253.inputMatch.invalid.param", coId, coPhId)) else {
+      val status = cophs((coId, coPhId)).status
+      cophs((coId, coPhId)).inputMatch(gameNo, sets, balls, info, playfield) match {
+        case Left(err)   => Left(err)
+        case Right(list) => {
+          val changed = !(status == cophs((coId, coPhId)).status)
+          if (changed) updateCompStatus(coId)
+          Right(list)
+        } 
+      }  
+    }
+
+  //***
+  // Playfield Routines
+  //***
+
+  def getPlayfield(pfNo: String): Either[Error, Playfield] = 
+    if (!playfields.contains(pfNo)) Left(Error("err0029.svc.getPlayfield", pfNo)) else {
+      Right(playfields(pfNo))
+    }
+
+  def setPlayfield(pf: Playfield): Unit = 
+    if (pf.used) playfields(pf.nr) = pf
+    else {
+      // remove playfield with this code
+      val pfSel = playfields.filter( _._2.code == pf.code)
+      if (pfSel.size > 0) playfields = playfields.filter( _._2.code != pf.code)
+    }
+
+  // set/delete sequence of playfield for tourney 
+  def setPlayfields(pfs: Seq[Playfield]): Unit = for (pf <- pfs) setPlayfield(pf)
+
+  // delete all playfield entries of tourney 
+  def delPlayfields(): Unit = playfields = Map().withDefaultValue(Playfield("",false,"","","","","","","",""))
+
+  // delete playfield with certain code
+  def delPlayfield(code: String): Boolean =
+    if (playfields.filter( _._2.code == code).size >= 1) {
+      playfields = playfields.filter( _._2.code == code)
+      true
+    } else false
+
+
+
+  //***
+  // Mgmt Routines
+  //***
+
   /* getCurCoId - take stored value when available, otherwise select a good choice: 
   **              competition with running phases/rounds
   **              first configured competition

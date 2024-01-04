@@ -208,8 +208,8 @@ class PostActionCtrl @Inject()
         Playfield.decode(reqData) match {
           case Left(err)   => Future( BadRequest(err.encode) )
           case Right(pf)   => tsv.setPlayfield(pf).map {
-            case Left(err)   => BadRequest(err.encode)
-            case Right(pfNr) => Ok(Return(pfNr).encode)
+            case Left(err)  => BadRequest(err.encode)
+            case Right(res) => Ok("")
           }  
         }
       }   
@@ -223,7 +223,7 @@ class PostActionCtrl @Inject()
           case Left(err)    => Future(BadRequest(err.encode))
           case Right(pfi)   => tsv.setPfieldInfo(pfi)(tse).map {
             case Left(err)     => BadRequest(err.encode)
-            case Right(res)    => Ok(Return(res).encode)
+            case Right(res)    => Ok("")
           }
         }
       } 
@@ -231,9 +231,9 @@ class PostActionCtrl @Inject()
       // delete a playfield with code, returns number of deleted fields
       // def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
       case "delPlayfield"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        tsv.delPlayfield(getParam(param, "no", -1), getParam(param, "code"), getParam(param, "verify", false) ).map {
-          case Left(err)    => BadRequest(err.encode)
-          case Right(pfNo)  => Ok(Return(pfNo).encode)
+        tsv.delPlayfield(getParam(param, "code")).map {
+          case Left(err)   => BadRequest(err.encode)
+          case Right(res)  => Ok(Return(res).encode)
         }
       }  
 
@@ -421,6 +421,14 @@ class PostActionCtrl @Inject()
         }
       }  
 
+      case "updateCompPhaseStatus"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {
+        tsv.updateCompPhaseStatus(getParam(pMap, "coId", -1L), 
+                                  getParam(pMap, "coPhId", -1), 
+                                  CompPhaseStatus(getParam(pMap, "status", CompPhaseStatus.UNKN.id))).map { 
+          case Left(err)  => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(res) => logger.info(s"${cmd}: execution Ok"); Ok(Return(res).encode)
+        }  
+      } 
 
       //
       // PLAYER Routines
@@ -475,10 +483,7 @@ class PostActionCtrl @Inject()
       // resetMatches
       // def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]]  
       case "resetMatches" => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        val coId   = getParam(pMap, "coId", 0L)
-        val coPhId = getParam(pMap, "coPhId", 0)     
-
-        tsv.resetMatches(coId, coPhId)(tse).map {
+        tsv.resetMatches(getParam(pMap, "coId", 0L), getParam(pMap, "coPhId", 0))(tse).map {
           case Left(err)    => BadRequest(err.encode)
           case Right(gList) => Ok( write[List[Int]](gList) )
         }

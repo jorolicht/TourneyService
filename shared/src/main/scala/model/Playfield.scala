@@ -9,7 +9,7 @@ import shared.utils.{ Error, Return }
  * information about ongoing match 
  */
 case class Playfield(
-  nr:        Int, 
+  nr:        String,          
   used:      Boolean, 
   startTime: String,  // Format "yyyyMMddhhmmss" 
   code:      String,  // <coId> <md> <coph> <md> <gamenumber>
@@ -50,7 +50,7 @@ object Playfield {
   * @param info
   */
 case class PfieldInfo(
-  nr:   Int, 
+  nr:   String, 
   used: Boolean, 
   code: String, 
   coId: Long, 

@@ -289,15 +289,14 @@ trait TourneySvc extends WrapperSvc
   // 
 
   // update competition status
-  def updateCompStatus(coId: Long): Future[Either[Error, CompStatus.Value]] = 
-    if (!App.tourney.comps.isDefinedAt(coId)) Future(Left(Error("err0014.trny.compNotFound", coId.toString))) else {
-      val oldStatus = App.tourney.comps(coId).status
+  def updateCompStatus(coId: Long): Future[Either[Error, Boolean]] = 
+    if (!App.tourney.comps.isDefinedAt(coId)) Future(Left(Error("err0014.trny.compNotFound", coId))) else {
       App.tourney.updateCompStatus(coId) match {
-        case Left(err)     => Future(Left(err))
-        case Right(status) => if (status == oldStatus) Future(Right(status)) else 
-          postAction("setCompStatus", App.tourney.id, s"coId=${coId}&status=${status.id}", "", true).map { 
+        case Left(err)      => Future(Left(err))
+        case Right(changed) => if (!changed) Future(Right(changed)) else 
+          postAction("setCompStatus", App.tourney.id, s"coId=${coId}&status=${App.tourney.comps(coId).status.id}", "", true).map { 
             case Left(err)  => Left(err)
-            case Right(res) => Right(status)
+            case Right(res) => Right(true)
         }
       }
     }
@@ -497,32 +496,23 @@ trait TourneySvc extends WrapperSvc
   //
 
   // set playfield
-  def setPlayfield(playfield: Playfield): Future[Either[Error, Playfield]] = 
-    postAction("setPlayfield", App.tourney.id, "", playfield.encode, true).map {
+  def setPlayfield(pf: Playfield): Future[Either[Error, Unit]] = {
+    App.tourney.setPlayfield(pf)
+    postAction("setPlayfield", App.tourney.id, "", pf.encode, true).map {
       case Left(err)  => Left(err)
-      case Right(res) => Playfield.decode(res)
+      case Right(res) => Right({})
     }
+  }  
 
-  // get playfield
-  def getPlayfield(pfNo: Int): Future[Either[Error, Playfield]] = 
-    getAction("getPlayfield", App.tourney.id, s"pfNo=${pfNo}").map {
-      case Left(err)     => Left(err.add("getPlayfield"))
-      case Right(pfield) => Playfield.decode(pfield)
-    }
-
-  // get all playfields of tourney 
-  def getPlayfields(toId: Long): Future[Either[Error, Seq[Playfield]]] = 
-    getAction("getPlayfields", toId).map {
-      case Left(err)  => Left(err.add("getPlayfields"))
-      case Right(pfs) => Playfield.decSeq(pfs)
-    }
 
   // delete playfield with certain code, return number of deleted entry
-  def delPlayfield(code: String): Future[Either[Error, Int]] = 
+  def delPlayfield(code: String): Future[Either[Error, Boolean]] = {
+    delPlayfield(code)
     postAction("delPlayfield", App.tourney.id, s"code=${code}","",true).map {
       case Left(err)  => Left(err.add("delPlayfield"))
-      case Right(cnt) => Return.decode2Int(cnt, "delPlayfield")
-    }
+      case Right(res) => Return.decode2Boolean(res, "delPlayfield")
+    } 
+  }  
 
 
   //
@@ -583,23 +573,42 @@ trait TourneySvc extends WrapperSvc
     } 
 
 
-
   // inputMatch - input match result, returns affected game numbers 
-  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, 
-                 sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
+  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = 
     if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
-      (for {
-        r1 <- EitherT(Future(App.tourney.cophs((coId, coPhId)).inputMatch(gameNo, sets, balls, info, playfield)))
-        r2 <- EitherT(inputMatchRemote(App.tourney.id, coId, coPhId, gameNo, sets, balls, info, playfield) ) 
-      } yield { (r1, r2) }).value.map {   
-        case Left(err)  => Left(err)
-        case Right(res) => Right(res._1) 
+      App.tourney.inputMatch(coId, coPhId, gameNo, sets, balls, info, playfield) match {
+        case Left(err)     => Future(Left(err))
+        case Right(result) => if (App.serverLess) Future(Right(result)) else {
+          postAction("inputMatch", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}", 
+                     write[( (Int, Int), String, String, String) ]((sets, balls, info, playfield)), true).map {
+            case Left(err)  => Left(err.add("postAction->inputMatch"))
+            case Right(res) => {
+              try Right(read[List[Int]](res))  
+              catch { case _:Throwable => Left(Error("err0223.svc.inputMatch.decodeResult", "", "", "inputMatch")) }    
+            } 
+          }
+        }
       }
-    }  
-  }
+    }   
+
+  // resetMatch - reset a match locally result, returns affected game numbers 
+  def resetMatch(coId: Long, coPhId: Int, gameNo: Int, rPantA: Boolean=false, rPantB: Boolean=false): Future[Either[Error, List[Int]]] = 
+    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
+      App.tourney.resetMatch(coId, coPhId, gameNo, rPantA, rPantB) match {
+        case Left(err)     => Future(Left(err))
+        case Right(result) => if (App.serverLess) Future(Right(result)) else {
+          postAction("resetMatch", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}&resetPantA=${rPantA}&resetPantB=${rPantB}", "", true).map {
+            case Left(err)  => Left(err.add("postAction->resetMatch"))
+            case Right(res) => {
+              try Right(read[List[Int]](res))  
+              catch { case _:Throwable => Left(Error("err0228.svc.resetMatch.decodeResult", "", "", "resetMatch")) }    
+            } 
+          }  
+        }
+      }
+    }       
+
+
 
   // inputReferee - input match result (no overwrite), returns affected game numbers 
   def inputReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, 
@@ -612,38 +621,9 @@ trait TourneySvc extends WrapperSvc
           catch { case _:Throwable => Left(Error("err0231.svc.inputReferee.decodeResult", "", "", "inputReferee")) }    
           } 
       }
+  
 
-
-  def inputMatchRemote(toId: Long, coId: Long, coPhId: Int, gameNo: Int, 
-                       sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = 
-    if (App.serverLess) Future(Right(List())) else {
-      postAction("inputMatch", toId, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}",
-        write[( (Int, Int), String, String, String) ]((sets, balls, info, playfield)), true).map {
-          case Left(err)  => Left(err.add("postAction/inputMatch"))
-          case Right(res) => {
-            try Right(read[List[Int]](res))  
-            catch { case _:Throwable => Left(Error("err0223.svc.inputMatch.decodeResult", "", "", "inputMatch")) }    
-            } 
-        }
-    }    
-
-
-  // resetMatch - reset a match locally result, returns affected game numbers 
-  def resetMatch(coId: Long, coPhId: Int, gameNo: Int, rPantA: Boolean=false, rPantB: Boolean=false): Future[Either[Error, List[Int]]] = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
-      (for {
-        r1 <- EitherT(Future( App.tourney.cophs((coId, coPhId)).resetMatch(gameNo, rPantA, rPantB) ))
-        r2 <- EitherT( resetMatchRemote(App.tourney.id, coId, coPhId, gameNo, rPantA, rPantB) )
-      } yield { (r1, r2) }).value.map {   
-        case Left(err)  => Left(err)
-        case Right(res) => Right(res._1) 
-      }
-    }  
-  }
-
+    
 
   // getMatch - get a match 
   def getMatch(toId: Long, coId: Long, coPhId: Int, gameNo: Int): Future[Either[Error, MEntry]] = {
@@ -670,31 +650,22 @@ trait TourneySvc extends WrapperSvc
         }
     }  
 
-
-
   // resetMatch - reset a match locally result, returns affected game numbers 
-  def resetMatches(coId: Long, coPhId: Int): Future[Either[Error, List[Int]]] = {
-    import cats.data.EitherT
-    import cats.implicits._ 
-
-    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else App.tourney.getCoPh(coId, coPhId) match {
-      case Left(err)   => Future(Left(err))
-      case Right(coph) => coph.resetMatches() match {
-        case Left(err)   => Future(Left(err))
-        case Right(res)  => if (App.serverLess) Future(Right(res)) else resetMatchesRemote(App.tourney.id, coId, coPhId)
+  def resetMatches(coId: Long, coPhId: Int): Future[Either[Error, List[Int]]] = 
+    if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
+      App.tourney.resetMatches(coId, coPhId) match {
+        case Left(err)  => Future(Left(err))
+        case Right(res) => postAction("resetMatches", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}", "", true).map {
+          case Left(err)  => Left(err.add("postAction/resetMatches"))
+          case Right(res) => {
+            try Right(read[List[Int]](res))  
+            catch { case _:Throwable => Left(Error("err0228.svc.resetMatch.decodeResult", "", "", "resetMatch")) }    
+          }  
+        }           
       }
-    }
-  }
+    }    
 
-  // resetMatchesRemote - reset a match locally result, returns affected game numbers 
-  def resetMatchesRemote(toId: Long, coId: Long, coPhId: Int): Future[Either[Error, List[Int]]] =    
-    postAction("resetMatches", toId, s"coId=${coId}&coPhId=${coPhId}", "", true).map {
-      case Left(err)  => Left(err.add("postAction/resetMatches"))
-      case Right(res) => {
-        try Right(read[List[Int]](res))  
-        catch { case _:Throwable => Left(Error("err0228.svc.resetMatch.decodeResult", "", "", "resetMatch")) }    
-      } 
-    }
+
 
 
   //
@@ -711,6 +682,18 @@ trait TourneySvc extends WrapperSvc
         }    
       }     
     }
+
+
+  def updateCompPhaseStatus(coId: Long, coPhId: Int, status: CompPhaseStatus.Value): Future[Either[Error, Boolean]] = 
+    App.tourney.updateCompPhaseStatus(coId, coPhId, status) match {
+      case Left(err)  => Future(Left(err))
+      case Right(res) => if (!res) Future(Right(res)) else {
+        postAction("updateCompPhaseStatus", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&status=${status.id}", "", true).map {
+          case Left(err)  => Left(err)
+          case Right(res) => Return.decode2Boolean(res, "updateCompPhaseStatus") 
+        }
+      }
+    }  
 
 
   def saveCompPhase(coph: CompPhase): Future[Either[Error, Unit]] = {

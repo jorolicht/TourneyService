@@ -109,8 +109,6 @@ class GetActionCtrl @Inject()
         case Right(comps) => Ok(write[Seq[Competition]](comps))
       }
 
-      
-
       /** getComp
        * 
        *  Service: def getComp(toId: Long, coId: Long): Future[Either[Error, Competition]]
@@ -119,7 +117,6 @@ class GetActionCtrl @Inject()
         case Left(err) => logger.error(s"getComp error: ${err.toString}"); BadRequest(err.add("getComp").encode)
         case Right(co) => Ok(write[Competition](co))
       }
-
 
       // getPlayfields returns encoded Playfields or Error
       case "getPlayfields"  => tsv.getPlayfields(toId).map { 
@@ -131,7 +128,7 @@ class GetActionCtrl @Inject()
        * 
        *  Service: def getPlayfield(toId: Long, pfNr: Int): Future[Either[Error, Playfield]]
        */ 
-      case "getPlayfield"  => tsv.getPlayfield(toId, getParam(pMap, "pfNo", -1)).map { 
+      case "getPlayfield"  => tsv.getPlayfield(toId, getParam(pMap, "pfNo", "")).map { 
         case Left(err)     => logger.error(s"getPlayfield error: ${err.toString}"); BadRequest(err.add("getPlayfield").encode) 
         case Right(pfield) => Ok(pfield.encode)
       }

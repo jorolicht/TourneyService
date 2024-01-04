@@ -1,7 +1,7 @@
 package shared.model
 
 import scala.util.matching
-import scala.collection.mutable.{ ArrayBuffer, HashMap, Map }
+import scala.collection.mutable.{ ArrayBuffer, ListBuffer, HashMap, HashSet, Map }
 
 import upickle.default._
 import upickle.default.{ReadWriter => RW, macroRW}
@@ -576,7 +576,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   
 
   // inputMatch - set match result, info, playfield ....
-  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = {
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = 
     try {
       val m = getMatch(gameNo)
       m.setSets(sets)
@@ -588,13 +588,10 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
       updateStatus() 
       Right(propMatch(gameNo))
     } catch { case _:Throwable => Left(Error("err0224.coph.inputMatch.invalidGameNo", gameNo.toString))} 
-  }
 
 
   // propMatch
-  def propMatch(gameNo: Int): List[Int] = { 
-    import scala.collection.mutable.ListBuffer
-    
+  def propMatch(gameNo: Int): List[Int] = 
     try {
       val triggerList = ListBuffer[Int](gameNo)
       val m = getMatch(gameNo)
@@ -630,26 +627,23 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
       updateStatus() 
       triggerList.toList
     } catch { case _: Throwable => println("ERROR propMatch exception"); List() }  
-  }
 
 
-  def getMatch(game: Int): MEntry = {
-    getTyp match {
-      case CompPhaseTyp.GR => matches(game-1).asInstanceOf[MEntryGr]
-      case CompPhaseTyp.RR => matches(game-1).asInstanceOf[MEntryGr]
-      case CompPhaseTyp.SW => matches(game-1).asInstanceOf[MEntryGr]
-      case CompPhaseTyp.KO => matches(game-1).asInstanceOf[MEntryKo]
-      case _      => matches(game-1).asInstanceOf[MEntryBase]
-    }    
-  }
-  
+  def getMatch(game: Int): MEntry = getTyp match {
+    case CompPhaseTyp.GR => matches(game-1).asInstanceOf[MEntryGr]
+    case CompPhaseTyp.RR => matches(game-1).asInstanceOf[MEntryGr]
+    case CompPhaseTyp.SW => matches(game-1).asInstanceOf[MEntryGr]
+    case CompPhaseTyp.KO => matches(game-1).asInstanceOf[MEntryKo]
+    case _               => matches(game-1).asInstanceOf[MEntryBase]
+  }    
 
-  def resetMatches(): Either[Error, List[Int]] = {
-    var error = Error.dummy
-    val triggerList = scala.collection.mutable.ListBuffer[Int]()
 
-    println(s"resetMatches coId: ${coId} coPhId: ${coPhId}")
+  def resetMatches(): Either[Error, List[Int]] = 
     try {
+      //println(s"resetMatches coId: ${coId} coPhId: ${coPhId}")
+      var error = Error.dummy
+      val triggerList = scala.collection.mutable.ListBuffer[Int]()
+      
       getTyp match {
         case CompPhaseTyp.KO | CompPhaseTyp.GR | CompPhaseTyp.RR | CompPhaseTyp.SW  => 
           // val mList = (for (m <- matches) yield { if (m.status == MEntry.MS_FIN && (m.round == maxRnd || m.round == (maxRnd-1))) m.gameNo else 0 }).filter(_ != 0)
@@ -664,12 +658,9 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
       }
       if (error.isDummy) Right(triggerList.distinct.sorted.toList) else Left(error)
     } catch { case _:Throwable => Left(Error("err0229.svc.resetMatches.failed")) }
-  }
 
 
-  def resetMatch(gameNo: Int, resetPantA: Boolean=false, resetPantB: Boolean=false): Either[Error, List[Int]] = {
-    import scala.collection.mutable.ListBuffer
-
+  def resetMatch(gameNo: Int, resetPantA: Boolean=false, resetPantB: Boolean=false): Either[Error, List[Int]] = 
     try {
       var error = Error.dummy
       val triggerList = ListBuffer[Int](gameNo)
@@ -710,7 +701,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
       updateStatus() 
       if (error.isDummy) Right(triggerList.toList) else Left(error)
     } catch { case _: Throwable => Left(Error("err0230.svc.resetMatch.game", gameNo.toString))}
-  }
 
 
   // Example Match Entry for ClickTT
@@ -750,24 +740,22 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
     result.toString()
   }
 
-  def getMatchName(m: MEntry): String = {
-    m.coPhTyp match {
-      case CompPhaseTyp.GR | CompPhaseTyp.RR => groups(m.asInstanceOf[MEntryGr].grId).name
-      case CompPhaseTyp.SW => "MatchName"
-      case CompPhaseTyp.KO => m.asInstanceOf[MEntryKo].round match {
-        case 7 => "Round of 128"
-        case 6 => "Round of 64"
-        case 5 => "Round of 32"
-        case 4 => "Round of 16"
-        case 3 => "Quarter-final"
-        case 2 => "Semi-final"
-        case 1 => "Final"
-        case 0 => "Place 3"
-        case _ => ""
-      }
+  def getMatchName(m: MEntry): String = m.coPhTyp match {
+    case CompPhaseTyp.GR | CompPhaseTyp.RR => groups(m.asInstanceOf[MEntryGr].grId).name
+    case CompPhaseTyp.SW => "MatchName"
+    case CompPhaseTyp.KO => m.asInstanceOf[MEntryKo].round match {
+      case 7 => "Round of 128"
+      case 6 => "Round of 64"
+      case 5 => "Round of 32"
+      case 4 => "Round of 16"
+      case 3 => "Quarter-final"
+      case 2 => "Semi-final"
+      case 1 => "Final"
+      case 0 => "Place 3"
       case _ => ""
-    }  
-  }  
+    }
+    case _ => ""
+  }   
 
   // calculate players position within competition phase
   def calcModel(grId: Int = -1): Boolean = {
@@ -815,8 +803,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
 
   // genGrMatchDependencies - generate depend and trigger values
   def genGrMatchDependencies(): Either[Error, Boolean] = {
-    import scala.collection.mutable.ListBuffer
-    import scala.collection.mutable.HashSet
     import shared.model.Competition._
     try {
       // init map with default value
@@ -849,8 +835,8 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
         val plB:(ListBuffer[Int], ListBuffer[Int])  = if (SNO.valid(m.stNoB)) {
           depMap(SNO.plId(m.stNoB)).partition(_ <= m.gameNo)
         } else { (ListBuffer(), ListBuffer()) }
-        val depend = scala.collection.mutable.HashSet[Int]()
-        val trigger = scala.collection.mutable.HashSet[Int]()
+        val depend  = HashSet[Int]()
+        val trigger = HashSet[Int]()
       
         if (plA._2.size > 0) trigger += (plA._2).sorted.head
         if (plB._2.size > 0) trigger += (plB._2).sorted.head
@@ -859,7 +845,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
         matches(m.gameNo-1).asInstanceOf[MEntryGr].depend  = depend.mkString("·")
         matches(m.gameNo-1).asInstanceOf[MEntryGr].trigger = trigger.mkString("·")          
       }  
-    } catch { case _: Throwable => println("genGrMatchDependencies", s"${this}"); Left(Error("??? genGrMatchDependencies")) }
+    } catch { case _: Throwable => println("ERROR: genGrMatchDependencies", s"${this}"); Left(Error("err0249.genGrMatchDependencies")) }
     Right(true)
   }
 
@@ -871,7 +857,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   def encode(version: Int=0) = write[CompPhaseTx](toTx())
 
   def toTx(): CompPhaseTx = {
-    println(s"??? CompPhase toTx size: ${size}")
     CompPhaseTx(name, coId, coPhId, coPhCfg.id, status.id, demo, size, noPlayers, noWinSets, baseCoPhId, quali.id, candInfo, candidates, matches.map(x=>x.toTx), groups.map(g=>g.toTx), ko.toTx) 
   }
     

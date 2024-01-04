@@ -993,6 +993,7 @@ organize.competition.tit.edit                         = Edit Competition
 organize.competition.tit.view                         = View Competition
 organize.competition.tit.start                        = Start Competition 
 organize.competition.tit.delete                       = Delete Competition
+organize.competition.tit.upload                       = Upload Competition
 organize.competition.participant.card                 = Participants [{0}] Administration
 organize.competition.coph.card                        = Rounds [{0}] Configuration and Start
 organize.competition.dlg.coph.new.hdr                 = New Round
@@ -1459,9 +1460,13 @@ err0243.systemKO.draw.size                          = Draw KO-System, size or nu
 err0244.systemKO.draw.updown                        = Draw KO-System, updown assignment error
 err0245.invalid.sno.double                          = Startnumber of double invalid: {0}
 err0246.decode.sendCttFile                          = Decoding error in routine sendCttFile
-err247.deleteCoPh.notPossible                       = Delete round {0} not possible, because dependend round(s) {1} exist
-err248.delCompPhase.invalid.param                   = Error in routine delCompPhase invalid parameter {0}/{1}
-
+err0247.deleteCoPh.notPossible                      = Delete round {0} not possible, because dependend round(s) {1} exist
+err0248.delCompPhase.invalid.param                  = Error in routine delCompPhase invalid parameter {0}/{1}
+err0249.genGrMatchDependencies                      = Error in routine genGrMatchDependencies
+err0250.updateCompPhaseStatus.invalid.param         = Error in routine updateCompPhaseStatus invalid parameter {0}/{1}
+err0251.resetMatches.invalid.param                  = Error in routine resetMatches invalid parameter {0}/{1}
+err0252.resetMatch.invalid.param                    = Error in routine resetMatch invalid parameter {0}/{1}
+err0253.inputMatch.invalid.param                    = Error in routine inputMatch invalid parameter {0}/{1}
 
 return001.csv.hdr.player                            = CSV header for player
 

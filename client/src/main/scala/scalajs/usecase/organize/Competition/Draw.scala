@@ -43,7 +43,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   @JSExport 
   override def actionEvent(key: String, elem: dom.raw.HTMLElement, event: dom.Event) = {
     val (coPhase, coId, coPhId) = getCompEnv(elem) 
-    debug("actionEvent", s"key: ${key} coId: ${coId} coPhId: ${coPhId}")
+    //debug("actionEvent", s"key: ${key} coId: ${coId} coPhId: ${coPhId}")
     key match {
       case "DrawRefresh"   => {
         val drawElements = gE(s"DrawContent_${coId}_${coPhId}").querySelectorAll("td[data-drawPos]")
@@ -51,23 +51,22 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
           val elem = drawElements.item(i).asInstanceOf[HTMLElement]
           (getData(elem, "drawPos", 0), elem.innerText.toIntOption.getOrElse(0))
         }).unzip
-        println(s"${asign._1.mkString(",")} versus ${asign._2.mkString(", ")}")
+        //debug("DrawRefresh, s"${asign._1.mkString(",")} versus ${asign._2.mkString(",")}")
         val diff = asign._1.toSet.diff(asign._2.toSet)
         if      (diff.size == 0) reassignDraw(App.tourney.cophs(coId, coPhId), asign._1.zip(asign._2).toMap)
         else if (diff.size == 1) DlgBox.standard(getMsg("change.hdr"), getMsg("change.msg", diff.head.toString), Seq("ok"))
         else                     DlgBox.standard(getMsg("change.hdr"), getMsg("changex.msg", diff.mkString(",")), Seq("ok"))
       } 
 
-      case "Start"   => App.tourney.getCoPh(coId, coPhId) map { coph => {  
-        coph.setStatus(CompPhaseStatus.EIN)
-        saveCompPhase(coph) map {
-          case Left(err)   => error("StartInputCoPh", s"${err}") 
-          case Right(res)  => {
-            setVisible(gE(s"DrawStartBtn_${coph.coId}_${coph.coPhId}"), false)
-            App.execUseCase("OrganizeCompetitionInput", "", "") 
-          }   
-        }
-      }}  
+      case "Start"   => updateCompPhaseStatus(coId, coPhId, CompPhaseStatus.EIN) map {
+        case Left(err)   => error("StartInputCoPh", s"${err}") 
+        case Right(res)  => {
+          setVisible(gE(s"DrawStartBtn_${coId}_${coPhId}"), false)
+          App.execUseCase("OrganizeCompetitionInput", "", "")
+        }    
+      }
+
+
 
     }
   }
@@ -88,7 +87,7 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
         case _               => setHtml(contentElement, showAlert(getMsg("invalidSection")))
       }      
     } else {
-      debug("setPage", s"Draw update: coId: ${coph.coId} coPhId: ${coph.coPhId}")
+      //debug("setPage", s"Draw update: coId: ${coph.coId} coPhId: ${coph.coPhId}")
       val base = gE(s"DrawContent_${coph.coId}_${coph.coPhId}")
       coph.getTyp match {
         case CompPhaseTyp.GR  => updateGrView(base, coph.groups, App.tourney.comps(coph.coId).typ)
@@ -117,7 +116,6 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
 
   def updateGrView(base: HTMLElement, groups: ArrayBuffer[Group], coTyp: CompTyp.Value) =
     for (g <- groups) {
-      println(s"updateGrView ${base}")
       g.pants.zipWithIndex.foreach { case (pant, index) => {
         val pantBase = base.querySelector(s"[data-pantPos='${g.grId}_${index}']").asInstanceOf[HTMLElement]
         setDrawPosition(pantBase, pant, coTyp, s"${g.grId}_${index}")

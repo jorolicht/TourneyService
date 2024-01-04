@@ -124,6 +124,7 @@ organize.competition.tit.edit                         = Edit Competition
 organize.competition.tit.view                         = View Competition
 organize.competition.tit.start                        = Start Competition 
 organize.competition.tit.delete                       = Delete Competition
+organize.competition.tit.upload                       = Upload Competition
 organize.competition.participant.card                 = Participants [{0}] Administration
 organize.competition.coph.card                        = Rounds [{0}] Configuration and Start
 organize.competition.dlg.coph.new.hdr                 = New Round

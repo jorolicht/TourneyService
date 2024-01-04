@@ -124,6 +124,7 @@ organize.competition.tit.edit                         = Edit Wettbewerb
 organize.competition.tit.view                         = View Wettbewerb
 organize.competition.tit.start                        = Start Wettbewerb 
 organize.competition.tit.delete                       = Wettbewerb löschen
+organize.competition.tit.upload                       = Wettbewerb hochladen
 organize.competition.participant.card                 = Teilnehmer [{0}] administrieren
 organize.competition.coph.card                        = Spielrunden [{0}] konfigurieren und starten
 organize.competition.dlg.coph.new.hdr                 = Neuanlage Spielrunde

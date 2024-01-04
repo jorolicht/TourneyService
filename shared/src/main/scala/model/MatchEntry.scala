@@ -54,7 +54,8 @@ trait MEntry {
     else if (SNO(stNoA).isNN | SNO(stNoB).isNN)                 { setStatus(MEntry.MS_MISS)  } 
     else if (blocked)                                           { setStatus(MEntry.MS_BLOCK) }
     else if (sets==(0,0) & playfield!="")                       { 
-                                                                  MEntry.setRunning(this, true) 
+                                                                  MEntry.setRunning(this, true)
+                                                                  println(s"Set playfield: ${playfield}") 
                                                                   setStatus(MEntry.MS_RUN)   
                                                                 }
     else if (sets==(0,0) & playfield=="")                       { setStatus(MEntry.MS_READY) }        
@@ -138,7 +139,7 @@ case class MEntryBase(coId: Long, coTyp: CompTyp.Value, coPhId: Int, coPhTyp: Co
 
   def setSets(value:(Int,Int)) = { sets = value }
   def setResult(value:String)  = { result = value } 
-  def setPlayfield(value: String) = { playfield = value }
+  def setPlayfield(value: String) = { playfield = value.trim() }
   def setInfo(value: String)  = { info = value } 
   def setStatus(value:Int)    = { status = value }
   def setGameNo(value: Int)   = { gameNo = value }
@@ -186,7 +187,7 @@ case class MEntryKo(
   def setPantB(sNoB: String) = stNoB = sNoB    
   def setSets(value:(Int,Int)) = { sets = value }
   def setResult(value:String)  = { result = value } 
-  def setPlayfield(value: String) = { playfield = value }
+  def setPlayfield(value: String) = { playfield = value.trim() }
   def setInfo(value:String)  = { info = value }  
   def setStatus(value:Int)   = { status = value } 
   def setGameNo(value: Int)   = { gameNo = value }  

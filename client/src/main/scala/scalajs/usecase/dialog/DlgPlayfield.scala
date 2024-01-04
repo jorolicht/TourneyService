@@ -88,10 +88,10 @@ object DlgPlayfield  extends BasicHtml
     setHtml(gUE("Competition"), clientviews.playfield.html.CompOption(App.tourney.getNamesComp(), pf.pClass).toString )
     setInput("Info", pf.info)
 
-    if (pf.nr > 0) {
+    if (pf.nr != "") {
       $(getIdHa("InfoOption")).value(1.toString)
       $(getIdHa("Nr")).attr("value", pf.nr)
-    } else if (pf.nr == 0 & pf.info != "") {
+    } else if (pf.nr == "" & pf.info != "") {
       $(getIdHa("InfoOption")).value(2.toString)
       $(getIdHa("Nr")).attr("value", "")
     } else {
@@ -106,21 +106,20 @@ object DlgPlayfield  extends BasicHtml
     !someEmpty
   }
 
-  def verifyInfo(info: String, pfNr: Int): Boolean = {
-      (info.trim != "" & pfNr == 0)
+  def verifyInfo(info: String, pfNr: String): Boolean = {
+      (info.trim != "" & pfNr.trim == "")
   }
 
-  def verifyPlayfield(pfNr: Int) : Boolean = {
-      val someEmpty = pfNr < 1
-      if (someEmpty) $(getIdHa("Help")).text(getMsg("help2"))
-      !someEmpty
+  def verifyPlayfield(pfNr: String) : Boolean = {
+      if (pfNr.trim.length < 1 ) $(getIdHa("Help")).text(getMsg("help2"))
+      pfNr.trim.length >= 1
     }
 
 
   // read playfield dilaog with playfield values
   def read(): Playfield = {
     val coId = getInput(gE(uc("Competition")),0L)
-    val nr = if (getInput(gE(uc("InfoOption")),0) != 2) getInput(gE(uc("Nr")),0) else 0
+    val nr = if (getInput(gUE("InfoOption"), 0) != 2) getInput(gUE("Nr"),"") else ""
 
     Playfield(nr, true, "19700101000000", "", 
       getInput(gE(uc("NameA"))), getInput(gE(uc("ClubA"))),
@@ -131,7 +130,7 @@ object DlgPlayfield  extends BasicHtml
   }
   
   // show dialog return result (Future) or Failure when canceled
-  def show(pf: Playfield = Playfield(0, false, "19700101000000" , "", "", "", "", "", "", "") ): Future[Playfield] = {
+  def show(pf: Playfield = Playfield("", false, "19700101000000" , "", "", "", "", "", "", "") ): Future[Playfield] = {
     val p = Promise[Playfield]()
     val f = p.future
 
