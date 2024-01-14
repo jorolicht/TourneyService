@@ -583,6 +583,11 @@ object TIO {
               trny.writeTime  = clock.millis()
               trny.backupTime = clock.millis()
 
+              // initially generate playfield entries
+              for(coph <- trny.cophs.values; m <- coph.matches) {   
+                if (m.status == MEntry.MS_RUN && (m.playfield != "")) trny.playfields(m.playfield) = trny.genPlayfieldFromMatch(m, "")
+              }
+
               if (tourney.isDefinedAt(toId)) { tourney.remove(toId) }
               tourney(toId) = trny
               logger.info(s"--------------------------------------------------------------------------")
@@ -592,6 +597,7 @@ object TIO {
               logger.info(s"  clubs / IdMax: ${trny.clubs.size} / ${trny.clubIdMax}")
               logger.info(s"  players in competitions: ${trny.pl2co.size}")
               logger.info(s"--------------------------------------------------------------------------") 
+
               Right(tourney(toId))
             } catch { case _: Throwable => Left(Error("err0012.trny.read", toId.toString, s"${orgDir} / ${startDate}")) }
         }  

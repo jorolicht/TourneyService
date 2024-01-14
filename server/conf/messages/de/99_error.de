@@ -237,6 +237,8 @@ err0250.updateCompPhaseStatus.invalid.param         = Fehler in Routine updateCo
 err0251.resetMatches.invalid.param                  = Fehler in Routine resetMatches ungültige Parameter {0}/{1}
 err0252.resetMatch.invalid.param                    = Fehler in Routine resetMatch ungültige Parameter {0}/{1}
 err0253.inputMatch.invalid.param                    = Fehler in Routine inputMatch ungültige Parameter {0}/{1}
+err0254.ballInput.invalid                           = Balleingabe fehlerhaft (enthält Blanks)
+err0255.getMatch.invalid.param                      = Fehler in Routine getMatch ungültige Parameter {0}
 
 
 return001.csv.hdr.player                            = CSV header for player

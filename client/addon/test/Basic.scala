@@ -46,6 +46,7 @@ object AddonBasic extends UseCase("AddonBasic")
       case 10 => test_10(param)
       case 11 => test_11(param)
       case 12 => test_12(param)
+      case 13 => test_13(param)
 
       case _ => AddonMain.setOutput(s"ERROR: invalid test number ${number}"); Future(true)
     }
@@ -439,6 +440,26 @@ object AddonBasic extends UseCase("AddonBasic")
 
     Future(true)
   }    
+
+  // Test 13 - Basic Test UTC Timestamp
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20basic%20%2Dn%2013%20%2D%2Dparam%207 
+  def test_13(param: String):Future[Boolean] = {
+
+    def getUTCTimestamp(): String = {
+      val date  = new js.Date()
+      f"${date.getUTCFullYear().toInt}%04d${date.getUTCMonth().toInt+1}%02d${date.getUTCDate().toInt}%02d${date.getUTCHours().toInt}%02d${date.getUTCMinutes().toInt}%02d${date.getUTCSeconds().toInt}%02d"
+    }
+
+    val test = s"START Test 13 - Basic Test UTC Timestamp -> ${param}"
+    AddonMain.addOutput(test)
+
+    AddonMain.addOutput(s"UTC Time: ${getUTCTimestamp()}")
+
+    Future(true)
+  }  
+
+
+
 
 
 

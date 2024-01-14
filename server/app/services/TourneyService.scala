@@ -69,11 +69,14 @@ trait TourneyService {
   def getPlayfields(toId: Long): Future[Either[Error, Seq[Playfield]]]
   def getPlayfield(toId: Long, pfNo: String): Future[Either[Error, Playfield]]
 
+  def setPlayfield(coId: Long, coPhId: Int, game: Int, startTime: String)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] 
   def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
   def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv) : Future[Either[Error, Unit]] 
-  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
+
   def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
-  def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def delPlayfield(coId: Long, coPhId: Int, game: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def delPlayfield(pfNo: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+
 
   //
   // Competition Interface
@@ -103,7 +106,7 @@ trait TourneyService {
   // Match Interface (used internal)
   def getMatchStatus(toId: Long, coId: Long, coPhId:Int, gameNo: Int): Future[Either[Error, Int]] 
   def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, 
-                 info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] 
+                 info: String, playfield: String, timeStamp: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] 
   def resetMatch(coId: Long, coPhId:Int, gameNo: Int, resetPantA: Boolean, resetPantB: Boolean)(implicit tse :TournSVCEnv): Future[Either[Error, List[Int]]] 
   def resetMatches(coId: Long, coPhId:Int)(implicit tse :TournSVCEnv): Future[Either[Error,List[Int]]] 
 
@@ -137,7 +140,6 @@ trait TourneyService {
   def setTournAddress(toId: Long, address: Address): Future[Either[Error, Address]]
   def setTournContact(toId: Long, contact: Contact): Future[Either[Error, Contact]]
   
-  //def getTournRun(toId: Long):     Future[Either[Error, TournRun]]
   def getTourney(toId: Long):     Future[Either[Error, Tourney]]
 
   def getTournPlayers(toId: Long): Future[Either[Error, Seq[Player]]]
@@ -150,9 +152,8 @@ trait TourneyService {
   def clean(): Unit
   def dump(toId: Long): Future[Either[Error, String]] 
 
-  def trigger(trny: Tourney, trigger: UpdateTrigger): Unit
-  def trigger(orgDir: String, trigger: UpdateTrigger): Unit
-  def trigger(tse: TournSVCEnv, trigCmd: String): Future[Either[Error,Boolean]]
+  def trigger(toId: Long, trigger: UpdateTrigger): Unit
+  def trigger(tse :TournSVCEnv, trigCmd: String): Unit
 
 }
 

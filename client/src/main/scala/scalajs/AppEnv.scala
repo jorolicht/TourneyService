@@ -113,22 +113,9 @@ object AppEnv extends BasicHtml
     else { serverAddress = home; Future(true) }
   }
 
-  def initPrompt() = {
-    prompt = scala.collection.mutable.ArrayBuffer("command1", "command2")
-  }
-
   def resetContext(): Unit = { 
     userCtx = Session.get(userCtx.runModeLocal) 
   }
-
-  /** resetView
-   * 
-   */
-  def resetView() = {
-    setHeader()
-    ctrlSidebar(status)
-    setHistory("HomeMain","","")
-  } 
 
   def getOrganizer   : String  = { userCtx.organizer }
   def getOrgDir      : String  = { userCtx.orgDir }
@@ -139,20 +126,16 @@ object AppEnv extends BasicHtml
   def isAdmin()      : Boolean = { userCtx.admin }
   def getCsrf()      : String  = csrf
 
-
-  def getToId: Long       = { status.toId }
   def setToId(toId: Long) = { 
     status.toId = toId
-    ctrlSidebar(status)
+    ctrlSidebar(status.ucName, status.toId)
     setHeader()
   }
 
 
   // ctrlSidebar - initialize sidebar for normal user, organizer or admin
-  def ctrlSidebar(status: AppStatus): Unit = {
-
-    val ucName     = status.ucName
-    val validToId  = (status.toId > 0)
+  def ctrlSidebar(ucName: String, toId: Long): Unit = {
+    val validToId  = (toId > 0)
 
     val validOrgId = (AppEnv.getOrgId > 0)
     val admin      = AppEnv.isAdmin

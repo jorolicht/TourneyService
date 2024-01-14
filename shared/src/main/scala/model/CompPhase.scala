@@ -576,7 +576,8 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
   
 
   // inputMatch - set match result, info, playfield ....
-  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = 
+  def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = {
+    println("Call CompPhase.inputMatch")
     try {
       val m = getMatch(gameNo)
       m.setSets(sets)
@@ -588,6 +589,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
       updateStatus() 
       Right(propMatch(gameNo))
     } catch { case _:Throwable => Left(Error("err0224.coph.inputMatch.invalidGameNo", gameNo.toString))} 
+  }  
 
 
   // propMatch

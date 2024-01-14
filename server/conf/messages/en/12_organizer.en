@@ -305,8 +305,12 @@ organize.playfield.compName                           = Competition
 organize.playfield.playerA                            = Player A
 organize.playfield.playerB                            = Player B
 organize.playfield.info                               = Info
+organize.playfield.cmd                                = Command
 organize.playfield.noEntry                            = No table entries available
-organize.playfield.btn.req.fullscreen                 = Switch to Fullscreen Mode
-organize.playfield.btn.req.playfield.edit             = Edit Table Entries
+organize.playfield.btn.req.Fullscreen                 = Switch to Fullscreen Mode
+organize.playfield.btn.req.AddInfo                    = Add Playfieldinfo 
 organize.playfield.tableview                          = Table View
-
+organize.playfield.hdr.addTourneyInfo                 = Add Playfieldinfo
+organize.playfield.msg.addTourneyInfo                 = Add special information to playfield info display
+organize.playfield.plh.addTourneyInfo                 = Table 3 to 6 reserved for training
+organize.playfield.noInput                            = invalid/empty input

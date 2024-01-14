@@ -123,7 +123,7 @@ object App extends BasicHtml with TourneySvc
 
         // initialize tourney if basic usecase is called
         if (ucName == "HomeMain") setLocalTourney(Tourney.init) else loadLocalTourney()
-        initTrigger()      
+        initTrigger(App.tourney.id, AppEnv.callerId, receiveSrvCmd)      
         execUseCase(ucName, ucParam, ucInfo)
       }  
       case false => dom.window.location.href = s"${AppEnv.home}"  
@@ -158,7 +158,7 @@ object App extends BasicHtml with TourneySvc
         (ucName, ucParam, ucInfo)
       }
       AppEnv.setStatus(eucName, eucParam, eucInfo)
-      if (ucMap(eucName).sidebar) AppEnv.ctrlSidebar(AppEnv.status)
+      if (ucMap(eucName).sidebar) AppEnv.ctrlSidebar(eucName, tourney.id)
       ucMap(eucName).render(eucParam, eucInfo, reload)
 
     }
@@ -167,34 +167,59 @@ object App extends BasicHtml with TourneySvc
 
   @JSExport
   def playfields(toIdStr: String, language: String, csrfToken: String, lastUpdate: String): Unit = {
-    val toId = toIdStr.toLongOption.getOrElse(0L)
-   
-    println(s"playfields -> toId: ${toIdStr} language: ${language}") 
 
-    AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
-    getTourney(toId).map {
-      case Left(err)    => {
-        println(s"playfields(error) ${getError(err)}")
-        HomeMain.render("Error", getError(err))
-      }  
-      case Right(trny)  => {
-        setLocalTourney(trny)
-        for {
-          msgsLoaded    <- AppEnv.initMessages(lastUpdate, language)
-        } yield { 
-          initTrigger()
-          setHtml(gE("PlayfieldTitle"), getMsg("header.title.playfields", tourney.organizer, tourney.name))
-          setMainContent(clientviews.playfield.html.Fullscreen( tourney.playfields.values.toSeq , AppEnv.msgs).toString)
+    // receiveUpdate - command called from sse - updates fullscreen display
+    def receiveUpdate(e: dom.MessageEvent) = {   
+      debug("receiveUpdate", s"receiveUpdate event: ${e.data.toString}")
+      e.data.toString match {
+        case UpdateTrigger(cmd, caId, toId, coId, coPh, grId) => if (toId == tourney.id && caId != AppEnv.callerId) cmd match {
+          case "PLAYFIELD" => syncPlayfields map {
+            case Left(err)   => error("syncPlayfields", getError(err))
+            case Right(res)  => {
+              val pf     = tourney.playfields.values.filter(_.coCode != (0L,0)).toSeq
+              val pfInfo = tourney.playfields.values.filter(_.coCode == (0L,0)).toSeq
+              setMainContent(clientviews.playfield.html.Fullscreen(pf, pfInfo, AppEnv.msgs))
+            }
+          }
+          case _           => debug("receiveUpdate", s"invalid trigger cmd: ${cmd}  toId: ${toId} caId: ${caId} coPh: ${coPh}")
+        } else                debug("receiveUpdate", s"invalid trigger check toId: ${toId} and caId: ${caId}")
+        case _             => error("receiveUpdate", s"invalid trigger: ${e.data.toString}")
+      }
+    }
+    
+    val date = new js.Date
+
+    println(s"START: playfields -> toId: ${toIdStr} language: ${language}")
+    AppEnv.callerId = CallerIdent(date.getTime.toString.takeRight(6))
+    val toId = toIdStr.toLongOption.getOrElse(0L)
+    if (!initTrigger(toId, AppEnv.callerId, receiveUpdate)) println(s"ERROR: initTrigger") else {
+      AppEnv.initMessages(lastUpdate, language) map { _ =>
+        AppEnv.setDebugLevel(getOrDefault(AppEnv.getLocalStorage("AppEnv.LogLevel"), AppEnv.getMessage("config.LogLevel")))
+        getTourney(toId).map {
+          case Left(err)    => println(s"ERROR: getTourney -> ${getError(err)}")
+          case Right(trny)  => {
+            tourney = trny
+            syncPlayfields map {
+              case Left(err)  => println(s"ERROR: syncPlayfields -> ${getError(err)}")
+              case Right(res) => {
+                setHtml(gE("PlayfieldTitle"), getMsg("header.title.playfields", tourney.organizer, tourney.name))
+                val pf     = tourney.playfields.values.filter(_.coCode != (0L,0)).toSeq
+                val pfInfo = tourney.playfields.values.filter(_.coCode == (0L,0)).toSeq
+                setMainContent(clientviews.playfield.html.Fullscreen(pf, pfInfo, AppEnv.msgs))
+              }  
+            }
+          }
         }
       }
     }
   }
 
+
   /** ctrlAccess - returns true if valid access
    * 
    */ 
   def ctrlAccess(ucName: String, ctx: Session): Boolean = {
-    debug("ctrlAccess", s"ucName: ${ucName} ctx: ${ctx.orgId}")
+    //debug("ctrlAccess", s"ucName: ${ucName} ctx: ${ctx.orgId}")
     ucName match {
       case s if s.startsWith("Organize") => ctx.orgId > 0
       case s if s.startsWith("Admin")    => ctx.admin
@@ -209,57 +234,31 @@ object App extends BasicHtml with TourneySvc
    *             if empty then setup new one
    * @param toId tourney identifier to watch for changes
    */ 
-  def initTrigger(): Boolean = {
+  def initTrigger(toId: Long, id: CallerIdent, trigFun:(dom.MessageEvent) => Unit): Boolean = if (toId > 0) {
     import scala.util.Random
     try {
-      //val date = new scala.scalajs.js.Date.now().toString
-      val id = s"${Random.nextInt(90) + 10}${scala.scalajs.js.Date.now()}"
-      AppEnv.setLocalStorage("AppEnv.trigger", id)  
-      val trigCmd = s"/trigger?id=${id}&init=true"
+      val trigCmd = s"/trigger?id=${toId}_${id}"
       if (global.window.EventSource.toString != "undefined") {
         debug("initTrigger", trigCmd)
+        //setup server send events
         var sse = new dom.raw.EventSource(trigCmd)  
-        sse.onmessage = receiveSrvCmd _
+        sse.onmessage = trigFun
         true
-      } else {
-        error("initTrigger", trigCmd)
-        false
-      }
-    } catch { 
-      case e: Throwable => error("initTrigger", s"error: ${e.toString}"); false 
-    }
-  } 
+      } else { error("initTrigger", trigCmd); false }
+    } catch { case e: Throwable => error("initTrigger", s"error: ${e.toString}"); false }
+  } else false
 
-  def setTrigger(toId: Long): Future[Either[Error, Boolean]]= {
-    val id = AppEnv.getLocalStorage("AppEnv.trigger")
-    val path = s"/trigger?id=${id}&toId=${toId}&init=false"
-    Ajax.get(path).map(_.responseText)
-      .map(res => Return.decode2Boolean(res, "setTrigger"))
-      .recover({
-        case dom.ext.AjaxException(req) => Left( Error.decode(req.responseText, s"text: ${req.responseText.take(40)} path: ${path}", "setTrigger") )
-        case _: Throwable               => Left( Error("err0007.ajax.getJson", path, "unspecified exception", "setTrigger") ) 
-      })
-  }  
-
-
- def receivePlayfieldUpdate(e: dom.MessageEvent) = {   
-    e.data.toString match {
-      case UpdateTrigger(cmdName, ident, toId, coId, coph, grId) => if (toId == tourney.getToId) {
-        cmdName match {
-          case "Playfield"     => {
-            for {
-              res     <- updatePlayfield(toId)
-              content  = clientviews.playfield.html.Fullscreen( tourney.playfields.values.toSeq , AppEnv.msgs).toString
-            } yield {
-              setMainContent(content)
-            }
-          }  
-          case _               => debug("receive", s"unknown trigger command: ${e.data.toString}")
-
-        }
-      }  
-    }
-  } 
+  // // setTrigger for a special toId
+  // def setTrigger(toId: Long): Future[Either[Error, Boolean]]= {
+  //   val id = AppEnv.getLocalStorage("AppEnv.trigger")
+  //   val path = s"/trigger?id=${id}&toId=${toId}&init=false"
+  //   Ajax.get(path).map(_.responseText)
+  //     .map(res => Return.decode2Boolean(res, "setTrigger"))
+  //     .recover({
+  //       case dom.ext.AjaxException(req) => Left( Error.decode(req.responseText, s"text: ${req.responseText.take(40)} path: ${path}", "setTrigger") )
+  //       case _: Throwable               => Left( Error("err0007.ajax.getJson", path, "unspecified exception", "setTrigger") ) 
+  //     })
+  // }  
 
 
   def receiveSrvCmd(e: dom.MessageEvent) = {    
@@ -274,8 +273,8 @@ object App extends BasicHtml with TourneySvc
             case "Competition"      => for { x <- updateCompetition(toId)      } yield updViews(updt) 
             case "Club"             => for { x <- updateClub(toId)             } yield updViews(updt) 
             case "Player"           => for { x <- updatePlayer(toId)           } yield updViews(updt) 
-            case "Pant2Comp"        => for { x <- updatePant2Comp(toId) } yield updViews(updt) 
-            case "Playfield"        => for { x <- updatePlayfield(toId)        } yield updViews(updt) 
+            case "Pant2Comp"        => for { x <- updatePant2Comp(toId)        } yield updViews(updt) 
+            case "PLAYFIELD"        => for { x <- updatePlayfield(toId)        } yield updViews(updt) 
             case "CompPhase"        => updateCompPhase(toId, coId, coPh).map { case _ => updViews(updt) }
             case "MatchReset"       => resetResults(coId,coPh); updViews(updt)
             case _                  => debug("receive", s"unknown trigger command: ${e.data.toString}")
@@ -398,14 +397,13 @@ object App extends BasicHtml with TourneySvc
 
   def loadLocalTourney(): Unit = {
     Tourney.decode(AppEnv.getLocalStorage("AppEnv.Tourney")) match {
-      case Left(err) => AppEnv.error(s"loadLocalTourney", getErrStack(err)); setLocalTourney(Tourney.init)
-      case Right(tourney) => AppEnv.setToId(tourney.id)
+      case Left(err)   => AppEnv.error(s"loadLocalTourney", getErrStack(err)); setLocalTourney(Tourney.init)
+      case Right(trny) => tourney = trny
     } 
   }
 
   def setLocalTourney(trny: Tourney): Unit = {
     println(s"setLocalTourney", s"Tourney id: ${trny.id} / ${tourney.id}  name: ${trny.name}")
-    setTrigger(trny.id)
     tourney = trny
     saveLocalTourney(trny)
   }

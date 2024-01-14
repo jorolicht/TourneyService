@@ -161,7 +161,7 @@ class GetActionCtrl @Inject()
       case "getTournBase"   => {
         tourneyDao.findById(toId).map { result => result match {
           case Some(tB) => Ok(tB.encode())
-          case None     => BadRequest( Error("err0133.get.noTourneyFound", toId.toString, "", "getTournBase").encode)
+          case None     => BadRequest( Error("err0133.get.noTourneyFound", toId, "", "getTournBase").encode)
         }} 
       }
 
@@ -194,7 +194,7 @@ class GetActionCtrl @Inject()
 
       case "test"         => Future(Ok(true.toString))
     
-      case _              => Future( BadRequest(Error("err0052.get.unkown",cmd).encode) )
+      case _              => Future( BadRequest(Error("err0052.get.unkown", cmd).encode) )
     }  
   } 
 

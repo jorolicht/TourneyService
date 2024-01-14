@@ -11,13 +11,14 @@ import shared.utils.{ Error, Return }
 case class Playfield(
   nr:        String,          
   used:      Boolean, 
-  startTime: String,  // Format "yyyyMMddhhmmss" 
-  code:      String,  // <coId> <md> <coph> <md> <gamenumber>
+  startTime: String,      // Format "yyyyMMddhhmmss" 
+  coCode:    (Long,Int),  // (<coId>,<coPhIdh>)
+  gameNo:    Int,
   playerA:   String, 
   clubA:     String, 
   playerB:   String, 
   clubB:     String,  
-  pClass:    String, 
+  coInfo:    String, 
   info:      String
 ) {
   def encode = write[Playfield](this)
@@ -26,6 +27,7 @@ case class Playfield(
 object Playfield {
   implicit def rw: RW[Playfield] = macroRW
   def tupled = (this.apply _).tupled
+  def dummy = new Playfield("", false, "19700101000000", (0L,0),0,"","","","","","")
 
   def decode(x: String): Either[Error, Playfield] = {
     try   Right(read[Playfield](x))
@@ -35,38 +37,5 @@ object Playfield {
   def decSeq(pfl: String): Either[Error, Seq[Playfield]] = {  
     try Right(read[Seq[Playfield]](pfl))
     catch { case _: Throwable => Left(Error("err0051.decode.Playfields", pfl.take(20))) }
-  }
-} 
-
-
-/** PfieldInfo - alternative info to set the playfield
-  * 
-  * @param nr
-  * @param used
-  * @param code // <coId> <md> <coph> <md> <gamenumber>
-  * @param coId
-  * @param snoA
-  * @param snoB
-  * @param info
-  */
-case class PfieldInfo(
-  nr:   String, 
-  used: Boolean, 
-  code: String, 
-  coId: Long, 
-  snoA: String, 
-  snoB: String, 
-  info: String
-) {
-  def encode = write[PfieldInfo](this)
-}
-
-object PfieldInfo { 
-  implicit def rw: RW[PfieldInfo] = macroRW
-  def tupled = (this.apply _).tupled
-
-  def decode(x: String): Either[Error, PfieldInfo] = {
-    try Right(read[PfieldInfo](x))
-    catch { case _: Throwable => Left(Error("err0084.decode.PfieldInfo", x)) }
   }
 }

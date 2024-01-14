@@ -13,6 +13,7 @@ case class Error(msgCode:String, var in1:String="", var in2:String="", var callS
 object Error {
   def apply[T](msgCode: String, in: T) = new Error(msgCode, in.toString(), "", "")
   def apply[T,U](msgCode: String, in1: T, in2: U) = new Error(msgCode, in1.toString(), in2.toString(), "")
+  def apply[T,U](msgCode: String, in1: T, in2: U, callStack: String) = new Error(msgCode, in1.toString(), in2.toString(), callStack)
 
   def decode(errTx:String, hint: String="", func: String="_"): Error = {
     try   { val err = errTx.split("\\^"); Error(err(0), err(1), err(2), s"${func}:${err(3)}") }

@@ -341,61 +341,56 @@ class TourneyServiceImpl @Inject()()(  implicit
   def setPlayfield(pf: Playfield)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => Right(trny.setPlayfield(pf))
+      case Right(trny) => {
+        trny.setPlayfield(pf)
+        trigger(tse, "PLAYFIELD")
+        Right({})
+      }  
     } 
+
+  def setPlayfield(coId: Long, coPhId: Int, game: Int, startTime: String)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.setPlayfield(coId, coPhId, game, startTime); trigger(tse, "PLAYFIELD"); Right({})
+    } 
+
 
   /** set/delete sequence of playfield for tourney */
   def setPlayfields(pfs: Seq[Playfield])(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]= 
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => Right(trny.setPlayfields(pfs))
+      case Right(trny) => trny.setPlayfields(pfs); trigger(tse, "PLAYFIELD"); Right({})
+    }  
+  
+
+  /** delete all playfield entries of tourney */
+  def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)   => Left(err)
+      case Right(trny) => trny.delPlayfields(); trigger(tse, "PLAYFIELD"); Right({})
     }  
 
-
-  /** setPfieldInfo
-    * 
-    * @param  pfi playfield information
-    * @param  implicit tse tourney service environment
-    * @return playfield number
-    */
-  def setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = {
-    import java.time.LocalDateTime
-    import java.time.format.DateTimeFormatter
-
+  /** delete a playfield based on playfield number (not secure, as new game could overwrite old entry!)
+   *  or based on it's full specification (competition identifier, competition phase identifier, game number)
+   */
+  def delPlayfield(coId: Long, coPhId: Int, game: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
       case Right(trny) => {
-        if (pfi.used) {
-          val today = LocalDateTime.now()
-          val now = s"${today.format(DateTimeFormatter.ofPattern("yyyyMMddhhmmss"))}"
-          val playerA = trny.players(pfi.snoA.toLong)
-          val playerB = trny.players(pfi.snoB.toLong)
-          val compName = trny.comps(pfi.coId).name
-          val pf = Playfield(pfi.nr, pfi.used, now, pfi.code, playerA.getName(), playerA.getClub(),
-                             playerB.getName(), playerB.getClub(), compName,  pfi.info)
-          // add playfield to the map
-          trny.playfields(pfi.nr) = pf
-        } else {
-          // remove the entry from the map with same code
-          trny.playfields = trny.playfields.filter( _._2.code != pfi.code)
-        }
-        Right({})
-      }
+        val result = trny.delPlayfield(coId, coPhId, game)
+        trigger(tse, "PLAYFIELD")
+        Right(result)
+      }  
     }
-  }
-
-/** delete all playfield entries of tourney */
-def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
-  TIO.getTrny(tse, true).map {
-    case Left(err)   => Left(err)
-    case Right(trny) => Right(trny.delPlayfields())
-  }  
-
-  /** delete a playfield based on its code  */
-  def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
+  
+  def delPlayfield(pfNo: String)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
     TIO.getTrny(tse, true).map {
       case Left(err)   => Left(err)
-      case Right(trny) => Right(trny.delPlayfield(code))
+      case Right(trny) => {
+        val result = trny.delPlayfield(pfNo)
+        trigger(tse, "PLAYFIELD")
+        Right(result)
+      }  
     }
 
 
@@ -514,10 +509,10 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
                            else  Right( trny.cophs((coId, coPhId)).getMatch(gameNo).status )  
     } 
 
-  def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] =
+  def inputMatch(toId: Long, coId: Long, coPhId:Int, gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String, timeStamp: String, overwrite: Boolean=false): Future[Either[Error, List[Int]]] =
     TIO.get(toId).map {
       case Left(err)    => Left(err)
-      case Right(trny)  => trny.inputMatch(coId, coPhId, gameNo, sets, result, info, playfield)
+      case Right(trny)  => trny.inputMatch(coId, coPhId, gameNo, sets, result, info, playfield, timeStamp)
     } 
 
 
@@ -559,10 +554,10 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
           //trny.cophs((ma.coId, ma.coPh)).addMatch(ma, prt)
           
           // delete playfield, ma.playfield contains playfield code
-          trny.playfields = trny.playfields.filter( _._2.code != ma.playfield)
+          trny.delPlayfield(ma.coId, ma.coPhId, ma.gameNo)
           trny.cophs((ma.coId, ma.coPhId)).setModel(ma)
           //logger.info(s"setMatch after: ${trny.cophs}")
-          trigger(trny, trigCmd)
+          trigger(trny.id, trigCmd)
           Right(true)
         } else {
           Right(false)
@@ -584,7 +579,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
             1
           }  
         }  
-        trigger(trny, UpdateTrigger("Match", tse.toId))
+        trigger(trny.id, UpdateTrigger("Match", tse.toId))
         Right(cnt.length)
       }
     }  
@@ -604,7 +599,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
       case Right(trny)  => {
         if (trny.cophs.isDefinedAt((coId, coPhId))) {
           trny.cophs((coId, coPhId)).resetResults()
-          trigger(trny, UpdateTrigger("MatchReset", tse.callerIdent, tse.toId, coId, coPhId, 0))
+          trigger(trny.id, UpdateTrigger("MatchReset", tse.callerIdent, tse.toId, coId, coPhId, 0))
           Right(true)
         } else {
           Right(false)
@@ -654,7 +649,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
       case Right(trny)  => trny.addCompPhase(coId, name) match {
         case Left(err)   => Left(err)
         case Right(coph) => {
-          if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
+          if (tse.trigger) trigger(trny.id, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coph.coId, 0))
           Right(coph)
         }
       }
@@ -666,7 +661,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
       case Right(trny)  => trny.updateCompPhaseStatus(coId, coPhId, status) match {
         case Left(err)   => Left(err)
         case Right(res)  => {
-          if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
+          if (tse.trigger) trigger(trny.id, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
           Right(res)
         }
       }
@@ -702,7 +697,7 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
         } else {
           for ( (key, coph) <- trny.cophs ) if (coph.coId == coId) trny.cophs.remove(key)
         }
-        if (tse.trigger) trigger(trny, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
+        if (tse.trigger) trigger(trny.id, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
         Right(true)
       }
     }     
@@ -885,25 +880,15 @@ def delPlayfields()(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
     }
  
 
-  def trigger(tse: TournSVCEnv, trigCmd: String): Future[Either[Error, Boolean]] = {
+  def trigger(toId: Long, trigger: UpdateTrigger): Unit = {
     import controllers.{ EventActor, ActorRefManager }
-    TIO.getTrny(tse).map {
-      case Left(err)   => Left(err)
-      case Right(trny) => { 
-        logger.info(s"trigger -> orgDir: ${trny.orgDir} id: ${trny.id}  cmd: ${trigCmd}")
-        EventActor.manager ! ActorRefManager.SendMessage(trny.orgDir, trigCmd)
-        Right(true) 
-      } 
-    }
+    logger.info(s"trigger -> toId: ${toId}  trigger: ${trigger}")
+    EventActor.manager ! ActorRefManager.MessageToId(toId, trigger.toString) 
   }
 
-  def trigger(trny: Tourney, trigger: UpdateTrigger): Unit = {
+  def trigger(tse: TournSVCEnv, trigCmd: String): Unit = {
     import controllers.{ EventActor, ActorRefManager }
-    EventActor.manager ! ActorRefManager.SendMessage(trny.orgDir, trigger.toString) 
+    EventActor.manager ! ActorRefManager.MessageToId(tse.toId, UpdateTrigger(trigCmd, tse.callerIdent, tse.toId, 0L, 0, 0).toString)
   }
-  
-  def trigger(orgDir: String, trigger: UpdateTrigger): Unit = {
-    import controllers.{ EventActor, ActorRefManager }
-    EventActor.manager ! ActorRefManager.SendMessage(orgDir, trigger.toString) 
-  }
+
 }

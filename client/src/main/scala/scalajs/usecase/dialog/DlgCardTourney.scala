@@ -135,8 +135,8 @@ object DlgCardTourney  extends BasicHtml
         case Left(eList) => DlgShowError.show(eList)
         case Right(tb)   => {
           if (!p.isCompleted) p success tb
-          offEvents(gE(uc("Modal")), "hide.bs.modal")
-          doModal(gE(uc("Modal")), "hide")
+          offEvents(gUE("Modal"), "hide.bs.modal")
+          doModal(gUE("Modal"), "hide")
         }  
       }
     }
@@ -146,9 +146,9 @@ object DlgCardTourney  extends BasicHtml
     set(dlgMode, tournBase)
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => cancel())
-    onClick(gE(uc("BtnSave")), (e: Event) => submit(e))
-    doModal(gE(uc("Modal")), "show")
+    onEvents(gUE("Modal"), "hide.bs.modal", () => cancel())
+    onClick(gUE("BtnSave"), (e: Event) => submit(e))
+    doModal(gUE("Modal"), "show")
 
     f.map(Right(_))
      .recover { case e: Exception =>  Left(Error(e.getMessage)) }

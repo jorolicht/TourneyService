@@ -235,7 +235,7 @@ class HomeCtrl @Inject()(
     } else {
       val relfName = genPath("public", "content", p1, p2, p3, p4, p5, p6)
       logger.info(s"content: file not found ($fName)")
-       BadRequest(Error("err0137.user.fileNotFound",relfName).encode)
+       BadRequest(Error("err0137.user.fileNotFound", relfName).encode)
       //Ok("").withCookies(Cookie("TuSeError", tourn.services.Crypto.genErrorCookie(Messages("error.message.fileNotFound",relfName)))).bakeCookies()
     }        
   }
@@ -290,20 +290,14 @@ class HomeCtrl @Inject()(
   /**
     *  trigger - sends a message through server send event mechanism to the client
     */  
-  def trigger(id: String, toId:Long=0L, init:Boolean=false) = Action { implicit request =>
-    if (init) {
-      logger.info(s"initTrigger id:${id}")
-      val source  = Source.actorRef[String](32, OverflowStrategy.dropHead).watchTermination() { 
+  def trigger(id: String) = Action { implicit request =>
+    logger.info(s"initTrigger id:${id}")
+    val source  = Source.actorRef[String](32, OverflowStrategy.dropHead).watchTermination() { 
         case (actorRef, terminate) =>  EventActor.manager ! Register(id, actorRef)
-                                      terminate.onComplete(_ => EventActor.manager ! UnRegister(id, actorRef))
-                                      actorRef
-      }
-      Ok.chunked(source via EventSource.flow).as(ContentTypes.EVENT_STREAM)
-    } else {
-      logger.info(s"setTrigger id:${id} toId:${toId}")
-      EventActor.manager ! RegToId(id, toId)
-      Ok(Return(true).encode)
-    }  
+                                       terminate.onComplete(_ => EventActor.manager ! UnRegister(id, actorRef))
+                                       actorRef
+    }
+    Ok.chunked(source via EventSource.flow).as(ContentTypes.EVENT_STREAM)
   }  
 
   /**
@@ -391,35 +385,30 @@ class ActorRefManager extends Actor {
   import scala.collection.mutable.HashMap
   
   private val aRefMap = new HashMap[String, ActorRef]
-  private val toIdMap = new HashMap[Long, Set[String]]
 
   def receive = {
     case Register(id, actorRef)   => aRefMap(id) = actorRef
-    case UnRegister(id, actorRef) => {
-      aRefMap.remove(id)
-      //println(s"unregister id: ${id} map: ${toIdMap}")
-    }  
-    case SendMessage(id, message) => if (aRefMap.contains(id)) aRefMap(id) ! message
+    case UnRegister(id, actorRef) => println(s"Message UnRegister id: ${id}") // aRefMap.remove(id); 
+    //case SendMessage(id, message) => if (aRefMap.contains(id)) aRefMap(id) ! message
 
-    case MessageToId(toId, msg)   => toIdMap(toId).foreach( aRefMap(_) ! msg  )
-    case RegToId(id, toId)        => {
-      for ((k,s) <- toIdMap) { toIdMap(k) -= id }
-      if (toId != 0) {
-        if (!toIdMap.isDefinedAt(toId)) toIdMap(toId) = Set.empty[String]
-        toIdMap(toId) += id
-      }  
-      //println(s"register: toId:${toId} id: ${id} map: ${toIdMap}")
-    } 
+    case MessageToId(toId, msg)   => {
+      aRefMap.filter( _._1.startsWith(s"${toId}_") ).map {
+        println(s"Message to ${toId} -> ${msg}")
+        _._2 ! msg
+      }
+    }  
+
     case Clean()                    => {
       val curTime = System.currentTimeMillis().toLong
-      for ((k,s) <- toIdMap) { toIdMap(k).foreach { elem => {
-        val diff: Long = (curTime - elem.substring(2).toLong)/1000
-        if (diff > 86400) toIdMap(k) -= elem
-        //println(s"clean: tStamp: ${tStamp} difference: ${(curTime-tStamp)/1000} sec")
-      }}}
-      for ((k,s) <- toIdMap) { if (s.isEmpty) toIdMap.remove(k) } 
-      println(s"clean trigger: curTime: ${curTime} map: ${toIdMap}")
-    }  
+      for ((id, s) <- aRefMap) { 
+        val idParts = id.split("_")
+        if (idParts.size == 3) {
+          val regTime = idParts(2).toLongOption.getOrElse(0L) // register time
+          if ((curTime - regTime) > 36000000) aRefMap -= id
+          println(s"clean trigger: curTime: ${curTime} id: ${id}")
+        }
+      }
+    }
   }
 }
 
@@ -430,7 +419,7 @@ object ActorRefManager {
   case class UnRegister(id: String, actorRef: ActorRef)
 
   case class MessageToId(toId: Long, message: String)
-  case class RegToId(id: String, toId: Long)
+  //case class RegToId(id: String, toId: Long)
   case class Clean()
 }
 

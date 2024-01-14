@@ -329,7 +329,6 @@ trait TourneySvc extends WrapperSvc
     }
 
 
-
   // get competitions based on tourney Id
   def getComps(toId: Long): Future[Either[Error, Seq[Competition]]] = 
     getAction("getComps", toId).map { 
@@ -494,7 +493,6 @@ trait TourneySvc extends WrapperSvc
   //
   //  PLAYFIELD Interface
   //
-
   // set playfield
   def setPlayfield(pf: Playfield): Future[Either[Error, Unit]] = {
     App.tourney.setPlayfield(pf)
@@ -504,17 +502,46 @@ trait TourneySvc extends WrapperSvc
     }
   }  
 
+  def setPlayfield(coId: Long, coPhId: Int, game: Int, startTime: String):  Future[Either[Error, Unit]] = {
+    App.tourney.setPlayfield(coId, coPhId, game, startTime)
+    postAction("setPlayfield", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&game=${game}&startTime=${startTime}", "", true).map {
+      case Left(err)  => Left(err)
+      case Right(res) => Right({})
+    }
+  }
 
   // delete playfield with certain code, return number of deleted entry
-  def delPlayfield(code: String): Future[Either[Error, Boolean]] = {
-    delPlayfield(code)
-    postAction("delPlayfield", App.tourney.id, s"code=${code}","",true).map {
-      case Left(err)  => Left(err.add("delPlayfield"))
-      case Right(res) => Return.decode2Boolean(res, "delPlayfield")
-    } 
-  }  
+  def delPlayfield(coId: Long, coPhId: Int, game: Int): Future[Either[Error, Boolean]] = 
+    if (!App.tourney.delPlayfield(coId, coPhId, game)) Future(Right(false)) else {
+      postAction("delPlayfield", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&game=${game}","",true).map {
+        case Left(err)  => Left(err.add("delPlayfield"))
+        case Right(res) => Return.decode2Boolean(res, "delPlayfield")
+      }
+    }
 
+  // delete playfield with certain code, return number of deleted entry
+  def delPlayfield(pfNo: String): Future[Either[Error, Boolean]] = 
+    if (!App.tourney.delPlayfield(pfNo)) Future(Right(false)) else {
+      postAction("delPlayfield", App.tourney.id, s"pfNo=${pfNo}", "", true).map {
+        case Left(err)  => Left(err.add("delPlayfield"))
+        case Right(res) => Return.decode2Boolean(res, "delPlayfield")
+      }
+    }
 
+  // sync playfield entries
+  def syncPlayfields: Future[Either[Error, Unit]] = 
+    getAction("getPlayfields", App.tourney.id, "").map {
+      case Left(err)     => Left(err)
+      case Right(pfSeq)  => {
+        try {
+          val pfS = read[Seq[Playfield]](pfSeq)
+          App.tourney.playfields = collection.mutable.HashMap( pfS.map { p => { p.nr -> p }} : _*)
+          Right({})
+        } catch { case _:Throwable => Left(Error("???"))}
+      }
+    }
+
+    
   //
   //  PLAYER Interface
   //
@@ -574,12 +601,12 @@ trait TourneySvc extends WrapperSvc
 
 
   // inputMatch - input match result, returns affected game numbers 
-  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String): Future[Either[Error, List[Int]]] = 
+  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String, timeStamp: String): Future[Either[Error, List[Int]]] = 
     if (App.tourney.isDummy) Future(Left(Error("err0227.tourney.isDummy"))) else {
-      App.tourney.inputMatch(coId, coPhId, gameNo, sets, balls, info, playfield) match {
+      App.tourney.inputMatch(coId, coPhId, gameNo, sets, balls, info, playfield, timeStamp) match {
         case Left(err)     => Future(Left(err))
         case Right(result) => if (App.serverLess) Future(Right(result)) else {
-          postAction("inputMatch", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}", 
+          postAction("inputMatch", App.tourney.id, s"coId=${coId}&coPhId=${coPhId}&gameNo=${gameNo}&timeStamp=${timeStamp}", 
                      write[( (Int, Int), String, String, String) ]((sets, balls, info, playfield)), true).map {
             case Left(err)  => Left(err.add("postAction->inputMatch"))
             case Right(res) => {

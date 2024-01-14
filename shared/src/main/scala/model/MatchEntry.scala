@@ -55,7 +55,6 @@ trait MEntry {
     else if (blocked)                                           { setStatus(MEntry.MS_BLOCK) }
     else if (sets==(0,0) & playfield!="")                       { 
                                                                   MEntry.setRunning(this, true)
-                                                                  println(s"Set playfield: ${playfield}") 
                                                                   setStatus(MEntry.MS_RUN)   
                                                                 }
     else if (sets==(0,0) & playfield=="")                       { setStatus(MEntry.MS_READY) }        

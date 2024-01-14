@@ -119,6 +119,8 @@ object Player {
     p.setTTR(ttr.toString)
   }
 
+  def dummy = new Player(0L, 0L, "", "", "", 1970, "", SexTyp.UNKN, "_")
+ 
   def fromCSV(value: String): Either[Error, Player] = 
     try {
       val p = value.split(',')

@@ -47,7 +47,7 @@ case class Tourney(
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
   var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
-  var playfields: Map[String, Playfield]                = Map().withDefaultValue(Playfield("",false,"","","","","","","","")),
+  var playfields: Map[String, Playfield]                = Map().withDefaultValue(Playfield("",false, "", (0L,0), 0, "", "", "", "", "", "")),
   var licenses:   Map[String, String]                   = Map().withDefaultValue("")
 )
 {
@@ -68,16 +68,9 @@ case class Tourney(
   var curCoId:     Long = 0L 
  
   def encode(): String =
-    write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield], Map[String,String])]  ((
-      Tourney.defaultEncodingVersion, 
-      TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
-      players.values.toList, 
-      comps.values.toList, 
-      clubs.values.toList,
-      pl2co.values.toList, 
-      cophs.values.map(x => x.toTx()).toList,
-      playfields.values.toList,
-      licenses    
+    write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], Map[String,String])] ((
+      Tourney.defaultEncodingVersion, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
+      players.values.toList, comps.values.toList, clubs.values.toList, pl2co.values.toList, cophs.values.map(x => x.toTx()).toList, licenses    
     ))
 
 
@@ -614,49 +607,102 @@ case class Tourney(
 
 
    // inputMatch - input match result, returns affected game numbers 
-  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String): Either[Error, List[Int]] = 
+  def inputMatch(coId: Long, coPhId: Int, gameNo: Int, sets: (Int,Int), balls: String, info: String, playfield: String, timeStamp: String): Either[Error, List[Int]] = {
     if (!cophs.isDefinedAt((coId, coPhId))) Left(Error("err0253.inputMatch.invalid.param", coId, coPhId)) else {
       val status = cophs((coId, coPhId)).status
       cophs((coId, coPhId)).inputMatch(gameNo, sets, balls, info, playfield) match {
         case Left(err)   => Left(err)
         case Right(list) => {
+          setPlayfield(coId, coPhId, gameNo, timeStamp)
           val changed = !(status == cophs((coId, coPhId)).status)
           if (changed) updateCompStatus(coId)
           Right(list)
         } 
       }  
     }
+}  
+
 
   //***
   // Playfield Routines
   //***
-
   def getPlayfield(pfNo: String): Either[Error, Playfield] = 
-    if (!playfields.contains(pfNo)) Left(Error("err0029.svc.getPlayfield", pfNo)) else {
-      Right(playfields(pfNo))
+    if (!playfields.contains(pfNo)) Left(Error("err0029.svc.getPlayfield", pfNo)) else Right(playfields(pfNo))
+
+  def setPlayfield(coId: Long, coPhId: Int, game: Int, startTime: String): Unit =     
+    if (!cophs.isDefinedAt((coId,coPhId))) println(s"ERROR: couldn't set playfield coId: ${coId} coPhId: ${coPhId} game:${game}") else {
+      getMatch(coId, coPhId, game) match {
+        case Left(err)   => println(s"ERROR: ${err}")
+        case Right(mtch) => if ((mtch.status == MEntry.MS_RUN) && (mtch.playfield != ""))
+          setPlayfield(genPlayfieldFromMatch(mtch, startTime))
+        else  
+          delPlayfield(coId, coPhId, game)
+      }
     }
 
-  def setPlayfield(pf: Playfield): Unit = 
-    if (pf.used) playfields(pf.nr) = pf
-    else {
-      // remove playfield with this code
-      val pfSel = playfields.filter( _._2.code == pf.code)
-      if (pfSel.size > 0) playfields = playfields.filter( _._2.code != pf.code)
-    }
 
+    
+  // set a playfield according to pf.nr   
+  def setPlayfield(pf: Playfield): Unit = if ((pf.used) && (pf.nr != "")) {
+    // delete it first, maybe it's just a changed plafield number ...
+    delPlayfield(pf.coCode._1, pf.coCode._2, pf.gameNo)
+    playfields(pf.nr) = pf
+  }  
+  
   // set/delete sequence of playfield for tourney 
   def setPlayfields(pfs: Seq[Playfield]): Unit = for (pf <- pfs) setPlayfield(pf)
 
+
+  // delete playfield with certain code  
+  def delPlayfield(coId: Long, coPhId: Int, game: Int): Boolean = {
+      // remove playfield with this code
+      val pfSel = playfields.filter( x => x._2.coCode == (coId, coPhId) && x._2.gameNo == game)
+      if (pfSel.size > 0) { playfields -= pfSel.head._1; true } else { false }    
+  }  
+  
+  // delete playfield with playfield number 
+  def delPlayfield(pfNo: String): Boolean = if (playfields.contains(pfNo)) { playfields -= pfNo; true } else false
+
   // delete all playfield entries of tourney 
-  def delPlayfields(): Unit = playfields = Map().withDefaultValue(Playfield("",false,"","","","","","","",""))
+  def delPlayfields(): Unit = playfields = Map().withDefaultValue(Playfield("",false, "", (0L,0), 0, "", "", "", "", "", ""))
 
-  // delete playfield with certain code
-  def delPlayfield(code: String): Boolean =
-    if (playfields.filter( _._2.code == code).size >= 1) {
-      playfields = playfields.filter( _._2.code == code)
-      true
-    } else false
 
+  def genPlayfieldFromInfo(info: String): Playfield = {
+    val infoId = (playfields.filter( _._2.coCode == (0L, 0)).map( _._2.gameNo).toList ++ List(0)).max + 1
+    Playfield(s"Info_${infoId}", true,"",(0L,0), infoId, "","","","","", info)
+  }
+
+  def genPlayfieldFromMatch(mtch: MEntry, startTime: String): Playfield = mtch.coTyp match {
+    case CompTyp.SINGLE => {
+      val playerA = getSinglePlayer(SNO(mtch.stNoA)).getOrElse(Player.dummy)
+      val playerB = getSinglePlayer(SNO(mtch.stNoB)).getOrElse(Player.dummy)
+      Playfield(mtch.getPlayfield, 
+                (mtch.status == MEntry.MS_RUN) && (mtch.playfield != ""), 
+                startTime, (mtch.coId, mtch.coPhId), mtch.gameNo,
+                playerA.getName(), playerA.clubName, playerB.getName(), playerB.clubName, 
+                s"${comps(mtch.coId).name}[${cophs((mtch.coId,mtch.coPhId)).name}]", mtch.info)
+    }
+    case CompTyp.DOUBLE => {
+      val doubleA = getDoublePlayers(SNO(mtch.stNoA)).getOrElse((Player.dummy,Player.dummy))
+      val doubleB = getDoublePlayers(SNO(mtch.stNoB)).getOrElse((Player.dummy,Player.dummy))
+      Playfield(mtch.getPlayfield, 
+                (mtch.status == MEntry.MS_RUN) && (mtch.playfield != ""), 
+                startTime, (mtch.coId, mtch.coPhId), mtch.gameNo,
+                s"${doubleA._1.lastname}/${doubleA._2.lastname}", "",
+                s"${doubleB._1.lastname}/${doubleB._2.lastname}", "", 
+                s"${comps(mtch.coId).name}[${cophs((mtch.coId, mtch.coPhId)).name}]", mtch.info)
+    }
+  }
+
+
+  //***
+  // Match Routines
+  //***
+
+  def getMatch(coId: Long, coPhId: Int, game: Int): Either[Error, MEntry] = 
+    if (!cophs.isDefinedAt((coId,coPhId)) || !cophs((coId,coPhId)).existsMatchNo(game)) Left(Error("err0255.getMatch.invalid.param", s"${coId}/${coPhId}/${game}")) else {
+      Right(cophs((coId,coPhId)).getMatch(game))
+    }
 
 
   //***
@@ -805,8 +851,8 @@ object Tourney {
   def decodeDefault(trnyStr: String): Either[Error, Tourney] = { 
     var decodeStep = 0
     try {
-      val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields, lics) =
-        read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], List[Playfield], Map[String, String])](trnyStr)
+      val (version, tBD, players, comps, clubs, pl2co, cophTx, lics) =
+        read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], Map[String, String])](trnyStr)
 
       decodeStep = 1  
       val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
@@ -818,7 +864,6 @@ object Tourney {
       trny.clubs = collection.mutable.Map(clubs.map(x => (x.id, x)): _*);            decodeStep += 1
       trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*); decodeStep += 1
       trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx(x) ).map(coph => ((coph.coId, coph.coPhId),coph)): _*); decodeStep += 1
-      trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*);  decodeStep += 1
       trny.licenses = lics
 
       trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
@@ -839,7 +884,14 @@ object Tourney {
       for(comp <- trny.comps.values) {   
         trny.comp2id(comp.hash) = comp.id
         if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
-      }   
+      }
+
+      // generate playfield entries
+      for(coph <- trny.cophs.values; m <- coph.matches) {   
+        if (m.status == MEntry.MS_RUN && (m.playfield != "")) trny.playfields(m.playfield) = trny.genPlayfieldFromMatch(m, "")
+      }
+
+      decodeStep += 1
       Right(trny)
     }
     catch { case _: Throwable => Left( Error("err0070.decode.Tourney", decodeStep.toString, trnyStr.take(20), "Tourney.decode") ) }

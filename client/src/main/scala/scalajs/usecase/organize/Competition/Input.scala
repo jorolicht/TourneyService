@@ -70,11 +70,11 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       "BadRequest"
     }
 
-    debug("actionEvent", s"key: ${key} -> ${action}")
+    // debug("actionEvent", s"key: ${key} -> ${action}")
     action match {
 
       case "SaveMatchResult"   => { 
-        val game    = getData(elem, "game", 0)
+        val game    = getData(elem, "game", -1)
         val rowBase = getRowBase(coId, coPhId)
         val row     = getRow(coId, coPhId, game)
         
@@ -94,17 +94,24 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
               case Right(res) => (true, "", res, Error.dummy)
             }
         }
-        if (inputOk) inputMatch(coId, coPhId, game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game)).map {
+        if (inputOk) inputMatch(coId, coPhId, game, sets, balls, getInputInfo(row, game), getInputPlayfield(row, game), getUTCTimestamp).map {
           case Left(err)           => error("actionEvent", s"SaveMatchResult -> inputMatch: ${err}") 
           case Right(gUpdateList)  => for (game <- gUpdateList) setMatchView(App.tourney.cophs((coId, coPhId)), rowBase, game) 
         } else error("actionEvent", s"SaveMatchResult -> input not OK: ${err}")
       }
       
       case "DeleteMatchResult"   => {
-        val rowBase  = getRowBase(coId, coPhId) 
-        resetMatch(coId, coPhId, getData(elem, "game", -1)).map {
+        val rowBase  = getRowBase(coId, coPhId)
+        val game     = getData(elem, "game", -1)
+        resetMatch(coId, coPhId, game).map {
           case Left(err)          => error("actionEvent", s"DeleteMatchResult -> resetMatch: ${err}")
-          case Right(gUpdateList) => for (g <- gUpdateList) setMatchView(App.tourney.cophs((coId, coPhId)), rowBase, g)
+          case Right(gUpdateList) => {
+            App.tourney.delPlayfield(coId, coPhId, game)
+            for (g <- gUpdateList) { 
+              App.tourney.delPlayfield(coId, coPhId, g)
+              setMatchView(App.tourney.cophs((coId, coPhId)), rowBase, g)
+            }
+          }  
         }        
       }
 
@@ -114,7 +121,10 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.getCompPhaseName(coId,coPhId))) {
           resetMatches(coId, coPhId).map {
             case Left(err)          => error("actionEvent", s"DeleteAll -> resetMatches: ${err}")
-            case Right(gUpdateList) => for (g <- gUpdateList) setMatchView(App.tourney.cophs((coId, coPhId)), rowBase, g)
+            case Right(gUpdateList) => for (g <- gUpdateList) {
+              App.tourney.delPlayfield(coId, coPhId, g)
+              setMatchView(App.tourney.cophs((coId, coPhId)), rowBase, g)
+            }  
           } 
         }
       }
@@ -214,7 +224,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }  
 
     if (containsBlank) {
-      Left(Error(""))
+      Left(Error("err0254.ballInput.invalid"))
     } else if (inv.length==0) {
       Right( (inv.toArray, (0,0)) )
     } else {
@@ -236,7 +246,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     
     val contentElement = gE(s"InputContent_${coph.coId}_${coph.coPhId}")
     if (contentElement.innerHTML == "") {
-      debug("setPage", s"Input init: coId: ${coph.coId} coPhId: ${coph.coPhId}")
+      //debug("setPage", s"Input init: coId: ${coph.coId} coPhId: ${coph.coPhId}")
       val size    = coph.size
       val maxRnd  = coph.getMaxRnds
       val winSets = coph.noWinSets
@@ -263,9 +273,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     }  
 
     // update input page 
-    debug("setPage", s"Input update: coId: ${coph.coId} coPhId: ${coph.coPhId}")
-    setVisible(gE(s"InputStartBtn_${coId}_${coPhId}"), coph.status==CompPhaseStatus.AUS) 
-
+    //debug("setPage", s"Input update: coId: ${coph.coId} coPhId: ${coph.coPhId}")
     coph.getTyp match {
       case CompPhaseTyp.GR | CompPhaseTyp.RR  => {
         val matchMap = coph.matches.groupBy(mEntry=>mEntry.round)
@@ -292,6 +300,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     // STATUS dependend settings
     val editible = (coph.status == CompPhaseStatus.EIN | coph.status == CompPhaseStatus.FIN)
     setAttribute(gE(s"Input_${coId}_${coPhId}"), "contenteditable", editible.toString)
+    setVisible(gE(s"InputStartBtn_${coId}_${coPhId}"), coph.status==CompPhaseStatus.AUS)
     setVisible(gE(s"InputDemoBtn_${coId}_${coPhId}"), App.tourney.cophs((coId,coPhId)).demo)
     setDisabled(gE(s"InputDemoBtn_${coId}_${coPhId}"), !editible)
   }
@@ -466,5 +475,13 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
     dom.window.setTimeout(() => { btn.style.backgroundColor=bgC }, 100)
     btn.click()
   }
+
+  // getUTCTimestamp
+  // format: yyyyMMddhhmmss
+    def getUTCTimestamp: String = {
+      val date  = new js.Date()
+      f"${date.getUTCFullYear().toInt}%04d${date.getUTCMonth().toInt+1}%02d${date.getUTCDate().toInt}%02d${date.getUTCHours().toInt}%02d${date.getUTCMinutes().toInt}%02d${date.getUTCSeconds().toInt}%02d"
+    }
+
 
 }

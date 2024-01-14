@@ -21,7 +21,7 @@ import shared.model.Competition._
 import shared.utils.Constants._ 
 import shared.utils.Routines._
 
-import scalajs.usecase.dialog.{ DlgBox, DlgSpinner, DlgPlayfield }
+import scalajs.usecase.dialog.{ DlgBox, DlgSpinner }
 import scalajs.usecase.component._
 import scalajs.service._
 import scalajs._

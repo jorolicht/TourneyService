@@ -303,8 +303,13 @@ organize.playfield.compName                           = Wettbewerb
 organize.playfield.playerA                            = Spieler A
 organize.playfield.playerB                            = Spieler B
 organize.playfield.info                               = Info
+organize.playfield.cmd                                = Aktion
 organize.playfield.noEntry                            = Keine Tischeinträge vorhanden
-organize.playfield.btn.req.fullscreen                 = Wechsel zur Vollbildanzeige
-organize.playfield.btn.req.playfield.edit             = Tischanzeige bearbeiten
+organize.playfield.btn.req.Fullscreen                 = Wechsel zur Vollbildanzeige
+organize.playfield.btn.req.AddInfo                    = Änderung Tischanzeige
 organize.playfield.tableview                          = Tischanzeige
+organize.playfield.hdr.addTourneyInfo                 = Änderung Tischanzeige
+organize.playfield.msg.addTourneyInfo                 = Information zur Tischanzeige hinzufügen
+organize.playfield.plh.addTourneyInfo                 = Tisch 3 bis 6 reserviert für Training
+organize.playfield.noInput                            = ungültige/leere Eingabe
 

@@ -15,12 +15,18 @@
 	  <meta name="author" content="Robert Lichtenegger">
 	  
 	  <title>@msgs.messages("app.title")</title>
-	  <!-- sbAdmin/Bootstrap CSS-->
-	  <link rel="stylesheet" href="@routes.Assets.at("/public", "bootstrap/css/bootstrap.min.css")">
-	  <link rel="stylesheet" href="@routes.Assets.at("/public", "css/font-awesome.min.css")">
-	  <link rel="stylesheet" href="@routes.Assets.at("/public", "css/sb-admin.css")">
-	  <link rel="stylesheet" href="@routes.Assets.at("/public", "css/tuse.css")">	
-	  <link rel="shortcut icon" href="@assetsFinder.path("img/favicon.png")" type="image/png" >
+
+		<!-- update bootstrap  -->
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "bootstrap-4.3.1/css/bootstrap.min.css")'>
+		<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
+	  
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/font-awesome.min.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/sb-admin.css")'>
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/tuse.css")'>
+		<link rel="stylesheet" href='@routes.Assets.at("/public", "css/print.css")' media="print">
+	  <link rel="stylesheet" href='@routes.Assets.at("/public", "css/atom-one-light.css")'>
+	  <link rel="shortcut icon" href='@routes.Assets.at("/public", "img/favicon.png")' type="image/png" >
+
 
 	  @scalajs.html.scripts("client", routes.Assets.at("/public", _).toString, name => getClass.getResource(s"/public/$name") != null)  
 	  
@@ -29,30 +35,21 @@
     
 	  <!-- NAVIGATION -->
 	  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-			
-			<header class="sticky-header">
-		   <div class="container">
-		   
-				<div class="row">
-					<div class="col-1 text-left text-white justify-content-start">
-						<img alt="TT Logo" height="40" width="56" src="@assetsFinder.path("img/logo.png")">
-					</div>
-					<div id="PlayfieldTitle" class="playfieldheader col-10 text-center text-white justify-content-center">
-							Club - Turnier
-					</div>
-					<div  class="col-1">
-						<button id="clock" type="button" class="btn btn-outline-light">Light</button>
-					</div>
-				</div>		   
-		     
-		   </div>
-		  </header>
-
-	    <a class="navbar-brand" href="/"> 
-	      <img alt="TT Logo" height="30" width="46" src="@assetsFinder.path("img/logo.png")">
-	      <span id="header_title"><strong>&nbsp;@msgs.messages("app.header.title")</strong></span>
-	    </a>
-
+			<header class="sticky-header w-100">
+				<div class="d-flex justify-content-between">
+					 <div class="text-left text-white">
+						 <img alt="TT Logo" height="40" width="56" src="@assetsFinder.path("img/logo.png")">
+					 </div>
+ 
+					 <div id='PlayfieldTitle' class="align-self-center text-center text-white">
+						Club - Turnier
+					 </div>
+ 
+					 <div  class="text-left">
+						 <button id="clock" type="button" class="btn btn-outline-light">Light</button>
+					 </div>
+				</div>
+			 </header>
 	  </nav>
 	    
 	  <!-- CONTENT -->

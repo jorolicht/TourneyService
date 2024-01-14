@@ -49,7 +49,7 @@ object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc
             App.tourney.setCurCoId(0)
             App.resetLocalTourney()
             setHeader()
-            AppEnv.ctrlSidebar(AppEnv.status)
+            AppEnv.ctrlSidebar("HomeMain", App.tourney.id)
             setMainContent(clientviews.home.html.Bye(getMsg("bye")).toString) 
           }
         }

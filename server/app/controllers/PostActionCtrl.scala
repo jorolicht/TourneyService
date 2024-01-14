@@ -205,37 +205,45 @@ class PostActionCtrl @Inject()
        *  def setPlayfield(pf: Playfield): Future[Either[Error, Int]]
        */
       case "setPlayfield"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        Playfield.decode(reqData) match {
-          case Left(err)   => Future( BadRequest(err.encode) )
-          case Right(pf)   => tsv.setPlayfield(pf).map {
+        if (pMap.contains("coId")) {
+          // setPlayfield method based on game number (e.g. match)
+          val (coId, coPhId, game, startTime) = (getParam(pMap, "coId", -1L), getParam(pMap, "coPhId", -1), getParam(pMap, "game", -1), getParam(pMap, "startTime", ""))
+          tsv.setPlayfield(coId, coPhId, game, startTime).map {
             case Left(err)  => BadRequest(err.encode)
             case Right(res) => Ok("")
-          }  
+          } 
+        } else {
+          // setPlayfield method with playfield as parameter 
+          Playfield.decode(reqData) match {
+            case Left(err)   => Future( BadRequest(err.encode) )
+            case Right(pf)   => tsv.setPlayfield(pf).map {
+              case Left(err)  => BadRequest(err.encode)
+              case Right(res) => Ok("")
+            }  
+          }
         }
       }   
       
-      
-      /** setPfieldInfo
-       *  setPfieldInfo(pfi: PfieldInfo)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
-       */
-      case "setPfieldInfo"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        PfieldInfo.decode(reqData) match {
-          case Left(err)    => Future(BadRequest(err.encode))
-          case Right(pfi)   => tsv.setPfieldInfo(pfi)(tse).map {
-            case Left(err)     => BadRequest(err.encode)
-            case Right(res)    => Ok("")
-          }
-        }
-      } 
 
       // delete a playfield with code, returns number of deleted fields
       // def delPlayfield(code: String)(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
       case "delPlayfield"    => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
-        tsv.delPlayfield(getParam(param, "code")).map {
-          case Left(err)   => BadRequest(err.encode)
-          case Right(res)  => Ok(Return(res).encode)
+        if (pMap.contains("coId")) {
+          // get parameter for method call
+          val (coId, coPhId, game) = (getParam(pMap, "coId", -1L), getParam(pMap, "coPhId", -1), getParam(pMap, "game", -1))
+          tsv.delPlayfield(coId, coPhId, game).map {
+            case Left(err)   => BadRequest(err.encode)
+            case Right(res)  => Ok(Return(res).encode)
+          }
+        } else {
+          val pfNo = getParam(pMap, "pfNo", "")
+          tsv.delPlayfield(pfNo).map {
+            case Left(err)   => BadRequest(err.encode)
+            case Right(res)  => Ok(Return(res).encode)
+          }
         }
       }  
+
 
       //
       // Tourney POST-Action Routines
@@ -337,7 +345,6 @@ class PostActionCtrl @Inject()
           }       
         }
       }     
-
 
 
       //
@@ -492,9 +499,10 @@ class PostActionCtrl @Inject()
 
       // inputReferee = inputMatch without overwrite functionality
       case "inputReferee" => {
-        val coId   = getParam(pMap, "coId", 0L)
-        val coPhId = getParam(pMap, "coPhId", 0)
-        val gameNo = getParam(pMap, "gameNo", 0)
+        val coId      = getParam(pMap, "coId", 0L)
+        val coPhId    = getParam(pMap, "coPhId", 0)
+        val gameNo    = getParam(pMap, "gameNo", 0)
+        val timeStamp = getParam(pMap, "timeStamp", "19700101000000")
         
         var data: ((Int,Int),String,String,String) =((0,0),"","","")
         try   data = read[( (Int, Int), String, String, String) ](reqData)
@@ -507,7 +515,7 @@ class PostActionCtrl @Inject()
 
         logger.info(s"${cmd}: param: ${sets} ${result} ${info} ${playfield}")
 
-        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, false).map {
+        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, timeStamp, false).map {
           case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
           case Right(gList) => logger.info(s"${cmd}: execution Ok");    Ok( write[List[Int]](gList) )
         }
@@ -518,6 +526,7 @@ class PostActionCtrl @Inject()
         val coId      = getParam(pMap, "coId", 0L)
         val coPhId    = getParam(pMap, "coPhId", 0)
         val gameNo    = getParam(pMap, "gameNo", 0)
+        val timeStamp = getParam(pMap, "timeStamp", "19700101000000")
         val overwrite = getParam(pMap, "overwrite", false)
         
         var data: ((Int,Int),String,String,String) =((0,0),"","","")
@@ -531,7 +540,7 @@ class PostActionCtrl @Inject()
 
         logger.info(s"${cmd}: param: ${sets} ${result} ${info} ${playfield}")
 
-        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, overwrite).map {
+        tsv.inputMatch(toId, coId, coPhId, gameNo, sets, result, info, playfield, timeStamp, overwrite).map {
           case Left(err)    => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
           case Right(gList) => logger.info(s"${cmd}: execution Ok");    Ok( write[List[Int]](gList) )
         }
@@ -583,7 +592,7 @@ class PostActionCtrl @Inject()
       //
       case "error" => {
         logger.error(s"postAction params: ${params}") 
-        Future(BadRequest(Error("err0022.post.decode", params,"","error").encode))
+        Future(BadRequest(Error("err0022.post.decode", params, "", "error").encode))
       }
 
       case "test" => {

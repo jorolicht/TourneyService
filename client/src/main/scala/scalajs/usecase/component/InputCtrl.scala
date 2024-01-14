@@ -88,10 +88,10 @@ object InputCtrl extends BasicHtml with TourneySvc
           // when folded do nothing (usecase "HomeMain", "None")
           if (!node.classList.contains("show")) { 
             val nAttribute = node.getAttribute(s"data-sbredir-${ucName}") 
-            AppEnv.info("eventSidebar", s"ucName: ${ucName} nAttribute: $nAttribute not show/hide") 
+            //AppEnv.info("eventSidebar", s"ucName: ${ucName} nAttribute: $nAttribute not show/hide") 
             nAttribute
           } else{
-            AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir} show")  
+            //AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir} show")  
             ucName
           } 
         } catch  { case _: Throwable => { 
@@ -100,7 +100,7 @@ object InputCtrl extends BasicHtml with TourneySvc
           "HomeMain"  
         }}
       } else {
-        AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir}")  
+        //AppEnv.info("eventSidebar", s"ucName: ${ucName} redirect: ${redir}")  
         ucName
       }
     App.execUseCase(effUcName, effUcParam, effUcInfo)

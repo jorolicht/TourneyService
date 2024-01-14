@@ -594,25 +594,24 @@ def actionAddCoPh(coId: Long): Unit =
     }
   }
 
-  def actionResetInputCoPh(coph: CompPhase) = resetMatches(coph.coId, coph.coPhId) map { case Right(res) => 
-    updViewCoPhContent(coph)
-    updateCompStatus(coph.coId).map {
-      case Left(err)  => error("actionResetInputCoPh", s"updateCompStatus -> ${err}")
-      case Right(res) => saveCompPhase(coph).map {
-        case Left(err)  => error("actionResetInputCoPh", s"saveCompPhase -> ${err}")
-        case Right(res) => App.execUseCase("OrganizeCompetitionInput", "", "")
+  def actionResetInputCoPh(coph: CompPhase) = resetMatches(coph.coId, coph.coPhId) map { 
+    case Left(err)  => error("actionResetInputCoPh", s"resetMatches -> ${err}")
+    case Right(res) => {
+      updViewCoPhContent(coph)
+      updateCompStatus(coph.coId).map {
+        case Left(err)  => error("actionResetInputCoPh", s"updateCompStatus -> ${err}")
+        case Right(res) => saveCompPhase(coph).map {
+          case Left(err)  => error("actionResetInputCoPh", s"saveCompPhase -> ${err}")
+          case Right(res) => App.execUseCase("OrganizeCompetitionInput", "", "")
+        }
       }
-    }
+    }  
   }  
 
-  def actionDeleteCoPh(coph: CompPhase) = 
-    delCompPhase(coph.coId,coph.coPhId) map {
-      case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
-      case Right(res) => render()
-    }
-    
-
-  //ArrayBuffer[(Pant, Boolean)]() 
+  def actionDeleteCoPh(coph: CompPhase) = delCompPhase(coph.coId, coph.coPhId) map {
+    case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
+    case Right(res) => render()
+  }
 
   def actionSortPant(coph: CompPhase, sortTyp: String, direction: String): Unit = {
     import clientviews.organize.competition.CoPhCard

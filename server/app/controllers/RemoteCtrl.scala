@@ -66,10 +66,8 @@ class RemoteCtrl @Inject()
   def trigger(toId: Long, cmd: String) = Action.async { implicit request =>
     val msgs:  Messages  = messagesApi.preferred(request)
     val ctx =  Crypto.getSessionFromCookie(request.cookies.get("TuSe"), msgs)
- 
-    val tse = TournSVCEnv(toId, ctx.orgDir,true)
 
-    tsv.trigger(tse, cmd)
+    tsv.trigger(TournSVCEnv(toId, ctx.orgDir, true), cmd)
     Future(Ok(true.toString))
   } 
 
@@ -503,7 +501,7 @@ class RemoteCtrl @Inject()
     logger.debug(s"setReferee toId:${toId} coId:${coId} coPhId:${coPhId} body:${content}")
 
     if (nonceCalc != nonce) Future(Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap))) else {
-      tsv.inputMatch(toId, coId, coPhId, gameNo, (1,3), "7.6.4.5", "hallo", "33", false).map {
+      tsv.inputMatch(toId, coId, coPhId, gameNo, (1,3), "7.6.4.5", "hallo", "33", "", false).map {
         case Left(err)  =>  Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap)) 
         case Right(res) =>  Ok(views.html.error(Error("err0221.invalidNonce"), lang, langMap)) 
       }
