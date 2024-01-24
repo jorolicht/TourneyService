@@ -14,7 +14,6 @@ import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-//import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
 import org.scalajs.dom                   // from "org.scala-js" %%% "scalajs-dom" % "0.9.3"
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLTableElement
@@ -118,7 +117,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       case "DeleteAll"   => { 
         val rowBase  = getRowBase(coId, coPhId) 
 
-        dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.getCompPhaseName(coId,coPhId))) {
+        dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", App.tourney.getCoPhName(coId,coPhId))) {
           resetMatches(coId, coPhId).map {
             case Left(err)          => error("actionEvent", s"DeleteAll -> resetMatches: ${err}")
             case Right(gUpdateList) => for (g <- gUpdateList) {

@@ -227,6 +227,7 @@ std.btn.delete                                      = LÖSCHEN
 std.btn.update                                      = AKTUALISIERUNG
 std.btn.upload                                      = UPLOAD
 std.btn.download                                    = DOWNLOAD
+std.btn.publish                                     = VERÖFFENTLICHEN
 std.btn.cancel                                      = ABBRUCH
 std.btn.new                                         = NEU
 std.btn.add                                         = HINZUFÜGEN

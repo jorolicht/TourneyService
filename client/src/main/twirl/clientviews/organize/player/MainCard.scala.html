@@ -12,9 +12,8 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(players: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)])(implicit ucc: UseCaseParam)
+@(players: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, String)])(implicit ucc: UseCaseParam)
 @getNameWithClub(name:String,club:String) = @{ s"${name}[${club}]"}
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
 <!-- (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) -->
 

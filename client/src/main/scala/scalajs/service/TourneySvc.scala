@@ -81,8 +81,8 @@ trait TourneySvc extends WrapperSvc
     }
   }
 
-  def genCertFile(orgDir: String, coId: Long, sno: String, certHtml: String): Future[Boolean] = {
-    postJson("/service/genCertFile", s"orgDir=${orgDir}&toId=${App.tourney.id}&coId=${coId}&sno=${sno}", certHtml).map {
+  def genCertFile(orgDir: String, coId: Long, sno: String, tTyp: TourneyTyp.Value, certHtml: String): Future[Boolean] = {
+    postJson("/service/genCertFile", s"orgDir=${orgDir}&toId=${App.tourney.id}&coId=${coId}&sno=${sno}&tTyp=${tTyp.id}", certHtml).map {
       case Left(err)  => false
       case Right(res) => true
     }
@@ -97,10 +97,11 @@ trait TourneySvc extends WrapperSvc
   def printCert(tourney: Tourney, sno: String, coId: Long): Unit = {
     import shared.utils.Constants._
     val coName     = tourney.comps(coId).name
-    val place      = tourney.pl2co((sno,coId)).getPlaceDesc(AppEnv.getMessage _)
+    val place      = tourney.getPantPlace(sno, coId)
     val orgDir     = tourney.orgDir
     val locdate    = AppEnv.getMessage("certificate.locationdate", tourney.address.city, int2date(tourney.startDate, AppEnv.lang))
 
+    println("printCert")
     val (plName, clName) = tourney.comps(coId).typ match {
       case CompTyp.SINGLE => {
         val plId = tourney.pl2co((sno,coId)).getPlayerId
@@ -118,9 +119,11 @@ trait TourneySvc extends WrapperSvc
       orgDir, AppEnv.getMessage("certificate.title", plName), tourney.name, coName, place, plName, clName, locdate, AppEnv.lang
     ).toString
 
-    genCertFile(orgDir, coId, sno, ctext).map { x => {
-       dom.window.location.href = s"/content/clubs/${orgDir}/certs/Certificate_${tourney.id}_${coId}_${sno}.html"
+    println("genCertFile")
 
+    genCertFile(orgDir, coId, sno, tourney.typ, ctext).map { x => {
+       dom.window.open(s"/content/clubs/${orgDir}/certs/Certificate_${tourney.id}_${coId}_${sno}.html", AppEnv.getMessage("app.certificate"))
+      //dom.window.location.href = s"/content/clubs/${orgDir}/certs/Certificate_${tourney.id}_${coId}_${sno}.html"
        //Home.link(s"/content/clubs/${orgDir}/certs/Certificate_${getToId}_${coId}_${sno}.html")
        AppEnv.debug("genCertFile", s"for coId: ${coId} sno: ${sno}")
     }} 
@@ -236,12 +239,24 @@ trait TourneySvc extends WrapperSvc
 
   // get full tourney configuration information
   def getTourney(toId: Long): Future[Either[Error, Tourney]] = {
-    // println(s"getSubResult1: ${scala.scalajs.js.Date.now()}")
-    getAction("getTourney", toId).map {
-      case Left(err)     => Left(err.add("getTourney"))
-      case Right(trnyTx) => Tourney.decode(trnyTx)
-    }
-  }
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    (for {
+      trny  <- EitherT(getAction("getTourney", toId))
+      pfSeq <- EitherT(getAction("getPlayfields", toId, ""))
+    } yield { (trny, pfSeq) }).value.map {
+      case Left(err)    => Left(err)
+      case Right(res)   => Tourney.decode(res._1) match {
+          case Left(err)      => Left(err)
+          case Right(tourney) => try {
+            val pfS = read[Seq[Playfield]](res._2)
+            tourney.playfields = collection.mutable.HashMap( pfS.map { p => { p.nr -> p }} : _*)
+            Right(tourney)
+          } catch { case _: Throwable => Left(Error("err0256.svc.getTourney"))}
+        }  
+      } 
+    } 
 
 
   // get all players of tourney 
@@ -322,7 +337,10 @@ trait TourneySvc extends WrapperSvc
         case Left(err)   => Left(err.add("addComp"))
         case Right(coTx) => Competition.decode(coTx) match {
           case Left(err)      => Left(err)
-          case Right(remComp) => if (locComp.id == remComp.id) Right(remComp) else Left(Error("err0215.sync")) 
+          case Right(remComp) => if (locComp.id == remComp.id) Right(remComp) else 
+            
+            Left(Error("err0215.sync")) 
+            
         }        
 
       }
@@ -345,16 +363,13 @@ trait TourneySvc extends WrapperSvc
     }
 
 
-  // set whole competition
-  def delComp(coId: Long): Future[Either[Error, Boolean]] = {
+  // delte whole competition
+  def delComp(coId: Long): Future[Either[Error, Unit]] = {
     App.tourney.delComp(coId) match {
       case Left(err)  => Future(Left(err))
       case Right(res1) => postAction("delComp", App.tourney.id, s"coId=${coId}", "", true).map {
         case Left(err)   => Left(err)
-        case Right(res2) => Return.decode2Boolean(res2, "delComp") match {
-          case Left(err)   => Left(err)
-          case Right(res3) => if (res1 == res3) Right(res3) else Left(Error("err0215.sync")) 
-        }
+        case Right(res2) => Right({})
       }  
     }
   }
@@ -528,17 +543,16 @@ trait TourneySvc extends WrapperSvc
       }
     }
 
+
   // sync playfield entries
   def syncPlayfields: Future[Either[Error, Unit]] = 
     getAction("getPlayfields", App.tourney.id, "").map {
       case Left(err)     => Left(err)
-      case Right(pfSeq)  => {
-        try {
-          val pfS = read[Seq[Playfield]](pfSeq)
-          App.tourney.playfields = collection.mutable.HashMap( pfS.map { p => { p.nr -> p }} : _*)
-          Right({})
-        } catch { case _:Throwable => Left(Error("???"))}
-      }
+      case Right(pfSeq)  => try {
+        val pfS = read[Seq[Playfield]](pfSeq)
+        App.tourney.playfields = collection.mutable.HashMap( pfS.map { p => { p.nr -> p }} : _*)
+        Right({})
+      } catch { case _:Throwable => Left(Error("err0257.svc.syncPlayfields"))}
     }
 
     
@@ -749,6 +763,16 @@ trait TourneySvc extends WrapperSvc
         case Right(result)   => Right(result)
       }      
     }
+
+
+  //publish competition phase 
+  def pubCompPhase(coId: Long, coPhId: Option[Int]): Future[Either[Error, Unit]] =
+    App.tourney.pubCompPhase(coId, coPhId) match {
+      case Left(err)  => Future(Left(err))
+      case Right(res) => postAction("pubCompPhase", App.tourney.id, s"coId=${coId}", write[Option[Int]](coPhId), true).map {
+        case Left(err)  => Left(err)
+        case Right(res) => Right({})  
+    }}
 
 
   //

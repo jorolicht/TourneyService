@@ -278,7 +278,7 @@ object AddonMain extends TestUseCase("AddonMain")
       case "dialog"    => AddonDialog.execTest(number, toId, plId, param)
       case "coph"      => AddonCompPhase.execTest(number, toId, coId, phase, param)
       case "ctt"       => AddonCtt.execTest(number, param);       Future(false)
-      case "player"    => AddonPlayer.execTest(number, toId, plId, param)
+      case "player"    => AddonPlayer.execTest(number, toId, coId, phase, plId, param)
       case "referee"   => AddonReferee.execTest(number, toId, coId, phase, param)
       case "match"     => AddonMatch.execTest(number, toId, coId, phase, game, param)
       case "download"  => AddonDownload.execTest(number, param);  Future(false)
@@ -415,7 +415,7 @@ object AddonMain extends TestUseCase("AddonMain")
 
     
     if (command != "") {
-      pHistory.insert(0, command)
+      pHistory.insert(0, command.replaceAll(";", " --").replaceAll("="," "))
       if (pHistory.length > maxLen) pHistory.remove(maxLen, 1)
     } 
 

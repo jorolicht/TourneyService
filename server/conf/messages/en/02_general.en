@@ -230,6 +230,7 @@ std.btn.delete                                      = DELETE
 std.btn.update                                      = UPDATE
 std.btn.upload                                      = UPLOAD
 std.btn.download                                    = DOWNLOAD
+std.btn.publish                                     = PUBLISH
 std.btn.new                                         = NEW
 std.btn.add                                         = ADD
 std.btn.cancel                                      = CANCEL

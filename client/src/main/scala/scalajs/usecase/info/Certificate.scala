@@ -31,7 +31,7 @@ object InfoCertificate extends UseCase("InfoCertificate")
 
   def render(ucParam: String = "", ucInfo: String = "", reload: Boolean=false) = {
     debug(s"render", s"param: ${ucParam} ucInfo: ${ucInfo}")
-    setMainContent(clientviews.component.html.CertificateTmpl(viewPlacements).toString)
+    setMainContent(clientviews.component.html.Certificate(viewPlacements(App.tourney)))
   }
 
   // buttonPrintPreview - print certificate preview

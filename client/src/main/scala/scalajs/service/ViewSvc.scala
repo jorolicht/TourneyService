@@ -57,11 +57,11 @@ trait ViewServices {
   /** list all competition and the corresponding players
    *  @return: Seq(CoId, CoName, Seq(Position, PlaceString, PlayerName, ClubName, PlayerIdStr))            
    */
-  def viewPlacements(): Seq[(Long, String, Seq[(Int, String, String, String, String)])] = {
+  def viewPlacements(tourney: Tourney): Seq[(Long, String, Seq[(Int, String, String, String, String)])] = {
 
     def getPlacements(coId: Long, cTyp: CompTyp.Value, tourney: Tourney): Seq[(Int, String, String, String, String)] = {
       (for {
-        (sno_coId, pa2co) <- App.tourney.pl2co
+        (sno_coId, pa2co) <- tourney.pl2co
       } yield {
         //debug(s"viewPlacments: ${sno_coId} ${tourney.comps(sno_coId._2).name}")
         if (sno_coId._2 == coId) {
@@ -76,16 +76,16 @@ trait ViewServices {
                debug(s"viewPlacments4: ${tourney.players(plId).clubName}")
                debug(s"viewPlacments5: ${pa2co.sno}")
                */
-               (pa2co.getPlace()._1, pa2co.getPlaceDesc(AppEnv.getMessage _), 
-                tourney.players(plId).getName(),
-                tourney.players(plId).clubName,
-                pa2co.sno)
+               val pl = pa2co.getPlace()._1
+               if (pl != 0) (pl, tourney.getPantPlace(pa2co.placement), tourney.players(plId).getName(), tourney.players(plId).clubName, pa2co.sno)
+               else (0, "0", "", "", "0")
+
              }
              case CompTyp.DOUBLE | CompTyp.MIXED => {
                pa2co.getDoubleId match {
                  case Left(err) => (0, "0", "", "", "0")
                  case Right(id) => {
-                  (pa2co.getPlace()._1, pa2co.getPlaceDesc(AppEnv.getMessage _), 
+                  (pa2co.getPlace()._1, tourney.getPantPlace(pa2co.placement), 
                     s"${tourney.players(id._1).lastname}/${tourney.players(id._2).lastname}",
                     s"${tourney.players(id._1).clubName}/${tourney.players(id._2).clubName}",
                     pa2co.sno)
@@ -104,11 +104,7 @@ trait ViewServices {
     (for {  
       (coId, comp) <- App.tourney.comps
     } yield { 
-      if (comp.status.equalsTo(CompStatus.ERFIN)) {
-        (coId, comp.name, getPlacements(coId, comp.typ, App.tourney))
-      } else {
-        (coId, comp.name, Seq())
-      }
+      if (comp.getCertCoPhId != None) (coId, comp.name, getPlacements(coId, comp.typ, tourney)) else (coId, comp.name, Seq())
     }).toSeq.filter(_._3.length>0)
   }
 

@@ -35,13 +35,13 @@ import scalajs.{ App }
 object OrganizePlayer extends UseCase("OrganizePlayer")  
   with TourneySvc with ViewServices
 {
-  var player: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)] = Seq()
+  var player: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, String)] = Seq()
   var snoSortDirection = true
 
    /** view4PlayerRegister
    *  returns Sequence of Player (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) 
    */
-  def view4PlayerRegister(): Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)] = {
+  def view4PlayerRegister(): Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, String)] = {
     val tourney = App.tourney
     
     // list for single, double or mixed players
@@ -52,16 +52,16 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
       comp.typ match {
         case CompTyp.SINGLE => {
           val pl1 = tourney.players(p2ce.getPlayerId)
-          (Pant.genSNO(pl1.id, pl1.id), s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, 0L, pl1.getLicense.value)
+          (p2ce.sno, s"${pl1.lastname}, ${pl1.firstname}", pl1.clubName, p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.getLicense.value)
         }
         case CompTyp.DOUBLE | CompTyp.MIXED => p2ce.getDoubleId match {
-          case Left(err) => println(s"ERROR: ${err.toString()}");  ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
+          case Left(err) => println(s"ERROR: ${err.toString()}");  ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", "")
           case Right(id) => {
             val (pl1, pl2) = (tourney.players(id._1), tourney.players(id._2))
-            (Pant.genSNO(pl1.id, pl2.id), s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, pl1.id, pl2.id, "")
+            (p2ce.sno, s"${pl1.lastname}/${pl2.lastname}", s"${pl1.clubName}/${pl2.clubName}", p2ce.status, comp.name, comp.id, comp.typ, comp.status, pl1.email, "")
           }
         }
-        case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", 0L, 0L, "")
+        case _ => ("", "", "", PantStatus.UNKN, "", 0L, CompTyp.Typ, CompStatus.UNKN, "", "")
       }
     }).toSeq
   }
@@ -116,55 +116,55 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   }
 
   def sortByName(): Unit = {
-    toggleSortDirection(gE(uc("SortName")))
+    toggleSortDirection(gUE("SortName"))
     sortStatus(); sortComp(); sortName()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
   def sortByComp(): Unit = {
-    toggleSortDirection(gE(uc("SortComp")))
+    toggleSortDirection(gUE("SortComp"))
     sortName(); sortStatus(); sortComp()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   }  
 
   def sortBySNO(): Unit = {
     val pList = if (snoSortDirection) {
-      player.filter(_._4 >= PantStatus.REGI).sortBy( x => if (x._11 == 0) x._10 else x._10 + 1000000 )
+      player.filter(_._4.equalsTo(PantStatus.REGI, PantStatus.REDY, PantStatus.FINI, PantStatus.PLAY)).sortBy( x => x._7.id.toString + x._1 )
     } else {
-      player.filter(_._4 >= PantStatus.REGI).sortBy( x => if (x._11 == 0) x._10 else x._10 + 1000000 ).reverse    
+      player.filter(_._4.equalsTo(PantStatus.REGI, PantStatus.REDY, PantStatus.FINI, PantStatus.PLAY)).sortBy( x => x._7.id.toString + x._1 ).reverse    
     }
     snoSortDirection = !snoSortDirection
     setContent(clientviews.organize.player.html.ContentCard(pList).toString)
   } 
 
   def sortByStatus(): Unit = {
-    toggleSortDirection(gE(uc("SortStatus")))
+    toggleSortDirection(gUE("SortStatus"))
     sortName(); sortComp(); sortStatus()
     setContent(clientviews.organize.player.html.ContentCard(player).toString)
   } 
 
-  def sortName() = getSortDirection(gE(uc("SortName"))) match {
+  def sortName() = getSortDirection(gUE("SortName")) match {
     case -1 => player = player.sortBy(_._2.toLowerCase).reverse 
     case  1 => player = player.sortBy(_._2.toLowerCase)
     case  _ => {} 
   }
 
-  def sortStatus() = getSortDirection(gE(uc("SortStatus"))) match {
+  def sortStatus() = getSortDirection(gUE("SortStatus")) match {
     case -1 => player = player.sortBy(_._4).reverse 
     case  1 => player = player.sortBy(_._4)
     case  _ => {} 
   }  
 
-  def sortComp() = getSortDirection(gE(uc("SortComp"))) match {
+  def sortComp() = getSortDirection(gUE("SortComp")) match {
     case -1 => player = player.sortBy(_._5).reverse 
     case  1 => player = player.sortBy(_._5)
     case  _ => {} 
   }    
 
   def setContent(content: String) = {
-    val rows = gE(uc("MainCard")).querySelectorAll("tr[data-update]")
+    val rows = gUE("MainCard").querySelectorAll("tr[data-update]")
     rows.map( row => row.parentNode.removeChild(row))
-    gE(uc("PlayerDummy")).asInstanceOf[HTMLTableRowElement].insertAdjacentHTML("afterend", content)
+    gUE("PlayerDummy").asInstanceOf[HTMLTableRowElement].insertAdjacentHTML("afterend", content)
   }
 
   @JSExport
@@ -198,22 +198,22 @@ object OrganizePlayer extends UseCase("OrganizePlayer")
   @JSExport
   def onclickSort(elem: dom.raw.HTMLElement, sortByTyp: String): Unit = {
     import shared.utils.PlayerSortTyp
-    println(s"onclickSort ${sortByTyp}")
+    //println(s"onclickSort ${sortByTyp}")
     PlayerSortTyp(sortByTyp.toIntOption.getOrElse(0)) match {
       case PlayerSortTyp.SNO         => sortBySNO()
       case PlayerSortTyp.Name        => sortByName()
       case PlayerSortTyp.Competition => sortByComp()    
       case PlayerSortTyp.Status      => sortByStatus() 
-      case PlayerSortTyp.UNKNOWN     => println(s"SortBy: unknown")
+      case PlayerSortTyp.UNKNOWN     => println(s"ERROR: SortByTyp unknown")
     }
   } 
 
   @JSExport
   def onclickEdit(elem: dom.raw.HTMLElement): Unit = {
-    val pl1 = getData(elem, "plId1", 0L)
-    val pl2 = getData(elem, "plId2", 0L)
-    println(s"PlayerIds: ${pl1} ${pl2}")
-    DlgCardPlayer.show(pl1, App.tourney)
+    CompTyp(getData(elem, "CompTyp",0)) match {
+      case CompTyp.SINGLE => DlgCardPlayer.show(SNO(getSNO(elem)).getSingleId, App.tourney)
+      case _              => println("ERROR: invalid competition typ couldn't edit player/participant")
+    }
   } 
 
 

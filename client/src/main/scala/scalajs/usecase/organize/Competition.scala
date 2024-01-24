@@ -1,7 +1,7 @@
 package scalajs.usecase.organize
 
-/* DEBUG LINKS
-** http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test%20%2Ds%20coph%20%2Dn%204
+/* DEBUG
+** http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;scope=coph;number=4;toId=186;coId=1
 */
 import scala.collection.mutable.{ ArrayBuffer }
 import scala.concurrent._
@@ -219,6 +219,22 @@ object OrganizeCompetition extends UseCase("OrganizeCompetition")
       case "DeleteCoPh" => App.tourney.getCoPh(App.tourney.getCurCoId, App.tourney.getCurCoPhId) map { coph => {
         dlgCancelOk(getMsg("confirm.delete.hdr"), getMsg("confirm.delete.msg", coph.name)) { actionDeleteCoPh(coph) } 
       }}
+
+      case "CertificateCoPh" => {
+        val (coId, coPhId) = (getCoId(elem), getCoPhId(elem))
+        val compName = App.tourney.getCompName(coId)
+        val coPhName = App.tourney.getCoPhName(coId, coPhId)
+        val fin = if (App.tourney.getCoPhStatus(coId, coPhId) != CompPhaseStatus.FIN) getMsg("dlg.publish.notFinished") else ""
+
+        DlgBox.standard(getMsg("dlg.publish.hdr"), s"${getMsg("dlg.publish.msg", compName, coPhName)} ${fin}", 
+                        Seq("cancel", "reset", "publish"), 0, true).map { _ match {
+          case 1 => {} 
+          case 2 => actionCertificateCoPh(coId, None)
+          case 3 => actionCertificateCoPh(coId, Some(coPhId))
+          case _ => error("CertificateCoPh", "invalid DlgBox result")
+        }}
+      }  
+
 
       case "CollapseCoPh" => App.tourney.getCoPh(App.tourney.getCurCoId, App.tourney.getCurCoPhId) map { coph => {
         updViewCoPhContent(coph) 
@@ -609,6 +625,11 @@ def actionAddCoPh(coId: Long): Unit =
   }  
 
   def actionDeleteCoPh(coph: CompPhase) = delCompPhase(coph.coId, coph.coPhId) map {
+    case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
+    case Right(res) => render()
+  }
+
+  def actionCertificateCoPh(coId: Long, coPhId: Option[Int]) = pubCompPhase(coId, coPhId) map {
     case Left(err)  => DlgInfo.error(gM("msg.error.hdr"), getError(err))
     case Right(res) => render()
   }

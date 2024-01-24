@@ -31,7 +31,7 @@ object OrganizeCertificate extends UseCase("OrganizeCertificate")
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
-    setMainContent(clientviews.component.html.CertificateTmpl(viewPlacements).toString)
+    setMainContent(clientviews.component.html.Certificate(viewPlacements(App.tourney)))
   }
 
 

@@ -223,7 +223,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
   }
 
   def setResultEntries(reEntries: Seq[ResultEntry]) = {
-    for (i <-0 to size-1) results(i).valid = false 
+    for (i <-0 until size) results(i).valid = false 
     for (result <- reEntries) {
       val index = getIndex(result.pos._1, result.pos._2)
       if (result.valid & index >= 0 & index < scala.math.pow(2,rnds).toInt) {
@@ -235,9 +235,11 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
 
 
   def calc() = {
-    for (i <- 0 to size-1) pants(i).setPlace(KoRound.getPlace(rnds, false))
+    for (i <- 0 until size) pants(i).setPlace(KoRound.getPlace(rnds, false))
     for (res <- results) {
       if (res.valid & validSets(res.sets, noWinSets) & sno2pos.isDefinedAt(res.sno._1) & sno2pos.isDefinedAt(res.sno._2)) {
+        // KO: pos._1 = rnd, pos._2 = match number
+        println(s"calc: sno1: ${res.sno._1} sno2: ${res.sno._2} rnd: ${res.pos._1} sets: ${res.sets}")
         pants(sno2pos(res.sno._1)).setPlace(KoRound.getPlace(res.pos._1, res.sets._1 == noWinSets))
         pants(sno2pos(res.sno._2)).setPlace(KoRound.getPlace(res.pos._1, res.sets._2 == noWinSets))
       }
@@ -360,8 +362,9 @@ object KoRound {
       case 3   => if (win) (3,4)   else (5,8)
       case 2   => if (win) (1,2)   else (3,4)
       case 1   => if (win) (1,0)   else (2,0)
-      case 0   => (1,0)
-      case -1  => if (win) (3,0)   else(4,0)
+      case 0   => if (win) (3,0)   else (4,0)
+      // case 0   => (1,0)
+      case -1  => if (win) (3,0)   else (4,0)
     }
   } 
 
@@ -397,37 +400,6 @@ object KoRound {
       Right(kr)
     } catch { case _: Throwable => Left(Error("err0236.decode.koRound")) }
   }
-
-  def fromTx1(tx: KoRoundTx1): Either[Error, KoRound] = {
-    try {
-      val kr = new KoRound(tx.size, tx.name, tx.noWinSets, tx.rnds)
-
-      // add players
-      for ((plentry, count) <- tx.pants.zipWithIndex) {
-        if (count < tx.pants.length) {
-          kr.pants(count) = plentry.toPant()
-          kr.sno2pos += (kr.pants(count).sno -> count) 
-        }  
-      }
-
-      // add matches
-      for (result <- tx.results) {
-        val resEntry = result
-        val index = kr.getIndex(resEntry.pos._1, resEntry.pos._2)
-
-        // calcualte position within array from the result entry
-        // results of ko tree are linearized/flattend 
-        if (resEntry.valid & index >= 0 & index < scala.math.pow(2,kr.rnds).toInt) {
-          kr.results(index) = resEntry
-        }
-      }
-      kr.calc
-      Right(kr)
-    } catch { case _: Throwable => Left(Error("err0236.decode.koRound")) }
-  }
-
-
-
 
 }
 

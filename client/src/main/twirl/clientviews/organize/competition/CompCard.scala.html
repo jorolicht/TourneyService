@@ -14,9 +14,7 @@
  *@
 
 @(compInfos: Seq[(Competition, Int, Int)], selected: Long, lang: String)(implicit ucc: UseCaseParam)
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
 @selRow(value: Boolean) = @{ if(value) Html("class='text-white bg-secondary'") }
-
 
 <table @id("MainTbl") class="table table-sm small table-hover tuse-border">
 	<tbody>
@@ -43,7 +41,7 @@
 			<tr data-coId='@co._1.id' @id(s"${co._1.id}")  @selRow(co._1.id==selected)
 				 @actionEvent("SelectCompetition", "onclick")>  
 				<td class="text-left tuse-height"><strong>@co._1.id</strong</td>
-				<td class="text-left tuse-height">@co._1.genName(msg_)</td>
+				<td class="text-left tuse-height">@co._1.getName(msg_)</td>
 				<td class="text-left tuse-height">@co._1.formatTime(lang)</td>
 				<td class="text-left tuse-height">@co._1.genRange</td>
 				<td @id(s"Counter_${co._1.id}") class="text-center tuse-height">@co._2/@co._3</td>

@@ -443,7 +443,7 @@ class TourneyServiceImpl @Inject()()(  implicit
 
   /** delComp delete one competition 
    */
-  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]] =
+  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] =
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => trny.delComp(coId)
@@ -683,8 +683,7 @@ class TourneyServiceImpl @Inject()()(  implicit
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => trny.setCompPhase(coph)
-    }      
-  
+    } 
 
   /** delCompPhases - reset competition phases  
    */
@@ -692,15 +691,18 @@ class TourneyServiceImpl @Inject()()(  implicit
     TIO.getTrny(tse, true).map {
       case Left(err)    => Left(err)
       case Right(trny)  => {
-        if (coId == 0) {
-          trny.cophs = HashMap()
-        } else {
-          for ( (key, coph) <- trny.cophs ) if (coph.coId == coId) trny.cophs.remove(key)
-        }
+        if (coId == 0) trny.cophs = HashMap()
+        else for ( (key, coph) <- trny.cophs ) if (coph.coId == coId) trny.cophs.remove(key)
         if (tse.trigger) trigger(trny.id, UpdateTrigger("CompPhase", tse.callerIdent, tse.toId, coId, 0))
         Right(true)
       }
     }     
+
+  def pubCompPhase(coId: Long, coPhId: Option[Int])(implicit tse :TournSVCEnv): Future[Either[Error, Unit]] = 
+    TIO.getTrny(tse, true).map {
+      case Left(err)    => Left(err)
+      case Right(trny)  => trny.pubCompPhase(coId, coPhId)
+    }  
 
   
   // 

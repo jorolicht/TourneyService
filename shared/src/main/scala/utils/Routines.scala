@@ -32,8 +32,16 @@ package object Routines {
   def getMDInt(s: String, index: Int):  Int     = try { s.split("·")(index).toInt } catch  { case _: Throwable => 0 }
   def getMDLong(s: String, index: Int): Long    = try { s.split("·")(index).toLong } catch { case _: Throwable => 0L } 
   def getMDBool(s: String, index: Int): Boolean = try { s.split("·")(index).toBoolean } catch { case _: Throwable => false } 
+  def getMDIntOption(s: String, index: Int): Option[Int] = try { s.split("·")(index).toIntOption } catch { case _: Throwable => None } 
 
-  def setMD[U](s: String, value: U, index: Int) : String = {
+
+  def setMDOption[U](s: String, value: Option[U], index: Int): String = 
+    value match {
+      case None         => setMD(s, "?", index) 
+      case Some(uVal)   => setMD(s, uVal, index)  
+    }
+
+  def setMD[U](s: String, value: U, index: Int): String = {
     val sArr   = s.split('·')
     if (index < sArr.length) { 
       sArr(index) = s"${value}"

@@ -8,6 +8,7 @@ import upickle.default.{ReadWriter => RW, macroRW}
 import shared.utils.{ Error, Return }
 import shared.utils.Routines._
 import shared.utils.Constants._
+import shapeless.ops.function
 
 
 /*
@@ -45,7 +46,8 @@ case class Tourney(
   var players:    Map[Long, Player]                     = Map().withDefaultValue(Player(0L, 0L, "","","", 0, "", SexTyp.UNKN, "_")),
   var comps:      Map[Long, Competition]                = Map(),
   var clubs:      Map[Long, Club]                       = Map(),  // clubs map with key (id) 
-  var pl2co:      Map[(String, Long), Pant2Comp]        = Map(),  // registered player in a competition key: (sno, coId)
+  var pl2co:      Map[(String, Long), Pant2Comp]        = Map().withDefaultValue(Pant2Comp("", 0L, "", "", PantStatus.UNKN, "_")), 
+                                                          // registered player in a competition key: (sno, coId)
   var cophs:      Map[(Long, Int), CompPhase]           = Map(),  // map (coId, coPhId)  -> Competition Phase
   var playfields: Map[String, Playfield]                = Map().withDefaultValue(Playfield("",false, "", (0L,0), 0, "", "", "", "", "", "")),
   var licenses:   Map[String, String]                   = Map().withDefaultValue("")
@@ -66,7 +68,10 @@ case class Tourney(
   var backupTime:  Long = 0L
   var writeTime:   Long = 0L  
   var curCoId:     Long = 0L 
- 
+
+  var mfunc: (String, Seq[String])=>String = msgFun
+  def msgFun(code: String, ins: Seq[String]) = { s"${code}->${ins.mkString(",")}" }
+
   def encode(): String =
     write[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx], Map[String,String])] ((
       Tourney.defaultEncodingVersion, TourneyBaseData(id, name, organizer, orgDir, startDate, endDate, ident, typ, privat, contact, address),
@@ -204,14 +209,17 @@ case class Tourney(
   /** delComp - delete competition with id
    * 
    */ 
-  def delComp(coId: Long):Either[Error, Boolean] = {
+  def delComp(coId: Long):Either[Error, Unit] = {
     if (coId == 0) {
       Left(Error("err0014.trny.compNotFound", coId.toString)) 
     } else if (comps.isDefinedAt(coId)) {
       val co = comps(coId)
       if (comp2id.isDefinedAt(co.hash)) comp2id.remove(co.hash)
+      pl2co = pl2co.filter( _._1._2 != coId)
+      cophs = cophs.filter(_._1._1 != coId)
+
       comps.remove(coId)        
-      Right(true)
+      Right({})
     } else {  
       Left(Error("err0014.trny.compNotFound", coId.toString))
     }
@@ -221,23 +229,29 @@ case class Tourney(
     if (comps.isDefinedAt(coId)) { comps(coId).status = status; Right({}) }
     else Left(Error("err0014.trny.compNotFound", coId.toString))
   
-  // update competition status, if changed return true  
-  def updateCompStatus(coId: Long): Either[Error, Boolean] = {
-    if (!comps.isDefinedAt(coId)) Left(Error("err0014.trny.compNotFound", coId)) else {
+  def calcCompStatus(coId: Long): CompStatus.Value = {
+    if (!comps.isDefinedAt(coId)) CompStatus.UNKN else {
       val statusList = (cophs.filter( _._1._1 == coId).values.map { _.status }).toList
       val sizeMap = statusList.groupBy(identity).mapValues(_.size)
       val size = statusList.length
-      val result = if (size == 0)                                                                  CompStatus.READY
-        else if (sizeMap.isDefinedAt(CompPhaseStatus.FIN) && sizeMap(CompPhaseStatus.FIN) == size) CompStatus.FIN
-        else if (sizeMap.isDefinedAt(CompPhaseStatus.EIN) && sizeMap(CompPhaseStatus.EIN) > 0)     CompStatus.RUN
-        else if (sizeMap.isDefinedAt(CompPhaseStatus.AUS) && sizeMap(CompPhaseStatus.AUS) > 0)     CompStatus.RUN
-        else if (sizeMap.isDefinedAt(CompPhaseStatus.CFG) && sizeMap(CompPhaseStatus.CFG) > 0)     CompStatus.CFG
-        else                                                                                       CompStatus.UNKN
+      if (size == 0)                                                                             CompStatus.READY
+      else if (sizeMap.isDefinedAt(CompPhaseStatus.FIN) && sizeMap(CompPhaseStatus.FIN) == size) CompStatus.FIN
+      else if (sizeMap.isDefinedAt(CompPhaseStatus.CFG) && sizeMap(CompPhaseStatus.CFG) > 0)     CompStatus.CFG
+      else if (sizeMap.isDefinedAt(CompPhaseStatus.AUS) && sizeMap(CompPhaseStatus.AUS) > 0)     CompStatus.RUN
+      else if (sizeMap.isDefinedAt(CompPhaseStatus.EIN) && sizeMap(CompPhaseStatus.EIN) > 0)     CompStatus.RUN
+      else                                                                                       CompStatus.UNKN
+    }  
+  }
+
+
+  // update competition status, if changed return true  
+  def updateCompStatus(coId: Long): Either[Error, Boolean] = {
+    if (!comps.isDefinedAt(coId)) Left(Error("err0014.trny.compNotFound", coId)) else {
       // return true if status has changed
+      val result = calcCompStatus(coId)                                                                             
       if (comps(coId).status == result) Right(false) else { comps(coId).status = result; Right(true) }
     }
   }
-
 
   def regSingle(coId: Long, pl: Player, pStatus: PantStatus.Value): Either[Error, SNO] =
     addPlayer(pl) match {
@@ -426,6 +440,17 @@ case class Tourney(
     }      
   }
 
+  def getPantPlace(sno: String, coId: Long): String = getPantPlace(pl2co((sno,coId)).placement)
+  def getPantPlace(placement: String): String = {
+    val placeArr = getMDIntArr(placement)
+    if  ( (placeArr.length==1 && placeArr(0)>0) || (placeArr.length==2 && placeArr(0)>0 && placeArr(0)==placeArr(1)) ) {
+      mfunc("certificate.place.value", Seq(placeArr(0).toString)) 
+    } else if (placeArr.length==2 && placeArr(0)>0 && placeArr(0)!=placeArr(1)) {
+      mfunc("certificate.place.range", Seq(placeArr(0).toString, placeArr(1).toString)) 
+    } else ""
+  }
+
+
   def setPantBulkStatus(coId: Long, pantStatus: List[(String, PantStatus.Value)]):Either[Error, Int] = 
     seqEither(for (p <- pantStatus) yield setPantStatus(coId, SNO(p._1), p._2)) match {
       case Left(err)  => Left(err)
@@ -455,9 +480,9 @@ case class Tourney(
     catch { case _: Throwable => Left(Error("err0174.trny.getDoublePlayer", sno.value)) }
 
 
-  //
+  // ***
   // Competition Phase Routines
-  //
+  // ***
 
   /** getCoPhStatus returns status of the competition phase 
    *  otherwise undefined status
@@ -503,7 +528,7 @@ case class Tourney(
   // get all competition phases (e.g. rounds) that are dependend from this round
   // first filter all relevant cophs and generate dependend list names
   def delCompPhase(coId: Long, coPhId: Int): Either[Error, Unit] = 
-    if (!cophs.contains((coId,coPhId))) Left(Error("err0250.updateCompPhaseStatus.invalid.param",coId)) else {
+    if (!cophs.contains((coId,coPhId))) Left(Error("err0250.updateCompPhaseStatus.invalid.param", coId)) else {
       val cophList = cophs.filter( x => (x._1._1 == coId && x._1._2 != coPhId )).map( _._2)
       val depList = (for (co <- cophList) yield { if (co.baseCoPhId.getOrElse(0) == coPhId) co.name else "" }).filter( _ != "").to(List)
       if (depList.length > 0) Left(Error("err0247.deleteCoPh.notPossible", cophs((coId,coPhId)).name, depList.mkString(" ") ))
@@ -511,7 +536,7 @@ case class Tourney(
     }
 
   def getCoPh(coId: Long, coPhId: Int): Either[Error, CompPhase] = 
-    if ( coId==0 || coPhId == 0 | !cophs.isDefinedAt((coId,coPhId))) {
+    if ( coId==0 || coPhId == 0 || !cophs.isDefinedAt((coId,coPhId))) {
       println(s"ERROR: getCoPh(${coId},${coPhId}) doesn't exist")
       Left(Error("err0237.getCoPh.notFound", coId.toString, coPhId.toString))
     } else {
@@ -528,28 +553,32 @@ case class Tourney(
 
   def delCompPhases(coId: Long, coPhIds: List[Int]) = coPhIds.foreach { coPhId => if (cophs.isDefinedAt((coId, coPhId))) cophs.remove((coId, coPhId)) }
 
-  // def getCompPhaseFollowing(coId: Long, coPhId: Int): List[Int] = {
-  //   var result = scala.collection.mutable.ListBuffer[Int]()
-  //   if (coPhId != 0 & coId != 0) {
-  //     if (cophs.isDefinedAt((coId, coPhId*2)))   result.append(coPhId*2) ++ getCompPhaseFollowing(coId, coPhId*2)
-  //     if (cophs.isDefinedAt((coId, coPhId*2+1))) result.append(coPhId*2+1) ++ getCompPhaseFollowing(coId, coPhId*2+1) 
-  //   }
-  //   result.toList
-  // }  
+  def pubCompPhase(coId: Long, coPhIdOpt: Option[Int]): Either[Error, Unit] = 
+    if (!comps.isDefinedAt(coId)) Left(Error("err0258.pubCompPhase", coId, "?")) else {
+       comps(coId).setCertCoPhId(coPhIdOpt)
+       coPhIdOpt match {
+         case None         => {
+           // reset all placements
+           for ((key, pantElem) <- pl2co) if (key._2 == coId) { pantElem.setPlace((0,0)) }
+           Right({})
+         } 
+         case Some(coPhId) => if (!cophs.isDefinedAt((coId, coPhId))) Left(Error("err0258.pubCompPhase", coId, coPhId)) else {
+           val plm = cophs((coId, coPhId)).getPlacements()
+           for ((key, pantElem) <- pl2co) if (key._2 == coId) { if (plm.isDefinedAt(key._1)) pantElem.setPlace(plm(key._1)) else pantElem.setPlace((0,0)) }
+           Right({})
+         }
+       }  
+    }
 
-  def getCompPhaseNames(coId: Long, coPhIds: List[Int]): List[String] = {
-    for (coPhId <- coPhIds) yield { cophs((coId, coPhId)).name }  
-  } 
 
   def getCoPhNoWinSets(coId: Long, coPhId: Int): Int = {
     if (cophs.isDefinedAt((coId, coPhId))) { cophs((coId, coPhId)).noWinSets }
     else { println(s"ERROR: getCoPhNoWinSets(${coId},${coPhId}) doesn't exist");  0 }
   }
 
-
-  def getCompPhaseName(coId: Long, coPhId: Int): String = {
+  def getCoPhName(coId: Long, coPhId: Int): String = {
     if (cophs.isDefinedAt((coId, coPhId))) { cophs((coId, coPhId)).name }
-    else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "UNKNOWN" }
+    else { println(s"ERROR: getCompPhaseName(${coId},${coPhId}) doesn't exist");  "" }
   }
 
   def getCompPhaseMatches(coId: Long, coPhId: Int): String = {
@@ -561,8 +590,8 @@ case class Tourney(
     val effCoId = if (coId == 0L) curCoId else coId
     //println(s"getCompName ${effCoId} ${coId}  ${fmt}")
     fmt match {
-      case 1 => if (comps.isDefinedAt(effCoId) && effCoId != 0L) s"[${comps(effCoId).name}]" else ""
-      case _ => if (comps.isDefinedAt(effCoId) && effCoId != 0L) comps(effCoId).name else ""
+      case 1 => if (comps.isDefinedAt(effCoId) && effCoId != 0L) s"[${comps(effCoId).getName(mfunc)}]" else ""
+      case _ => if (comps.isDefinedAt(effCoId) && effCoId != 0L) comps(effCoId).getName(mfunc) else ""
     }
   } 
 
@@ -801,51 +830,51 @@ object Tourney {
     val version = if (start >=0 & end >= 2 & start<end) trnyStrStart.slice(start+1,end).trim.toIntOption.getOrElse(0) else 0
     //println(s"Tourney.decode => version: ${version}" )
     version match {
-      case 1 => decodeV1(trnyStr)
+      //case 1 => decodeV1(trnyStr)
       case _ => decodeDefault(trnyStr) // val defaultEncodingVersion: Int = 2
     }
   }
 
 
-  def decodeV1(trnyStr: String): Either[Error, Tourney] = try {
-    val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields, lics) =
-      read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx1], List[Playfield], Map[String, String])](trnyStr)
+  // def decodeV1(trnyStr: String): Either[Error, Tourney] = try {
+  //   val (version, tBD, players, comps, clubs, pl2co, cophTx, playfields, lics) =
+  //     read[(Int, TourneyBaseData, List[Player], List[Competition], List[Club], List[Pant2Comp], List[CompPhaseTx1], List[Playfield], Map[String, String])](trnyStr)
 
-    val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
-                        tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
+  //   val trny = Tourney(tBD.id, tBD.name, tBD.organizer, tBD.orgDir, tBD.startDate, tBD.endDate, 
+  //                       tBD.ident, tBD.typ, tBD.privat, tBD.contact, tBD.address)
 
-    trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)
-    trny.comps = collection.mutable.Map(comps.map(x => (x.id, x)): _*)
-    trny.clubs = collection.mutable.Map(clubs.map(x => (x.id, x)): _*)
-    trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*)
-    trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx1(x)).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
-    trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*)
-    trny.licenses = lics
+  //   trny.players = collection.mutable.Map(players.map(x => (x.id, x)): _*)
+  //   trny.comps = collection.mutable.Map(comps.map(x => (x.id, x)): _*)
+  //   trny.clubs = collection.mutable.Map(clubs.map(x => (x.id, x)): _*)
+  //   trny.pl2co = collection.mutable.Map(pl2co.map(x => ((x.sno, x.coId), x)): _*)
+  //   trny.cophs = collection.mutable.Map(cophTx.map(x => CompPhase.fromTx1(x)).map(coph => ((coph.coId, coph.coPhId),coph)): _*)
+  //   trny.playfields = collection.mutable.Map(playfields.map(x => (x.nr, x)): _*)
+  //   trny.licenses = lics
 
-    // for(license <- licenses) { 
-    //   val key = getMDStr(license, 0)
-    //   if (!trny.licenses.contains(key)) trny.licenses(key) = license
-    // }
+  //   // for(license <- licenses) { 
+  //   //   val key = getMDStr(license, 0)
+  //   //   if (!trny.licenses.contains(key)) trny.licenses(key) = license
+  //   // }
 
-    trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
-    trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
-    trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
-    // create inverse hashtables and maxId entries
-    for(club <- trny.clubs.values) {   
-      trny.club2id(club.hash) = club.id
-      if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
-    }
-    for(pl <- trny.players.values) {   
-      trny.player2id(pl.hash) = pl.id
-      if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
-    }
-    for(comp <- trny.comps.values) {   
-      trny.comp2id(comp.hash) = comp.id
-      if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
-    }   
-    Right(trny)
-  }
-  catch { case _: Throwable => Left( Error("err0070.decode.Tourney", trnyStr.take(20), "", "Tourney.decode") ) }
+  //   trny.club2id   = Map().withDefaultValue(0L)  // club hash -> id
+  //   trny.player2id = Map().withDefaultValue(0L)  // player hash -> id
+  //   trny.comp2id   = Map().withDefaultValue(0L)  // competition hash -> id
+  //   // create inverse hashtables and maxId entries
+  //   for(club <- trny.clubs.values) {   
+  //     trny.club2id(club.hash) = club.id
+  //     if (club.id > trny.clubIdMax) trny.clubIdMax = club.id.toInt
+  //   }
+  //   for(pl <- trny.players.values) {   
+  //     trny.player2id(pl.hash) = pl.id
+  //     if (pl.id > trny.playerIdMax) trny.playerIdMax = pl.id
+  //   }
+  //   for(comp <- trny.comps.values) {   
+  //     trny.comp2id(comp.hash) = comp.id
+  //     if (comp.id > trny.compIdMax) trny.compIdMax = comp.id
+  //   }   
+  //   Right(trny)
+  // }
+  // catch { case _: Throwable => Left( Error("err0070.decode.Tourney", trnyStr.take(20), "", "Tourney.decode") ) }
 
 
   def decodeDefault(trnyStr: String): Either[Error, Tourney] = { 
@@ -902,8 +931,8 @@ object Tourney {
 
 object TourneyTyp extends Enumeration {
   val UNKN = Value(0,  "UNKN")
-  val TT   = Value(1,  "Tabletennis")  // table tennis
-  val SK   = Value(2,  "Shephead")     // Schafkopf
-  val ANY  = Value(99, "ANY")          // waiting list
+  val TT   = Value(1,  "TT")  // table tennis
+  val SK   = Value(2,  "SK")  // Schafkopf
+  val ANY  = Value(99, "ANY") // waiting list
 }
 

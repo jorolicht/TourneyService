@@ -37,7 +37,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
 {
   def render(testCase:String = "", testOption:String = "", reload:Boolean = false) = {}
 
-  def execTest(number: Int, toId: Long, plId: Long, param: String): Future[Boolean] = {
+  def execTest(number: Int, toId: Long, coId: Long, phase: Int, plId: Long, param: String): Future[Boolean] = {
     number match {
       case 0 => test_0(toId, plId)
       case 1 => test_1(toId, plId)
@@ -47,6 +47,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
       case 5 => test_5(toId, plId, param)
       case 6 => test_6(toId, plId)
       case 7 => test_7(param)
+      case 8 => test_8(number, toId, coId)
     }
   }
 
@@ -224,6 +225,28 @@ object AddonPlayer extends UseCase("AddonPlayer")
       println(s"SELECTED: ${res}")
     }
     Future(true)
+  }
+
+  // Test 8 - Player  
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;scope=player;number=8;toId=186;coId=1
+  def test_8(number: Int, toId: Long, coId: Long):Future[Boolean] = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+
+    val test = s"START: Test Player ${number} toId:${toId} coId:${coId}"
+    AddonMain.setOutput(test)
+    (for {
+      valid   <- EitherT(authBasicContext("maria30.lichtenegger@gmail.com", "", "MLich@4530"))
+      result  <- EitherT(App.loadRemoteTourney(toId))
+    } yield { (valid, result) }).value.map {
+      case Left(err)    => AddonMain.setOutput(s"ERROR: load tourney toId:${toId} failed with: ${err.msgCode}"); true
+      case Right(res)   => {
+        App.tourney.setCurCoId(coId)
+        App.execUseCase("OrganizePlayer", "", "")
+        AddonMain.addOutput(s"SUCCESS: Test Player ${number}")
+        true
+      }
+    }
   }
 
 

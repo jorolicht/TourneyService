@@ -238,36 +238,36 @@ object Group {
   }
 
 
-  def fromTx1(grtx: GroupTx1, drawPos: Int = 0): Either[Error, Group] = {
-    var error = Error.dummy
-    try {
-      val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
+  // def fromTx1(grtx: GroupTx1, drawPos: Int = 0): Either[Error, Group] = {
+  //   var error = Error.dummy
+  //   try {
+  //     val gr = new Group(grtx.grId, grtx.size, grtx.quali, grtx.name, grtx.noWinSets)
 
-      // set participants
-      gr.pants  = grtx.pants.map { _.toPant()}
+  //     // set participants
+  //     gr.pants  = grtx.pants.map { _.toPant()}
 
-      // add matches
-      for (resEntry <- grtx.results) {
-        //println(s"Group from Tx: resEntrys: ${resEntry.toString}")
-        if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
-          GroupEntry.fromResultEntry(resEntry, grtx.noWinSets) match {
-            case Left(err)  => error = err
-            case Right(res) => {
-              gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = res
-              gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
-            }  
-          }
-        } 
-      }
+  //     // add matches
+  //     for (resEntry <- grtx.results) {
+  //       //println(s"Group from Tx: resEntrys: ${resEntry.toString}")
+  //       if (resEntry.valid & resEntry.pos._1 > 0 & resEntry.pos._2 > 0 & resEntry.pos._1 <= grtx.size & resEntry.pos._2 <= grtx.size) {
+  //         GroupEntry.fromResultEntry(resEntry, grtx.noWinSets) match {
+  //           case Left(err)  => error = err
+  //           case Right(res) => {
+  //             gr.results(resEntry.pos._1-1)(resEntry.pos._2-1) = res
+  //             gr.results(resEntry.pos._2-1)(resEntry.pos._1-1) = gr.results(resEntry.pos._1-1)(resEntry.pos._2-1).invert
+  //           }  
+  //         }
+  //       } 
+  //     }
 
 
-      gr.drawPos = drawPos
-      gr.genOccuRating
-      gr.calc
+  //     gr.drawPos = drawPos
+  //     gr.genOccuRating
+  //     gr.calc
 
-      Right(gr)
-    } catch { case _: Throwable => Left(error.add("Group.fromTx")) }
-  }
+  //     Right(gr)
+  //   } catch { case _: Throwable => Left(error.add("Group.fromTx")) }
+  // }
 
 
   /** genGrpSplit - check whether the numbers of players can be

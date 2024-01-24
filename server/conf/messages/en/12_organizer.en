@@ -239,7 +239,9 @@ organize.competition.confirm.resetInput.hdr           = Reset Confirmation
 organize.competition.confirm.resetInput.msg           = Delete all results of {0}?
 organize.competition.confirm.delete.hdr               = Deletion Confirmation
 organize.competition.confirm.delete.msg               = Delete round {0}?
-
+organize.competition.dlg.publish.hdr                  = Publish Certificates/Final Results
+organize.competition.dlg.publish.msg                  = Create/publish certificates for {0} based on {1} or delete/reset them?
+organize.competition.dlg.publish.notFinished          = Hint: Round still not finished!
 
 organize.competition.referee.gameNo                   = Game Number
 organize.competition.referee.set1                     = Set 1

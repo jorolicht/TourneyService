@@ -74,6 +74,12 @@ case class Pant2Comp (
     } else ""
   }
 
+  def setPlace(p: (Int, Int)) = {
+    if      (p == (0,0))   placement = "" 
+    else if (p._1 == p._2) placement = s"${p._1}"
+    else                   placement = s"${p._1}·${p._2}"
+  }
+  
   def getPlace(): (Int, Int) = {
     try {
       val placeArr = getMDIntArr(placement)

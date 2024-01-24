@@ -1,6 +1,8 @@
 @*
  * Template Organize Register
- * input Sequence of Player (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) 
+ * input Sequence of Player (sno, name, clubname, status, coName, coId, coTyp, coStatus, email, plId1, plId2, license) 
+ * 
+ * http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;scope=player;number=8;toId=186;coId=1 
  *@
 
 @import shared.utils.PlayerSortTyp
@@ -12,9 +14,8 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(players: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, Long, Long, String)])(implicit ucc: UseCaseParam)
+@(players: Seq[(String, String, String, PantStatus.Value, String, Long, CompTyp.Value, CompStatus.Value, String, String)])(implicit ucc: UseCaseParam)
 @getNameWithClub(name:String,club:String) = @{ s"${name}[${club}]"}
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
 <!-- (sno, name, clubname, status, coName, coId, coTyp, coStatus, email) -->
 @for(player <- players) {	
@@ -24,8 +25,8 @@
 			@if(player._9!="") { <a href="mailto:@player._9"><i class="fa fa-envelope-o"></i></a> }
 		</td>
 		<td class="text-left tuse-height">
-			<a data-plId1='@player._10' data-plId2='@player._11' class="text-dark" href="#" @onclick("Edit")><i class="fa fa-pencil"></i></a>
-			<span @if(player._12!=""){class="playerWithLicense"} >@getNameWithClub(player._2, player._3)</span>
+			<a data-sno='@player._1' data-CompTyp='@player._7.id' class="text-dark" href="#" @onclick("Edit")><i class="fa fa-pencil"></i></a>
+			<span @if(player._10!=""){class="playerWithLicense"} >@getNameWithClub(player._2, player._3)</span>
 		</td>
 		<td class="text-left tuse-height">@player._5</td>
 		<td class="text-right tuse-height">
@@ -34,9 +35,11 @@
 				@button("player.btn.reject","","btn-xs","SetStatus", player._6.toString, player._1, "PLS_RJEC")
 				@button("player.btn.wait","","btn-xs",  "SetStatus", player._6.toString, player._1, "PLS_WAIT")
 			}
-			@if(player._4>=PantStatus.REGI){ 	
+
+			@if(player._4.equalsTo(PantStatus.REGI, PantStatus.REDY, PantStatus.PLAY, PantStatus.FINI)){ 	
 				<input class="form-check-input" type="checkbox" data-coId='@player._6' data-sno='@player._1'
-				@onchange("CheckActiv") @checked(player._4>PantStatus.REGI) @if(player._8>CompStatus.READY){disabled="disabled"}>
+				@onchange("CheckActiv") @checked(player._4.equalsTo(PantStatus.REDY, PantStatus.PLAY, PantStatus.FINI))
+				@enabled(player._8==CompStatus.READY)>
 			}					
 		</td>
 	</tr>		      

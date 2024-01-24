@@ -199,19 +199,15 @@ object App extends BasicHtml with TourneySvc
           case Left(err)    => println(s"ERROR: getTourney -> ${getError(err)}")
           case Right(trny)  => {
             tourney = trny
-            syncPlayfields map {
-              case Left(err)  => println(s"ERROR: syncPlayfields -> ${getError(err)}")
-              case Right(res) => {
-                setHtml(gE("PlayfieldTitle"), getMsg("header.title.playfields", tourney.organizer, tourney.name))
-                val pf     = tourney.playfields.values.filter(_.coCode != (0L,0)).toSeq
-                val pfInfo = tourney.playfields.values.filter(_.coCode == (0L,0)).toSeq
-                setMainContent(clientviews.playfield.html.Fullscreen(pf, pfInfo, AppEnv.msgs))
-              }  
-            }
+            tourney.mfunc = AppEnv.getMessage 
+            setHtml(gE("PlayfieldTitle"), getMsg("header.title.playfields", tourney.organizer, tourney.name))
+            val pf     = tourney.playfields.values.filter(_.coCode != (0L,0)).toSeq
+            val pfInfo = tourney.playfields.values.filter(_.coCode == (0L,0)).toSeq
+            setMainContent(clientviews.playfield.html.Fullscreen(pf, pfInfo, AppEnv.msgs))
           }
         }
-      }
-    }
+      } 
+    } 
   }
 
 
@@ -398,13 +394,17 @@ object App extends BasicHtml with TourneySvc
   def loadLocalTourney(): Unit = {
     Tourney.decode(AppEnv.getLocalStorage("AppEnv.Tourney")) match {
       case Left(err)   => AppEnv.error(s"loadLocalTourney", getErrStack(err)); setLocalTourney(Tourney.init)
-      case Right(trny) => tourney = trny
+      case Right(trny) => {
+        tourney       = trny
+        tourney.mfunc = AppEnv.getMessage
+      }  
     } 
   }
 
   def setLocalTourney(trny: Tourney): Unit = {
-    println(s"setLocalTourney", s"Tourney id: ${trny.id} / ${tourney.id}  name: ${trny.name}")
-    tourney = trny
+    //println(s"setLocalTourney", s"Tourney id: ${trny.id} / ${tourney.id}  name: ${trny.name}")
+    tourney       = trny
+    tourney.mfunc = AppEnv.getMessage 
     saveLocalTourney(trny)
   }
 
@@ -414,6 +414,10 @@ object App extends BasicHtml with TourneySvc
     catch { case _: Throwable => AppEnv.error("saveLocalTourney(error)", "couldn't write to local storage") }    
   }
   
-  def resetLocalTourney(): Unit = { tourney = Tourney.init; saveLocalTourney(tourney) }
+  def resetLocalTourney(): Unit = { 
+    tourney       = Tourney.init
+    tourney.mfunc = AppEnv.getMessage 
+    saveLocalTourney(tourney) 
+  }
 
 }

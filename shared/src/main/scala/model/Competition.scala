@@ -78,6 +78,13 @@ case class Competition(
   def getWebRegister: Boolean  = getMDBool(options,12); def setWebRegister(value:Boolean)   = { options = setMD(options, value, 12) }
   def getCurCoPhId: Int        = getMDInt(options,13);  def setCurCoPhId(value:Int)         = { options = setMD(options, value, 13) }
 
+  // set basis for generating users/participants certificate
+  // NONE         -> no certificates generated so far
+  // Some(coPhId) -> competition phase / round which is basis for placement calculation 
+  def getCertCoPhId = getMDIntOption(options, 14)
+  def setCertCoPhId(value: Option[Int]) = { options = setMDOption(options, value, 14) }
+
+
   // formatTime - depending on local
   // 0 - date and time
   // 1 - date
@@ -124,7 +131,7 @@ case class Competition(
   def getToTTR: String   = if (getRatingUpperLevel>0) "%04d".format(getRatingUpperLevel) else "XXXX"
   
   def getStatusName(mfun:(String, Seq[String])=>String): String = mfun(status.msgCode, Seq())
-  def genName(fun:(String, Seq[String])=>String): String = {
+  def getName(fun:(String, Seq[String])=>String): String = {
     if(name!="") { name } else { s"${getAgeGroup} ${getRatingRemark} ${typ.name(fun)}" }
   }
 

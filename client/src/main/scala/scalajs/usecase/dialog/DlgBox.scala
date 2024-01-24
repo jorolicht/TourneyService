@@ -2,7 +2,6 @@ package scalajs.usecase.dialog
 
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
-//import scala.scalajs.js._
 import scala.scalajs._
 
 import org.querki.jquery._               // from "org.querki" %%% "jquery-facade" % "1.2"
@@ -59,9 +58,9 @@ object DlgBox extends BasicHtml
     setHtml(gUE("Load"), html.DlgBox(header, body, buttons, defaultButton, sameSize))
 
     // register routines for cancel and submit
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
+    onEvents(gUE("Modal"), "hide.bs.modal", () => dialogBoxCancel())
     onClick2("[id^=APP__DlgBox__Click_]", (e: Event) => dialogBoxClick(e))
-    doModal(gE(uc("Modal")), "show")
+    doModal(gUE("Modal"), "show")
     f
   }
 
@@ -88,15 +87,15 @@ object DlgBox extends BasicHtml
       
       if (!p.isCompleted) { 
         p success buNo 
-        offEvents(gE(uc("Modal")), "hide.bs.modal")
-        doModal(gE(uc("Modal")), "hide")
+        offEvents(gUE("Modal"), "hide.bs.modal")
+        doModal(gUE("Modal"), "hide")
       }         
     }
     
     setHtml(gUE("Load"), html.DlgBoxStd(header, body, buttons, defaultButton, true))
-    onEvents(gE(uc("Modal")), "hide.bs.modal", () => dialogBoxCancel())
+    onEvents(gUE("Modal"), "hide.bs.modal", () => dialogBoxCancel())
     onClick2("[id^=APP__DlgBox__Click_]", (e: Event) => dialogBoxClick(e))
-    doModal(gE(uc("Modal")), "show")
+    doModal(gUE("Modal"), "show")
     f
   }
 

@@ -239,6 +239,9 @@ err0252.resetMatch.invalid.param                    = Error in routine resetMatc
 err0253.inputMatch.invalid.param                    = Error in routine inputMatch invalid parameter {0}/{1}
 err0254.ballInput.invalid                           = Ballinput invalid (contains blanks)
 err0255.getMatch.invalid.param                      = Error in routine getMatch invalid parameter {0}
+err0256.svc.getTourney                              = Error in routine getTourney, decode playfield sequence not possible
+err0257.svc.syncPlayfields                          = Error in routine syncPlayfields
+err0258.pubCompPhase                                = Error in routine pubCompPhase, invalid competition {0}/{1}
 
 
 return001.csv.hdr.player                            = CSV header for player

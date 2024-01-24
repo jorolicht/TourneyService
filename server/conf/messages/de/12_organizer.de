@@ -239,6 +239,9 @@ organize.competition.confirm.resetInput.hdr           = Löschbestätigung
 organize.competition.confirm.resetInput.msg           = Alle Ergebniseingaben der {0} löschen?
 organize.competition.confirm.delete.hdr               = Löschbestätigung
 organize.competition.confirm.delete.msg               = Spielrunde {0} löschen?
+organize.competition.dlg.publish.hdr                  = Veröffentlichung Urkunden/Erbebnisse
+organize.competition.dlg.publish.msg                  = Urkunden für {0} auf Basis der {1} erstellen/veröffentlichen oder Veröffentlichung zurücksetzen/löschen?
+organize.competition.dlg.publish.notFinished          = Hinweis: Spielrunde noch nicht beendet!
 
 organize.competition.referee.gameNo                   = Spielnummer
 organize.competition.referee.set1                     = Satz 1

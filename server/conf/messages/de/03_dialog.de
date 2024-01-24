@@ -3,6 +3,8 @@
 ###
 dlg.canceled                                        = Dialog wurde abgebrochen
 dlg.box.cancel                                      = ABBRUCH
+dlg.box.reset                                       = ZURÜCKSETZEN
+dlg.box.publish                                     = VERÖFFENTLICHEN
 dlg.box.update                                      = AKTUALISIERUNG
 dlg.box.new                                         = NEU
 dlg.box.ok                                          = OK

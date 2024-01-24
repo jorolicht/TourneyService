@@ -12,10 +12,6 @@
 @import clientviews.component.input.html.inputCheckbox
 
 @(coph: CompPhase)(implicit ucc: UseCaseParam)
-@enabled(value: Boolean) = @{ if(value) "" else "disabled" } 
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
-@selected(value: Boolean) = @{ if(value) "selected" else "" }  
-
 
 <div class="row m-1 mb-2 pb-2 border-bottom">
   <div class="col-2"><strong>@msg("coph.state.lbl")</strong></div>
@@ -79,6 +75,9 @@
     </div>
   </div>
   <div class="col-auto">@actionButton("DeleteCoPh", "std.btn.delete", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  @if(coph.coPhCfg.equalsTo(CompPhaseCfg.KO, CompPhaseCfg.KO, CompPhaseCfg.SW) && (coph.status==CompPhaseStatus.EIN  || coph.status==CompPhaseStatus.FIN)){
+    <div class="col-auto">@actionButton("CertificateCoPh", "std.btn.publish", "btn btn-outline-secondary btn-xs mr-1", coph.coId, coph.coPhId)</div>
+  }
   <div class="col-auto">@inputCheckbox("DemoBtn", "mb-0", coph.coId, coph.coPhId, coph.demo)</div>
 </div>
 
@@ -148,5 +147,3 @@
     </div>
   </div>
 }
-
-

@@ -8,8 +8,6 @@
 @(coId: Long, players: Seq[(String, String, String, String, String, Int, Int)], editable: Boolean)(implicit ucc: UseCaseParam)
 @getName(fName:String,lName:String) = @{ if(fName!="") s"$lName, $fName" else lName }
 @getYear(year:Int) = @{ if (year==0) "" else year.toString }
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
-@enabled(value: Boolean) = @{ if(value) "" else "disabled" } 
 
 @if(players.isEmpty){
   <div class="alert alert-info text-center mb-0" role="alert">

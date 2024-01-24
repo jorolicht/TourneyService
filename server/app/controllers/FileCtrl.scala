@@ -140,6 +140,9 @@ class FileCtrl @Inject()
    */
   def genCertFile(params: String) = Action.async { implicit request: Request[AnyContent] =>
     import shared.utils.Constants._
+    import tourn.services.Crypto._
+    import cats.data.EitherT
+
     //import java.nio.charset.StandardCharsets
 
     val msgs:   Messages  = messagesApi.preferred(request)
@@ -147,26 +150,45 @@ class FileCtrl @Inject()
     val param   = Crypto.encParam(params)
     val reqdata = request.body.asText.getOrElse("")
 
-    val orgDir  = param("orgDir")
-    val toId    = param("toId").mkString.toLong
-    val coId    = param("coId").mkString.toLong
-    val sno     = param("sno")
+    // val orgDir  = param("orgDir")
+    // val toId    = param("toId").mkString.toLong
+    // val coId    = param("coId").mkString.toLong
+    // val sno     = param("sno")
+    // val tTyp    = param("tTyp")
 
-    logger.info(s"genCertFile (orgDir/toId/coId/sno: ${orgDir}/${toId}/${coId}/${sno})")
+   // verify necessary parameters
+    val (pMap, orgDir, toId, coId, sno, tTyp, valid) = (for {
+      pM       <- encEParam(params)
+      orgDir   <- getEParam(pM, "orgDir")
+      toId     <- getEParam(pM, "toId", 0L)
+      coId     <- getEParam(pM, "coId", 0L)
+      sno      <- getEParam(pM, "sno")
+      tTyp     <- getEParam(pM, "tTyp", 0)
+    } yield { (pM, orgDir, toId, coId, sno, tTyp) }) match {
+      case Left(err)  => (new scala.collection.mutable.HashMap[String, String], "error", 0L, 0L, "", TourneyTyp.UNKN, false)
+      case Right(res) => (res._1, res._2, res._3, res._4, res._5, TourneyTyp(res._6), true)  
+    }
 
-    val contentDir = s"${env.rootPath}${File.separator}public${File.separator}content${File.separator}clubs"
-    val certPic = Paths.get(s"${contentDir}${File.separator}${orgDir}${File.separator}certificate.png")
-    val certDir =  s"${contentDir}${File.separator}${orgDir}${File.separator}certs"
-    val certHtml = s"${certDir}${File.separator}Certificate_${toId}_${coId}_${sno}.html"
+    if (!valid) { 
+      logger.error(s"genCertFile invalid parameter")
+      Future( Ok(Return(false).encode) ) 
+    } else {
+      val contentDir = s"${env.rootPath}${File.separator}public${File.separator}content${File.separator}clubs"
+      val certPic    = Paths.get(s"${contentDir}${File.separator}${orgDir}${File.separator}certificate.png")
+      val certDir    = s"${contentDir}${File.separator}${orgDir}${File.separator}certs"
+      val certHtml   = s"${certDir}${File.separator}Certificate_${toId}_${coId}_${sno}.html"
 
-    if (!Files.exists(certPic)) {
-      val dummyFN = Paths.get(s"${contentDir}${File.separator}dummy${File.separator}certificate.png")
-      Files.copy(dummyFN, certPic, StandardCopyOption.REPLACE_EXISTING)
-    } 
+      // take club specific certificate file else take standard file for this tourney category
+      val certData = if (Files.exists(certPic)) {
+        reqdata.replace("CERTIFICATE_FILE", s"${orgDir}${File.separator}certificate.png")
+      } else {  
+        reqdata.replace("CERTIFICATE_FILE", s"dummy${File.separator}${tTyp.toString}_certificate.png")
+      }  
 
-    if (!Files.exists(Paths.get(certDir))) Files.createDirectories(Paths.get(certDir))
-    Files.write(Paths.get(certHtml), reqdata.getBytes(StandardCharsets.UTF_8))
-    Future( Ok(Return(true).encode) )
+      if (!Files.exists(Paths.get(certDir))) Files.createDirectories(Paths.get(certDir))
+      Files.write(Paths.get(certHtml), certData.getBytes(StandardCharsets.UTF_8))
+      Future( Ok(Return(true).encode) )
+    }  
   }
  
 

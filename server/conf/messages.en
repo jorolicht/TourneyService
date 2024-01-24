@@ -10,8 +10,8 @@ config.cookie.confirmation                          = false
 config.LogLevel                                     = debug
 
 app.mockup                                          = false
-app.version                                         = 2023-08EN160
-app.date                                            = 2023-09-11
+app.version                                         = 2024-01EN170
+app.date                                            = 2024-01-24
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
 app.url.download                                    = https://turnier-service.org/download/
@@ -54,6 +54,9 @@ app.footer.impressum                                = Imprint
 app.footer.dataprotection                           = Data Protection
 app.footer.author                                   = Author: {0}
 app.footer.changedate                               = Last update: {0}
+
+app.certificate                                     = Certificate
+
 
 ###
 # General Labels
@@ -287,6 +290,7 @@ std.btn.delete                                      = DELETE
 std.btn.update                                      = UPDATE
 std.btn.upload                                      = UPLOAD
 std.btn.download                                    = DOWNLOAD
+std.btn.publish                                     = PUBLISH
 std.btn.new                                         = NEW
 std.btn.add                                         = ADD
 std.btn.cancel                                      = CANCEL
@@ -1108,7 +1112,9 @@ organize.competition.confirm.resetInput.hdr           = Reset Confirmation
 organize.competition.confirm.resetInput.msg           = Delete all results of {0}?
 organize.competition.confirm.delete.hdr               = Deletion Confirmation
 organize.competition.confirm.delete.msg               = Delete round {0}?
-
+organize.competition.dlg.publish.hdr                  = Publish Certificates/Final Results
+organize.competition.dlg.publish.msg                  = Create/publish certificates for {0} based on {1} or delete/reset them?
+organize.competition.dlg.publish.notFinished          = Hint: Round still not finished!
 
 organize.competition.referee.gameNo                   = Game Number
 organize.competition.referee.set1                     = Set 1
@@ -1473,6 +1479,9 @@ err0252.resetMatch.invalid.param                    = Error in routine resetMatc
 err0253.inputMatch.invalid.param                    = Error in routine inputMatch invalid parameter {0}/{1}
 err0254.ballInput.invalid                           = Ballinput invalid (contains blanks)
 err0255.getMatch.invalid.param                      = Error in routine getMatch invalid parameter {0}
+err0256.svc.getTourney                              = Error in routine getTourney, decode playfield sequence not possible
+err0257.svc.syncPlayfields                          = Error in routine syncPlayfields
+err0258.pubCompPhase                                = Error in routine pubCompPhase, invalid competition {0}/{1}
 
 
 return001.csv.hdr.player                            = CSV header for player

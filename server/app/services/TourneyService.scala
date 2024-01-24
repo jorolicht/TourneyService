@@ -90,7 +90,7 @@ trait TourneyService {
   def setCompRatingLowLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
   def setCompRatingUpperLevel(coId: Long, level: Int)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
 
-  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Boolean]]
+  def delComp(coId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, Unit]]
   def delComps()(implicit tse :TournSVCEnv): Future[Either[Error, Int]]
 
   def getComp(toId: Long, coId: Long): Future[Either[Error, Competition]]
@@ -120,7 +120,8 @@ trait TourneyService {
   def delCompPhase(coId: Long, coPhId: Int)(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]] 
   def delCompPhases(coId: Long=0)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]
   def updateCompPhaseStatus(coId: Long, coPhId: Int, status: CompPhaseStatus.Value)(implicit tcp :TournSVCEnv): Future[Either[Error, Boolean]]
-   
+  def pubCompPhase(coId: Long, coPhId: Option[Int])(implicit tcp :TournSVCEnv): Future[Either[Error, Unit]]
+
   // Tourney Inteface
   def addTourney(trny: Tourney)(implicit tse :TournSVCEnv): Future[Either[Error, Long]]
   def delTourney(toId: Long)(implicit tse :TournSVCEnv): Future[Either[Error, String]]

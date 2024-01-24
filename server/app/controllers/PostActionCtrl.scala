@@ -398,7 +398,7 @@ class PostActionCtrl @Inject()
       case "delComp"  => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else { 
         tsv.delComp(getParam(pMap, "coId", -1L)).map { 
           case Left(err)   => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
-          case Right(res)  => logger.info(s"${cmd}: execution Ok");    Ok(Return(res).encode)
+          case Right(res)  => logger.info(s"${cmd}: execution Ok");    Ok("")
         }           
       }
 
@@ -436,6 +436,17 @@ class PostActionCtrl @Inject()
           case Right(res) => logger.info(s"${cmd}: execution Ok"); Ok(Return(res).encode)
         }  
       } 
+
+      case "pubCompPhase"   => if (!chkAccess(ctx)) Future(BadRequest(accessError(cmd))) else {
+        val coId               = getParam(pMap, "coId", -1L)
+        val coPhId:Option[Int] = try read[Option[Int]](reqData) catch { case _:Throwable => None }
+
+        tsv.pubCompPhase(coId, coPhId).map { 
+          case Left(err)  => logger.error(s"${cmd}: ${err.encode}" ); BadRequest(err.encode)
+          case Right(res) => logger.info(s"${cmd}: execution Ok"); Ok(Return(res).encode)
+        }  
+      }
+
 
       //
       // PLAYER Routines

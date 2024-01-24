@@ -150,6 +150,9 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
     }
   }
 
+  /** reassignDraw - change draw before starting input
+    * 
+    */
 
   def reassignDraw(reassign: scala.collection.immutable.Map[Int,Int], compTyp: CompTyp.Value): Either[Error, Int] = {
     val pants = ArrayBuffer.fill[Pant](size)(Pant("0", "", "", 0, "", (0,0)))
@@ -851,6 +854,18 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
     Right(true)
   }
 
+  
+  def getPlacements(): Map[String, (Int,Int)] = {
+    val placements = scala.collection.mutable.HashMap[String, (Int,Int)]() 
+    getTyp match { 
+      case CompPhaseTyp.RR  => groups(0).pants.map ( p => placements(p.sno) = p.place)
+      case CompPhaseTyp.KO  => {
+        println("getPlacement ...")
+        ko.pants.map ( p => placements(p.sno) = p.place)
+      }  
+    }
+    placements
+  }
 
   //*****************************************************************************
   // General Routines
@@ -1036,58 +1051,58 @@ object CompPhase {
     } 
   }
 
-  def fromTx1(tx: CompPhaseTx1): CompPhase = {
-    import scala.collection.mutable.ListBuffer
-    import scala.collection.mutable.HashSet
-    import shared.model.Competition._
+  // def fromTx1(tx: CompPhaseTx1): CompPhase = {
+  //   import scala.collection.mutable.ListBuffer
+  //   import scala.collection.mutable.HashSet
+  //   import shared.model.Competition._
 
-    var error = Error.dummy
-    try {
-      val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, CompPhaseCfg(tx.coPhCfg), CompPhaseStatus(tx.status), tx.demo, tx.size, tx.noPlayers, tx.noWinSets, tx.baseCoPh, QualifyTyp(tx.quali) ) 
+  //   var error = Error.dummy
+  //   try {
+  //     val cop = new CompPhase(tx.name, tx.coId, tx.coPhId, CompPhaseCfg(tx.coPhCfg), CompPhaseStatus(tx.status), tx.demo, tx.size, tx.noPlayers, tx.noWinSets, tx.baseCoPh, QualifyTyp(tx.quali) ) 
       
-      cop.candInfo   = tx.candInfo
+  //     cop.candInfo   = tx.candInfo
 
-      // map PantV1 to Pant 
-      cop.candidates = tx.candidates.map { x => (x._1.toPant(x._2), x._3)  }
-      cop.matches    = tx.matches.map(x=>x.decode)
-      cop.mTotal     = cop.matches.size
+  //     // map PantV1 to Pant 
+  //     cop.candidates = tx.candidates.map { x => (x._1.toPant(x._2), x._3)  }
+  //     cop.matches    = tx.matches.map(x=>x.decode)
+  //     cop.mTotal     = cop.matches.size
 
-      val (fin,fix) = cop.matches.foldLeft((0,0))( (x,m) => {
-        val fin = if (m.finished) 1 else 0 
-        val fix = if (m.status == MEntry.MS_FIX) 1 else 0 
-        (x._1 + fin, x._2 + fix)
-      })
-      cop.mFinished = fin
-      cop.mFix      = fix
+  //     val (fin,fix) = cop.matches.foldLeft((0,0))( (x,m) => {
+  //       val fin = if (m.finished) 1 else 0 
+  //       val fix = if (m.status == MEntry.MS_FIX) 1 else 0 
+  //       (x._1 + fin, x._2 + fix)
+  //     })
+  //     cop.mFinished = fin
+  //     cop.mFix      = fix
 
-      cop.getTyp match {
-        case CompPhaseTyp.GR | CompPhaseTyp.RR | CompPhaseTyp.SW => {
-          // setup group with draw position information
-          val lastPos = tx.groups.foldLeft(1){ (pos, g) =>
-            //cop.groups = cop.groups :+ Group.fromTx(g, pos)
-            Group.fromTx1(g, pos) match {
-              case Left(err)  => error = err
-              case Right(grp) => cop.groups = cop.groups :+ grp 
-            }
-            pos + g.size 
-          }
+  //     cop.getTyp match {
+  //       case CompPhaseTyp.GR | CompPhaseTyp.RR | CompPhaseTyp.SW => {
+  //         // setup group with draw position information
+  //         val lastPos = tx.groups.foldLeft(1){ (pos, g) =>
+  //           //cop.groups = cop.groups :+ Group.fromTx(g, pos)
+  //           Group.fromTx1(g, pos) match {
+  //             case Left(err)  => error = err
+  //             case Right(grp) => cop.groups = cop.groups :+ grp 
+  //           }
+  //           pos + g.size 
+  //         }
 
-          val mSize = cop.matches.size
-          // hook for calculation trigger and depend, if not present
-          if (mSize > 0 && !cop.matches(mSize-1).asInstanceOf[MEntryGr].hasDepend) cop.genGrMatchDependencies()
-        }  
-        case CompPhaseTyp.KO  => KoRound.fromTx1(tx.ko) match {
-          case Left(err)      => error = err
-          case Right(koRound) => cop.ko = koRound
-        }
-        case _       => {}
-      }
-      cop
-    } catch { case _: Throwable => 
-      println(s"ERROR: thrown from CompPhase.fromTx ${error.toString}")
-      CompPhase("", 0L, 0, CompPhaseCfg.CFG, CompPhaseStatus.CFG, false, 0, 0, 0)
-    } 
-  }
+  //         val mSize = cop.matches.size
+  //         // hook for calculation trigger and depend, if not present
+  //         if (mSize > 0 && !cop.matches(mSize-1).asInstanceOf[MEntryGr].hasDepend) cop.genGrMatchDependencies()
+  //       }  
+  //       case CompPhaseTyp.KO  => KoRound.fromTx1(tx.ko) match {
+  //         case Left(err)      => error = err
+  //         case Right(koRound) => cop.ko = koRound
+  //       }
+  //       case _       => {}
+  //     }
+  //     cop
+  //   } catch { case _: Throwable => 
+  //     println(s"ERROR: thrown from CompPhase.fromTx ${error.toString}")
+  //     CompPhase("", 0L, 0, CompPhaseCfg.CFG, CompPhaseStatus.CFG, false, 0, 0, 0)
+  //   } 
+  // }
 
 
 
@@ -1142,28 +1157,28 @@ object CompPhaseTx {
 }
 
 
-case class CompPhaseTx1(
-  val name:       String, 
-  val coId:       Long, 
-  val coPhId:     Int,
-  val coPhCfg:    Int,
-  val status:     Int,
-  var demo:       Boolean, 
-  var size:       Int, 
-  val noPlayers:  Int,
-  val noWinSets:  Int,
-  val baseCoPh:   Option[Int],
-  val quali:      Int,
-  val candInfo:   String, 
-  val candidates: ArrayBuffer[(Pant1,String,Boolean)], 
-  val matches:    ArrayBuffer[MEntryTx], 
-  val groups:     ArrayBuffer[GroupTx1],
-  val ko:         KoRoundTx1
-)
+// case class CompPhaseTx1(
+//   val name:       String, 
+//   val coId:       Long, 
+//   val coPhId:     Int,
+//   val coPhCfg:    Int,
+//   val status:     Int,
+//   var demo:       Boolean, 
+//   var size:       Int, 
+//   val noPlayers:  Int,
+//   val noWinSets:  Int,
+//   val baseCoPh:   Option[Int],
+//   val quali:      Int,
+//   val candInfo:   String, 
+//   val candidates: ArrayBuffer[(Pant1,String,Boolean)], 
+//   val matches:    ArrayBuffer[MEntryTx], 
+//   val groups:     ArrayBuffer[GroupTx1],
+//   val ko:         KoRoundTx1
+// )
 
-object CompPhaseTx1 {
-  implicit def rw: RW[CompPhaseTx1] = macroRW 
-}
+// object CompPhaseTx1 {
+//   implicit def rw: RW[CompPhaseTx1] = macroRW 
+// }
 
 
 
@@ -1192,8 +1207,11 @@ object CompPhaseCfg extends Enumeration {
   implicit class CompPhaseCfg(cs: Value) {
     def msgCode  = s"CompPhaseCfg.${cs.toString}"
     def infoCode = s"CompPhaseCfgInfo.${cs.toString}"
+    def equalsTo(compareWith: Value*) = compareWith.contains(cs)
   }  
-} 
+}
+
+
 
 object CompPhaseTyp extends Enumeration {
   val UNKN = Value(-1, "UNKN")

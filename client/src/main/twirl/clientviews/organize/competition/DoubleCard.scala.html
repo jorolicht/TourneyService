@@ -12,7 +12,6 @@
 @(doubles: Seq[(String, String, String, String, String, Int)], editable: Boolean)(implicit ucc: UseCaseParam)
 @getName(fName:String,lName:String) = @{ if(fName!="") s"$lName, $fName" else lName }
 @getYear(year:Int) = @{ if (year==0) "" else year.toString }
-@checked(value: Boolean) = @{ if(value) "checked" else "" } 
 
 @if(doubles.isEmpty){
   <div class="alert alert-info text-center mb-0" role="alert">
@@ -43,7 +42,7 @@
                   @checked(dble._6>0) @if(!editable){disabled="disabled"} >
               </td>  
               <td class="text-right tuse-height">
-                <a data-sno='@dble._1' class="text-dark" href="#" @actionEvent("DeleteParticipant", "onclick")><i class="fa fa-trash"></i></a>
+                <a data-sno='@dble._1' class="text-dark" href="#" @actionEvent("DeletePant", "onclick")><i class="fa fa-trash"></i></a>
               </td>
             </tr> 	      
         }

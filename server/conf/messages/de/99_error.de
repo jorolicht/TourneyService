@@ -239,6 +239,9 @@ err0252.resetMatch.invalid.param                    = Fehler in Routine resetMat
 err0253.inputMatch.invalid.param                    = Fehler in Routine inputMatch ungültige Parameter {0}/{1}
 err0254.ballInput.invalid                           = Balleingabe fehlerhaft (enthält Blanks)
 err0255.getMatch.invalid.param                      = Fehler in Routine getMatch ungültige Parameter {0}
+err0256.svc.getTourney                              = Fehler in Routine getTourney, Dekodierung der Playfield-Struktur nicht möglich
+err0257.svc.syncPlayfields                          = Fehler in Routine syncPlayfields
+err0258.pubCompPhase                                = Fehler in Routine pubCompPhase, ungültige Parameter {0}/{1}
 
 
 return001.csv.hdr.player                            = CSV header for player

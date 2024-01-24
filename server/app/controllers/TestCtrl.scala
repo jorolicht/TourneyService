@@ -64,6 +64,26 @@ class TestCtrl @Inject()(
 
   import shared.utils._
 
+
+  def exec(params: String) = silhouette.UserAwareAction.async { implicit request: Request[AnyContent] =>
+    import tourn.services.Crypto._
+    import upickle.default._
+    import cats.data.EitherT
+
+    def accessError(cmd: String) = Error("err0080.access.invalidRights", "", "", cmd).encode
+    def chkAccess(ctx: shared.utils.Session): Boolean = (ctx.orgId > 0) | !Crypto.accessCtrl
+
+    val msgs: Messages = messagesApi.preferred(request)
+    val ctx     = getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request)) 
+    val param   = encParam(params)
+    val reqData = request.body.asText.getOrElse("")
+
+    Future(Ok(Return(true).encode))
+  }  
+
+
+
+
   /** trigger - triggers connected clients
    * 
    */
@@ -83,29 +103,6 @@ class TestCtrl @Inject()(
     }
     Future(Ok("true"))
   }
-
-  /** run test with name
-    * 
-    * @param name
-    * @param p1
-    * @param p2
-    * @param p3
-    * @param p4
-    * @param p5
-    */
-  def run(name: String, p1: String="", p2: String="", p3: String="", p4: String="", p5: String="") = Action.async { implicit request: Request[AnyContent] =>
-    logger.info(s"run(${name},${p1},${p2},${p3},${p4},${p5})")
-    name match {
-     case "cache"   => test_cache(name, p1, p2, p3)
-     //case "save"    => test_save(name, p1, p2, p3) 
-     case _         => Future(Ok("Test: unknown"))
-
-    }
-  }  
-
-  def errCode(code: String) = Action  { implicit request =>
-    BadRequest(Error("err9999.test", code).encode)
-  }
     
 
   def test_cache(name: String, p1: String="", p2: String="", p3: String="") = {
@@ -120,15 +117,6 @@ class TestCtrl @Inject()(
       case _     => Future(Ok(s"Test ${name} ${p1}: failed"))
     }
   }
-
-  // def test_save(name: String, p1: String="", p2: String="", p3: String="") = {
-  //   logger.info(s"Test ${name}: started") 
-
-  //   tsv.saveTourney(p1.toLong).map {
-  //     case Left(err)  =>
-  //     case Right(res) =>
-  //   } 
-  // }
 
 
   def cmd(toId: Long, coId: Long = 0) = Action.async { implicit request: Request[AnyContent]=>
@@ -158,47 +146,6 @@ class TestCtrl @Inject()(
     EventActor.manager ! SendMessage(s"PF_${toid}", s"Hallo#UPS#${toid}")
     Future(Ok(s"TEST sendMsg"))
   } 
-
-  /*
-  def test_importCtt(toid: Long, orgdir: String)(implicit msgs: Messages) = {
-    val ctt = CttService.load("", TourneyCttTestData1.content)
-    tsv.insert(ctt, orgdir, "TTC FS88").map { res => 
-      if (res > 0) {
-        tsv.setPlayfield(res, Playfield(3,true,0L,"PlayerlA","ClubA","PlayerB","ClubB","Class","Info"))
-        tsv.setPlayfield(res, Playfield(4,true,0L,"PlayerlA4","ClubA","PlayerB","ClubB4","Class","Info4"))
-        tsv.setPlayfield(res, Playfield(5,true,0L,"PlayerlA5","ClubA","PlayerB","ClubB5","Class","Info5"))
-        tsv.setTournAddress(res,shared.model.Address("Turnhalle Lerchenfeld","Deutschland","85356","Freising","Kulturstr. 4"))
-        tsv.setTournContact(res,Contact("Lichtenegger","Josef","+4915100992233","robert.lichtenegger@icloud.com"))
-        Ok(s"TEST import ctt (${res}): OK")
-      } else {
-        Ok(s"TEST import ctt: FAILURE")
-      }
-    }
-  }*/
-
-  /*
-  def test_importCfg(toid: Long, orgdir: String) = {
-    import upickle.default._
-    val titx = read[TourneyTx](TourneyJsonTestData1.content(toid))
-
-    tsv.insert(titx).map { tId => 
-      if (tId > 0) {
-        tsv.setPlayfield(tId, Playfield(3,true,0L,"PlayerlA","ClubA","PlayerB","ClubB","Class","Info"))
-        tsv.setPlayfield(tId, Playfield(4,true,0L,"PlayerlA4","ClubA","PlayerB","ClubB4","Class","Info4"))
-        tsv.setPlayfield(tId, Playfield(5,true,0L,"PlayerlA5","ClubA","PlayerB","ClubB5","Class","Info5"))
-
-        tsv.setCompRatingLowLevel(tId, 2, 1500)
-        tsv.setCompRatingUpperLevel(tId, 2, 1650)
-
-        tsv.setCompRatingLowLevel(tId, 1, 1500)
-        tsv.setCompRatingUpperLevel(tId, 3, 1650)
-
-        Ok(s"TEST import cfg (${tId}): OK")
-      } else {
-        Ok(s"TEST import cfg: FAILURE")
-      }
-    }
-  }  */
 
 
   /**
@@ -243,48 +190,7 @@ class TestCtrl @Inject()(
     }  
     logger.info(s"TestCtrl.base64: ${result}") 
     Ok(result)
-  }  
-
-  def jsonComps(toId: Long) = Action.async { implicit request =>
-    import upickle.default._
-    import upickle.default.{ReadWriter => RW, macroRW}
-    logger.info(s"TestCtrl.jsonComps -> START") 
-    tsv.getComps(toId).map {
-      case Left(err)    => Ok("ERROR")
-      case Right(coSeq) => Ok(write[Seq[Competition]](coSeq)) 
-    }
-  }  
-
-  def setComps() = Action { implicit request =>
-    import upickle.default._
-    import upickle.default.{ReadWriter => RW, macroRW}
-
-    def diff(s1: String, s2: String): List[String] = {
-      s1.lazyZip(s2).collect {
-        case (x, y) if x != y => s"$x != $y"
-      }.toList ++
-        s1.drop(s2.length).map(x => s"$x is undefined") ++
-        s2.drop(s1.length).map(y => s"$y is missing")
-    }    
-
-    val bodyContent: String = request.body.asText.getOrElse("")
-    val x = """
-      [{"id":1,"hashKey":"HCDDDA97D","name":"Herren·A-Klasse·EINZEL","typ":1,"startDate":"20220310#1200","status":-1,"options":"Herren·A-Klasse·0·0·2"},
-       {"id":2,"hashKey":"H9E47F2F9","name":"Herren·B-Klasse·EINZEL","typ":1,"startDate":"20220310#1200","status":-1,"options":"Herren·B-Klasse·0·0·3"}]
-    """ 
-
-    logger.info(s"DIFF: ${diff(x, bodyContent)}")
-
-    try {
-      logger.info(s"BODY: ${bodyContent}")
-      logger.info(s"X   :${x}")
-      val res = read[Seq[Competition]](bodyContent)
-      Ok("OK")
-    } catch { case _: Throwable => {
-      logger.error(s"setComps -> could not decode body")
-      Ok("ERROR")
-    }}
-  }  
+  }
 
   
   /**

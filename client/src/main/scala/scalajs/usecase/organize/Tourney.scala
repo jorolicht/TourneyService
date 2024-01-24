@@ -39,24 +39,24 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
 
   // render view
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
+    debug("render", s"parm: ${param}")
     setMainContent(clientviews.organize.html.Tourney(App.tourney.id))
     update()
   } 
 
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
+    debug("update", s"parm: ${param}")
     getTournBases(AppEnv.getOrgDir).map { 
       case Left(err)    => DlgInfo.show(getMsg("dlg.error"), getError(err), "danger")
       case Right(trnys) => {
         val toId = App.tourney.id
         tournBases = trnys
-        //debug("update", s"TournBases: ${tournBases}")
+        debug("update", s"toId: ${toId} tournBases: ${tournBases}")
         setHtml(gUE("TourneyCard"), html.TourneyCard(toId, trnys))
-
         selTableRow(uc(s"TableRow_${toId}"))
-        setViewTournBase(App.tourney)
       }  
     }
-    OrganizePlayer.setBadge()
+    //OrganizePlayer.setBadge()
   }
 
 
@@ -293,10 +293,5 @@ object OrganizeTourney extends UseCase("OrganizeTourney") with TourneySvc
     $(elem).addClass("text-white").siblings().removeClass("text-white")
   }
 
-  // setViewTournBase set the view of the base part of the tourney
-  def setViewTournBase(trny: Tourney): Unit = {
-    import shared.utils.Routines._
-    collapse("TourneyCard", trny.id == 0)
-  }
 
 }

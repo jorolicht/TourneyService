@@ -16,6 +16,14 @@ case class SNO(value: String) {
   //val SNO_NN  = "99000" 
   //val SNO_MAX = "99999"
 
+
+  def getSingleId: Long = value.toLongOption.getOrElse(0L)
+  def getDoubleId: (Long, Long) = { 
+    val ids = getMDLongArr(value)
+    if (ids.length != 2) (0L,0L) else (ids(0), ids(1))
+  }
+
+
   def getSinglePlayer()(implicit trny: Tourney): Either[Error, Player] = {
     try Right(trny.players(value.toLong))
     catch { case _: Throwable => Left(Error("err0173.trny.getSinglePlayer", value)) }
@@ -116,5 +124,12 @@ object SNO {
   def valid(value: Long): Boolean = {
     (value > 0) && (value < 99500)
   }  
+
+  def getSingleId(value: String): Long = value.toLongOption.getOrElse(0L)
+  def getDoubleId(value: String): (Long, Long) = { 
+    val ids = getMDLongArr(value)
+    if (ids.length != 2) (0L,0L) else (ids(0), ids(1))
+  }
+
 
 }

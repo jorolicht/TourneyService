@@ -21,11 +21,11 @@
         <th class="border-left border-right"></th>
         <th colspan='@{((coph.noWinSets*2)-1)}' class="border-left border-right text-center"><small class='ml-1 mr-1'>@msg("balls")</small></th>
         <th class="border-left border-right font-weight-bold"><small class='ml-1 mr-1'>@msg("sets")</small></th>
-        <th class="text-right">
+        <th class="text-right d-print-none">
           <button id='InputDemoBtn_@{coph.coId}_@{coph.coPhId}' data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
            style='display:none' @actionEvent("Demo", "onclick")>@msg_("std.btn.demo")</button> 
         </th>
-        <th class="text-right">
+        <th class="text-right d-print-none">
           <button data-coId='@coph.coId' data-coPhId='@coph.coPhId' type='button' class='btn btn-outline-secondary btn-xxs ml-1 mr-1'  
            @enabled(coph.status==CompPhaseStatus.EIN || coph.status==CompPhaseStatus.FIN)
            @actionEvent("DeleteAll", "onclick")>&nbsp;&nbsp;<i class="fa fa-trash"></i>&nbsp;&nbsp;</button> 
