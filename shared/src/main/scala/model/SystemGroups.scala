@@ -108,23 +108,23 @@ class Group(val grId: Int, val size: Int, val quali: Int, val name: String, noWi
   def setMatch(m: MEntryGr): Either[shared.utils.Error, Boolean] = { 
     import shared.model.MEntry._
     import shared.utils.Error
-    val balls     = m.result.split('·')
-    val sets      = getSets(balls, noWinSets)
 
     try {
+      val balls  = if (m.result=="") new Array[String](0) else m.result.split('·')
+      //println(s"INFO: setMatch ${m.toString()}")
       if (m.wgw._1 < 1 | m.wgw._1 > size | m.wgw._2 < 1 | m.wgw._2 > size) {
         Left(Error("err0225.systemgroup.invalid.whoagainstwho"))
-      } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(sets, noWinSets)) {
+      } else if ((m.status == MS_FIN | m.status == MS_FIX  | m.status == MS_DRAW) & validSets(m.sets, noWinSets)) {
         results(m.wgw._1-1)(m.wgw._2-1).valid    = true
         results(m.wgw._1-1)(m.wgw._2-1).balls    = balls
-        results(m.wgw._1-1)(m.wgw._2-1).sets     = sets
-        results(m.wgw._1-1)(m.wgw._2-1).points   = getPoints(sets, noWinSets)
+        results(m.wgw._1-1)(m.wgw._2-1).sets     = m.sets
+        results(m.wgw._1-1)(m.wgw._2-1).points   = getPoints(m.sets, noWinSets)
         results(m.wgw._1-1)(m.wgw._2-1).ballDiff = getBalls(balls, noWinSets)
         results(m.wgw._2-1)(m.wgw._1-1) = results(m.wgw._1-1)(m.wgw._2-1).invert
         Right(true)
-      } else if (m.result == "" & sets == (0,0)) {
+      } else if (m.result == "" & m.sets == (0,0)) {
         results(m.wgw._1-1)(m.wgw._2-1).valid    = false
-        results(m.wgw._1-1)(m.wgw._2-1).balls    = Array()
+        results(m.wgw._1-1)(m.wgw._2-1).balls    = new Array[String](0)
         results(m.wgw._1-1)(m.wgw._2-1).sets     = (0,0)
         results(m.wgw._1-1)(m.wgw._2-1).points   = (0,0)
         results(m.wgw._1-1)(m.wgw._2-1).ballDiff = (0,0) 

@@ -235,11 +235,12 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
 
 
   def calc() = {
+    // println("START KO.calc")
     for (i <- 0 until size) pants(i).setPlace(KoRound.getPlace(rnds, false))
     for (res <- results) {
       if (res.valid & validSets(res.sets, noWinSets) & sno2pos.isDefinedAt(res.sno._1) & sno2pos.isDefinedAt(res.sno._2)) {
         // KO: pos._1 = rnd, pos._2 = match number
-        println(s"calc: sno1: ${res.sno._1} sno2: ${res.sno._2} rnd: ${res.pos._1} sets: ${res.sets}")
+        // println(s"calc: sno1: ${res.sno._1} sno2: ${res.sno._2} rnd: ${res.pos._1} sets: ${res.sets}")
         pants(sno2pos(res.sno._1)).setPlace(KoRound.getPlace(res.pos._1, res.sets._1 == noWinSets))
         pants(sno2pos(res.sno._2)).setPlace(KoRound.getPlace(res.pos._1, res.sets._2 == noWinSets))
       }
@@ -247,6 +248,7 @@ class KoRound(var size: Int, var name: String, val noWinSets: Int, var rnds: Int
   }
 
   def setMatch(m: MEntry): Either[shared.utils.Error, Boolean] = {
+    //println("START KO.setMatch")
     val rEntry = ResultEntry.fromMatchEntry(m)
     if (validPos(rEntry.pos)) { 
       results(getIndex(rEntry.pos)) = rEntry

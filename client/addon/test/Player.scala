@@ -57,12 +57,8 @@ object AddonPlayer extends UseCase("AddonPlayer")
     import cats.implicits._ 
 
     AddonMain.setOutput(s"START Test Player 0: show player page")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => AddonMain.addOutput(s"ERROR Test Player 0: load tourney ${toId} failed with: ${err.msgCode}"); false
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false    
       case Right(res)   => {
         App.tourney.setCurCoId(1)
         App.execUseCase("OrganizePlayer", "", "")
@@ -79,12 +75,8 @@ object AddonPlayer extends UseCase("AddonPlayer")
     import cats.implicits._ 
 
     AddonMain.setOutput(s"START Test Player 1: show player plId=${plId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => AddonMain.addOutput(s"ERROR Test Player 1: load tourney ${toId} failed with: ${err.msgCode}"); false
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => AddonMain.addOutput(s"SUCCESS Test Player 1: ${App.tourney.players(plId)}"); true
     }
   }
@@ -109,12 +101,8 @@ object AddonPlayer extends UseCase("AddonPlayer")
     import cats.implicits._ 
 
     AddonMain.setOutput(s"START Test Player 2: delete license ${plId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => AddonMain.setOutput(s"ERROR Test Player 2: load tourney ${toId} failed with: ${err.msgCode}"); Future(false)
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); Future(false)
       case Right(res)   => setPlayer(plId, CttLicense("")).map {
         case Left(err)     => AddonMain.setOutput(s"ERROR Test Player 2: ${getError(err)}"); false
         case Right(player) => AddonMain.setOutput(s"SUCCESS Test Player 2: ${player.getLicense}"); true
@@ -128,12 +116,8 @@ object AddonPlayer extends UseCase("AddonPlayer")
     import cats.implicits._ 
 
     AddonMain.setOutput(s"START Test Player 3 set license: plId=${plId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => AddonMain.addOutput(s"ERROR Test Player 3 set license: load failed with: ${err.msgCode}"); Future(false)
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament");Future(false)
       case Right(res)   => setPlayer(plId, CttLicense("202004168")).map {
         case Left(err)     => AddonMain.addOutput(s"ERROR Test Player 3 set license: failed with: ${err.msgCode}"); false
         case Right(player) => AddonMain.addOutput(s"SUCCESS Test Player 3: ${player.getLicense}"); true
@@ -149,7 +133,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
     AddonMain.setOutput(s"START Test Player 4 set email: ${email}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
       result    <- EitherT( App.loadRemoteTourney(toId) )
       player    <- EitherT( addPlayer(App.tourney.players(plId).copy(email=email))  )
     } yield { (pw, result, player ) }).value.map {
@@ -166,7 +150,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
     AddonMain.setOutput(s"START Test Player 5 set lastname: ${name}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
       result    <- EitherT( App.loadRemoteTourney(toId) )
       player    <- EitherT( setPlayer(App.tourney.players(plId).copy(lastname=name))  )
     } yield { (pw, result, player ) }).value.map {
@@ -183,7 +167,7 @@ object AddonPlayer extends UseCase("AddonPlayer")
     AddonMain.setOutput(s"START Test Player 6 dialog: plId->${plId}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
       result    <- EitherT( App.loadRemoteTourney(toId) )
       player    <- EitherT( setPlayer(App.tourney.players(plId).copy(lastname=name))  )
     } yield { (pw, result, player ) }).value.map {

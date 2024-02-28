@@ -181,6 +181,7 @@ organize.competition.confirm.change.msg               = Change competition {0}?
 organize.competition.draw.table.group                 = Group
 organize.competition.draw.table.pos                   = POS
 organize.competition.draw.table.name                  = Lastname, Firstname
+organize.competition.draw.table.dbl.name              = Lastname, Lastname
 organize.competition.draw.table.club                  = Club
 organize.competition.draw.table.ttr                   = TTR
 organize.competition.draw.change.hdr                  = Position Information Incorrect

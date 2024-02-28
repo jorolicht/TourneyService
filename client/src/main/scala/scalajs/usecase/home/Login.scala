@@ -72,13 +72,13 @@ object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc
     import shapeless._ 
     import shapeless.syntax.sized._ 
     import scalajs.usecase.dialog._ 
+    import shared.utils.Routines._
     import scalajs.usecase.component.{InputCtrl => IC}
 
     debug("actionEvent", s"key: ${key} event: ${event.`type`}")
     key match {
       
       case "ReqAuthenticate" => {
-        import shared.utils.Routines._
         import shared.utils.Constants._        
     
         // check input values by mapping to tuple
@@ -106,17 +106,13 @@ object HomeLogin extends UseCase("HomeLogin") with AuthenticateSvc
       }
 
       case "ReqNewPassword"    => {
-        val userInput = getInput(gE(uc("user")))
-        if (true) {
-        //if (EmailAddress.isValid(userInput)) {
-          // send user new password
-          authReset(userInput).map {
-            case Left(err)  => DlgInfo.show(getMsg("dlg.title.err.reqPw"), getError(err), "danger")
-            case Right(res) => DlgInfo.show(getMsg("dlg.title.ok.reqPw"), getMsg("dlg.body.ok.reqPw", userInput), "success")
-          }
-        } else {
-          DlgInfo.show(getMsg("dlg.wrongemail.hdg"), getMsg("dlg.wrongemail.text"), "danger")
+        val user = getInput(gUE("user"))
+        val (email, licCode) = if (validEmail(user)) (user, "") else ("", user) 
+        authReset(email, licCode).map {
+          case Left(err)  => DlgInfo.show(getMsg("dlg.title.err.reqPw"), getError(err), "danger")
+          case Right(res) => DlgInfo.show(getMsg("dlg.title.ok.reqPw"), getMsg("dlg.body.ok.reqPw", res._1), "success")
         }
+
       }
 
       case _                 => warn(s"actionEvent", s"invalid key: ${key}")

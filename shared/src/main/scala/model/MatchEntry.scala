@@ -179,7 +179,7 @@ case class MEntryKo(
     |  Ko-Match: SnoA: ${stNoA} - SnoB: ${stNoB} Winner->${winPos} Looser->${looPos}
     |    gameNo: ${gameNo} round: ${round} maNo: ${maNo} info: ${info} winSets: ${winSets}
     |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
-    |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: ${result}
+    |    playfield: ${playfield} status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: [${result}]
     """.stripMargin('|')
 
   def setPantA(sNoA: String) = stNoA = sNoA
@@ -192,6 +192,7 @@ case class MEntryKo(
   def setGameNo(value: Int)   = { gameNo = value }  
 
   def getWinPos():(Int,Int) = {
+    println(s"getWinPos: ${winPos}")
     val wPos = getMDIntArr(winPos)
     if (wPos.size == 4) (wPos(0), wPos(3)) else (0,0)
   }
@@ -287,7 +288,7 @@ case class MEntryGr(
       |    gameNo: ${gameNo} round: ${round} grId: ${grId} info: ${info} winSets: ${winSets}
       |    coId: ${coId} coTyp: ${coTyp} coPhId: ${coPhId} coPhTyp: ${coPhTyp}
       |    depend: ${depend} trigger: ${trigger} playfield: ${playfield} 
-      |    status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: '${result}'
+      |    status: ${MEntry.statusInfo(status)} sets: ${sets._1}:${sets._2} result: [${result}]
   """.stripMargin('|')
 
   def setPantA(sNoA: String) = stNoA = sNoA
@@ -406,7 +407,9 @@ object MEntry {
       case CompTyp.DOUBLE => {
         val idAs = getMDLongArr(snoA)
         val idBs = getMDLongArr(snoB)
-        getPlayerRunning(idAs(0), idAs(1)) | getPlayerRunning(idBs(0), idBs(1))
+        if (idAs.length == 2 && idBs.length == 2) {
+          getPlayerRunning(idAs(0), idAs(1)) | getPlayerRunning(idBs(0), idBs(1))
+        } else false  
       }
     }
   }
@@ -423,10 +426,14 @@ object MEntry {
       case CompTyp.DOUBLE => {
         val idAs = getMDLongArr(m.stNoA)
         val idBs = getMDLongArr(m.stNoB)
-        if (run) addPlayerRunning(idAs(0), gaId) else removePlayerRunning(idAs(0), gaId)
-        if (run) addPlayerRunning(idAs(1), gaId) else removePlayerRunning(idAs(1), gaId)
-        if (run) addPlayerRunning(idBs(0), gaId) else removePlayerRunning(idBs(0), gaId)
-        if (run) addPlayerRunning(idBs(1), gaId) else removePlayerRunning(idBs(1), gaId)
+        if (idAs.length == 2) {
+          if (run) addPlayerRunning(idAs(0), gaId) else removePlayerRunning(idAs(0), gaId)
+          if (run) addPlayerRunning(idAs(1), gaId) else removePlayerRunning(idAs(1), gaId)
+        } 
+        if (idBs.length == 2) {
+          if (run) addPlayerRunning(idBs(0), gaId) else removePlayerRunning(idBs(0), gaId)
+          if (run) addPlayerRunning(idBs(1), gaId) else removePlayerRunning(idBs(1), gaId)
+        }
       }
     }
   }

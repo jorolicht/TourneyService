@@ -170,6 +170,7 @@ class AuthenticateCtrl @Inject()(
     * @param params
     */
   def authReset(params: String="") = silhouette.UserAwareAction.async { implicit request =>
+    import upickle.default._
     import shared.utils.Routines._
     import org.mindrot.jbcrypt.BCrypt
     import org.apache.commons.mail.EmailException
@@ -181,6 +182,7 @@ class AuthenticateCtrl @Inject()(
 
     val msgs: Messages  = messagesApi.preferred(request)
     val param   = Crypto.encParam(params)
+    val lang    = param("lang")
     val email   = param("email")
     val licCode = param("licCode")
     val withPW  = param("withPW").toBoolean
@@ -203,17 +205,21 @@ class AuthenticateCtrl @Inject()(
             case 1 => {
               val name = license.name.split(",").map(_.trim).reverse.mkString(" ") 
               val email = license.email
-              val lang = msgs("app.lang")
 
-              val mail = Email(
-                msgs("email.password.subject"),
-                msgs("email.password.from"),
-                Seq(s"$name <$email>"),
-                bodyText = Some(EmailPassword(name, randPW, lang, false).toString),
-                bodyHtml = Some(EmailPassword(name, randPW, lang, true).toString)
-              )
-              try   { mailer.send(mail); if (withPW) Ok(Return(randPW).encode) else Ok(Return("ok").encode) }  
-              catch { 
+              try {
+                if (validEmail(email)) {
+                  mailer.send(Email(
+                    msgs("email.password.subject"),
+                    msgs("email.password.from"),
+                    Seq(s"$name <$email>"),
+                    bodyText = Some(EmailPassword(name, randPW, lang, false).toString),
+                    bodyHtml = Some(EmailPassword(name, randPW, lang, true).toString)
+                  ))
+                  Ok( write[(String,String)]((email, if (withPW) randPW else "")) )      
+                } else {
+                  BadRequest( Error("err0259.authReset.invalidEmail", email).encode )
+                }
+              } catch { 
                 case e: EmailException => BadRequest( Error("err0092.email.password.send", e.getMessage()).encode )
                 case _: Throwable      => BadRequest( Error("err0093.email.user.notfound", email).encode )
               }

@@ -54,12 +54,8 @@ object AddonCtt extends UseCase("AddonCtt")
     import cats.implicits._ 
 
     val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
@@ -79,12 +75,8 @@ object AddonCtt extends UseCase("AddonCtt")
     val toId  = 185L
     
     println(s"---> Start Test: CTT update / toId ${toId} sDate: ${sDate}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         val date = text.toIntOption.getOrElse(19000101)
 
@@ -114,7 +106,7 @@ object AddonCtt extends UseCase("AddonCtt")
     println(s"---> Start Test: CTT new / sDate: ${sDate}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
     } yield { (pw) }).value.map {
       case Left(err)  => dom.window.alert(s"ERROR: authentication failed with: ${getError(err)}")
       case Right(res) => {
@@ -154,12 +146,8 @@ object AddonCtt extends UseCase("AddonCtt")
 
     
     println(s"---> Start Test: generate CTT result file for toId: ${toId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (pw) }).value.map {
-      case Left(err)  => dom.window.alert(s"ERROR: authentication failed with: ${getError(err)}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res) => {
         genCttResult.map {
           case Left(err)     => println(s"ERROR: genCttResult with: ${getError(err)}")
@@ -201,12 +189,8 @@ object AddonCtt extends UseCase("AddonCtt")
 
     val toId = text.toLongOption.getOrElse(185L)
     println(s"---> Start Test: generate CTT result file for: ${toId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => genCttResult.map {
         case Left(err)     => println(s"ERROR: genCttResult with: ${getError(err)}")
         case Right(result) => {

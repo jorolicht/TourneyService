@@ -205,6 +205,16 @@ case class Tourney(
     case _ => (0, 0)
   }
 
+  /** getCompTyp - returns type of competition  
+   *
+   */ 
+  def getCompTyp(coId: Long): CompTyp.Value = if (comps.isDefinedAt(coId)) { 
+      comps(coId).typ
+    } else {  
+      println(s"ERROR: getCompTyp(${coId}) doesn't exist")
+      CompTyp.UNKN
+    }
+
 
   /** delComp - delete competition with id
    * 
@@ -446,7 +456,8 @@ case class Tourney(
     if  ( (placeArr.length==1 && placeArr(0)>0) || (placeArr.length==2 && placeArr(0)>0 && placeArr(0)==placeArr(1)) ) {
       mfunc("certificate.place.value", Seq(placeArr(0).toString)) 
     } else if (placeArr.length==2 && placeArr(0)>0 && placeArr(0)!=placeArr(1)) {
-      mfunc("certificate.place.range", Seq(placeArr(0).toString, placeArr(1).toString)) 
+      if   (placeArr(1) > 0)  mfunc("certificate.place.range", Seq(placeArr(0).toString, placeArr(1).toString)) 
+      else                    mfunc("certificate.place.value", Seq(placeArr(0).toString)) 
     } else ""
   }
 

@@ -545,7 +545,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
 
   // setModel enter result into the corresponding model 
   def setModel(m: MEntry): Unit = {  
-
+    println("START: setModel: ")
     try {
       if (m.gameNo-1 >= 0 && m.gameNo-1 < matches.length ) {
         matches(m.gameNo-1) = m 
@@ -572,7 +572,7 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
           }
         }   
   
-        case _      => ()
+        case _      => println(s"ERROR setModel: invalid competition phase type")
       }
     } catch { case _: Throwable => println(s"ERROR setModel ${m.toString}")}
   }
@@ -580,7 +580,6 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
 
   // inputMatch - set match result, info, playfield ....
   def inputMatch(gameNo: Int, sets: (Int,Int), result: String, info: String, playfield: String): Either[Error, List[Int]] = {
-    println("Call CompPhase.inputMatch")
     try {
       val m = getMatch(gameNo)
       m.setSets(sets)
@@ -617,7 +616,9 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
         case CompPhaseTyp.KO => {
           val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
           // propagate winner
+
           if (existsMatchNo(gWin) && m.finished) { 
+            val x = getMatch(gWin).setPant(pWin, m.getWinner)
             setModel(getMatch(gWin).setPant(pWin, m.getWinner).setStatus(true))
             triggerList.append(gWin)
           }  
@@ -688,15 +689,13 @@ case class CompPhase(val name: String, val coId: Long, val coPhId: Int, var coPh
           setModel(m.setStatus(true))      
           // propagate deletion of that position
           val (gWin, pWin) = m.asInstanceOf[MEntryKo].getWinPos
-          //println(s"propagate winner gameNo: ${gWin} position: ${pWin}")
           if (existsMatchNo(gWin)) resetMatch(gWin, pWin==0, pWin==1 ) match {
             case Left(err)  => error = err
-            case Right(res) => triggerList ++= res
+            case Right(res) => triggerList ++= res; println(s"END: resetMatch: ${gameNo}")
           }
           
           // propagate looser i.e. 3rd place match
           val (gLoo, pLoo) = m.asInstanceOf[MEntryKo].getLooPos
-          //println(s"propagate looser gameNo: ${gLoo} position: ${pWin}")
           if (existsMatchNo(gLoo)) resetMatch(gLoo, pLoo==0, pLoo==1 ) match {
             case Left(err) => error = err
             case Right(res) => triggerList ++= res

@@ -68,14 +68,6 @@ trait ViewServices {
           cTyp match {
              case CompTyp.SINGLE => {
                val plId = pa2co.getSingleId
-               /*
-               debug(s"viewPlacments0: ${plId.toString}")
-               debug(s"viewPlacments1: ${pa2co.getPlace()}")
-               debug(s"viewPlacments2: ${pa2co.getPlaceDesc(App.getMessage _)}")
-               debug(s"viewPlacments3: ${tourney.players(plId).getName()}")
-               debug(s"viewPlacments4: ${tourney.players(plId).clubName}")
-               debug(s"viewPlacments5: ${pa2co.sno}")
-               */
                val pl = pa2co.getPlace()._1
                if (pl != 0) (pl, tourney.getPantPlace(pa2co.placement), tourney.players(plId).getName(), tourney.players(plId).clubName, pa2co.sno)
                else (0, "0", "", "", "0")

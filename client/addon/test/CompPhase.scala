@@ -39,7 +39,7 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
 
   def execTest(number: Int, toId: Long=0L, coId: Long=0L, phase: Int=0,  param: String=""): Future[Boolean]= {
     number match {
-      case 0 => test_0(param); Future(true)
+      case 0 => test_0(param)
       case 1 => test_1(param); Future(true)
       case 2 => test_2(toId, coId, phase, param)
       case 3 => test_3(toId, coId, phase, param)
@@ -48,24 +48,88 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     }
   }
 
-  def test_0(text: String) = {
-    import cats.data.EitherT
-    import cats.implicits._ 
 
-    val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
-      case Right(res)   => {
-        App.tourney.setCurCoId(1)
-        App.execUseCase("OrganizeCompetitionDraw", "", "")
-        println(s"SUCCESS: test_0")
+
+    
+
+  // Test 0 - competition phase default test/debug function 
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;scope=coph;param=swiss
+  def test_0(param: String):Future[Boolean] = {
+
+    def genEdgeInfo(group: Group, pos: Int): String = {
+      val str = new StringBuilder("")
+      for (i <- pos+1 until group.size) {
+        if (group.results(pos)(i).valid) {
+          str.append(s"(${pos+1},${i+1},X) ")
+        } else {
+          val pointDiff = (group.points(pos)._1 - group.points(i)._1).abs
+          str.append(s"(${pos+1},${i+1},${pointDiff}) ")
+        }
       }
+      str.toString()
     }
+
+    val toId = App.tourney.id
+    val coId = App.tourney.curCoId
+    val coPhId = App.tourney.getCurCoPhId
+
+    val test = s"START: Test Competition Phase toId:${toId} coId:${coId} coPhId:${coPhId} param:${param}"
+    AddonMain.setOutput(test)
+
+    param.toLowerCase() match {
+      case "swiss" => App.tourney.getCoPh(coId, coPhId) match {
+        case Left(err)   => AddonMain.addOutput(s"ERROR: getCoPh failed ${err.toString()}")
+        case Right(coph) => {
+          val g = coph.groups(0)
+          for(i <- 0 until g.size) {
+            AddonMain.addOutput(s"(${i+1}) ${g.pants(i).name.substring(0,2)} -> ${g.points(i)._1} ${genEdgeInfo(g,i)}")
+          }
+        }
+      }
+
+      case "mwpm" => App.tourney.getCoPh(coId, coPhId) match {
+        case Left(err)   => AddonMain.addOutput(s"ERROR: getCoPh failed ${err.toString()}")
+        case Right(coph) => {
+          val g = coph.groups(0)
+          for(i <- 0 until g.size) {
+            for(j <- i+1 until g.size) {
+              if (!g.results(i)(j).valid) {
+                val pDiff = (2*g.size) - (g.points(i)._1 - g.points(i)._2 - (g.points(j)._1 - g.points(j)._2)).abs
+                AddonMain.addOutput(s"${i+1} ${j+1} ${pDiff}")
+              }  
+            }
+          }
+        }
+      }
+
+
+
+      case _ => AddonMain.addOutput(s"HINT: valid params 'swiss' 'mwpm' ")
+    }
+
+    AddonMain.addOutput(s"SUCCESS: Test Competition Phase")
+    Future(true)
   }
+
+
+  // def test_0(text: String) = {
+  //   import cats.data.EitherT
+  //   import cats.implicits._ 
+
+  //   val toId = text.toLongOption.getOrElse(182L)
+  //   (for {
+  //     pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
+  //     coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+  //     result    <- EitherT(App.loadRemoteTourney(toId))
+  //   } yield { (result, pw) }).value.map {
+  //     case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+  //     case Right(res)   => {
+  //       App.tourney.setCurCoId(1)
+  //       App.execUseCase("OrganizeCompetitionDraw", "", "")
+  //       println(s"SUCCESS: test_0")
+  //     }
+  //   }
+  // }
 
 
   def test_1(text: String) = {
@@ -73,12 +137,8 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
     import cats.implicits._ 
 
     val toId = text.toLongOption.getOrElse(182L)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => dom.window.alert(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         App.tourney.setCurCoId(2)
         
@@ -212,5 +272,6 @@ object AddonCompPhase extends UseCase("AddonCompPhase")
       }
     }
   }
+
 
 }

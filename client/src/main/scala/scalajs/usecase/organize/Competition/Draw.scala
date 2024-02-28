@@ -75,11 +75,12 @@ object OrganizeCompetitionDraw extends UseCase("OrganizeCompetitionDraw")
   def setPage(coph: CompPhase): Unit = {
     val contentElement = gE(s"DrawContent_${coph.coId}_${coph.coPhId}")
     if (contentElement.innerHTML == "") {
+      val compTyp = App.tourney.getCompTyp(coph.coId)
       debug("setPage", s"Draw init: coId: ${coph.coId} coPhId: ${coph.coPhId}")
       coph.getTyp match {
-        case CompPhaseTyp.GR => setHtml(contentElement, clientviews.organize.competition.draw.html.GroupCard(coph))
-        case CompPhaseTyp.KO => setHtml(contentElement, clientviews.organize.competition.draw.html.KOCard(coph))
-        case CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.draw.html.RRCard(coph))        
+        case CompPhaseTyp.GR => setHtml(contentElement, clientviews.organize.competition.draw.html.GroupCard(coph, compTyp))
+        case CompPhaseTyp.KO => setHtml(contentElement, clientviews.organize.competition.draw.html.KOCard(coph, compTyp))
+        case CompPhaseTyp.RR => setHtml(contentElement, clientviews.organize.competition.draw.html.RRCard(coph, compTyp))        
         case CompPhaseTyp.SW => {
           val mtchRnds = coph.matches.toList.groupBy(_.round)
           setHtml(contentElement, clientviews.organize.competition.draw.html.SwissCard(coph, mtchRnds))

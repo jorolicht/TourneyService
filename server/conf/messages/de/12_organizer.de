@@ -181,6 +181,7 @@ organize.competition.confirm.change.msg               = Wettbewerb {0} ändern?
 organize.competition.draw.table.group                 = Gruppe
 organize.competition.draw.table.pos                   = POS
 organize.competition.draw.table.name                  = Name, Vorname
+organize.competition.draw.table.dbl.name              = Name, Name
 organize.competition.draw.table.club                  = Verein
 organize.competition.draw.table.ttr                   = TTR
 organize.competition.draw.change.hdr                  = Eingabefehler für Neupositionierung

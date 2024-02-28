@@ -85,7 +85,7 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
         val sInput  = getInputSets(row, noWinSets, game)
         
         val (inputOk, balls, sets, err) = bInput match {
-          case Left(err)  => (false, "", (0,0), err)
+          case Left(err)  => error("actionEvent", s"SaveMatchResult -> bInput: ${err}"); (false, "", (0,0), err) 
           case Right(res) => if (res._2 != (0,0)) {
               (true,  res._1.mkString("·"), res._2, Error.dummy)
             } else sInput match {
@@ -383,18 +383,18 @@ object OrganizeCompetitionInput extends UseCase("OrganizeCompetitionInput")
       }
       case MS_BLOCK => {
         gameNo.classList.add("text-danger")
-        inputElts.map(_.asInstanceOf[HTMLElement].setAttribute("contenteditable", s"false"))
-        setDisabled(saveBtn, false || disBtn ); setDisabled(deleteBtn, true)
+        inputElts.map(_.asInstanceOf[HTMLElement].removeAttribute("contenteditable"))
+        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, false || disBtn)
       } 
       case MS_READY => {
         gameNo.classList.add("text-success")
         inputElts.map(_.asInstanceOf[HTMLElement].removeAttribute("contenteditable"))
-        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, true)         
+        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, false || disBtn)          
       } 
       case MS_RUN   => {
         gameNo.classList.add("text-primary")
         inputElts.map(_.asInstanceOf[HTMLElement].removeAttribute("contenteditable"))
-        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, true)     
+        setDisabled(saveBtn, false || disBtn); setDisabled(deleteBtn, false || disBtn)      
       } 
       case MS_FIN   => {
         gameNo.classList.add("text-dark")

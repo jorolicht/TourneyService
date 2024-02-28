@@ -264,7 +264,7 @@ object AddonMain extends TestUseCase("AddonMain")
     }
 
     val conf   = new ConfTest(args)
-    val scope  = conf.scope.getOrElse("unknown")
+    val scope  = conf.scope.getOrElse("basic")
     val number = conf.number.getOrElse(0)
     val param  = conf.param.getOrElse("")
     val toId   = conf.toId.getOrElse(0L)
@@ -335,7 +335,7 @@ object AddonMain extends TestUseCase("AddonMain")
   }
 
 
-  def setLoginLoad(toId: Long): Future[Either[Error,Boolean]] = {
+  def setLoginLoad(toId: Long): Future[Either[Error, Boolean]] = {
     import cats.data.EitherT
     import cats.implicits._ 
     
@@ -344,7 +344,7 @@ object AddonMain extends TestUseCase("AddonMain")
     } else {
       (for {
         pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-        coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+        coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
         result    <- EitherT(App.loadRemoteTourney(toId))
       } yield { (result, pw) }).value.map {
         case Left(err)    => addOutput(s"ERROR load: ${err}"); Left(err)

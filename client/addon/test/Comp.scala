@@ -64,12 +64,8 @@ object AddonComp extends UseCase("AddonComp")
    
     val toId = testOption.toLongOption.getOrElse(182L)
     println(s"START AddonComp.testEncode => toId: ${toId}")
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         
     // case class CompPhase(val name: String, val coId: Long, val coPh: Int, 

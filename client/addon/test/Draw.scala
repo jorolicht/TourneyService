@@ -1,4 +1,4 @@
-
+package addon.test
 
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
@@ -47,12 +47,8 @@ object AddonDraw extends TestUseCase("AddonDraw")
 
     val toId = tnp.param.toLongOption.getOrElse(182L)
     START(tnp)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
@@ -72,12 +68,8 @@ object AddonDraw extends TestUseCase("AddonDraw")
 
     val toId = tnp.param.toLongOption.getOrElse(182L)
     START(tnp)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         App.tourney.setCurCoId(1)
         App.execUseCase("OrganizeCompetitionDraw", "", "")
@@ -93,12 +85,8 @@ object AddonDraw extends TestUseCase("AddonDraw")
 
     val toId = tnp.param.toLongOption.getOrElse(182L)
     START(tnp)
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (result, pw) }).value.map {
-      case Left(err)    => println(s"ERROR: load tourney ${toId} failed with: ${err.msgCode}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res)   => {
         App.tourney.setCurCoId(1)
         App.tourney.comps(1).setCurCoPhId(3)
@@ -186,17 +174,5 @@ object AddonDraw extends TestUseCase("AddonDraw")
     SUCCESS(tnp)
   }  
 
-
 } 
 
-
-
-
-
-// case class MatchTest(
-//   val matches:   ArrayBuffer[MatchEntry]
-// )
-
-// object MatchTest {
-//   implicit def rw: RW[MatchTest] = macroRW 
-// }

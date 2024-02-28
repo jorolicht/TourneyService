@@ -242,6 +242,7 @@ err0255.getMatch.invalid.param                      = Fehler in Routine getMatch
 err0256.svc.getTourney                              = Fehler in Routine getTourney, Dekodierung der Playfield-Struktur nicht möglich
 err0257.svc.syncPlayfields                          = Fehler in Routine syncPlayfields
 err0258.pubCompPhase                                = Fehler in Routine pubCompPhase, ungültige Parameter {0}/{1}
+err0259.authReset.invalidEmail                      = Keine gültige EMail-Adresse gefunden {0}
 
 
 return001.csv.hdr.player                            = CSV header for player

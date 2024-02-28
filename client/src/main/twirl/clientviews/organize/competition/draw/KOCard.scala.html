@@ -5,6 +5,7 @@
  * 
  *@
 @import scala.collection.mutable.ArrayBuffer
+@import shared.model.CompTyp
 @import shared.model.CompPhase
 @import shared.model.CompPhaseStatus
 @import shared.model.Pant 
@@ -13,7 +14,7 @@
 @import shared.utils.twirlhelper._ 
 @import clientviews.component.helper.html._
 
-@(coph: CompPhase)(implicit ucc: UseCaseParam)
+@(coph: CompPhase, compTyp: CompTyp.Value)(implicit ucc: UseCaseParam)
 
 @bTR = @{ """<td class='tdDrawGroup border-top border-right'></td>"""}
 @bBR = @{ """<td class='tdDrawGroup border-bottom border-right'></td>"""}
@@ -92,7 +93,14 @@
           </button>
         </div>
       </th>
-      <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th>
+
+      @compTyp match {
+        case CompTyp.SINGLE  =>  { <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th> }
+        case CompTyp.DOUBLE  =>  { <th><small class="font-weight-bold ml-1 mr-1">@msg("table.dbl.name")</small></th> }
+        case CompTyp.MIXED   =>  { <th><small class="font-weight-bold ml-1 mr-1">@msg("table.dbl.name")</small></th> }
+        case _               =>  { <th><small class="font-weight-bold ml-1 mr-1">@msg("table.name")</small></th> }
+      }
+
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.club")</small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@msg("table.ttr") </small></th>
       <th><small class="font-weight-bold ml-1 mr-1">@coph.candInfo</small></th>

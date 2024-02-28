@@ -50,13 +50,8 @@ object AddonDownload extends UseCase("AddonDownload")
     val toId = param.toLongOption.getOrElse(185L)
     
     println(s"---> Start Download Test 0: toId ${param}")
-    
-    (for {
-      pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
-      result    <- EitherT(App.loadRemoteTourney(toId))
-    } yield { (pw) }).value.map {
-      case Left(err)  => dom.window.alert(s"ERROR: authentication failed with: ${getError(err)}")
+    AddonMain.setLoginLoad(toId).map {
+      case Left(err)  => AddonMain.addOutput(s"ERROR setLoginLoad - Test Swiss Tournament"); false
       case Right(res) => {
         startSpinner()
         downloadFile(DownloadType.ClickTT).map {

@@ -33,7 +33,7 @@ object AddonBasic extends UseCase("AddonBasic")
 
   def execTest(number: Int, param: String):Future[Boolean]= {
     number match {
-      case 0 => test_0(param); Future(true)
+      case  0 => test_0(param)
       case  1 => test_1(param); Future(true)
       case  2 => test_2();      Future(true)
       case  3 => test_3(param); Future(true)
@@ -53,8 +53,61 @@ object AddonBasic extends UseCase("AddonBasic")
   }
 
 
-  // Test 0 - hello world
-  def test_0(text: String) = s"Hello ${text}!"
+  // Test 0 - default basic tests
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;param=hello
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;param=blossom
+  // http://localhost:9000/start?ucName=HomeMain&ucParam=Debug&ucInfo=test;param=login
+  def test_0(param: String) = {
+    import cats.data.EitherT
+    import cats.implicits._ 
+    val test = s"START: Basic Test param:${param}"
+    AddonMain.setOutput(test)
+
+    param.toLowerCase()  match {
+      case "login"   => {
+        var toId = 1L
+        
+        (for {
+          valid   <- EitherT(authBasicContext("info@turnier-service.com", "", "Ah3tQE"))
+          result  <- EitherT(App.loadRemoteTourney(toId))
+        } yield { (valid, result) }).value.map {
+          case Left(err)    => AddonMain.setOutput(s"ERROR: load tourney toId:${toId} failed with: ${err.msgCode}"); true
+          case Right(res)   => {
+            val coId = App.tourney.getCurCoId
+            App.execUseCase("OrganizeCompetition", "", "")
+            AddonMain.addOutput(s"Competition status: ${App.tourney.calcCompStatus(coId).toString} / ${App.tourney.comps(coId).status.toString}")
+            AddonMain.addOutput(s"SUCCESS: Basic Test param:${param}")
+            true
+          }
+        }
+      } 
+
+      case "hello"   => AddonMain.addOutput(s"Hello ${param}!"); Future(true)
+      case "blossom" => {
+        var edmonds = new Edmonds(js.Array(js.Array(1,2,10), js.Array(1,7,10), js.Array(2,3,12), js.Array(3,4,20), js.Array(3,5,20),
+                                        js.Array(4,5,25), js.Array(5,6,10), js.Array(6,7,10), js.Array(7,8,8)), true)
+
+        val result = edmonds.maxWeightMatching()
+        AddonMain.addOutput(s"result maxWeightMatching")
+        AddonMain.addOutput(s"Output: ${result.toString()}")
+        Future(true)
+      }
+      case _       => {
+        AddonMain.addOutput(s"ERROR: invalid param: ${param}")
+        AddonMain.addOutput(s"Valid param: hello, blossom & login")
+        Future(true)
+      }  
+    }      
+    
+    
+  }  
+
+// @js.native
+// @JSGlobal
+// class Edmonds(input: Array[Array[Int]], maxCardinality: Boolean) extends js.Object {
+//   def maxWeightMatching(): js.Any = js.native
+// }
+
 
   // Test 1 - date formatting
   def test_1(testDate: String): String = {
@@ -459,9 +512,11 @@ object AddonBasic extends UseCase("AddonBasic")
   }  
 
 
+}
 
 
-
-
-
+@js.native
+@JSGlobal
+class Edmonds(input: js.Array[js.Array[Int]], maxCardinality: Boolean) extends js.Object {
+  def maxWeightMatching(): js.Array[Int] = js.native
 }

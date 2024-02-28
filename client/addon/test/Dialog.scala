@@ -74,16 +74,14 @@ object AddonDialog extends UseCase("AddonDialog")
     AddonMain.setOutput(s"START Test Dialog 1 player: plId->${plId}")
     (for {
       pw        <- EitherT(authReset("", "ttcdemo/FED89BFA1BF899D590B5", true ))
-      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw))
+      coValid   <- EitherT(authBasicContext("","ttcdemo/FED89BFA1BF899D590B5", pw._2))
       result    <- EitherT(App.loadRemoteTourney(toId))
       player    <- EitherT(DlgCardPlayer.show(plId, App.tourney))
     } yield { (result, pw, player) }).value.map {
       case Left(err)    => AddonMain.addOutput(s"ERROR Test Dialog 1: tourney ${toId} failed with: ${err.msgCode}"); Future(false)
       case Right(res)   => {
         AddonMain.addOutput(s"SUCCESS Test Dialog 1: player->${res._3}")
-        
         Future(false)
-
       }
     }
   }  
