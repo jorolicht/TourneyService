@@ -9,9 +9,9 @@ object Settings {
   val name = "TourneyService"
 
   /** The previous and current version of the application */
-  val previous = "1.6.0"
-  val version  = "1.7.0"
-  val relDate  = "2024-01-24"
+  val previous = "1.7.0"
+  val version  = "1.8.0"
+  val relDate  = "2024-02-28"
 
 
    /** The version of scala */

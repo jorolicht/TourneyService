@@ -5,7 +5,7 @@
   <div class="row"> <!-- ROW --> 
     <div class="col-6">
      <p>
-        Die Web-Anwendung in der Version 2.0 bietet nun erstmals alle Funktionn für die Online-Durchführung eines Tischtennis-Turniers.
+        Die Web-Anwendung ab der Version 1.7 bietet alle Funktionn für die Online-Durchführung eines Tischtennis-Turniers.
         Hier einige Funktionen im Überblick:
       </p>
       <ul>
@@ -135,7 +135,8 @@
 
 ## Neuigkeiten
 
-#### 2. Januar 2024: Turnierservice Version 2.0
+#### 28. Februar 2024: Turnierservice Version 1.8
+  * Korrktur Doppel-Ergebnis-Eingabe
   * Komplette Funktionen zur Online-Durchführung eines Turniers
   * Auslosung für Gruppen und KO-Runde
   * Anzeige der Tischbelegung für Spieler
