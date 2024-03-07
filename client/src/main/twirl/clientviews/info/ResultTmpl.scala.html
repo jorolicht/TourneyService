@@ -8,13 +8,15 @@
 
 @(co2NameStatus: Map[Long,(String, String)], co2coph: Map[Long, Seq[CompPhase]])(implicit ucp: UseCaseParam)
 @collapse(id: String)=@{ s""" href=javascript:InputCtrl.collapse('${ucp.idBase}__${id}') """	}
+@idRef(coId: Long, coPhId: Int) = @{ "#" + ucp.idBase + "__" + coId.toString + "_" + coPhId.toString }
+@idTab(coId: Long, coPhId: Int) = @{ ucp.idBase + "__" + coId.toString + "_" + coPhId.toString }
 
 @if(co2coph.size == 0){
   <div class="alert alert-info text-center" role="alert">
     <span class="tuse-font-1">@msg("noEntries")</span>
   </div>
 } else {
-  @for((coId, cophList) <- co2coph) {
+  @for((coId, cophs) <- co2coph) {
     <div class="card mb-1">
       <div class="tuse-card-header">
         <div class="float-left">
@@ -28,7 +30,30 @@
     </div>  
 
     <div @id("Result_"+coId) class="mt-2 collapse">
-      @clientviews.component.tabletennis.html.CompPhaseTmpl(cophList.toIndexedSeq)
+
+      <ul class="nav nav-tabs" role="tablist">
+        @for(i <- 0 until cophs.length) {
+          <li class="nav-item">
+            <a class="nav-link @if(i==0){active}" id=@id(s"coph_${i}") data-toggle="tab" href="@idRef(cophs(i).coId,cophs(i).coPhId)" role="tab">
+              <span class="tuse-font-2 text-dark">
+                @{s"${cophs(i).name}" }
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+      <div class="tab-content">
+        @for(i <- 0 until cophs.length) {
+          <div class="tab-pane fade @if(i==0){show active}" id="@idTab(cophs(i).coId,cophs(i).coPhId)" role="tabpanel">
+            @cophs(i).getTyp match {
+              case CompPhaseTyp.GR => { @clientviews.component.html.ViewGroups(cophs(i).coId, cophs(i).coPhId, cophs(i).groups) }  
+              case CompPhaseTyp.KO => { @clientviews.component.html.ViewKo(cophs(i).coId, cophs(i).coPhId, cophs(i).ko) }  
+              case CompPhaseTyp.RR => { @clientviews.component.html.ViewRR(cophs(i).coId, cophs(i).coPhId, cophs(i).groups(0)) }  
+            }
+          </div>	
+        }
+      </div>
+
     </div>
   } 
 }

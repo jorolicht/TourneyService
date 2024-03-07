@@ -135,7 +135,8 @@
 
 ## Neuigkeiten
 
-#### 28. Februar 2024: Turnierservice Version 1.8
+#### 7. März 2024: Turnierservice Version 1.81
+  * Korrktur Ergebnisanzeige Jeder-gegen-Jeden nun sichtbar
   * Korrktur Doppel-Ergebnis-Eingabe
   * Komplette Funktionen zur Online-Durchführung eines Turniers
   * Auslosung für Gruppen und KO-Runde

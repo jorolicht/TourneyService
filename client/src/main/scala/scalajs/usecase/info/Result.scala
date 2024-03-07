@@ -30,13 +30,12 @@ import scalajs.App
 // ***    
 @JSExportTopLevel("InfoResult")
 object InfoResult extends UseCase("InfoResult")
-  with TourneySvc
+  with TourneySvc with ViewServices
 {
 
   def render(param: String = "", ucInfo: String = "", reload: Boolean=false) = {
     showTourneyResults(App.tourney)
   }
-
   
   override def update(param: String = "", upd: UpdateTrigger = UpdateTrigger("", 0L)) = {
     val coId   = upd.coId
@@ -48,67 +47,11 @@ object InfoResult extends UseCase("InfoResult")
     cphase.getTyp match {
       case CompPhaseTyp.KO => showKoResult(cphase.coId, cphase.coPhId, cphase.ko) 
       case CompPhaseTyp.GR => showGrResult(cphase.coId, cphase.coPhId, cphase.groups(grId-1))
+      case CompPhaseTyp.RR => showRrResult(cphase.coId, cphase.coPhId, cphase.groups(0))
       case _      => debug("update",s"error unknown competition type")
     }
   }
 
-  // show results of ko round
-  def showGrResult(coId: Long, coPhId: Int, group: Group) = {
-    debug("showGrResult", s"APP__GrRound_${coId}_${coPhId}")
-		for(i <- 0 to group.size-1) {
-			for(j <- 0 to group.size-1) {
-				if(i!=j){
-          val res = if(group.results(i)(j).valid) { group.results(i)(j).sets._1.toString + ":" + group.results(i)(j).sets._2.toString } else { "&nbsp;" }
-          setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1}"), res)
-          //debug("showGrResult",s"APP__GrRound_${coId}_${coPhId}_Set_${group.grId}_${i+1}_${j+1} -> ${res}")
-        }
-      }
-      val balls  = group.balls(i)._1.toString + ":" + group.balls(i)._2.toString  
-      val sets   = group.sets(i)._1.toString + ":" + group.sets(i)._2.toString  
-      val points = group.points(i)._1.toString + ":" + group.points(i)._2.toString
-      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Balls_${group.grId}_${i}"), balls)
-      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Sets_${group.grId}_${i}"), sets)
-      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Points_${group.grId}_${i}"), points)
-      setHtml(gE(s"APP__GrRound_${coId}_${coPhId}_Places_${group.grId}_${i}"), group.pants(i).place._1.toString)
-    } 
-  } 
-
-  // show results of ko round
-  def showKoResult(coId: Long, coPhId: Int, koRound: KoRound) = {
-    for (index <- 0 to koRound.size-2) {
-      val result     = koRound.results(index) 
-      val rnd        = result.pos._1
-      val game       = result.pos._2
-      val playerName = {
-        if      (result.sets._1 == koRound.noWinSets) { koRound.getPlayerKoViewName(result.sno._1) } 
-        else if (result.sets._2 == koRound.noWinSets) { koRound.getPlayerKoViewName(result.sno._2)} 
-        else                                          { "&nbsp;" } 
-      }
-
-      // propagate result to next position of player
-      if (result.valid) {
-        //debug("showKoResult",s"valid ${index}: APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game} -> ${playerName}")
-
-        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}"), playerName)
-
-        // print result only if it's not against a dummy player 
-        if (result.sno._1 != SNO.BYE & result.sno._2 != SNO.BYE) {
-          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}"), result.sets._1.toString)
-          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}"), result.sets._2.toString)
-          val balls = result.balls.mkString(",")
-          setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}"), if (balls != "") s"(${balls})" else "&nbsp;" )
-        }
-      } else {
-        val (rnd,game) = koRound.getRndManoFromIndex(index)
-        //debug("showKoResult",s"invalid ${index}: APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}")
-
-        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}"), "&nbsp;")
-        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}"), "&nbsp;")
-        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}"), "&nbsp;")
-        setHtml(gE(s"APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}"), "&nbsp;")      
-      } 
-    }  
-  }
 
   // show results of tourney with all competitions
   def showTourneyResults(tourney: Tourney) = {
@@ -127,6 +70,7 @@ object InfoResult extends UseCase("InfoResult")
       // show results of every phase of every competition
       if (coPhase.getTyp == CompPhaseTyp.KO) showKoResult(coPhase.coId, coPhase.coPhId, coPhase.ko)
       if (coPhase.getTyp == CompPhaseTyp.GR) for (grp <- coPhase.groups ) showGrResult(coPhase.coId, coPhase.coPhId, grp)
+      if (coPhase.getTyp == CompPhaseTyp.RR) showGrResult(coPhase.coId, coPhase.coPhId, coPhase.groups(0))
     }
   } 
 }
