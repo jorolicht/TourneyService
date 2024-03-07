@@ -6,11 +6,11 @@ greeting                                            = Welcome!
 ###
 # App Main Messages / Configuration Issues
 ###
-config.cookie.confirmation    = false
-config.LogLevel    = debug
+config.cookie.confirmation    = true
+config.LogLevel    = error
 
 app.mockup                                          = false
-app.version = 2024-03EN181
+app.version                                         = 2024-02EN180
 app.date    = 2024-03-07
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/

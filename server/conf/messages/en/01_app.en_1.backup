@@ -7,7 +7,7 @@ greeting                                            = Welcome!
 # App Main Messages / Configuration Issues
 ###
 config.cookie.confirmation    = false
-config.LogLevel    = debug
+config.LogLevel    = error
 
 app.mockup                                          = false
 app.version = 2024-03EN181
