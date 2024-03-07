@@ -1,0 +1,389 @@
+@*
+ * Template for ko-round
+ *@
+
+@import shared.utils.UseCaseParam 
+@import shared.utils.twirlhelper._ 
+@import clientviews.component.helper.html._ 
+
+@import shared.model.KoRound
+
+@(coId: Long, coPhId: Int, koRound: KoRound)(implicit ucc: UseCaseParam)
+
+@koCol01(pos:Int) = @{ if(pos%2==1) { Html(s"""<td class="KoCol0">${pos}</td><td class="KoCol1A"><p id="APP__KoRound_${coId}_${coPhId}_PlayerPos_${pos}" class="KoPlayer">${koRound.pants(pos-1).name}</p><p id="APP__KoRound_${coId}_${coPhId}_ClubPos_${pos}" class="KoClub">${koRound.pants(pos-1).club}</p></td>""") } else { Html(s"""<td class="KoCol0">${pos}</td><td class="KoCol1B"><p id="APP__KoRound_${coId}_${coPhId}_PlayerPos_${pos}" class="KoPlayer">${koRound.pants(pos-1).name}</p><p id="APP__KoRound_${coId}_${coPhId}_ClubPos_${pos}" class="KoClub">${koRound.pants(pos-1).club}</p></td>""") } }
+@koCol2A(rnd:Int, game:Int) = @{ Html(s"""<td class="KoSetA"><div id="APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}" class="border-top border-right border-left p-1">&nbsp;</div></td><td class="KoCol2A"><p class="KoDummy">&nbsp;</p><p id="APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}" class="KoPlayer"></p></td>""") } 
+@koColxA(rnd:Int, game:Int) = @{ Html(s"""<td class="KoSetxA"><div id="APP__KoRound_${coId}_${coPhId}_SetA_${rnd}_${game}" class="border-top border-right border-left p-1">&nbsp;</div></td><td class="KoColxP"><p class="KoDummy">&nbsp;</p><p id="APP__KoRound_${coId}_${coPhId}_Winner_${rnd}_${game}" class="KoPlayer"></p></td>""") } 
+@koCol2B(rnd:Int, game:Int) = @{ Html(s"""<td class="KoSetB"><div id="APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}" class="border-bottom border-right border-left p-1">&nbsp;</div></td><td class="KoCol2R"><p id="APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}" class="KoBalls">&nbsp;</p><p class="KoDummy">&nbsp;</p></td>""") }
+@koColxB(rnd:Int, game:Int) = @{ Html(s"""<td class="KoSetxB"><div id="APP__KoRound_${coId}_${coPhId}_SetB_${rnd}_${game}" class="border-bottom border-right border-left p-1">&nbsp;</div></td><td class="KoColxR"><p id="APP__KoRound_${coId}_${coPhId}_Balls_${rnd}_${game}" class="KoBalls">&nbsp;</p><p class="KoDummy">&nbsp;</p></td>""") }
+@ko2Leer()  = @{ Html(s"""<td></td><td></td>""") }
+@koBorder() = @{ Html(s"""<td style="border-left:1pt solid black;"></td><td></td>""") }
+
+<div class="leftscroll mt-2">
+	@koRound.size match {
+		case 2 => {
+			<table class="KoTable">
+				<tbody>			
+					<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>					
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+					</tr>	
+					<tr>@koCol01(1)  @koCol2A(1,1) </tr>
+					<tr>@koCol01(2)  @koCol2B(1,1) </tr>
+				</tbody>
+			</table>
+		}				
+
+		case 4 => {
+			<table class="KoTable">
+				<tbody>			
+					<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</span></td>					
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+					</tr>	
+					<tr>@koCol01(1)  @koCol2A(2,1)  @ko2Leer()   </tr>
+					<tr>@koCol01(2)  @koCol2B(2,1)  @koColxA(1,1)</tr>
+					<tr>@koCol01(3)  @koCol2A(2,2)  @koColxB(1,1)</tr>
+					<tr>@koCol01(4)  @koCol2B(2,2)  @ko2Leer()   </tr>
+				</tbody>
+			</table>
+		}				
+
+		case 8 => {
+			<table class="KoTable">
+				<tbody>			
+					<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.quarterfinal")</span></td>					
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+					</tr>	
+					<tr>@koCol01(1)  @koCol2A(3,1)  @ko2Leer()    @ko2Leer()   </tr>
+					<tr>@koCol01(2)  @koCol2B(3,1)  @koColxA(2,1) @ko2Leer()   </tr>
+					<tr>@koCol01(3)  @koCol2A(3,2)  @koColxB(2,1) @koBorder()  </tr>
+					<tr>@koCol01(4)  @koCol2B(3,2)  @ko2Leer()    @koColxA(1,1)</tr>				
+					<tr>@koCol01(5)  @koCol2A(3,3)  @ko2Leer()    @koColxB(1,1)</tr>
+					<tr>@koCol01(6)  @koCol2B(3,3)  @koColxA(2,2) @koBorder()  </tr>	
+					<tr>@koCol01(7)  @koCol2A(3,4)  @koColxB(2,2) @ko2Leer()   </tr>
+					<tr>@koCol01(8)  @koCol2B(3,4)  @ko2Leer()    @ko2Leer()   </tr>
+				</tbody>
+			</table>
+		}				
+
+		case 16 => {
+			<table class="KoTable">
+				<tbody>			
+					<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.last16")</span></td>					
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.quarterfinal")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+					</tr>	
+					<tr>@koCol01(1)  @koCol2A(4,1)  @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(2)  @koCol2B(4,1)  @koColxA(3,1) @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(3)  @koCol2A(4,2)  @koColxB(3,1) @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(4)  @koCol2B(4,2)  @ko2Leer()    @koColxA(2,1) @ko2Leer()    </tr>				
+					<tr>@koCol01(5)  @koCol2A(4,3)  @ko2Leer()    @koColxB(2,1) @koBorder()   </tr>
+					<tr>@koCol01(6)  @koCol2B(4,3)  @koColxA(3,2) @koBorder()   @koBorder()   </tr>	
+					<tr>@koCol01(7)  @koCol2A(4,4)  @koColxB(3,2) @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(8)  @koCol2B(4,4)  @ko2Leer()    @ko2Leer()    @koColxA(1,1) </tr>
+					<tr>@koCol01(9)  @koCol2A(4,5)  @ko2Leer()    @ko2Leer()    @koColxB(1,1) </tr>
+					<tr>@koCol01(10) @koCol2B(4,5)  @koColxA(3,3) @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(11) @koCol2A(4,6)  @koColxB(3,3) @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(12) @koCol2B(4,6)  @ko2Leer()    @koColxA(2,2) @koBorder()   </tr>
+					<tr>@koCol01(13) @koCol2A(4,7)  @ko2Leer()    @koColxB(2,2) @ko2Leer()    </tr>
+					<tr>@koCol01(14) @koCol2B(4,7)  @koColxA(3,4) @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(15) @koCol2A(4,8)  @koColxB(3,4) @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(16) @koCol2B(4,8)  @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>
+				</tbody>
+			</table>
+		}		
+
+		case 32 => {
+			<table class="KoTable">
+				<tbody>			
+					<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.last32")</span></td>					
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last16")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.quarterfinal")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+					</tr>	
+					<tr>@koCol01(1)  @koCol2A(5,1)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(2)  @koCol2B(5,1)  @koColxA(4,1) @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(3)  @koCol2A(5,2)  @koColxB(4,1) @koBorder()   @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(4)  @koCol2B(5,2)  @ko2Leer()    @koColxA(3,1) @ko2Leer()    @ko2Leer()    </tr>				
+					<tr>@koCol01(5)  @koCol2A(5,3)  @ko2Leer()    @koColxB(3,1) @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(6)  @koCol2B(5,3)  @koColxA(4,2) @koBorder()   @koBorder()   @ko2Leer()    </tr>	
+					<tr>@koCol01(7)  @koCol2A(5,4)  @koColxB(4,2) @ko2Leer()    @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(8)  @koCol2B(5,4)  @ko2Leer()    @ko2Leer()    @koColxA(2,1) @ko2Leer()    </tr>
+					<tr>@koCol01(9)  @koCol2A(5,5)  @ko2Leer()    @ko2Leer()    @koColxB(2,1) @koBorder()   </tr>
+					<tr>@koCol01(10) @koCol2B(5,5)  @koColxA(4,3) @ko2Leer()    @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(11) @koCol2A(5,6)  @koColxB(4,3) @koBorder()   @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(12) @koCol2B(5,6)  @ko2Leer()    @koColxA(3,2) @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(13) @koCol2A(5,7)  @ko2Leer()    @koColxB(3,2) @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(14) @koCol2B(5,7)  @koColxA(4,4) @koBorder()   @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(15) @koCol2A(5,8)  @koColxB(4,4) @ko2Leer()    @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(16) @koCol2B(5,8)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @koColxA(1,1) </tr>
+					<!-- 16 Block -->
+					<tr>@koCol01(17) @koCol2A(5,9)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @koColxB(1,1) </tr>
+					<tr>@koCol01(18) @koCol2B(5,9)  @koColxA(4,5) @ko2Leer()    @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(19) @koCol2A(5,10) @koColxB(4,5) @koBorder()   @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(20) @koCol2B(5,10) @ko2Leer()    @koColxA(3,3) @ko2Leer()    @koBorder()   </tr>
+					<tr>@koCol01(21) @koCol2A(5,11) @ko2Leer()    @koColxB(3,3) @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(22) @koCol2B(5,11) @koColxA(4,6) @koBorder()   @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(23) @koCol2A(5,12) @koColxB(4,6) @ko2Leer()    @koBorder()   @koBorder()   </tr>
+					<tr>@koCol01(24) @koCol2B(5,12) @ko2Leer()    @ko2Leer()    @koColxA(2,2) @koBorder()   </tr>
+					<tr>@koCol01(25) @koCol2A(5,13) @ko2Leer()    @ko2Leer()    @koColxB(2,2) @ko2Leer()    </tr>
+					<tr>@koCol01(26) @koCol2B(5,13) @koColxA(4,7) @ko2Leer()    @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(27) @koCol2A(5,14) @koColxB(4,7) @koBorder()   @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(28) @koCol2B(5,14) @ko2Leer()    @koColxA(3,4) @koBorder()   @ko2Leer()    </tr>
+					<tr>@koCol01(29) @koCol2A(5,15) @ko2Leer()    @koColxB(3,4) @ko2Leer()    @ko2Leer()    </tr>				
+					<tr>@koCol01(30) @koCol2B(5,15) @koColxA(4,8) @koBorder()   @ko2Leer()    @ko2Leer()    </tr>
+					<tr>@koCol01(31) @koCol2A(5,16) @koColxB(4,8) @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>				
+					<tr>@koCol01(32) @koCol2B(5,16) @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer()    </tr>
+				</tbody>
+			</table>
+		}
+
+		case 64 => {
+      <table class="KoTable">
+      	<tbody>			
+      		<tr class="mb-4">
+		  			<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.last64")</span></td>					
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last32")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last16")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.quarterfinal")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+		  		</tr>	
+      		<tr>@koCol01(1)  @koCol2A(6,1)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer()     @ko2Leer() </tr>
+      		<tr>@koCol01(2)  @koCol2B(6,1)  @koColxA(5,1) @ko2Leer()    @ko2Leer()    @ko2Leer()     @ko2Leer() </tr>
+      		<tr>@koCol01(3)  @koCol2A(6,2)  @koColxB(5,1) @koBorder()   @ko2Leer()    @ko2Leer()     @ko2Leer() </tr>
+      		<tr>@koCol01(4)  @koCol2B(6,2)  @ko2Leer()    @koColxA(4,1) @ko2Leer()    @ko2Leer()     @ko2Leer() </tr>				
+		  		<tr>@koCol01(5)  @koCol2A(6,3)  @ko2Leer()    @koColxB(4,1) @koBorder()   @ko2Leer()     @ko2Leer() </tr>
+		  		<tr>@koCol01(6)  @koCol2B(6,3)  @koColxA(5,2) @koBorder()   @koBorder()   @ko2Leer()     @ko2Leer() </tr>	
+		  		<tr>@koCol01(7)  @koCol2A(6,4)  @koColxB(5,2) @ko2Leer()    @koBorder()   @ko2Leer()     @ko2Leer() </tr>
+		  		<tr>@koCol01(8)  @koCol2B(6,4)  @ko2Leer()    @ko2Leer()    @koColxA(3,1) @ko2Leer()     @ko2Leer() </tr>
+          <tr>@koCol01(9)  @koCol2A(6,5)  @ko2Leer()    @ko2Leer()    @koColxB(3,1) @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(10) @koCol2B(6,5)  @koColxA(5,3) @ko2Leer()    @koBorder()   @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(11) @koCol2A(6,6)  @koColxB(5,3) @koBorder()   @koBorder()   @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(12) @koCol2B(6,6)  @ko2Leer()    @koColxA(4,2) @koBorder()   @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(13) @koCol2A(6,7)  @ko2Leer()    @koColxB(4,2) @ko2Leer()    @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(14) @koCol2B(6,7)  @koColxA(5,4) @koBorder()   @ko2Leer()    @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(15) @koCol2A(6,8)  @koColxB(5,4) @ko2Leer()    @ko2Leer()    @koBorder()    @ko2Leer() </tr>
+		  		<tr>@koCol01(16) @koCol2B(6,8)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @koColxA(2,1)  @ko2Leer() </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(17) @koCol2A(6,9)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @koColxB(2,1)  @koBorder() </tr>
+		  		<tr>@koCol01(18) @koCol2B(6,9)  @koColxA(5,5) @ko2Leer()    @ko2Leer()    @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(19) @koCol2A(6,10) @koColxB(5,5) @koBorder()   @ko2Leer()    @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(20) @koCol2B(6,10) @ko2Leer()    @koColxA(4,3) @ko2Leer()    @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(21) @koCol2A(6,11) @ko2Leer()    @koColxB(4,3) @koBorder()   @koBorder()    @koBorder() </tr>
+          <tr>@koCol01(22) @koCol2B(6,11) @koColxA(5,6) @koBorder()   @koBorder()   @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(23) @koCol2A(6,12) @koColxB(5,6) @ko2Leer()    @koBorder()   @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(24) @koCol2B(6,12) @ko2Leer()    @ko2Leer()    @koColxA(3,2) @koBorder()    @koBorder() </tr>
+		  		<tr>@koCol01(25) @koCol2A(6,13) @ko2Leer()    @ko2Leer()    @koColxB(3,2) @ko2Leer()     @koBorder() </tr>
+		  		<tr>@koCol01(26) @koCol2B(6,13) @koColxA(5,7) @ko2Leer()    @koBorder()   @ko2Leer()     @koBorder() </tr>
+		  		<tr>@koCol01(27) @koCol2A(6,14) @koColxB(5,7) @koBorder()   @koBorder()   @ko2Leer()     @koBorder() </tr>
+		  		<tr>@koCol01(28) @koCol2B(6,14) @ko2Leer()    @koColxA(4,4) @koBorder()   @ko2Leer()     @koBorder() </tr>
+		  		<tr>@koCol01(29) @koCol2A(6,15) @ko2Leer()    @koColxB(4,4) @ko2Leer()    @ko2Leer()     @koBorder() </tr>				
+		  		<tr>@koCol01(30) @koCol2B(6,15) @koColxA(5,8) @koBorder()   @ko2Leer()    @ko2Leer()     @koBorder() </tr>
+      		<tr>@koCol01(31) @koCol2A(6,16) @koColxB(5,8) @ko2Leer()    @ko2Leer()    @ko2Leer()     @koBorder() </tr>				
+      		<tr>@koCol01(32) @koCol2B(6,16) @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer()     @koColxA(1,1) </tr>
+		  		<!--  MIDDLE 64-->
+		  		<tr>@koCol01(33) @koCol2A(6,17) @ko2Leer()     @ko2Leer()    @ko2Leer()    @ko2Leer()    @koColxB(1,1) </tr>
+      		<tr>@koCol01(34) @koCol2B(6,17) @koColxA(5,9)  @ko2Leer()    @ko2Leer()    @ko2Leer()    @koBorder() </tr>
+      		<tr>@koCol01(35) @koCol2A(6,18) @koColxB(5,9)  @koBorder()   @ko2Leer()    @ko2Leer()    @koBorder() </tr>
+      		<tr>@koCol01(36) @koCol2B(6,18) @ko2Leer()     @koColxA(4,5) @ko2Leer()    @ko2Leer()    @koBorder() </tr>				
+		  		<tr>@koCol01(37) @koCol2A(6,19) @ko2Leer()     @koColxB(4,5) @koBorder()   @ko2Leer()    @koBorder() </tr>
+		  		<tr>@koCol01(38) @koCol2B(6,19) @koColxA(5,10) @koBorder()   @koBorder()   @ko2Leer()    @koBorder() </tr>
+		  		<tr>@koCol01(39) @koCol2A(6,20) @koColxB(5,10) @ko2Leer()    @koBorder()   @ko2Leer()    @koBorder() </tr>
+		  		<tr>@koCol01(40) @koCol2B(6,20) @ko2Leer()     @ko2Leer()    @koColxA(3,3) @ko2Leer()    @koBorder() </tr>
+          <tr>@koCol01(41) @koCol2A(6,21) @ko2Leer()     @ko2Leer()    @koColxB(3,3) @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(42) @koCol2B(6,21) @koColxA(5,11) @ko2Leer()    @koBorder()   @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(43) @koCol2A(6,22) @koColxB(5,11) @koBorder()   @koBorder()   @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(44) @koCol2B(6,22) @ko2Leer()     @koColxA(4,6) @koBorder()   @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(45) @koCol2A(6,23) @ko2Leer()     @koColxB(4,6) @ko2Leer()    @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(46) @koCol2B(6,23) @koColxA(5,12) @koBorder()   @ko2Leer()    @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(47) @koCol2A(6,24) @koColxB(5,12) @ko2Leer()    @ko2Leer()    @koBorder()   @koBorder() </tr>
+		  		<tr>@koCol01(48) @koCol2B(6,24) @ko2Leer()     @ko2Leer()    @ko2Leer()    @koColxA(2,2) @koBorder() </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(49) @koCol2A(6,25) @ko2Leer()     @ko2Leer()    @ko2Leer()    @koColxB(2,2) @ko2Leer() </tr>
+		  		<tr>@koCol01(50) @koCol2B(6,25) @koColxA(5,13) @ko2Leer()    @ko2Leer()    @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(51) @koCol2A(6,26) @koColxB(5,13) @koBorder()   @ko2Leer()    @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(52) @koCol2B(6,26) @ko2Leer()     @koColxA(4,7) @ko2Leer()    @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(53) @koCol2A(6,27) @ko2Leer()     @koColxB(4,7) @koBorder()   @koBorder()   @ko2Leer() </tr>
+          <tr>@koCol01(54) @koCol2B(6,27) @koColxA(5,14) @koBorder()   @koBorder()   @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(55) @koCol2A(6,28) @koColxB(5,14) @ko2Leer()    @koBorder()   @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(56) @koCol2B(6,28) @ko2Leer()     @ko2Leer()    @koColxA(3,4) @koBorder()   @ko2Leer() </tr>
+		  		<tr>@koCol01(57) @koCol2A(6,29) @ko2Leer()     @ko2Leer()    @koColxB(3,4) @ko2Leer()    @ko2Leer() </tr>
+		  		<tr>@koCol01(58) @koCol2B(6,29) @koColxA(5,15) @ko2Leer()    @koBorder()   @ko2Leer()    @ko2Leer() </tr>
+		  		<tr>@koCol01(59) @koCol2A(6,30) @koColxB(5,15) @koBorder()   @koBorder()   @ko2Leer()    @ko2Leer() </tr>
+		  		<tr>@koCol01(60) @koCol2B(6,30) @ko2Leer()     @koColxA(4,8) @koBorder()   @ko2Leer()    @ko2Leer() </tr>
+		  		<tr>@koCol01(61) @koCol2A(6,31) @ko2Leer()     @koColxB(4,8) @ko2Leer()    @ko2Leer()    @ko2Leer() </tr>				
+		  		<tr>@koCol01(62) @koCol2B(6,31) @koColxA(5,16) @koBorder()   @ko2Leer()    @ko2Leer()    @ko2Leer() </tr>
+      		<tr>@koCol01(63) @koCol2A(6,32) @koColxB(5,16) @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer() </tr>				
+      		<tr>@koCol01(64) @koCol2B(6,32) @ko2Leer()     @ko2Leer()    @ko2Leer()    @ko2Leer()    @ko2Leer() </tr>      		
+      	</tbody>
+		  </table>
+		}
+		
+		case 128 => {
+      <table class="KoTable">
+      	<tbody>			
+      		<tr class="mb-4">
+						<td></td><td class="KoHead1"><span class="tuse-font-1 text-secondary">@msg_("ko.last128")</span></td>	
+						<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last64")</span></td>				
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last32")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.last16")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.quarterfinal")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.semifinal")</td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.final")</span></td>
+      			<td></td><td><span class="tuse-font-1 text-secondary">@msg_("ko.winner")</span></td>
+		  		</tr>	
+      		<tr>@koCol01(1)  @koCol2A(7,1)  @ko2Leer()       @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+      		<tr>@koCol01(2)  @koCol2B(7,1)  @koColxA(6,1)    @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+      		<tr>@koCol01(3)  @koCol2A(7,2)  @koColxB(6,1)    @koBorder()    @ko2Leer()    @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+      		<tr>@koCol01(4)  @koCol2B(7,2)  @ko2Leer()       @koColxA(5,1)  @ko2Leer()    @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(5)  @koCol2A(7,3)  @ko2Leer()       @koColxB(5,1)  @koBorder()   @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(6)  @koCol2B(7,3)  @koColxA(6,2)    @koBorder()    @koBorder()   @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(7)  @koCol2A(7,4)  @koColxB(6,2)    @ko2Leer()     @koBorder()   @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(8)  @koCol2B(7,4)  @ko2Leer()       @ko2Leer()     @koColxA(4,1) @ko2Leer()     @ko2Leer()   @ko2Leer()     </tr>
+          <tr>@koCol01(9)  @koCol2A(7,5)  @ko2Leer()       @ko2Leer()     @koColxB(4,1) @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(10) @koCol2B(7,5)  @koColxA(6,3)    @ko2Leer()     @koBorder()   @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(11) @koCol2A(7,6)  @koColxB(6,3)    @koBorder()    @koBorder()   @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(12) @koCol2B(7,6)  @ko2Leer()       @koColxA(5,2)  @koBorder()   @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(13) @koCol2A(7,7)  @ko2Leer()       @koColxB(5,2)  @ko2Leer()    @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(14) @koCol2B(7,7)  @koColxA(6,4)    @koBorder()    @ko2Leer()    @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(15) @koCol2A(7,8)  @koColxB(6,4)    @ko2Leer()     @ko2Leer()    @koBorder()    @ko2Leer()   @ko2Leer()     </tr>
+		  		<tr>@koCol01(16) @koCol2B(7,8)  @ko2Leer()       @ko2Leer()     @ko2Leer()    @koColxA(3,1)  @ko2Leer()   @ko2Leer()     </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(17) @koCol2A(7,9)  @ko2Leer()       @ko2Leer()     @ko2Leer()    @koColxB(3,1)  @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(18) @koCol2B(7,9)  @koColxA(6,5)    @ko2Leer()     @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(19) @koCol2A(7,10) @koColxB(6,5)    @koBorder()    @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(20) @koCol2B(7,10) @ko2Leer()       @koColxA(5,3)  @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(21) @koCol2A(7,11) @ko2Leer()       @koColxB(5,3)  @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+          <tr>@koCol01(22) @koCol2B(7,11) @koColxA(6,6)    @koBorder()    @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(23) @koCol2A(7,12) @koColxB(6,6)    @ko2Leer()     @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(24) @koCol2B(7,12) @ko2Leer()       @ko2Leer()     @koColxA(4,2) @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(25) @koCol2A(7,13) @ko2Leer()       @ko2Leer()     @koColxB(4,2) @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(26) @koCol2B(7,13) @koColxA(6,7)    @ko2Leer()     @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(27) @koCol2A(7,14) @koColxB(6,7)    @koBorder()    @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(28) @koCol2B(7,14) @ko2Leer()       @koColxA(5,4)  @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(29) @koCol2A(7,15) @ko2Leer()       @koColxB(5,4)  @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(30) @koCol2B(7,15) @koColxA(6,8)    @koBorder()    @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+      		<tr>@koCol01(31) @koCol2A(7,16) @koColxB(6,8)    @ko2Leer()     @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+      		<tr>@koCol01(32) @koCol2B(7,16) @ko2Leer()       @ko2Leer()     @ko2Leer()    @ko2Leer()     @koColxA(2,1) @ko2Leer()    </tr>
+		  		<!--  MIDDLE 64-->   
+		  		<tr>@koCol01(33) @koCol2A(7,17) @ko2Leer()       @ko2Leer()     @ko2Leer()    @ko2Leer()     @koColxB(2,1) @koBorder()    </tr>
+      		<tr>@koCol01(34) @koCol2B(7,17) @koColxA(6,9)    @ko2Leer()     @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+      		<tr>@koCol01(35) @koCol2A(7,18) @koColxB(6,9)    @koBorder()    @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+      		<tr>@koCol01(36) @koCol2B(7,18) @ko2Leer()       @koColxA(5,5)  @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(37) @koCol2A(7,19) @ko2Leer()       @koColxB(5,5)  @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(38) @koCol2B(7,19) @koColxA(6,10)   @koBorder()    @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(39) @koCol2A(7,20) @koColxB(6,10)   @ko2Leer()     @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(40) @koCol2B(7,20) @ko2Leer()       @ko2Leer()     @koColxA(4,3) @ko2Leer()     @koBorder()   @koBorder()    </tr>
+          <tr>@koCol01(41) @koCol2A(7,21) @ko2Leer()       @ko2Leer()     @koColxB(4,3) @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(42) @koCol2B(7,21) @koColxA(6,11)   @ko2Leer()     @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(43) @koCol2A(7,22) @koColxB(6,11)   @koBorder()    @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(44) @koCol2B(7,22) @ko2Leer()       @koColxA(5,6)  @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(45) @koCol2A(7,23) @ko2Leer()       @koColxB(5,6)  @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(46) @koCol2B(7,23) @koColxA(6,12)   @koBorder()    @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(47) @koCol2A(7,24) @koColxB(6,12)   @ko2Leer()     @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(48) @koCol2B(7,24) @ko2Leer()       @ko2Leer()     @ko2Leer()    @koColxA(3,2)  @koBorder()   @koBorder()    </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(49) @koCol2A(7,25) @ko2Leer()       @ko2Leer()     @ko2Leer()    @koColxB(3,2)  @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(50) @koCol2B(7,25) @koColxA(6,13)   @ko2Leer()     @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(51) @koCol2A(7,26) @koColxB(6,13)   @koBorder()    @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(52) @koCol2B(7,26) @ko2Leer()       @koColxA(5,7)  @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(53) @koCol2A(7,27) @ko2Leer()       @koColxB(5,7)  @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+          <tr>@koCol01(54) @koCol2B(7,27) @koColxA(6,14)   @koBorder()    @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(55) @koCol2A(7,28) @koColxB(6,14)   @ko2Leer()     @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(56) @koCol2B(7,28) @ko2Leer()       @ko2Leer()     @koColxA(4,4) @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(57) @koCol2A(7,29) @ko2Leer()       @ko2Leer()     @koColxB(4,4) @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(58) @koCol2B(7,29) @koColxA(6,15)   @ko2Leer()     @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(59) @koCol2A(7,30) @koColxB(6,15)   @koBorder()    @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(60) @koCol2B(7,30) @ko2Leer()       @koColxA(5,8)  @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(61) @koCol2A(7,31) @ko2Leer()       @koColxB(5,8)  @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(62) @koCol2B(7,31) @koColxA(6,16)   @koBorder()    @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+      		<tr>@koCol01(63) @koCol2A(7,32) @koColxB(6,16)   @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+      		<tr>@koCol01(64) @koCol2B(7,32) @ko2Leer()       @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @koColxA(1,1) </tr>
+
+          <!--  MIDDLE 128-->
+
+      		<tr>@koCol01(65)  @koCol2A(7,33)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @koColxB(1,1) </tr>
+      		<tr>@koCol01(66)  @koCol2B(7,33)  @koColxA(6,17) @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+      		<tr>@koCol01(67)  @koCol2A(7,34)  @koColxB(6,17) @koBorder()    @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+      		<tr>@koCol01(68)  @koCol2B(7,34)  @ko2Leer()     @koColxA(5,9)  @ko2Leer()    @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(69)  @koCol2A(7,35)  @ko2Leer()     @koColxB(5,9)  @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(70)  @koCol2B(7,35)  @koColxA(6,18) @koBorder()    @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(71)  @koCol2A(7,36)  @koColxB(6,18) @ko2Leer()     @koBorder()   @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(72)  @koCol2B(7,36)  @ko2Leer()     @ko2Leer()     @koColxA(4,5) @ko2Leer()     @ko2Leer()    @koBorder()    </tr>
+          <tr>@koCol01(73)  @koCol2A(7,37)  @ko2Leer()     @ko2Leer()     @koColxB(4,5) @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(74)  @koCol2B(7,37)  @koColxA(6,19) @ko2Leer()     @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(75)  @koCol2A(7,38)  @koColxB(6,19) @koBorder()    @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(76)  @koCol2B(7,38)  @ko2Leer()     @koColxA(5,10) @koBorder()   @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(77)  @koCol2A(7,39)  @ko2Leer()     @koColxB(5,10) @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(78)  @koCol2B(7,39)  @koColxA(6,20) @koBorder()    @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(79)  @koCol2A(7,40)  @koColxB(6,20) @ko2Leer()     @ko2Leer()    @koBorder()    @ko2Leer()    @koBorder()    </tr>
+		  		<tr>@koCol01(80)  @koCol2B(7,40)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @koColxA(3,3)  @ko2Leer()    @koBorder()    </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(81)  @koCol2A(7,41)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @koColxB(3,3)  @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(82)  @koCol2B(7,41)  @koColxA(6,21) @ko2Leer()     @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(83)  @koCol2A(7,42)  @koColxB(6,21) @koBorder()    @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(84)  @koCol2B(7,42)  @ko2Leer()     @koColxA(5,11) @ko2Leer()    @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(85)  @koCol2A(7,43)  @ko2Leer()     @koColxB(5,11) @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+          <tr>@koCol01(86)  @koCol2B(7,43)  @koColxA(6,22) @koBorder()    @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(87)  @koCol2A(7,44)  @koColxB(6,22) @ko2Leer()     @koBorder()   @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(88)  @koCol2B(7,44)  @ko2Leer()     @ko2Leer()     @koColxA(4,6) @koBorder()    @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(89)  @koCol2A(7,45)  @ko2Leer()     @ko2Leer()     @koColxB(4,6) @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(90)  @koCol2B(7,45)  @koColxA(6,23) @ko2Leer()     @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(91)  @koCol2A(7,46)  @koColxB(6,23) @koBorder()    @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(92)  @koCol2B(7,46)  @ko2Leer()     @koColxA(5,12) @koBorder()   @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(93)  @koCol2A(7,47)  @ko2Leer()     @koColxB(5,12) @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+		  		<tr>@koCol01(94)  @koCol2B(7,47)  @koColxA(6,24) @koBorder()    @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+      		<tr>@koCol01(95)  @koCol2A(7,48)  @koColxB(6,24) @ko2Leer()     @ko2Leer()    @ko2Leer()     @koBorder()   @koBorder()    </tr>
+      		<tr>@koCol01(96)  @koCol2B(7,48)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @ko2Leer()     @koColxA(2,2) @koBorder()    </tr>
+		  		<!--  MIDDLE 64-->
+		  		<tr>@koCol01(97)  @koCol2A(7,49)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @ko2Leer()     @koColxB(2,2) @ko2Leer()    </tr>
+      		<tr>@koCol01(98)  @koCol2B(7,49)  @koColxA(6,25) @ko2Leer()     @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+      		<tr>@koCol01(99)  @koCol2A(7,50)  @koColxB(6,25) @koBorder()    @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+      		<tr>@koCol01(100) @koCol2B(7,50)  @ko2Leer()     @koColxA(5,13) @ko2Leer()    @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(101) @koCol2A(7,51)  @ko2Leer()     @koColxB(5,13) @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(102) @koCol2B(7,51)  @koColxA(6,26) @koBorder()    @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(103) @koCol2A(7,52)  @koColxB(6,26) @ko2Leer()     @koBorder()   @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(104) @koCol2B(7,52)  @ko2Leer()     @ko2Leer()     @koColxA(4,7) @ko2Leer()     @koBorder()   @ko2Leer()    </tr>
+          <tr>@koCol01(105) @koCol2A(7,53)  @ko2Leer()     @ko2Leer()     @koColxB(4,7) @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(106) @koCol2B(7,53)  @koColxA(6,27) @ko2Leer()     @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(107) @koCol2A(7,54)  @koColxB(6,27) @koBorder()    @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(108) @koCol2B(7,54)  @ko2Leer()     @koColxA(5,14) @koBorder()   @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(109) @koCol2A(7,55)  @ko2Leer()     @koColxB(5,14) @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(110) @koCol2B(7,55)  @koColxA(6,28) @koBorder()    @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(111) @koCol2A(7,56)  @koColxB(6,28) @ko2Leer()     @ko2Leer()    @koBorder()    @koBorder()   @ko2Leer()    </tr>
+		  		<tr>@koCol01(112) @koCol2B(7,56)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @koColxA(3,4)  @koBorder()   @ko2Leer()    </tr>
+	        <!-- 16 Block -->
+		  		<tr>@koCol01(113) @koCol2A(7,57)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @koColxB(3,4)  @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(114) @koCol2B(7,57)  @koColxA(6,29) @ko2Leer()     @ko2Leer()    @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(115) @koCol2A(7,58)  @koColxB(6,29) @koBorder()    @ko2Leer()    @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(116) @koCol2B(7,58)  @ko2Leer()     @koColxA(5,15) @ko2Leer()    @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(117) @koCol2A(7,59)  @ko2Leer()     @koColxB(5,15) @koBorder()   @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+          <tr>@koCol01(118) @koCol2B(7,59)  @koColxA(6,30) @koBorder()    @koBorder()   @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(119) @koCol2A(7,60)  @koColxB(6,30) @ko2Leer()     @koBorder()   @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(120) @koCol2B(7,60)  @ko2Leer()     @ko2Leer()     @koColxA(4,8) @koBorder()    @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(121) @koCol2A(7,61)  @ko2Leer()     @ko2Leer()     @koColxB(4,8) @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(122) @koCol2B(7,61)  @koColxA(6,31) @ko2Leer()     @koBorder()   @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(123) @koCol2A(7,62)  @koColxB(6,31) @koBorder()    @koBorder()   @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(124) @koCol2B(7,62)  @ko2Leer()     @koColxA(5,16) @koBorder()   @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(125) @koCol2A(7,63)  @ko2Leer()     @koColxB(5,16) @ko2Leer()    @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+		  		<tr>@koCol01(126) @koCol2B(7,63)  @koColxA(6,32) @koBorder()    @ko2Leer()    @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+      		<tr>@koCol01(127) @koCol2A(7,64)  @koColxB(6,32) @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>
+      		<tr>@koCol01(128) @koCol2B(7,64)  @ko2Leer()     @ko2Leer()     @ko2Leer()    @ko2Leer()     @ko2Leer()    @ko2Leer()    </tr>					
+
+      	</tbody>
+		  </table>
+		}
+  }	
+</div>
