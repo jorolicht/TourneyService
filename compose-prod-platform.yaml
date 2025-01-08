@@ -1,0 +1,68 @@
+# Rotate nginx access.log, send USR1 signal to webserver 
+# but first rename access.log file, then send signal to process in container 
+# docker compose -f compose-prod-platform.yaml --env-file env.sh kill -s USR1 webserver
+
+services:
+  webserver:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./nginx/log:/var/log/nginx/     # for logging
+      - ./www/html/:/var/www/html/      # for testing
+      - ./nginx/conf/:/etc/nginx/conf.d/
+      - ./certbot/www:/var/www/certbot/
+      - ./certbot/conf/:/etc/nginx/ssl/
+    depends_on:
+      - trny-service
+        
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/
+      - ./certbot/conf/:/etc/letsencrypt/ 
+
+  trny-service:
+    image: jorolich/trnyserver-image:${APP_VERSION}   # Actual image name of your Play Framework app
+    restart: always
+    container_name: trny-container
+
+    labels:
+      MAINTAINER: ${APP_MAINTAINER}
+      VENDOR: ${APP_VENDOR}
+      IMAGE_DESCRIPTION: "This is a docker play framework image for the tourney service/server."
+ 
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      WORKDIR: ${WORKDIR}
+      LOGFILE_PATH: ${WORKDIR}/logs
+      PIDFILE_PATH: ${PIDFILE_PATH}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      AUTHENTICATOR_SIGNER_KEY: ${AUTHENTICATOR_SIGNER_KEY}
+      AUTHENTICATOR_CRYPTER_KEY: ${AUTHENTICATOR_CRYPTER_KEY}
+
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+
+    ports:
+      - "${PLAY_HTTP_PORT}:${PLAY_HTTP_PORT}"      
+    volumes:
+      - "./logs:${WORKDIR}/logs:rw"
+      - "./database:${WORKDIR}/db:rw"
+      - "./public:${WORKDIR}/public:rw"
+
+networks:
+  www-network:
+    driver: bridge

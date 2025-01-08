@@ -83,6 +83,11 @@ class HomeCtrl @Inject()(
   def start(ucName: String="", ucParam: String="", ucInfo: String="") = Action { implicit request =>
     import tourn.services.Crypto
     logger.info(s"start(${ucName},${ucParam},${ucInfo})")
+
+    val dbpath = cfg.get[String]("slick.dbs.license.db.url") 
+    logger.info(s"db configuration: ${dbpath}")
+
+
     val ctx = Crypto.getSessionFromCookie(request.cookies.get("TuSe"), messagesApi.preferred(request))
 
     if (ctx.orgId <= 0) {

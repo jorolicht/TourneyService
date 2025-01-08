@@ -1,0 +1,47 @@
+services:
+  trny-service:
+    image: trnyserver-image   # Actual image name of your Play Framework app
+    restart: always 
+    build:
+      context: server/.
+      args:
+        - APP_VERSION=${APP_VERSION}
+        - BUILD_ENV=${BUILD_ENV}
+        - WORKDIR=${WORKDIR}
+        - DEMON_USER=${DEMON_USER}
+        - DEMON_USERID=${DEMON_USERID}      
+        
+    container_name: trny-container
+
+    labels:
+      MAINTAINER: ${APP_MAINTAINER}
+      VENDOR: ${APP_VENDOR}
+      IMAGE_DESCRIPTION: "This is a docker play framework image for the tourney service/server."
+ 
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      WORKDIR: ${WORKDIR}
+      LOGFILE_PATH: ${WORKDIR}/logs
+      PIDFILE_PATH: ${PIDFILE_PATH}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      AUTHENTICATOR_SIGNER_KEY: ${AUTHENTICATOR_SIGNER_KEY}
+      AUTHENTICATOR_CRYPTER_KEY: ${AUTHENTICATOR_CRYPTER_KEY}
+
+      PLAY_HTTP_PORT: ${PLAY_HTTP_PORT}
+      PLAY_HTTP_HOST: ${PLAY_HTTP_HOST}
+      PLAY_HTTP_SECRET_KEY: ${PLAY_HTTP_SECRET_KEY}
+      PLAY_MAILER_HOST: ${PLAY_MAILER_HOST}
+      PLAY_MAILER_PORT: ${PLAY_MAILER_PORT}
+      PLAY_MAILER_USER: ${PLAY_MAILER_USER}
+      PLAY_MAILER_PASSWORD: ${PLAY_MAILER_PASSWORD}
+      PLAY_MAILER_DEBUG: ${PLAY_MAILER_DEBUG}
+      PLAY_MAILER_MOCK: ${PLAY_MAILER_MOCK}
+
+    ports:
+      - "${PLAY_HTTP_PORT}:${PLAY_HTTP_PORT}"      
+    volumes:
+      - "./logs:${WORKDIR}/logs:rw"
+      - "./database:${WORKDIR}/db:rw"

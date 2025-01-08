@@ -1,61 +1,485 @@
 ###
-# Message Entries
+# Email messages
 ###
-greeting                                            = Herzlich Willkommen!
-
-###
-# App Main Messages / Configuration Issues
-###
-config.cookie.confirmation    = true
-config.LogLevel    = error
-
-app.mockup                                          = false
-app.version = 2024-03DE181
-app.date    = 2024-03-07
-app.url.home                                        = https://www.turnier-service.info
-app.url.doc                                         = https://turnier-service.org/handbook/
-app.url.download                                    = https://turnier-service.org/download/  
-app.error.code                                      = Code:
-app.error.description                               = Beschreibung:
-app.error                                           = Upps ... wir konnten leider genau diese eine Seite nicht liefern. 
-app.error.tip                                       = Bitte Ruhe bewahren, eventuell Kaffee holen und Eingabe neu überdenken.
-app.srv.error                                       = Upps ... das sieht nach einem Server- oder Programmierfehler aus. 
-app.srv.error.tip                                   = Bitte Ruhe bewahren, eventuell Kaffee holen und Verantwortliche freundlich informieren.
-app.lang                                            = de    
-app.title                                           = Turnierservice
-app.ping                                            = Ping von IP-Adresse {0} mit Lizenz: {1}
-app.test                                            = Sprache {0} ist de ... #'ÄöüÜl@%&?ß!^^°
-app.emailhelp                                       = Bitte gültige E-Mail-Adresse eingeben
-
+email.code.from                                     = Turnier Service <info@turnier-service.org>
+email.code.subject                                  = Turnier-Programm Verification Code
+email.code.title                                    = Verifizierung Code
+email.code.greeting                                 = Lieber Sportsfreund {0},
+email.code.body.html                                = <p>Der Verifizierungscode lautet: <strong>{0}</strong></p><p>Bitte diesen Code in die Registrierungsseite eingeben.</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
+email.code.body.plain                               = Der Verifizierungscode lautet: {0} \n  Bitte diesen Code in die Registrierungsseite eingeben.\n\n  Viele Grüße\n\n  Turnier-Service Team
+email.password.from                                 = Turnier Service <info@turnier-service.org>
+email.password.subject                              = Turnier-Programm Authentisierungsinformation
+email.password.title                                = Passwort-Reset
+email.password.greeting                             = Lieber Sportsfreund {0},
+email.password.body.html                            = <p>das neue Passwort lautet: <strong>{0}</strong></p><p>Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen)</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
+email.password.body.plain                           = das neue Passwort lautet: {0} \n Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen).\n\n  Viele Grüße\n\n  Turnier-Service Team
+email.license.from                                  = Turnier Service <info@turnier-service.org>
+email.license.subject                               = Turnier-Programm Lizenzcode
+email.license.title                                 = Turnier-Programm Lizenzcode
+email.license.greeting                              = Lieber Sportsfreund {0},
+email.license.prolog.html                           = <p>anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
+email.license.html                                  = <h5>{0}</h5>
+email.license.full.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
+email.license.free.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
+email.license.prolog.plain                          = \n\n anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).\n
+email.license.plain                                 = \n\n {0} \n\n
+email.license.full.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
+email.license.free.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
 
 ###
-# Header and Footer
+# Usecase Tourney Administrator License
 ###
-app.header.title                                    = <strong>&nbsp;Turnierservice</strong>
-app.header.title.club                               = <strong>&nbsp;Turnierservice</strong> - {0}
-app.header.title.playfields                         = <strong>&nbsp;{0}</strong> - {1}
-app.header.title.demo.playfields                    = <strong>&nbsp;TTC DEMO e.V.</strong> - Demo Turnier
-app.header.manager                                  = TURNIERLEITUNG
-app.header.login                                    = LOGIN
-app.header.logout                                   = LOGOUT
-app.header.loginInfo                                = User:
-app.header.club                                     = Verein
-app.header.club.error                               = Verein/unknown
-app.header.register                                 = REGISTRIERUNG
-app.header.download                                 = DOWNLOAD
-app.header.handbook                                 = HANDBUCH
-app.header.register                                 = REGISTRIERUNG
-app.header.demo                                     = DEMO
-app.header.configuration                            = EINSTELLUNGEN
+admin.notallowed.header                               = Security-Check 
+admin.notallowed.body                                 = You are not allowed to do administrative tasks
+admin.upload.header                                   = Upload Licenses
+admin.button.upload                                   = UPLOAD
+admin.upload.info                                     = License-Datei in CSV Format
+admin.license.view                                    = Lizenzverwaltung
+admin.license.club                                    = Verein
+admin.license.placeholder.club                        = Vereinsname 
+admin.license.clubid                                  = ClubId
+admin.license.placeholder.clubid                      = VereinsNr
+admin.license.directory                               = Verzeichnis
+admin.license.placeholder.directory                   = Club-Directory/Club-Pfad
+admin.license.name                                    = Name
+admin.license.placeholder.name                        = Name, Vorname
+admin.license.info                                    = Info
+admin.license.email                                   = E-Mail-Kontakt
+admin.license.placeholder.email                       = max.mustermann@googlemail.com
+admin.license.license                                 = Lizenz
+admin.license.placeholder.license                     = <clubdir/licensecode>
+admin.license.delete.header                           = Lizenz löschen
+admin.license.delete.body                             = Soll die Lizenz von {0} wirklich gelöscht werden?
+admin.license.delete.body.error                       = Bitte zuerst eine Lizenz auswählen!
+admin.license.delete.button.cancel                    = ABBRUCH
+admin.license.delete.button.ok                        = LÖSCHEN
+admin.license.delete.button.error.ok                  = OK
+admin.license.update.header                           = Lizenz Aktualisierung
+admin.license.update.body                             = Soll die Lizenz von {0} wirklich geändert werden?
+admin.license.update.button.cancel                    = ABBRUCH
+admin.license.update.button.ok                        = AKTUALISIERUNG
+admin.license.yes                                     = Ja
+admin.license.no                                      = Nein
 
-app.footer.copyright1                               = Copyright
-app.footer.copyright2                               = ClApLiMa (Cloud-Application Lifecycle Management)
-app.footer.impressum                                = Impressum
-app.footer.dataprotection                           = Datenschutz
-app.footer.author                                   = Autor: {0}
-app.footer.changedate                               = Letzte Änderung: {0} 
 
-app.certificate                                     = Urkunde
+###
+# Usecase Tourney Administrator Database
+###
+admin.database.view                                   = Verwaltung Turnierdatenbanken
+admin.database.tourneyid                              = TurnierNr
+admin.database.placeholder.tourneyid                  = #
+admin.database.club                                   = Verein
+admin.database.placeholder.club                       = Vereinsname
+admin.database.date                                   = Datum
+admin.database.placeholder.date                       = Format: JJJJMMDD
+admin.database.orgdir                                 = Club-Path
+admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
+
+
+app.version = 184DE2025-01
+app.date    = 2025-01-07
+
+###
+# Usecase Info General
+###
+info.disabled.title                                   = HINWEIS
+info.disabled.image                                   = notlucky
+info.disabled.alt                                     = Turnierinformationen nicht verfügbar - Turnierauswahl erforderlich
+info.disabled.description                             = Turnierinformationen sind erst nach der Auswahl eines Turnieres verfügbar. Die Selektion erfolgt über die Turniersuche.
+info.enabled.title                                    = Turnierinformation
+info.enabled.image                                    = tourneydata
+info.enabled.description                              = für {0}
+info.enabled.alt                                       = Turnierinformationen für {0}
+
+
+###
+# Usecase Info Player
+###                                     
+info.player.count                                     = Anzahl Spieler: 
+info.player.noEntry                                   = Keine Wettbewerbe mit gemeldeten Spielern vorhanden 
+info.player.count                                     = Anzahl Spieler: 
+info.player.header.nr                                 = #
+info.player.header.name                               = Name
+info.player.header.club                               = Verein
+info.player.header.place                              = Platzierung
+info.player.header.ttr                                = TTR
+info.player.noplayer                                  = Keine Spieler gemeldet
+
+
+###
+# Usecase Info Competition
+###   
+info.competition.description                          = Wettbewerb
+info.competition.ttrRange                             = TTR Bereich
+info.competition.startTime                            = StartZeit
+info.competition.cntPlayer                            = #Spieler
+info.competition.status                               = Status
+info.competition.noEntry                              = Keine Einträge für Wettbewerbe vorhanden
+
+
+###
+# Usecase Info Playfield
+###   
+info.playfield.tableNo                                = Tisch
+info.playfield.compName                               = Wettbewerb
+info.playfield.playerA                                = Spieler A
+info.playfield.playerB                                = Spieler B
+info.playfield.info                                   = Info
+info.playfield.noEntry                                = Keine Tischeinträge vorhanden
+
+
+###
+# Usecase  Info Schedule
+###   
+info.schedule.register                                = Anmeldung
+info.schedule.description                             = Wettbewerb
+info.schedule.ttrRange                                = TTR Bereich
+info.schedule.startTime                               = StartZeit
+info.schedule.competitions                            = Wettbewerbe
+info.schedule.competition                             = Wettbewerb
+info.schedule.noEntry                                 = z.Z. keine Einträge für Wettbewerbe vorhanden
+info.schedule.optionalinfo                            = Turnierhinweise
+info.schedule.info                                    = Turnier
+info.schedule.date                                    = Datum
+info.schedule.email                                   = E-Mail-Adresse
+info.schedule.date.range                              = {0} - {1}
+info.schedule.selcompetition                          = Auswahl des Wettbewerb
+info.schedule.plh.playerdata                          = Spielerdaten
+info.schedule.plh.name                                = Name, Vorname
+info.schedule.plh.club                                = Club/Verein
+info.schedule.plh.email                               = max.mustermann@domain.com
+info.schedule.plh.ttr                                 = TTR-Wert
+info.schedule.plh.year                                = Jahrgang
+info.schedule.button.submit                           = ANMELDEN
+info.schedule.hint                                    = Zzt. sind keine weiteren Hinweise vom Veranstalter hinterlegt.
+info.schedule.comps.header.startTime                  = Startzeit
+info.schedule.comps.header.description                = Wettbewerb
+info.schedule.comps.header.ttrRange                   = TTR-Bereich
+info.schedule.comps.header.status                     = Status
+info.schedule.comps.header.noEntry                    = Zzt. sind keine Wettbewerbe vom Veranstalter konfiguriert.
+info.schedule.comps.header.noParts                    = Anmeldungen
+info.schedule.signup.invalidComp                      = Bitte einen Wettbewerb auswählen.
+info.schedule.signup.invalidname                      = Bitte Namen im Format: <Name>, <Vorname> eingeben.
+info.schedule.signup.closed                           = Keine Voranmeldungen mehr möglich.
+info.schedule.signup.notyetopen                       = Zzt. (noch) keine Voranmeldungen möglich
+info.schedule.signup.error                            = Bitte nutzen Sie E-Mail zur Anmeldung.
+info.schedule.signup.ok                               = Ihre Anmeldung wurde an den Turnierleiter gesendet.
+info.schedule.signup.error.header                     = Fehler bei der Registrierung:
+info.schedule.signup.ok.header                        = Anmeldung registriert:
+info.schedule.consent.text                            = Einwilligung zur elektronischen Datenverarbeitung. Die angegebenen Daten werden ausschließlich zur Durchführung des Turnieres verwendet. Dies beinhaltet eine Weitergabe der Daten und Spielergebnisse an den Organisator und eventuell eine Weiterleitung der Ergebnisse an zuständige Sportverbände sowie eine Veröffentlichung der Spielergebnisse mit Namen und Vereinsnamen.
+
+
+###
+# Usecase Info Misc
+###  
+info.results.noEntries                                = Bisher keine Wettbewerbe gestartet
+info.certificate.btn.print                            = URKUNDE
+
+
+###
+# Usecase Fullscreen
+###
+fullscreen.playfields.header.table                    = Tisch
+fullscreen.playfields.header.match                    = Begegnung
+fullscreen.playfields.header.info                     = Info
+fullscreen.playfields.noEntryMsg                      = zur Zeit keine Eintragungen für Tische
+fullscreen.playfields.title                           = Tischanzeige
+   
+###
+# Error Codes and Messages
+###
+err9999.test                                        = Error nicht dekodierbar, bzw. unbekannt: {0}
+err0000.communication.error                         = Kommunikationsfehler: Server nicht erreichbar
+err0001.decode.error                                = Fehlerdekodierung: {0} Hinweis: {1}
+err0002.ajax.reset                                  = Reset Authentisierung fehlgeschlagen {0} {1}
+err0003.ajax.authBasic                              = Basic Authentisierung fehlgeschlagen {0} {1}
+err0004.login.blocked                               = Benutzer-Authentisierung für eine Stunde gesperrt
+err0005.login.password                              = Benutzer-Authentisierung fehlgeschlagen ({0}.Versuch)
+err0006.login.licEmail                              = E-Mail/Lizenz {0} {1} oder Passwort nicht korrekt.
+err0007.ajax.getJson                                = Kommunikationsfehler getJson-Aufruf: {0} {1}
+err0008.ajax.postJson                               = Kommunikationsfehler postJson-Aufruf: {0} {1}
+err0009.ajax.postForm                               = Kommunikationsfehler postForm-Aufruf: {0} {1}
+err0010.call.delComp                                = ????
+err0011.trny.load                                   = Turnier {0} konnte nicht geladen werden
+err0012.trny.read                                   = Fehler beim Lesen des Turniers {0} orgDir/startDate: {1}
+err0013.trny.insufficient.rights                    = Fehlende Zugriffsrechte
+err0014.trny.compNotFound                           = Wettbewerb {0} nicht gefunden
+err0015.trny.compDate                               = Ungültiges Datum für Wettbewerb {0}
+err0016.trny.compExistsAlready                      = Wettbewerb mit gleichen Namen existiert bereits
+err0017.trny.compUpdate                             = Aktualisierung des Wettbewerbs nicht möglich
+err0018.get.decode                                  = GET-Aktion ungültige Parameter: {0} 
+err0019.call.getComps                               = Dekodierfehler getComps-Aufruf 
+err0020.decode.Competition                          = Fehler beim Dekodieren eines Wettbewerbs:  {0}
+err0021.call.getCompNumber                          = Fehler beim Dekodieren des Funktionsaufrufs getCompNumber, Wettbewerb: {0}
+err0022.post.decode                                 = POST-Aktion ungültige Parameter: {0} 
+err0023.post.regSingle                              = POST-Aktion regSingle gescheitert
+err0024.svc.setPlayerEmail.notFound                 = Service setPlayerEmail gescheitert, PlayerId not found {0}
+err0025.svc.getParticipantPlacement                 = Service getParticipantPlacement gescheitert kein Eintrag für {0} {1}
+err0026.svc.setParticipantPlacement                 = Service setParticipantPlacement gescheitert kein Eintrag für {0} {1
+err0027.tourney.setParticipantStatus                = Methode setParticipantStatus gescheitert, kein Eintrag für {0} {1}
+err0029.svc.getPlayfield                            = Service getPlayfield gescheitert kein Eintrag für {0}
+err0030.svc.getCompStatus                           = Service getCompStatus gescheitert keine Daten für Wettbewerb {0}
+err0031.svc.getCompName                             = Service getCompName gescheitert keine Daten für Wettbewerb {0}
+err0032.svc.setTournBase                            = Service setTournBase gescheitert keine Daten für Turnier {0}
+err0033.svc.getContent                              = Datei nicht lesbar/verfügbar: {0}
+err0034.ajax.getRequest                             = Kommunikationsfehler Ajax.get-Aufruf: {0} {1}
+err0035.svc.getCfgFile                              = Konfigurationsdatei nicht lesbar/verfügbar: {0}
+err0036.call.fileExists                             = Funktionsaufruf fileExists gescheitert: {0}
+err0037.call.getTournCfg                            = Funktionsaufruf getTournCfg Dekodierungsfehler: {0}
+err0038.decode.Players                              = Dekodierfehler Datentyp Players: {0}
+err0039.call.getTournPlayers                        = Funktionsaufruf getTournPlayers Dekodierungsfehler: {0}
+err0040.call.getTournClubs                          = Funktionsaufruf getTournClubs Dekodierungsfehler: {0}
+err0041.call.getPant2Comps                          = Funktionsaufruf getPant2Comps Dekodierungsfehler: {0}
+err0042.decode.Contact                              = Dekodierfehler Datentyp Contact: {0}
+err0043.decode.Address                              = Dekodierfehler Datentyp Address: {0}
+err0044.decode.Players                              = Dekodierfehler Datentyp Players (aus Seq[String]): {0}
+err0045.decode.Pant2Comps                           = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen (aus Seq[String]): {0}
+err0046.internal.server                             = Interner Server Fehler: {0}
+err0047.post.addTournCTT                            = Funktionsaufruf addTournCTT, fehlerhafte/fehlende Parameter
+err0048.trny.addSect                                = Funktionsaufruf addSect, Vorgänger nicht definiert
+err0049.decode.Playfield                            = Fehler beim Dekodieren der Spielfeldinformation: {0}
+err0050.decode.Club                                 = Fehler beim Dekodieren des Vereins(Club): {0}
+err0051.decode.Playfields                           = Fehler beim Dekodieren der Liste von Spielfeldinformation: {0}
+err0052.get.unkown                                  = Funktionsaufruf {0} nicht verfügbar
+err0053.get.fileExists                              = GET-Aktion fileExists gescheitert: {0}
+err0054.decode.Pant2Comp                            = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnung: {0}
+err0055.decode.Pant2Comps                           = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen: {0}
+err0056.decode.Clubs                                = Dekodierfehler Datentyp Clubs: {0}
+err0057.call.regDouble                              = Dekodierfehler reqDouble-Funktionsaufruf: {0}
+err0058.post.regDouble                              = POST-Aktion reqDouble gescheitert: {0}
+err0059.decode.Placement                            = Dekodierfehler Platzierung: {0}
+err0060.decode.Clubs                                = Dekodierfehler Datentyp Clubs (aus Seq[String]): {0}
+err0061.decode.Competitions                         = Dekodierfehler Datentyp Competitions (aus Seq[String]): {0}
+err0062.decode.TournBase                            = Dekodierfehler Datentyp TournBase: {0}
+err0063.post.unknown                                = POST-Aktion unbekannt: {0} 
+err0064.svc.addTournBase                            = Service addTournBase Fehler bei der Ausführung: {0} {1}
+err0065.svc.addTourney                              = Service addTourney Fehler bei der Ausführung: {0} {1}
+err0066.decode.Int                                  = Dekodierfehler Datentyp Integer: {0}
+err0067.decode.Long                                 = Dekodierfehler Datentyp Long: {0}
+err0068.decode.Boolean                              = Dekodierfehler Datentyp Boolean: {0}
+err0069.decode.String                               = Dekodierfehler Datentyp String: {0}
+err0070.decode.Tourney                              = Dekodierfehler Datentyp Tourney step {0}: {1}
+err0071.decode.TournRun                             = Dekodierfehler Datentyp TournRun: {0}
+err0080.access.invalidRights                        = Ungenügende Zugriffsrechte
+err0081.database.add                                = Datenbank-Fehler beim Hinzufügen von Datensätzen
+err0082.database.save                               = Datenbank-Fehler beim Sichern
+err0083.database.insert                             = Datenbank-Fehler beim Einfügen
+err0084.decode.PfieldInfo                           = Dekodierfehler Datentyp PfieldInfo: {0}
+err0085.access.insufficientRights                   = Geforderte Aktion nicht erlaubt, ungenügende Berechtigung
+err0086.access.notAuthenticated                     = Fehlerhafte Login Daten
+err0087.access.UnexpectedProviderError              = Vom (Login-)Provider wurde ein unerwarteter Fehler gemeldet
+err0088.access.couldNotAuthenticate                 = Fehlermeldung vom (Login-)Provider gemeldet, keine Authentisierung möglich
+err0089.ctrl.noMatchingTourney                      = Kein passendes Turnier gefunden
+err0090.internal.sidebarRedirect                    = Sidebar-Weiterleitung zu Directory-Eintrag fehlerhaft
+err0091.ajax.logout                                 = Fehlermeldung GET-Aktion: {0} {1} 
+err0092.email.password.send                         = Passwort Aktualisierung konnte nicht gesendet werden: {0}
+err0093.email.user.notfound                         = Passwort Aktualisierung konnte nicht gesendet werden, da E-Mail {0} nicht registriert ist
+err0094.login.noLic                                 = Authentisierung nicht möglich, da keine gültige Lizenz
+err0095.login.licenseupdate                         = Fehler beim Aktualisieren der Lizenz-Datenbank (Administrator verständigen) 
+err0096.login.emailpassword                         = E-Mail und/oder Passwort nicht korrekt
+err0097.login.invalid                               = Benutzer nicht berechtigt für diese Aktion
+err0098.usecase.unknown                             = Ungültige Anwendungsaktion bzw. ungültiges Kommando: {0}
+err0099.decode.License                              = Dekodierfehler Datentyp Lizenz: {0}
+err0100.licrequest.inuse                            = Fehler bei der Registrierung, Vereinsname wird bereits genutzt
+err0101.licrequest.database                         = License-Database not available
+err0102.licrequest.format                           = Allgemeiner Fehler, Registrierungsanforderung nicht gültig
+err0103.license.delete                              = Lizenzen {0} konnte nicht gelöscht werden
+err0104.license.update                              = Lizenzen {0} konnte nicht aktualisiert werden
+err0105.notallowed                                  = Benutzer-Aktion ist nicht autorisiert
+err0106.ctrl.sendVerifyCode                         = Fehler beim Senden des Verifizierungs-Code an: {0}
+err0107.sendEmail.parameter                         = Ungültige Parameter beim Senden einer E-Mail
+err0108.sendEmail.exception                         = Fehler beim Senden: {0}  
+err0109.sendEmail.service                           = E-Mail ungültig oder E-Mail-Service nicht verfügbar
+err0110.sendEmail.clubNotfound                      = Fehler Lizenz konnte nicht gesendet werden, Club nicht gefunden
+err0111.generate.PdfInvoice                         = Rechnung konnte nicht generiert werden
+err0112.decode.req.invoice                          = Ungültige Parameter beim Dekodieren der Lizenzanforderung
+err0123.svc.requestLicense                          = Service requestLicense Fehler beim Dekodieren: {0}
+err0124.invalidActionRequest                        = Geforderte Aktion nicht möglich: {0}
+err0125.setContentMD                                = Fehler beim Lesen des Markdown-Dokuments: {0}
+err0126.fileNotAvailable                            = Datei {0} nicht verfügbar
+err0127.svc.delPlayfield                            = Service delPlayfield code {0} nicht mehr registriert
+err0128.upload.file                                 = Datei konnte nicht hochgeladen werden, Grund: {0} 
+err0129.access.admin                                = Sorry keine Administrationsrechte 
+err0130.ctrl.uploadLic                              = Kontrollerfehler in Routine uploadLic
+err0131.login.emailnotfound                         = Kein Verein mit Organisator {0} registriert
+err0132.decode.Player                               = Dekodierfehler Datentyp Player: {0}
+err0133.get.noTourneyFound                          = GET-Aktion getTournBase Fehler - kein Turnier mit Id {0} gefunden
+err0134.crypto.NoSessionCookie                      = Kein Session Cookie vorhanden
+err0135.crypto.SessionTimeout                       = Timeout der Session
+err0136.crypto.SessionDecoding                      = Fehler beim Dekodieren/Entschlüsseln der Session
+err0137.user.fileNotFound                           = Datei: {0} nicht gefunden
+err0138.crypto.paramlist                            = Parameter-Liste nicht dekodierbar
+err0139.crypto.StringParam                          = Parameter {0} vom Typ String nicht gefunden
+err0140.crypto.LongParam                            = Parameter {0} vom Typ Long nicht gefunden
+err0141.crypto.IntParam                             = Parameter {0} vom Typ Int nicht gefunden
+err0142.crypto.Boolean                              = Parameter {0} vom Typ Boolean nicht gefunden
+err0143.decode.Competitions                         = Dekodierfehler Datentyp Competitions: {0}
+err0144.decode.TournBase                            = Dekodierfehler Datentyp Sequenz von TournBase: {0}
+err0145.user.download                               = Download nicht möglich (bitte Berechtigung prüfen)
+err0146.fileaccess.config                           = Konfigurationsdateien {0} bzw. {1} konnten nicht gelesen werden
+err0147.decode.ResultEntrys                         = Dekodierfehler Datentyp ResultEntrys: {0}
+err0148.decode.ResultEntry                          = Dekodierfehler Datentyp ResultEntry: {0}
+err0149.cache.moveFile                              = Fehler beim Umbenennen/Löschen von Dateien: {0} 
+err0150.access.notAuthorized                        = Berechtigung nicht ausreichend
+err0151.ctrl.getTournBase                           = Kontrollerfehler in Routine getTournBase
+err0152.ctrl.regTournBase                           = Kontrollerfehler in Routine regTournBase: {0}
+err0153.trny.addComp                                = Ungültiger Identifier für neuen Wettbewerb {0}
+err0154.trny.setComp                                = Ungültiger Identifier zum Ändern des Wettbewerbs
+err0155.svc.addPlayer                               = Ungültiger Identifier beim Anlegen eines Spielers {0}
+err0156.svc.addPlayer                               = Fehler in der Routine addPlayer, Spieler exisftiert bereits {0}
+err0157.svc.setPlayer                               = Fehler in der Routine setPlayer, ungültiger Identifier für {0}
+err0158.svc.setPlayer                               = Fehler in der Routine setPlayer, Spieler {0} existiert bereits
+err0159.Player.validateName                         = Name des Spielers nicht im Format <Nachname>, <Vorname>
+err0160.Player.validateEmail                        = Ungültiges E-Mail-Format
+err0161.Club.parseName                              = Ungültiger Name für Club
+err0162.Player.already.exists                       = Spieler mit dem Namen existiert bereits
+err0163.Player.already.registered                   = Spieler bereits registriert für den Wettbewerb
+err0164.RegDouble.Name.missing                      = Name des Spielers {0} fehlt
+err0165.decode.Match                                = Dekodierfehler Datentyp Match: {0}
+err0166.decode.Matches                              = Dekodierfehler Datentyp Matches: {0}
+err0167.decode.CompSystem                           = Dekodierfehler Datentyp CompSystem: {0}
+err0168.ajax.getJson                                = Kommunikationsfehler: {0}
+err0169.trny.addSect                                = Funktionsaufruf addSect, neuer Abschnitt existiert bereits
+err0170.trny.setSectPlayer                          = Funktionsaufruf setSectPlayer, Abschnitt {0} existiert nicht
+err0171.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt {0} kann nicht generiert werden
+err0172.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt nicht definiert
+err0173.trny.getSinglePlayer                        = Funktionsaufruf getSinglePlayer, Startnummer {0} fehlerhaft
+err0174.trny.getDoublePlayer                        = Funktionsaufruf getDoublePlayer, Startnummer {0} fehlerhaft
+err0175.DlgCardCfgSection                           = Ungültige Auswahl des Spielsystems
+err0176.decode.CompSection                          = Dekodierfehler Datentyp CompSection: {0}
+err0177.decode.CompPhase                            = Dekodierfehler Datentyp CompPhase: {0}
+err0178.svc.regTournBase                            = Fehler in der Routine regTournBase: {0} 
+err0179.Tourney.name                                = Fehler Turniername zu kurz (mind. 3 Zeichen)
+err0180.Tourney.edate                               = Fehler Turnierenddatum vor Turnierstartdatum
+err0181.Tourney.sdate                               = Fehler Turnierstartdatum ungültig
+err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
+err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
+err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
+err0185.ctrl.decode.setPant2Comps                   = Fehler in Routine setPant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
+err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
+err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
+err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
+err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
+err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
+err0191.ctrl.decode.MEntry                          = Dekodierfehler im Controller Datentyp MEntry: {0}
+err0192.input.invalid.sets                          = Ungültiges Eingabeformat für Sätze
+err0193.organize.competition.selection              = Ungültige Wettbewerbs-Auswahl: {0}
+err0194.msg.addCompPhase.existing                   = Wettbewerb kann nicht (erneut) gestartet werden
+err0195.msg.addCompPhase.name                       = Ungültiger Name für Runde/Wettbewerbsabschnitt (Länge mind. 2 Zeichen)
+err0196.msg.addCompPhase.config                     = Ungültige (keine) Konfiguration ausgewählt
+err0197.msg.initGrMatches.generating                = Interner Fehler, Spiele konnten nicht entsprechend dem Spielplan generiert werden
+err0198.getArrayBuffer                              = Lokaler Speicher konnte nicht gelesen werden {0}
+err0199.upload.file.tourneyId                       = Fehler beim Hochladen einer Datei: Ungültige Turnier-ID, bitte zuvor ein Turnier auswählen.
+err0200.upload.file.limit                           = Fehler beim Hochladen einer Datei: Datei zu groß
+err0201.upload.file.notsupported                    = Fehler beim Hochladen einer Datei: Dateityp wird nicht unterstützt
+err0202.upload.file.orgId                           = Fehler beim Hochladen einer Datei: fehlende Berechtigung
+err0203.upload.file.command                         = Fehler beim Hochladen einer Datei: ungültiges Kommando
+err0204.upload.file.mode                            = Fehler beim Hochladen einer Datei: ungültige Kommando-Option
+err0205.upload.file.startDate                       = Fehler beim Hochladen einer Datei: clickTT-Startdatum passt nicht zu Turnierstartdatum
+err0206.upload.file.sDateExists                     = Fehler beim Hochladen einer Datei: Turnier mit dem clickTT-Startdatum existiert bereits (Aktualisierung?).   
+err0207.genCttResult                                = (Kommunikations-)Fehler beim Generieren der ClickTT-Ergebnisdatei.
+err0208.genCttResult.noMatchingComp                 = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen passenden Wettbewerb gefunden
+err0209.genCttResult.moreMatchingComps              = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen eindeutigen Wettbewerb gefunden
+err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp
+err0211.downloadFile.missingResultFile              = Fehler beim Lesen der Ergebnisdatei: {0}
+err0212.svc.setPlayer.invalidPlayerId               = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer: {0}
+err0213.svc.setPlayer.invalidLicense                = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer/Lizenz: {0}/{1}
+err0214.decode.CttPerson                            = Dekodierfehler Datentyp CttPerson: {0}
+err0215.sync                                        = Turnierdaten nicht synchron (unterschiedliche Versionen lokal/remote)
+err0216.svc.setPlayer.invalidUpdate                 = Fehler beim Aktualisiern der Spielerdaten, Spieler hat Lizenz (nur E-Mail-Update erlaubt) 
+err0217.Player.validateTTR                          = Ungültiges TTR-Wert
+err0218.svc.getReferee.notFound                     = Spiel nicht gefunden/vorhanden
+err0219.svc.getReferee.invalid                      = Spielinfo ungültig
+err0220.getIpAddress                                = IP-Adresse des Servers nicht verfügbar. Kommunikationsfehler. 
+err0221.invalidNonce                                = Fehlende Berechtigung / EinmalPassword nicht ok.
+err0222.svc.invalidCompetitionPhase                 = Spielrunde / Spielphase nicht gefunden
+err0223.svc.inputMatch.decodeResult                 = Dekodierfehler in Routine inputMatch, Datentyp List[Int]
+err0224.coph.inputMatch.invalidGameNo               = Fehler in Routine inputMatch, Spielnummer ungültig {0}
+err0225.systemgroup.invalid.whoagainstwho           = Fehler im Gruppensystem, falsche Werte für wer-gegen-wen
+err0226.svc.resetMatch.failed                       = Fehler in Routine resetMatch
+err0227.tourney.isDummy                             = Serverless Modus
+err0228.svc.resetMatch.decodeResult                 = Dekodierfehler in Routine resetMatch, Datentyp List[Int]
+err0229.svc.resetMatches.failed                     = Fehler in Routine resetMatches
+err0230.svc.resetMatch.game                         = Fehler in Routine resetMatch, Spiel {0}
+err0231.svc.inputReferee.decodeResult               = Dekodierfehler in Routine inputReferee
+err0232.svc.getMatch.error                          = Fehler in Routine getMatch, Spiel {0}
+err0233.noInput                                     = Leere Eingabe nicht erlaubt
+err0234.coph.already.exists                         = Spielrunde {0} existiert bereits
+err0235.coph.name.short                             = Name zu kurz (mind. zwei Zeichen erforderlich)
+err0236.decode.koRound                              = Dekodierfehler Datentyp KO-Round
+err0237.getCoPh.notFound                            = Fehler in Routine getCoPh, Spielrunde nicht definiert/gefunden {0} {1}
+err0238.decode.Pant                                 = Dekodierfehler Datentyp Pant: {0}
+err0239.decode.csv.player                           = Datensatz für Spieler nicht lesbar: {0}
+err0240.svc.regSingle                               = Fehler in der Routine regSingle
+err0241.svc.regDouble                               = Fehler in der Routine regDouble
+err0242.setCompPhase                                = Fehler in Routine setCompPhase {0} {1}
+err0243.systemKO.draw.size                          = Auslosung KO-System, fehlerhafte Größe oder Anzahl der Runden
+err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
+err0245.invalid.sno.double                          = Doppel-Startnummer ungültig: {0}
+err0246.decode.sendCttFile                          = Dekodierfehlerin Routine sendCttFile
+err0247.deleteCoPh.notPossible                      = Löschen der Spielrunde {0} nicht möglich, da abhängige Runde(n) {1} existieren
+err0248.delCompPhase.invalid.param                  = Fehler in Routine delCompPhase ungültige Parameter {0}/{1}
+err0249.genGrMatchDependencies                      = Fehler in Routine genGrMatchDependencies
+err0250.updateCompPhaseStatus.invalid.param         = Fehler in Routine updateCompPhaseStatus ungültige Parameter {0}/{1}
+err0251.resetMatches.invalid.param                  = Fehler in Routine resetMatches ungültige Parameter {0}/{1}
+err0252.resetMatch.invalid.param                    = Fehler in Routine resetMatch ungültige Parameter {0}/{1}
+err0253.inputMatch.invalid.param                    = Fehler in Routine inputMatch ungültige Parameter {0}/{1}
+err0254.ballInput.invalid                           = Balleingabe fehlerhaft (enthält Blanks)
+err0255.getMatch.invalid.param                      = Fehler in Routine getMatch ungültige Parameter {0}
+err0256.svc.getTourney                              = Fehler in Routine getTourney, Dekodierung der Playfield-Struktur nicht möglich
+err0257.svc.syncPlayfields                          = Fehler in Routine syncPlayfields
+err0258.pubCompPhase                                = Fehler in Routine pubCompPhase, ungültige Parameter {0}/{1}
+err0259.authReset.invalidEmail                      = Keine gültige EMail-Adresse gefunden {0}
+
+
+return001.csv.hdr.player                            = CSV header for player
+###
+# Sidebar labels an titles
+###
+sidebar.label.HomeSearch                            = Turniersuche
+sidebar.label.InfoEnabled                           = TurnierInfo
+sidebar.label.InfoDisabled                          = TurnierInfo
+sidebar.label.InfoSchedule                          = Ausschreibung
+sidebar.label.InfoCompetition                       = Wettbewerbe
+sidebar.label.InfoPlayer                            = Teilnehmer
+sidebar.label.InfoResult                            = Ergebnisse
+sidebar.label.InfoPlayfield                         = Tischbelegung
+sidebar.label.InfoCertificate                       = Urkunden
+sidebar.label.OrganizeTourney                       = Turniere
+sidebar.label.OrganizeCompetition                   = Wettbewerbe
+sidebar.label.OrganizePlayer                        = Spieler
+sidebar.label.OrganizePlayfield                     = Tischbelegung
+sidebar.label.OrganizeCertificate                   = Urkunden
+sidebar.label.OrganizeReport                        = Berichte
+sidebar.label.Admin                                 = Administration
+sidebar.label.AdminLicense                          = Lizenz
+sidebar.label.AdminDatabase                         = Database
+sidebar.label.AdminReport                           = Berichte
+sidebar.label.OrganizeCompetitionCtrl               = Steuerung
+sidebar.label.OrganizeCompetitionDraw               = Auslosung
+sidebar.label.OrganizeCompetitionInput              = Eingabe
+sidebar.label.OrganizeCompetitionView               = Anzeige
+sidebar.label.OrganizeCompetitionReferee            = Schiri 
+
+sidebar.title.HomeSearch                            = Turniersuche
+sidebar.title.Info                                  = Turnier-Information
+sidebar.title.InfoDisabled                          = Turnier-Information erfordert Turnierauswahl
+sidebar.title.InfoSchedule                          = Turnierausschreibung
+sidebar.title.InfoCompetition                       = Wettbewerbe
+sidebar.title.InfoPlayer                            = Turnierteilnehmer
+sidebar.title.InfoResult                            = Ergebnisse
+sidebar.title.InfoPlayfield                         = Tischbelegung
+sidebar.title.InfoCertificate                       = Spielerplatzierung und Urkundendruck
+sidebar.title.OrganizeTourney                       = Turnierauswahl - Turnierleitung-Homepage
+sidebar.title.OrganizeCompetition                   = Auswahl der Wettbewerbe eines Turniers
+sidebar.title.OrganizePlayer                        = Spieler (Anmeldung, Warteliste)
+sidebar.title.OrganizePlayfield                     = Tischbelegung verwalten
+sidebar.title.OrganizeCertificate                   = Urkunden verwalten
+sidebar.title.OrganizeReport                        = Berichte und Reports
+sidebar.title.Admin                                 = Administration
+sidebar.title.AdminLicense                          = Lizenzverwaltung
+sidebar.title.AdminDatabase                         = Datenverwaltung
+sidebar.title.AdminReport                           = Berichte und Reports
 
 ###
 # General Labels
@@ -480,125 +904,6 @@ dlg.card.cfg.compphase.name.2                         = Zwischenrunde
 dlg.card.cfg.compphase.name.3                         = Hauptrunde
 dlg.card.cfg.compphase.name.4                         = Trostrunde
 ###
-# Sidebar labels an titles
-###
-sidebar.label.HomeSearch                            = Turniersuche
-sidebar.label.InfoEnabled                           = TurnierInfo
-sidebar.label.InfoDisabled                          = TurnierInfo
-sidebar.label.InfoSchedule                          = Ausschreibung
-sidebar.label.InfoCompetition                       = Wettbewerbe
-sidebar.label.InfoPlayer                            = Teilnehmer
-sidebar.label.InfoResult                            = Ergebnisse
-sidebar.label.InfoPlayfield                         = Tischbelegung
-sidebar.label.InfoCertificate                       = Urkunden
-sidebar.label.OrganizeTourney                       = Turniere
-sidebar.label.OrganizeCompetition                   = Wettbewerbe
-sidebar.label.OrganizePlayer                        = Spieler
-sidebar.label.OrganizePlayfield                     = Tischbelegung
-sidebar.label.OrganizeCertificate                   = Urkunden
-sidebar.label.OrganizeReport                        = Berichte
-sidebar.label.Admin                                 = Administration
-sidebar.label.AdminLicense                          = Lizenz
-sidebar.label.AdminDatabase                         = Database
-sidebar.label.AdminReport                           = Berichte
-sidebar.label.OrganizeCompetitionCtrl               = Steuerung
-sidebar.label.OrganizeCompetitionDraw               = Auslosung
-sidebar.label.OrganizeCompetitionInput              = Eingabe
-sidebar.label.OrganizeCompetitionView               = Anzeige
-sidebar.label.OrganizeCompetitionReferee            = Schiri 
-
-sidebar.title.HomeSearch                            = Turniersuche
-sidebar.title.Info                                  = Turnier-Information
-sidebar.title.InfoDisabled                          = Turnier-Information erfordert Turnierauswahl
-sidebar.title.InfoSchedule                          = Turnierausschreibung
-sidebar.title.InfoCompetition                       = Wettbewerbe
-sidebar.title.InfoPlayer                            = Turnierteilnehmer
-sidebar.title.InfoResult                            = Ergebnisse
-sidebar.title.InfoPlayfield                         = Tischbelegung
-sidebar.title.InfoCertificate                       = Spielerplatzierung und Urkundendruck
-sidebar.title.OrganizeTourney                       = Turnierauswahl - Turnierleitung-Homepage
-sidebar.title.OrganizeCompetition                   = Auswahl der Wettbewerbe eines Turniers
-sidebar.title.OrganizePlayer                        = Spieler (Anmeldung, Warteliste)
-sidebar.title.OrganizePlayfield                     = Tischbelegung verwalten
-sidebar.title.OrganizeCertificate                   = Urkunden verwalten
-sidebar.title.OrganizeReport                        = Berichte und Reports
-sidebar.title.Admin                                 = Administration
-sidebar.title.AdminLicense                          = Lizenzverwaltung
-sidebar.title.AdminDatabase                         = Datenverwaltung
-sidebar.title.AdminReport                           = Berichte und Reports
-
-###
-# Email messages
-###
-email.code.from                                     = Turnier Service <info@turnier-service.org>
-email.code.subject                                  = Turnier-Programm Verification Code
-email.code.title                                    = Verifizierung Code
-email.code.greeting                                 = Lieber Sportsfreund {0},
-email.code.body.html                                = <p>Der Verifizierungscode lautet: <strong>{0}</strong></p><p>Bitte diesen Code in die Registrierungsseite eingeben.</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
-email.code.body.plain                               = Der Verifizierungscode lautet: {0} \n  Bitte diesen Code in die Registrierungsseite eingeben.\n\n  Viele Grüße\n\n  Turnier-Service Team
-email.password.from                                 = Turnier Service <info@turnier-service.org>
-email.password.subject                              = Turnier-Programm Authentisierungsinformation
-email.password.title                                = Passwort-Reset
-email.password.greeting                             = Lieber Sportsfreund {0},
-email.password.body.html                            = <p>das neue Passwort lautet: <strong>{0}</strong></p><p>Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen)</p><p>Viele Grüße</p><p>Turnier-Service Team</p>
-email.password.body.plain                           = das neue Passwort lautet: {0} \n Bitte loggen Sie sich mit dem neuen Passwort ein und ändern dieses umgehend (in Einstellungen).\n\n  Viele Grüße\n\n  Turnier-Service Team
-email.license.from                                  = Turnier Service <info@turnier-service.org>
-email.license.subject                               = Turnier-Programm Lizenzcode
-email.license.title                                 = Turnier-Programm Lizenzcode
-email.license.greeting                              = Lieber Sportsfreund {0},
-email.license.prolog.html                           = <p>anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
-email.license.html                                  = <h5>{0}</h5>
-email.license.full.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
-email.license.free.epilog.html                      = <p>Der Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur <a href="https://turnier-service.info/doc/">Dokumentation</a>. DANKE!</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p><p>Robert / Turnier-Service Team</p>
-email.license.prolog.plain                          = \n\n anbei der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Exel-Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).\n
-email.license.plain                                 = \n\n {0} \n\n
-email.license.full.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
-email.license.free.epilog.plain                     = \nDer Lizenzstring funktioniert bei der freien und bei der Voll-Version eingeschränkt. Falls Ihr Anregung zur Verbesserung habt oder Fehler bemerkt bitte meldet Euch. Hier gehts zur Dokumentation: "https://turnier-service.info/doc/". DANKE! \n\n Sportliche Grüße und viel Erfolg bei Euren Turnieren \n\n Robert / Turnier-Service Team \n
-
-###
-#  Invoice Messages
-###
-invoice.title                                       = Turnier-Service Rechnung
-invoice.lang                                        = de
-invoice.literally                                   = Rechnung
-invoice.myaddress.name                              = Robert Lichtenegger
-invoice.myaddress.street                            = Finkenstr. 36a
-invoice.myaddress.zip                               = 85356
-invoice.myaddress.city                              = Freising
-invoice.myaddress.country                           = Deutschland
-invoice.taxNr                                       = 115/244/90953
-invoice.description                                 = Position
-invoice.amount                                      = Betrag
-invoice.label.date                                  = Rechnungsdatum: 
-invoice.label.number                                = Rechnungsnummer:
-invoice.label.bank.name                             = Bank
-invoice.label.bank.iban                             = IBAN
-invoice.label.bank.bicSwift                         = BIC/Swift
-invoice.label.bank.recipient                        = Empfänger
-invoice.label.duedate                               = Zahlungsfrist:
-invoice.duedate                                     = Zahlbar innerhalb von 30 Tagen
-invoice.bank.url                                    = https://www.ing.de/
-invoice.bank.name                                   = ING
-invoice.bank.iban                                   = DE97 5001 0517 0216 8999 55
-invoice.bank.bicSwift                               = INGDDEFFXXX
-invoice.bank.recipient                              = Robert Lichtenegger
-invoice.label.vat                                   = Im Rechnungsbetrag sind 19 % Umsatzsteuer enthalten
-invoice.label.paypal.recipient                      = <span style="color:#0000FF">Pay</span><span style="color:#1E90FF">Pal</span>
-invoice.paypal.recipient                            = robert.lichtenegger@icloud.com
-invoice.transfer.withInvoiceNumber                  = Bitte Rechnungsnummer als Verwendungszweck angeben
-invoice.footer.thanks                               = Danke für den Kauf der Lizenz und viel Freude beim Durchführen der Turniere. Fragen und Verbesserungsvorschläge bitte an <a href= 'mailto:info@turnier-serivce.org'>info@turnier-service.org</a>
-invoice.footer.url                                  = Internet:&nbsp;<a href="https://www.turnier-service.info"><span style="text-decoration: underline;">www.turnier-service.info</span></a>
-invoice.label.taxNr                                 = Steuernummer:
-invoice.label.total                                 = Gesamtsumme:
-invoice.label.transferTo                            = Bitte überweisen Sie die Gesamtsumme an:
-invoice.label.alternativ                            = oder:
-invoice.vat                                         = 19.00
-invoice.currency                                    = EUR
-invoice.item1.description                           = Turnierprogramm Lizenz(full)
-invoice.item1.price                                 = 39.50
-invoice.email.name                                  = Rechnung.pdf
-
-###
 # Referee Entries
 ###
 referee.lang                                        = de
@@ -613,263 +918,6 @@ referee.registered                                  = EINGETRAGEN
 referee.dlg.hdr.confirm                             = Spielergebnis speichern
 referee.dlg.result.message                          = {0} - {1} = <strong>({2}:{3})</strong> {4} 
 
-###
-# Usecase: Home Main & Error
-###
-home.main.LoginRequired                             = Login erforderlich!
-home.main.UnknownPage                               = Seite konnte leider nicht gefunden werden!        
-home.main.Welcome                                   = Herzlich Willkommen!
-home.main.GoodBye                                   = Bye!  
-home.main.Error                                     = Ein Fehler ist aufgetreten!
-home.main.Cookie                                    = Ohne Cookies geht leider nichts!
-home.main.prompt                                    = Eingabe Kommando:
-home.error.title                                      = FEHLER!
-home.error.image                                      = showError
-home.error.alt                                        = Ein Fehler ist aufgetreten.
-
-
-###
-# Usecase: Home Console
-###
-home.console.title                                    = Konsole
-home.console.btn.submit                               = Senden
-
-
-###
-# Usecase: Home Register
-###
-home.register.hdg.start                               = Registrierung
-home.register.hdg.free.confirm                        = Registrierung bestätigen
-home.register.hdg.free.finish                         = Registrierung erfolgt
-home.register.hdg.full.confirm                        = Registrierung und Bestellung bestätigen
-home.register.hdg.full.finish                         = Registrierung erfolgreich / Rechnung
-home.register.license.header                          = Lizenz
-home.register.plh.zip                                 = PLZ
-home.register.plh.city                                = Musterstadt
-home.register.plh.street                              = Musterweg
-home.register.lbl.zip                                 = Postleitzahl
-home.register.lbl.city                                = Stadt
-home.register.lbl.street                              = Strasse mit Hausnummer
-home.register.lbl.radio.free                          = freie Lizenz
-home.register.lbl.radio.full                          = volle Lizenz
-home.register.hlp.clubname.inuse                      = Name des Vereins bzw. Schlagwort bereits in Verwendung
-home.register.hlp.zip                                 = Bitte gültige Postleitzahl eingeben (mind. 2 Zeichen)
-home.register.hlp.city                                = Bitte gültige Stadt eingeben (mind. 2 Zeichen)
-home.register.hlp.street                              = Bitte gültige Strasse incl. Hausnummer eingeben (mind. 2 Zeichen)
-home.register.hlp.country                             = Bitte ein Land auswählen.
-home.register.hlp.code                                = &nbsp; Der Bestätigungscode ist leider nicht korrekt.
-home.register.hlp.ConfirmCondition                    = Bitte die Widerrufsbelehrung und die AGBs akzeptieren.
-home.register.onefreeLicense                          = <ul class="mb-0"><li>Ein EINZEL- und ein DOPPEL-Wettbewerb</li><li>bis zu 32/16 Teilnehmer</li></ul>
-home.register.onefullLicense                          = <ul class="mb-0"><li>Ein EINZEL- und ein DOPPEL-Wettbewerb</li><li>bis zu 128/64 Teilnehmer</li></ul>
-home.register.multifreeLicense                        = <ul class="mb-0"><li>8 Wettbewerbe (EINZEL oder DOPPEL)</li><li>32 Teilnehmer pro Wettbewerb</li></ul>
-home.register.multifullLicense                        = <ul class="mb-0"><li>64 Wettbewerbe (EINZEL oder DOPPEL)</li><li>bis zu 128 Teilnehmer pro Wettbewerb</li><li>insgesamt bis zu 500 Teilnehmer</li><li>Live-Ticker/Ergebnisse im Internet oder via eigenem Web-Service</li></ul>
-home.register.oneCompVersion                          = EIN-Wettbewerb Version
-home.register.multiCompVersion                        = MEHR-Wettbewerb Version
-home.register.btn.free.back                           = ZURÜCK 
-home.register.btn.free.request                        = Kostenfreie Lizenz anfordern
-home.register.btn.free.confirm                        = Lizenz zusenden
-home.register.btn.full.back                           = ZURÜCK
-home.register.btn.full.request                        = Kostenpflichtige Lizenz anfordern
-home.register.btn.full.confirm                        = Kostenpflichtig bestellen
-home.register.btn.code.resend                         = ERNEUT ZUSENDEN
-home.register.address.for.nameclub                    = Lizenz für <strong>{0} {1}</strong> - Verein: <strong>{2}</strong>
-home.register.freeconfirm.name                        = Kostenfreie Lizenz für <strong>{0}</strong>
-home.register.confirm.entercode                       = <small>Bitte geben Sie den 4-stelligen Bestätigungscode ein, den wir an: <strong>{0}</strong> gesendet haben.</small>
-home.register.address.for.email                       = E-Mail: <strong>{0}</strong>
-home.register.freefinish.prolog                       = <h5>Vielen Dank für die Registrierung,</h5><p>nachfolgend der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
-home.register.freefinish.epilog                       = Die Dokumentation findet sich <a href="https://turnier-service.org/">hier</a>. Wünsche und Verbesserungsvorschläge werden gerne entgegengenommen unter <a href="mailto:info@turnier-service.org">info@turnier-service.org</a><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
-home.register.fullconfirm.name                        = Kostenpflichtige Lizenz für <strong>{0}</strong>
-home.register.fullconfirm.clubname                    = Verein: <strong>{0}</strong>
-home.register.fullfinish.prolog                       = <h5>Vielen Dank für die Registrierung,</h5><p>nachfolgend der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
-home.register.fullfinish.epilog                       = <p>Die Dokumentation findet sich <a href="https://turnier-service.org/">hier</a>. Wünsche und Verbesserungsvorschläge werden gerne entgegengenommen unter <a href="mailto:info@turnier-service.org">info@turnier-service.org</a><p>Der Lizenzstring und die Rechnung wurde an die angegebene E-Mail-Adresse versendet.</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
-home.register.fullconfirm.item.hdl                    = Turnierservice Nutzungslizenz(full) zum Preis von 39,50€
-home.register.fullconfirm.item.cnt                    = 2
-home.register.fullconfirm.item.content.1              = Unbeschränkte lokale Nutzung der Excel-basierten Software
-home.register.fullconfirm.item.content.2              = 1 Jahr Nutzung der online Turnierdienste (max. 3 Turniere) ab Kaufdatum
-home.register.check.withdrawal                        = Ich habe die <a href="#" onclick='InputCtrl.setContent("/content/withdrawal.md")'>Widerrufsbelehrung</a> gelesen und erkenne sie hiermit an.
-home.register.lbl.gtc                                 = Ich habe die <a href="#" onclick='InputCtrl.setContent("/content/gtc.md")'>allgemeinen Geschäftsbedingungen</a> gelesen und erkläre mich damit einverstanden.
-home.register.lbl.withdrawal                          = Die Widerufsbelehrung und Geschäftsbedingungen müssen anerkannt und akzeptiert werden.
-
-
-###
-# Usecase: Home Login
-###
-home.login.hdg                                      = Turnierleitung - Login
-home.login.btn.req.newPassword                      = PASSWORT VERGESSEN
-home.login.btn.req.authPassword                     = LOGIN
-home.login.btn.req.authGoogle                       = Login mit Google
-home.login.lbl.user                                 = E-Mail oder Lizenzschlüssel  
-home.login.hlp.user                                 = Bitte geben Sie ihre E-Mail-Adresse oder den ersten Teil Ihres Lizenzschlüssels ein
-home.login.plh.user                                 = max.mustermann@email.de
-home.login.bye                                      = Auf Wiedersehen!
-home.login.dlg.hdg                                  = Login Fehler 
-home.login.dlg.text                                 = E-Mail/Lizenzstring und/oder Passwort nicht korrekt.
-home.login.dlg.title.err.reqPw                      = Fehler Passwort Rücksetzung
-home.login.dlg.wrongemail.hdg                       = Fehler beim Zurücksetzen des Passworts 
-home.login.dlg.wrongemail.text                      = Bitte korrekte E-Mail-Adresse eingeben.
-home.login.dlg.title.ok.reqPw                       = Zurücksetzung des Passworts 
-home.login.dlg.body.ok.reqPw                        = Ein neues Passwort wurde an {0} gesendet. Überprüfen Sie die Spam-Filter-Einstellungen bzw. das Postfach für unerwünsche E-Mail (Junkmail-Ordner), falls Sie keine E-Mail erhalten haben. Ändern Sie das neu erhaltene Passwort in den Einstellungen.
-
-
-###
-# Usecase: Home Setting - change user/club settings
-###
-home.setting.hdg                                    = Einstellungen
-home.setting.password.hdg                           = Passwort ändern
-home.setting.contact.hdg                            = Kontaktdaten ändern
-home.setting.btn.req.contactChange                  = SPEICHERN
-home.setting.hlp.city                               = Bitte gültige Stadt eingeben (mind. 2 Zeichen)
-home.setting.hlp.street                             = Bitte gültige Strasse incl. Hausnummer eingeben (mind. 2 Zeichen)
-home.setting.hlp.zip                                = Bitte gültige Postleitzahl eingeben
-home.setting.lbl.zip                                = Postleitzahl
-home.setting.lbl.city                               = Stadt
-home.setting.lbl.street                             = Strasse mit Hausnummer
-home.setting.lbl.country                            = Land
-home.setting.plh.zip                                = PLZ
-home.setting.plh.city                               = Musterstadt
-home.setting.plh.street                             = Musterweg
-home.setting.plh.country                            = Musterland
-home.setting.contactChange.failure.dlg.hdg          = Fehler bei der Aktualisierung
-home.setting.contactChange.success.dlg.text         = Die Kontaktdaten wurden erfolgreich aktualisiert.
-home.setting.btn.req.pwChange                       = PASSWORT ÄNDERN
-home.setting.pwChange.failure.dlg.hdg               = Fehler bei der Aktualisierung
-home.setting.pwChange.success.dlg.hdg               = Aktualisierung erfolgt
-home.setting.pwChange.success.dlg.text              = Passwort wurde erfolgreich aktualisiert.
-
-
-###
-# Usecase: Home Search
-###
-home.search.hint                                    = Name des Turniers oder Vereins
-home.search.label                                   = Turniersuche
-home.search.dlg.hdg                                 = Fehler bei der Suche 
-home.search.headline                                = Herzlich Willkommen!
-home.search.info                                    = Bitte Suchbegriff eingeben und dann Click auf ENTER/RETURN. Die gefunden Turnier werden angezeigt und können angeklickt werden.
-home.search.noEntryMsg                              = Leider kein passendes Turnier gefunden.
-home.search.table.date                              = Datum
-home.search.table.club                              = Verein
-home.search.table.tourney                           = Turnier
-home.search.lbl.typ                                 = <strong>Sportart</strong>
-home.search.lbl.year                                = <strong>Jahr</strong>
-home.search.lbl.string                              = <strong>Turniersuche</strong>
-home.search.plh.string                              = Name des Turniers oder Vereins
-
-
-###
-# Usecase Common
-###
-common.certificate.noentry                            = Bisher keine Endergebnisse vorhanden
-common.certificate.hdr.place                          = Platzierung
-common.certificate.hdr.name                           = Name
-common.certificate.hdr.club                           = Verein
-common.certificate.place                              = {0} Platz
-
-###
-# Usecase Info General
-###
-info.disabled.title                                   = HINWEIS
-info.disabled.image                                   = notlucky
-info.disabled.alt                                     = Turnierinformationen nicht verfügbar - Turnierauswahl erforderlich
-info.disabled.description                             = Turnierinformationen sind erst nach der Auswahl eines Turnieres verfügbar. Die Selektion erfolgt über die Turniersuche.
-info.enabled.title                                    = Turnierinformation
-info.enabled.image                                    = tourneydata
-info.enabled.description                              = für {0}
-info.enabled.alt                                       = Turnierinformationen für {0}
-
-
-###
-# Usecase Info Player
-###                                     
-info.player.count                                     = Anzahl Spieler: 
-info.player.noEntry                                   = Keine Wettbewerbe mit gemeldeten Spielern vorhanden 
-info.player.count                                     = Anzahl Spieler: 
-info.player.header.nr                                 = #
-info.player.header.name                               = Name
-info.player.header.club                               = Verein
-info.player.header.place                              = Platzierung
-info.player.header.ttr                                = TTR
-info.player.noplayer                                  = Keine Spieler gemeldet
-
-
-###
-# Usecase Info Competition
-###   
-info.competition.description                          = Wettbewerb
-info.competition.ttrRange                             = TTR Bereich
-info.competition.startTime                            = StartZeit
-info.competition.cntPlayer                            = #Spieler
-info.competition.status                               = Status
-info.competition.noEntry                              = Keine Einträge für Wettbewerbe vorhanden
-
-
-###
-# Usecase Info Playfield
-###   
-info.playfield.tableNo                                = Tisch
-info.playfield.compName                               = Wettbewerb
-info.playfield.playerA                                = Spieler A
-info.playfield.playerB                                = Spieler B
-info.playfield.info                                   = Info
-info.playfield.noEntry                                = Keine Tischeinträge vorhanden
-
-
-###
-# Usecase  Info Schedule
-###   
-info.schedule.register                                = Anmeldung
-info.schedule.description                             = Wettbewerb
-info.schedule.ttrRange                                = TTR Bereich
-info.schedule.startTime                               = StartZeit
-info.schedule.competitions                            = Wettbewerbe
-info.schedule.competition                             = Wettbewerb
-info.schedule.noEntry                                 = z.Z. keine Einträge für Wettbewerbe vorhanden
-info.schedule.optionalinfo                            = Turnierhinweise
-info.schedule.info                                    = Turnier
-info.schedule.date                                    = Datum
-info.schedule.email                                   = E-Mail-Adresse
-info.schedule.date.range                              = {0} - {1}
-info.schedule.selcompetition                          = Auswahl des Wettbewerb
-info.schedule.plh.playerdata                          = Spielerdaten
-info.schedule.plh.name                                = Name, Vorname
-info.schedule.plh.club                                = Club/Verein
-info.schedule.plh.email                               = max.mustermann@domain.com
-info.schedule.plh.ttr                                 = TTR-Wert
-info.schedule.plh.year                                = Jahrgang
-info.schedule.button.submit                           = ANMELDEN
-info.schedule.hint                                    = Zzt. sind keine weiteren Hinweise vom Veranstalter hinterlegt.
-info.schedule.comps.header.startTime                  = Startzeit
-info.schedule.comps.header.description                = Wettbewerb
-info.schedule.comps.header.ttrRange                   = TTR-Bereich
-info.schedule.comps.header.status                     = Status
-info.schedule.comps.header.noEntry                    = Zzt. sind keine Wettbewerbe vom Veranstalter konfiguriert.
-info.schedule.comps.header.noParts                    = Anmeldungen
-info.schedule.signup.invalidComp                      = Bitte einen Wettbewerb auswählen.
-info.schedule.signup.invalidname                      = Bitte Namen im Format: <Name>, <Vorname> eingeben.
-info.schedule.signup.closed                           = Keine Voranmeldungen mehr möglich.
-info.schedule.signup.notyetopen                       = Zzt. (noch) keine Voranmeldungen möglich
-info.schedule.signup.error                            = Bitte nutzen Sie E-Mail zur Anmeldung.
-info.schedule.signup.ok                               = Ihre Anmeldung wurde an den Turnierleiter gesendet.
-info.schedule.signup.error.header                     = Fehler bei der Registrierung:
-info.schedule.signup.ok.header                        = Anmeldung registriert:
-info.schedule.consent.text                            = Einwilligung zur elektronischen Datenverarbeitung. Die angegebenen Daten werden ausschließlich zur Durchführung des Turnieres verwendet. Dies beinhaltet eine Weitergabe der Daten und Spielergebnisse an den Organisator und eventuell eine Weiterleitung der Ergebnisse an zuständige Sportverbände sowie eine Veröffentlichung der Spielergebnisse mit Namen und Vereinsnamen.
-
-
-###
-# Usecase Info Misc
-###  
-info.results.noEntries                                = Bisher keine Wettbewerbe gestartet
-info.certificate.btn.print                            = URKUNDE
-
-
-###
-# Usecase Fullscreen
-###
-fullscreen.playfields.header.table                    = Tisch
-fullscreen.playfields.header.match                    = Begegnung
-fullscreen.playfields.header.info                     = Info
-fullscreen.playfields.noEntryMsg                      = zur Zeit keine Eintragungen für Tische
-fullscreen.playfields.title                           = Tischanzeige
-   
 ###
 # Usecase Organizer Tourney
 ###
@@ -1190,299 +1238,253 @@ organize.playfield.plh.addTourneyInfo                 = Tisch 3 bis 6 reserviert
 organize.playfield.noInput                            = ungültige/leere Eingabe
 
 ###
-# Usecase Tourney Administrator License
+# Message Entries
 ###
-admin.notallowed.header                               = Security-Check 
-admin.notallowed.body                                 = You are not allowed to do administrative tasks
-admin.upload.header                                   = Upload Licenses
-admin.button.upload                                   = UPLOAD
-admin.upload.info                                     = License-Datei in CSV Format
-admin.license.view                                    = Lizenzverwaltung
-admin.license.club                                    = Verein
-admin.license.placeholder.club                        = Vereinsname 
-admin.license.clubid                                  = ClubId
-admin.license.placeholder.clubid                      = VereinsNr
-admin.license.directory                               = Verzeichnis
-admin.license.placeholder.directory                   = Club-Directory/Club-Pfad
-admin.license.name                                    = Name
-admin.license.placeholder.name                        = Name, Vorname
-admin.license.info                                    = Info
-admin.license.email                                   = E-Mail-Kontakt
-admin.license.placeholder.email                       = max.mustermann@googlemail.com
-admin.license.license                                 = Lizenz
-admin.license.placeholder.license                     = <clubdir/licensecode>
-admin.license.delete.header                           = Lizenz löschen
-admin.license.delete.body                             = Soll die Lizenz von {0} wirklich gelöscht werden?
-admin.license.delete.body.error                       = Bitte zuerst eine Lizenz auswählen!
-admin.license.delete.button.cancel                    = ABBRUCH
-admin.license.delete.button.ok                        = LÖSCHEN
-admin.license.delete.button.error.ok                  = OK
-admin.license.update.header                           = Lizenz Aktualisierung
-admin.license.update.body                             = Soll die Lizenz von {0} wirklich geändert werden?
-admin.license.update.button.cancel                    = ABBRUCH
-admin.license.update.button.ok                        = AKTUALISIERUNG
-admin.license.yes                                     = Ja
-admin.license.no                                      = Nein
+greeting                                            = Herzlich Willkommen!
+
+###
+# App Main Messages / Configuration Issues
+###
+config.cookie.confirmation    = false
+config.LogLevel    = debug
+
+app.mockup                                          = false
+app.url.home                                        = https://www.turnier-service.info
+app.url.doc                                         = https://turnier-service.org/handbook/
+app.url.download                                    = https://turnier-service.org/download/  
+app.error.code                                      = Code:
+app.error.description                               = Beschreibung:
+app.error                                           = Upps ... wir konnten leider genau diese eine Seite nicht liefern. 
+app.error.tip                                       = Bitte Ruhe bewahren, eventuell Kaffee holen und Eingabe neu überdenken.
+app.srv.error                                       = Upps ... das sieht nach einem Server- oder Programmierfehler aus. 
+app.srv.error.tip                                   = Bitte Ruhe bewahren, eventuell Kaffee holen und Verantwortliche freundlich informieren.
+app.lang                                            = de    
+app.title                                           = Turnierservice
+app.ping                                            = Ping von IP-Adresse {0} mit Lizenz: {1}
+app.test                                            = Sprache {0} ist de ... #'ÄöüÜl@%&?ß!^^°
+app.emailhelp                                       = Bitte gültige E-Mail-Adresse eingeben
 
 
 ###
-# Usecase Tourney Administrator Database
+# Header and Footer
 ###
-admin.database.view                                   = Verwaltung Turnierdatenbanken
-admin.database.tourneyid                              = TurnierNr
-admin.database.placeholder.tourneyid                  = #
-admin.database.club                                   = Verein
-admin.database.placeholder.club                       = Vereinsname
-admin.database.date                                   = Datum
-admin.database.placeholder.date                       = Format: JJJJMMDD
-admin.database.orgdir                                 = Club-Path
-admin.database.placeholder.orgdir                     = Pathname/Verzeichnisname
+app.header.title                                    = <strong>&nbsp;Turnierservice</strong>
+app.header.title.club                               = <strong>&nbsp;Turnierservice</strong> - {0}
+app.header.title.playfields                         = <strong>&nbsp;{0}</strong> - {1}
+app.header.title.demo.playfields                    = <strong>&nbsp;TTC DEMO e.V.</strong> - Demo Turnier
+app.header.manager                                  = TURNIERLEITUNG
+app.header.login                                    = LOGIN
+app.header.logout                                   = LOGOUT
+app.header.loginInfo                                = User:
+app.header.club                                     = Verein
+app.header.club.error                               = Verein/unknown
+app.header.register                                 = REGISTRIERUNG
+app.header.download                                 = DOWNLOAD
+app.header.handbook                                 = HANDBUCH
+app.header.register                                 = REGISTRIERUNG
+app.header.demo                                     = DEMO
+app.header.configuration                            = EINSTELLUNGEN
+
+app.footer.copyright1                               = Copyright
+app.footer.copyright2                               = ClApLiMa (Cloud-Application Lifecycle Management)
+app.footer.impressum                                = Impressum
+app.footer.dataprotection                           = Datenschutz
+app.footer.author                                   = Autor: {0}
+app.footer.changedate                               = Letzte Änderung: {0} 
+
+app.certificate                                     = Urkunde
 
 ###
-# Error Codes and Messages
+# Usecase: Home Main & Error
 ###
-err9999.test                                        = Error nicht dekodierbar, bzw. unbekannt: {0}
-err0000.communication.error                         = Kommunikationsfehler: Server nicht erreichbar
-err0001.decode.error                                = Fehlerdekodierung: {0} Hinweis: {1}
-err0002.ajax.reset                                  = Reset Authentisierung fehlgeschlagen {0} {1}
-err0003.ajax.authBasic                              = Basic Authentisierung fehlgeschlagen {0} {1}
-err0004.login.blocked                               = Benutzer-Authentisierung für eine Stunde gesperrt
-err0005.login.password                              = Benutzer-Authentisierung fehlgeschlagen ({0}.Versuch)
-err0006.login.licEmail                              = E-Mail/Lizenz {0} {1} oder Passwort nicht korrekt.
-err0007.ajax.getJson                                = Kommunikationsfehler getJson-Aufruf: {0} {1}
-err0008.ajax.postJson                               = Kommunikationsfehler postJson-Aufruf: {0} {1}
-err0009.ajax.postForm                               = Kommunikationsfehler postForm-Aufruf: {0} {1}
-err0010.call.delComp                                = ????
-err0011.trny.load                                   = Turnier {0} konnte nicht geladen werden
-err0012.trny.read                                   = Fehler beim Lesen des Turniers {0} orgDir/startDate: {1}
-err0013.trny.insufficient.rights                    = Fehlende Zugriffsrechte
-err0014.trny.compNotFound                           = Wettbewerb {0} nicht gefunden
-err0015.trny.compDate                               = Ungültiges Datum für Wettbewerb {0}
-err0016.trny.compExistsAlready                      = Wettbewerb mit gleichen Namen existiert bereits
-err0017.trny.compUpdate                             = Aktualisierung des Wettbewerbs nicht möglich
-err0018.get.decode                                  = GET-Aktion ungültige Parameter: {0} 
-err0019.call.getComps                               = Dekodierfehler getComps-Aufruf 
-err0020.decode.Competition                          = Fehler beim Dekodieren eines Wettbewerbs:  {0}
-err0021.call.getCompNumber                          = Fehler beim Dekodieren des Funktionsaufrufs getCompNumber, Wettbewerb: {0}
-err0022.post.decode                                 = POST-Aktion ungültige Parameter: {0} 
-err0023.post.regSingle                              = POST-Aktion regSingle gescheitert
-err0024.svc.setPlayerEmail.notFound                 = Service setPlayerEmail gescheitert, PlayerId not found {0}
-err0025.svc.getParticipantPlacement                 = Service getParticipantPlacement gescheitert kein Eintrag für {0} {1}
-err0026.svc.setParticipantPlacement                 = Service setParticipantPlacement gescheitert kein Eintrag für {0} {1
-err0027.tourney.setParticipantStatus                = Methode setParticipantStatus gescheitert, kein Eintrag für {0} {1}
-err0029.svc.getPlayfield                            = Service getPlayfield gescheitert kein Eintrag für {0}
-err0030.svc.getCompStatus                           = Service getCompStatus gescheitert keine Daten für Wettbewerb {0}
-err0031.svc.getCompName                             = Service getCompName gescheitert keine Daten für Wettbewerb {0}
-err0032.svc.setTournBase                            = Service setTournBase gescheitert keine Daten für Turnier {0}
-err0033.svc.getContent                              = Datei nicht lesbar/verfügbar: {0}
-err0034.ajax.getRequest                             = Kommunikationsfehler Ajax.get-Aufruf: {0} {1}
-err0035.svc.getCfgFile                              = Konfigurationsdatei nicht lesbar/verfügbar: {0}
-err0036.call.fileExists                             = Funktionsaufruf fileExists gescheitert: {0}
-err0037.call.getTournCfg                            = Funktionsaufruf getTournCfg Dekodierungsfehler: {0}
-err0038.decode.Players                              = Dekodierfehler Datentyp Players: {0}
-err0039.call.getTournPlayers                        = Funktionsaufruf getTournPlayers Dekodierungsfehler: {0}
-err0040.call.getTournClubs                          = Funktionsaufruf getTournClubs Dekodierungsfehler: {0}
-err0041.call.getPant2Comps                          = Funktionsaufruf getPant2Comps Dekodierungsfehler: {0}
-err0042.decode.Contact                              = Dekodierfehler Datentyp Contact: {0}
-err0043.decode.Address                              = Dekodierfehler Datentyp Address: {0}
-err0044.decode.Players                              = Dekodierfehler Datentyp Players (aus Seq[String]): {0}
-err0045.decode.Pant2Comps                           = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen (aus Seq[String]): {0}
-err0046.internal.server                             = Interner Server Fehler: {0}
-err0047.post.addTournCTT                            = Funktionsaufruf addTournCTT, fehlerhafte/fehlende Parameter
-err0048.trny.addSect                                = Funktionsaufruf addSect, Vorgänger nicht definiert
-err0049.decode.Playfield                            = Fehler beim Dekodieren der Spielfeldinformation: {0}
-err0050.decode.Club                                 = Fehler beim Dekodieren des Vereins(Club): {0}
-err0051.decode.Playfields                           = Fehler beim Dekodieren der Liste von Spielfeldinformation: {0}
-err0052.get.unkown                                  = Funktionsaufruf {0} nicht verfügbar
-err0053.get.fileExists                              = GET-Aktion fileExists gescheitert: {0}
-err0054.decode.Pant2Comp                            = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnung: {0}
-err0055.decode.Pant2Comps                           = Dekodierfehler Teilnehmer-Wettbewerb-Zuordnungen: {0}
-err0056.decode.Clubs                                = Dekodierfehler Datentyp Clubs: {0}
-err0057.call.regDouble                              = Dekodierfehler reqDouble-Funktionsaufruf: {0}
-err0058.post.regDouble                              = POST-Aktion reqDouble gescheitert: {0}
-err0059.decode.Placement                            = Dekodierfehler Platzierung: {0}
-err0060.decode.Clubs                                = Dekodierfehler Datentyp Clubs (aus Seq[String]): {0}
-err0061.decode.Competitions                         = Dekodierfehler Datentyp Competitions (aus Seq[String]): {0}
-err0062.decode.TournBase                            = Dekodierfehler Datentyp TournBase: {0}
-err0063.post.unknown                                = POST-Aktion unbekannt: {0} 
-err0064.svc.addTournBase                            = Service addTournBase Fehler bei der Ausführung: {0} {1}
-err0065.svc.addTourney                              = Service addTourney Fehler bei der Ausführung: {0} {1}
-err0066.decode.Int                                  = Dekodierfehler Datentyp Integer: {0}
-err0067.decode.Long                                 = Dekodierfehler Datentyp Long: {0}
-err0068.decode.Boolean                              = Dekodierfehler Datentyp Boolean: {0}
-err0069.decode.String                               = Dekodierfehler Datentyp String: {0}
-err0070.decode.Tourney                              = Dekodierfehler Datentyp Tourney step {0}: {1}
-err0071.decode.TournRun                             = Dekodierfehler Datentyp TournRun: {0}
-err0080.access.invalidRights                        = Ungenügende Zugriffsrechte
-err0081.database.add                                = Datenbank-Fehler beim Hinzufügen von Datensätzen
-err0082.database.save                               = Datenbank-Fehler beim Sichern
-err0083.database.insert                             = Datenbank-Fehler beim Einfügen
-err0084.decode.PfieldInfo                           = Dekodierfehler Datentyp PfieldInfo: {0}
-err0085.access.insufficientRights                   = Geforderte Aktion nicht erlaubt, ungenügende Berechtigung
-err0086.access.notAuthenticated                     = Fehlerhafte Login Daten
-err0087.access.UnexpectedProviderError              = Vom (Login-)Provider wurde ein unerwarteter Fehler gemeldet
-err0088.access.couldNotAuthenticate                 = Fehlermeldung vom (Login-)Provider gemeldet, keine Authentisierung möglich
-err0089.ctrl.noMatchingTourney                      = Kein passendes Turnier gefunden
-err0090.internal.sidebarRedirect                    = Sidebar-Weiterleitung zu Directory-Eintrag fehlerhaft
-err0091.ajax.logout                                 = Fehlermeldung GET-Aktion: {0} {1} 
-err0092.email.password.send                         = Passwort Aktualisierung konnte nicht gesendet werden: {0}
-err0093.email.user.notfound                         = Passwort Aktualisierung konnte nicht gesendet werden, da E-Mail {0} nicht registriert ist
-err0094.login.noLic                                 = Authentisierung nicht möglich, da keine gültige Lizenz
-err0095.login.licenseupdate                         = Fehler beim Aktualisieren der Lizenz-Datenbank (Administrator verständigen) 
-err0096.login.emailpassword                         = E-Mail und/oder Passwort nicht korrekt
-err0097.login.invalid                               = Benutzer nicht berechtigt für diese Aktion
-err0098.usecase.unknown                             = Ungültige Anwendungsaktion bzw. ungültiges Kommando: {0}
-err0099.decode.License                              = Dekodierfehler Datentyp Lizenz: {0}
-err0100.licrequest.inuse                            = Fehler bei der Registrierung, Vereinsname wird bereits genutzt
-err0101.licrequest.database                         = License-Database not available
-err0102.licrequest.format                           = Allgemeiner Fehler, Registrierungsanforderung nicht gültig
-err0103.license.delete                              = Lizenzen {0} konnte nicht gelöscht werden
-err0104.license.update                              = Lizenzen {0} konnte nicht aktualisiert werden
-err0105.notallowed                                  = Benutzer-Aktion ist nicht autorisiert
-err0106.ctrl.sendVerifyCode                         = Fehler beim Senden des Verifizierungs-Code an: {0}
-err0107.sendEmail.parameter                         = Ungültige Parameter beim Senden einer E-Mail
-err0108.sendEmail.exception                         = Fehler beim Senden: {0}  
-err0109.sendEmail.service                           = E-Mail ungültig oder E-Mail-Service nicht verfügbar
-err0110.sendEmail.clubNotfound                      = Fehler Lizenz konnte nicht gesendet werden, Club nicht gefunden
-err0111.generate.PdfInvoice                         = Rechnung konnte nicht generiert werden
-err0112.decode.req.invoice                          = Ungültige Parameter beim Dekodieren der Lizenzanforderung
-err0123.svc.requestLicense                          = Service requestLicense Fehler beim Dekodieren: {0}
-err0124.invalidActionRequest                        = Geforderte Aktion nicht möglich: {0}
-err0125.setContentMD                                = Fehler beim Lesen des Markdown-Dokuments: {0}
-err0126.fileNotAvailable                            = Datei {0} nicht verfügbar
-err0127.svc.delPlayfield                            = Service delPlayfield code {0} nicht mehr registriert
-err0128.upload.file                                 = Datei konnte nicht hochgeladen werden, Grund: {0} 
-err0129.access.admin                                = Sorry keine Administrationsrechte 
-err0130.ctrl.uploadLic                              = Kontrollerfehler in Routine uploadLic
-err0131.login.emailnotfound                         = Kein Verein mit Organisator {0} registriert
-err0132.decode.Player                               = Dekodierfehler Datentyp Player: {0}
-err0133.get.noTourneyFound                          = GET-Aktion getTournBase Fehler - kein Turnier mit Id {0} gefunden
-err0134.crypto.NoSessionCookie                      = Kein Session Cookie vorhanden
-err0135.crypto.SessionTimeout                       = Timeout der Session
-err0136.crypto.SessionDecoding                      = Fehler beim Dekodieren/Entschlüsseln der Session
-err0137.user.fileNotFound                           = Datei: {0} nicht gefunden
-err0138.crypto.paramlist                            = Parameter-Liste nicht dekodierbar
-err0139.crypto.StringParam                          = Parameter {0} vom Typ String nicht gefunden
-err0140.crypto.LongParam                            = Parameter {0} vom Typ Long nicht gefunden
-err0141.crypto.IntParam                             = Parameter {0} vom Typ Int nicht gefunden
-err0142.crypto.Boolean                              = Parameter {0} vom Typ Boolean nicht gefunden
-err0143.decode.Competitions                         = Dekodierfehler Datentyp Competitions: {0}
-err0144.decode.TournBase                            = Dekodierfehler Datentyp Sequenz von TournBase: {0}
-err0145.user.download                               = Download nicht möglich (bitte Berechtigung prüfen)
-err0146.fileaccess.config                           = Konfigurationsdateien {0} bzw. {1} konnten nicht gelesen werden
-err0147.decode.ResultEntrys                         = Dekodierfehler Datentyp ResultEntrys: {0}
-err0148.decode.ResultEntry                          = Dekodierfehler Datentyp ResultEntry: {0}
-err0149.cache.moveFile                              = Fehler beim Umbenennen/Löschen von Dateien: {0} 
-err0150.access.notAuthorized                        = Berechtigung nicht ausreichend
-err0151.ctrl.getTournBase                           = Kontrollerfehler in Routine getTournBase
-err0152.ctrl.regTournBase                           = Kontrollerfehler in Routine regTournBase: {0}
-err0153.trny.addComp                                = Ungültiger Identifier für neuen Wettbewerb {0}
-err0154.trny.setComp                                = Ungültiger Identifier zum Ändern des Wettbewerbs
-err0155.svc.addPlayer                               = Ungültiger Identifier beim Anlegen eines Spielers {0}
-err0156.svc.addPlayer                               = Fehler in der Routine addPlayer, Spieler exisftiert bereits {0}
-err0157.svc.setPlayer                               = Fehler in der Routine setPlayer, ungültiger Identifier für {0}
-err0158.svc.setPlayer                               = Fehler in der Routine setPlayer, Spieler {0} existiert bereits
-err0159.Player.validateName                         = Name des Spielers nicht im Format <Nachname>, <Vorname>
-err0160.Player.validateEmail                        = Ungültiges E-Mail-Format
-err0161.Club.parseName                              = Ungültiger Name für Club
-err0162.Player.already.exists                       = Spieler mit dem Namen existiert bereits
-err0163.Player.already.registered                   = Spieler bereits registriert für den Wettbewerb
-err0164.RegDouble.Name.missing                      = Name des Spielers {0} fehlt
-err0165.decode.Match                                = Dekodierfehler Datentyp Match: {0}
-err0166.decode.Matches                              = Dekodierfehler Datentyp Matches: {0}
-err0167.decode.CompSystem                           = Dekodierfehler Datentyp CompSystem: {0}
-err0168.ajax.getJson                                = Kommunikationsfehler: {0}
-err0169.trny.addSect                                = Funktionsaufruf addSect, neuer Abschnitt existiert bereits
-err0170.trny.setSectPlayer                          = Funktionsaufruf setSectPlayer, Abschnitt {0} existiert nicht
-err0171.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt {0} kann nicht generiert werden
-err0172.trny.setCompDraw                            = Funktionsaufruf setCompDraw, Spielabschnitt nicht definiert
-err0173.trny.getSinglePlayer                        = Funktionsaufruf getSinglePlayer, Startnummer {0} fehlerhaft
-err0174.trny.getDoublePlayer                        = Funktionsaufruf getDoublePlayer, Startnummer {0} fehlerhaft
-err0175.DlgCardCfgSection                           = Ungültige Auswahl des Spielsystems
-err0176.decode.CompSection                          = Dekodierfehler Datentyp CompSection: {0}
-err0177.decode.CompPhase                            = Dekodierfehler Datentyp CompPhase: {0}
-err0178.svc.regTournBase                            = Fehler in der Routine regTournBase: {0} 
-err0179.Tourney.name                                = Fehler Turniername zu kurz (mind. 3 Zeichen)
-err0180.Tourney.edate                               = Fehler Turnierenddatum vor Turnierstartdatum
-err0181.Tourney.sdate                               = Fehler Turnierstartdatum ungültig
-err0182.ctrl.delTourney                             = Kontrollerfehler in Routine delTourney: {0}
-err0183.ctrl.decode.updComps                        = Fehler in Routine updComps, Wettbewerbsliste konnte nicht dekodiert werden
-err0184.ctrl.decode.updPlayers                      = Fehler in Routine updPlayers, Playerliste konnte nicht dekodiert werden
-err0185.ctrl.decode.setPant2Comps                   = Fehler in Routine setPant2Comps, Mapping-Liste Player zu Wettbewerbe konnte nicht dekodiert werden
-err0186.ctrl.decode.setClubs                        = Fehler in Routine setClubs, Liste der Vereine konnte nicht dekodiert werden
-err0187.trny.setClub                                = Fehler in Routine setClub, Namesänderung zu bereits existierenden Club (merge?)
-err0188.decode.ParticipantEntry                     = Dekodierfehler Datentyp ParticipantEntry: {0}
-err0189.ctrl.decode.TournBase                       = Dekodierfehler im Controller Datentyp TournBase: {0}
-err0190.ctrl.lic.notfound                           = Lizenz nicht gefunden: {0}
-err0191.ctrl.decode.MEntry                          = Dekodierfehler im Controller Datentyp MEntry: {0}
-err0192.input.invalid.sets                          = Ungültiges Eingabeformat für Sätze
-err0193.organize.competition.selection              = Ungültige Wettbewerbs-Auswahl: {0}
-err0194.msg.addCompPhase.existing                   = Wettbewerb kann nicht (erneut) gestartet werden
-err0195.msg.addCompPhase.name                       = Ungültiger Name für Runde/Wettbewerbsabschnitt (Länge mind. 2 Zeichen)
-err0196.msg.addCompPhase.config                     = Ungültige (keine) Konfiguration ausgewählt
-err0197.msg.initGrMatches.generating                = Interner Fehler, Spiele konnten nicht entsprechend dem Spielplan generiert werden
-err0198.getArrayBuffer                              = Lokaler Speicher konnte nicht gelesen werden {0}
-err0199.upload.file.tourneyId                       = Fehler beim Hochladen einer Datei: Ungültige Turnier-ID, bitte zuvor ein Turnier auswählen.
-err0200.upload.file.limit                           = Fehler beim Hochladen einer Datei: Datei zu groß
-err0201.upload.file.notsupported                    = Fehler beim Hochladen einer Datei: Dateityp wird nicht unterstützt
-err0202.upload.file.orgId                           = Fehler beim Hochladen einer Datei: fehlende Berechtigung
-err0203.upload.file.command                         = Fehler beim Hochladen einer Datei: ungültiges Kommando
-err0204.upload.file.mode                            = Fehler beim Hochladen einer Datei: ungültige Kommando-Option
-err0205.upload.file.startDate                       = Fehler beim Hochladen einer Datei: clickTT-Startdatum passt nicht zu Turnierstartdatum
-err0206.upload.file.sDateExists                     = Fehler beim Hochladen einer Datei: Turnier mit dem clickTT-Startdatum existiert bereits (Aktualisierung?).   
-err0207.genCttResult                                = (Kommunikations-)Fehler beim Generieren der ClickTT-Ergebnisdatei.
-err0208.genCttResult.noMatchingComp                 = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen passenden Wettbewerb gefunden
-err0209.genCttResult.moreMatchingComps              = Fehler beim Generieren der ClickTT-Ergebnisdatei, keinen eindeutigen Wettbewerb gefunden
-err0210.downloadFile.invalidType                    = Fehler beim Downlaod, ungültiger Dateityp
-err0211.downloadFile.missingResultFile              = Fehler beim Lesen der Ergebnisdatei: {0}
-err0212.svc.setPlayer.invalidPlayerId               = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer: {0}
-err0213.svc.setPlayer.invalidLicense                = Fehler beim Aktualisieren der Spielerlizenz, Spieler-Nummer/Lizenz: {0}/{1}
-err0214.decode.CttPerson                            = Dekodierfehler Datentyp CttPerson: {0}
-err0215.sync                                        = Turnierdaten nicht synchron (unterschiedliche Versionen lokal/remote)
-err0216.svc.setPlayer.invalidUpdate                 = Fehler beim Aktualisiern der Spielerdaten, Spieler hat Lizenz (nur E-Mail-Update erlaubt) 
-err0217.Player.validateTTR                          = Ungültiges TTR-Wert
-err0218.svc.getReferee.notFound                     = Spiel nicht gefunden/vorhanden
-err0219.svc.getReferee.invalid                      = Spielinfo ungültig
-err0220.getIpAddress                                = IP-Adresse des Servers nicht verfügbar. Kommunikationsfehler. 
-err0221.invalidNonce                                = Fehlende Berechtigung / EinmalPassword nicht ok.
-err0222.svc.invalidCompetitionPhase                 = Spielrunde / Spielphase nicht gefunden
-err0223.svc.inputMatch.decodeResult                 = Dekodierfehler in Routine inputMatch, Datentyp List[Int]
-err0224.coph.inputMatch.invalidGameNo               = Fehler in Routine inputMatch, Spielnummer ungültig {0}
-err0225.systemgroup.invalid.whoagainstwho           = Fehler im Gruppensystem, falsche Werte für wer-gegen-wen
-err0226.svc.resetMatch.failed                       = Fehler in Routine resetMatch
-err0227.tourney.isDummy                             = Serverless Modus
-err0228.svc.resetMatch.decodeResult                 = Dekodierfehler in Routine resetMatch, Datentyp List[Int]
-err0229.svc.resetMatches.failed                     = Fehler in Routine resetMatches
-err0230.svc.resetMatch.game                         = Fehler in Routine resetMatch, Spiel {0}
-err0231.svc.inputReferee.decodeResult               = Dekodierfehler in Routine inputReferee
-err0232.svc.getMatch.error                          = Fehler in Routine getMatch, Spiel {0}
-err0233.noInput                                     = Leere Eingabe nicht erlaubt
-err0234.coph.already.exists                         = Spielrunde {0} existiert bereits
-err0235.coph.name.short                             = Name zu kurz (mind. zwei Zeichen erforderlich)
-err0236.decode.koRound                              = Dekodierfehler Datentyp KO-Round
-err0237.getCoPh.notFound                            = Fehler in Routine getCoPh, Spielrunde nicht definiert/gefunden {0} {1}
-err0238.decode.Pant                                 = Dekodierfehler Datentyp Pant: {0}
-err0239.decode.csv.player                           = Datensatz für Spieler nicht lesbar: {0}
-err0240.svc.regSingle                               = Fehler in der Routine regSingle
-err0241.svc.regDouble                               = Fehler in der Routine regDouble
-err0242.setCompPhase                                = Fehler in Routine setCompPhase {0} {1}
-err0243.systemKO.draw.size                          = Auslosung KO-System, fehlerhafte Größe oder Anzahl der Runden
-err0244.systemKO.draw.updown                        = Auslosung KO-System, fehlerhafte Zuordnung
-err0245.invalid.sno.double                          = Doppel-Startnummer ungültig: {0}
-err0246.decode.sendCttFile                          = Dekodierfehlerin Routine sendCttFile
-err0247.deleteCoPh.notPossible                      = Löschen der Spielrunde {0} nicht möglich, da abhängige Runde(n) {1} existieren
-err0248.delCompPhase.invalid.param                  = Fehler in Routine delCompPhase ungültige Parameter {0}/{1}
-err0249.genGrMatchDependencies                      = Fehler in Routine genGrMatchDependencies
-err0250.updateCompPhaseStatus.invalid.param         = Fehler in Routine updateCompPhaseStatus ungültige Parameter {0}/{1}
-err0251.resetMatches.invalid.param                  = Fehler in Routine resetMatches ungültige Parameter {0}/{1}
-err0252.resetMatch.invalid.param                    = Fehler in Routine resetMatch ungültige Parameter {0}/{1}
-err0253.inputMatch.invalid.param                    = Fehler in Routine inputMatch ungültige Parameter {0}/{1}
-err0254.ballInput.invalid                           = Balleingabe fehlerhaft (enthält Blanks)
-err0255.getMatch.invalid.param                      = Fehler in Routine getMatch ungültige Parameter {0}
-err0256.svc.getTourney                              = Fehler in Routine getTourney, Dekodierung der Playfield-Struktur nicht möglich
-err0257.svc.syncPlayfields                          = Fehler in Routine syncPlayfields
-err0258.pubCompPhase                                = Fehler in Routine pubCompPhase, ungültige Parameter {0}/{1}
-err0259.authReset.invalidEmail                      = Keine gültige EMail-Adresse gefunden {0}
+home.main.LoginRequired                             = Login erforderlich!
+home.main.UnknownPage                               = Seite konnte leider nicht gefunden werden!        
+home.main.Welcome                                   = Herzlich Willkommen!
+home.main.GoodBye                                   = Bye!  
+home.main.Error                                     = Ein Fehler ist aufgetreten!
+home.main.Cookie                                    = Ohne Cookies geht leider nichts!
+home.main.prompt                                    = Eingabe Kommando:
+home.error.title                                      = FEHLER!
+home.error.image                                      = showError
+home.error.alt                                        = Ein Fehler ist aufgetreten.
 
 
-return001.csv.hdr.player                            = CSV header for player
+###
+# Usecase: Home Console
+###
+home.console.title                                    = Konsole
+home.console.btn.submit                               = Senden
+
+
+###
+# Usecase: Home Register
+###
+home.register.hdg.start                               = Registrierung
+home.register.hdg.free.confirm                        = Registrierung bestätigen
+home.register.hdg.free.finish                         = Registrierung erfolgt
+home.register.hdg.full.confirm                        = Registrierung und Bestellung bestätigen
+home.register.hdg.full.finish                         = Registrierung erfolgreich / Rechnung
+home.register.license.header                          = Lizenz
+home.register.plh.zip                                 = PLZ
+home.register.plh.city                                = Musterstadt
+home.register.plh.street                              = Musterweg
+home.register.lbl.zip                                 = Postleitzahl
+home.register.lbl.city                                = Stadt
+home.register.lbl.street                              = Strasse mit Hausnummer
+home.register.lbl.radio.free                          = freie Lizenz
+home.register.lbl.radio.full                          = volle Lizenz
+home.register.hlp.clubname.inuse                      = Name des Vereins bzw. Schlagwort bereits in Verwendung
+home.register.hlp.zip                                 = Bitte gültige Postleitzahl eingeben (mind. 2 Zeichen)
+home.register.hlp.city                                = Bitte gültige Stadt eingeben (mind. 2 Zeichen)
+home.register.hlp.street                              = Bitte gültige Strasse incl. Hausnummer eingeben (mind. 2 Zeichen)
+home.register.hlp.country                             = Bitte ein Land auswählen.
+home.register.hlp.code                                = &nbsp; Der Bestätigungscode ist leider nicht korrekt.
+home.register.hlp.ConfirmCondition                    = Bitte die Widerrufsbelehrung und die AGBs akzeptieren.
+home.register.onefreeLicense                          = <ul class="mb-0"><li>Ein EINZEL- und ein DOPPEL-Wettbewerb</li><li>bis zu 32/16 Teilnehmer</li></ul>
+home.register.onefullLicense                          = <ul class="mb-0"><li>Ein EINZEL- und ein DOPPEL-Wettbewerb</li><li>bis zu 128/64 Teilnehmer</li></ul>
+home.register.multifreeLicense                        = <ul class="mb-0"><li>8 Wettbewerbe (EINZEL oder DOPPEL)</li><li>32 Teilnehmer pro Wettbewerb</li></ul>
+home.register.multifullLicense                        = <ul class="mb-0"><li>64 Wettbewerbe (EINZEL oder DOPPEL)</li><li>bis zu 128 Teilnehmer pro Wettbewerb</li><li>insgesamt bis zu 500 Teilnehmer</li><li>Live-Ticker/Ergebnisse im Internet oder via eigenem Web-Service</li></ul>
+home.register.oneCompVersion                          = EIN-Wettbewerb Version
+home.register.multiCompVersion                        = MEHR-Wettbewerb Version
+home.register.btn.free.back                           = ZURÜCK 
+home.register.btn.free.request                        = Kostenfreie Lizenz anfordern
+home.register.btn.free.confirm                        = Lizenz zusenden
+home.register.btn.full.back                           = ZURÜCK
+home.register.btn.full.request                        = Kostenpflichtige Lizenz anfordern
+home.register.btn.full.confirm                        = Kostenpflichtig bestellen
+home.register.btn.code.resend                         = ERNEUT ZUSENDEN
+home.register.address.for.nameclub                    = Lizenz für <strong>{0} {1}</strong> - Verein: <strong>{2}</strong>
+home.register.freeconfirm.name                        = Kostenfreie Lizenz für <strong>{0}</strong>
+home.register.confirm.entercode                       = <small>Bitte geben Sie den 4-stelligen Bestätigungscode ein, den wir an: <strong>{0}</strong> gesendet haben.</small>
+home.register.address.for.email                       = E-Mail: <strong>{0}</strong>
+home.register.freefinish.prolog                       = <h5>Vielen Dank für die Registrierung,</h5><p>nachfolgend der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
+home.register.freefinish.epilog                       = Die Dokumentation findet sich <a href="https://turnier-service.org/">hier</a>. Wünsche und Verbesserungsvorschläge werden gerne entgegengenommen unter <a href="mailto:info@turnier-service.org">info@turnier-service.org</a><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
+home.register.fullconfirm.name                        = Kostenpflichtige Lizenz für <strong>{0}</strong>
+home.register.fullconfirm.clubname                    = Verein: <strong>{0}</strong>
+home.register.fullfinish.prolog                       = <h5>Vielen Dank für die Registrierung,</h5><p>nachfolgend der Lizenzstring (= &#60;Vereinsname/Lizenzcode&#62;). Diesen gesamten fett gedruckten Text einfach mit cut/paste ins Setup-Menue eintragen. Die Datei kann dann gespeichert und beliebig für jedes Turnier kopiert werden (es gibt keinen Kopierschutz o.ä.).</p>
+home.register.fullfinish.epilog                       = <p>Die Dokumentation findet sich <a href="https://turnier-service.org/">hier</a>. Wünsche und Verbesserungsvorschläge werden gerne entgegengenommen unter <a href="mailto:info@turnier-service.org">info@turnier-service.org</a><p>Der Lizenzstring und die Rechnung wurde an die angegebene E-Mail-Adresse versendet.</p><p>Sportliche Grüße und viel Erfolg bei Euren Turnieren</p>
+home.register.fullconfirm.item.hdl                    = Turnierservice Nutzungslizenz(full) zum Preis von 39,50€
+home.register.fullconfirm.item.cnt                    = 2
+home.register.fullconfirm.item.content.1              = Unbeschränkte lokale Nutzung der Excel-basierten Software
+home.register.fullconfirm.item.content.2              = 1 Jahr Nutzung der online Turnierdienste (max. 3 Turniere) ab Kaufdatum
+home.register.check.withdrawal                        = Ich habe die <a href="#" onclick='InputCtrl.setContent("/content/withdrawal.md")'>Widerrufsbelehrung</a> gelesen und erkenne sie hiermit an.
+home.register.lbl.gtc                                 = Ich habe die <a href="#" onclick='InputCtrl.setContent("/content/gtc.md")'>allgemeinen Geschäftsbedingungen</a> gelesen und erkläre mich damit einverstanden.
+home.register.lbl.withdrawal                          = Die Widerufsbelehrung und Geschäftsbedingungen müssen anerkannt und akzeptiert werden.
+
+
+###
+# Usecase: Home Login
+###
+home.login.hdg                                      = Turnierleitung - Login
+home.login.btn.req.newPassword                      = PASSWORT VERGESSEN
+home.login.btn.req.authPassword                     = LOGIN
+home.login.btn.req.authGoogle                       = Login mit Google
+home.login.lbl.user                                 = E-Mail oder Lizenzschlüssel  
+home.login.hlp.user                                 = Bitte geben Sie ihre E-Mail-Adresse oder den ersten Teil Ihres Lizenzschlüssels ein
+home.login.plh.user                                 = max.mustermann@email.de
+home.login.bye                                      = Auf Wiedersehen!
+home.login.dlg.hdg                                  = Login Fehler 
+home.login.dlg.text                                 = E-Mail/Lizenzstring und/oder Passwort nicht korrekt.
+home.login.dlg.title.err.reqPw                      = Fehler Passwort Rücksetzung
+home.login.dlg.wrongemail.hdg                       = Fehler beim Zurücksetzen des Passworts 
+home.login.dlg.wrongemail.text                      = Bitte korrekte E-Mail-Adresse eingeben.
+home.login.dlg.title.ok.reqPw                       = Zurücksetzung des Passworts 
+home.login.dlg.body.ok.reqPw                        = Ein neues Passwort wurde an {0} gesendet. Überprüfen Sie die Spam-Filter-Einstellungen bzw. das Postfach für unerwünsche E-Mail (Junkmail-Ordner), falls Sie keine E-Mail erhalten haben. Ändern Sie das neu erhaltene Passwort in den Einstellungen.
+
+
+###
+# Usecase: Home Setting - change user/club settings
+###
+home.setting.hdg                                    = Einstellungen
+home.setting.password.hdg                           = Passwort ändern
+home.setting.contact.hdg                            = Kontaktdaten ändern
+home.setting.btn.req.contactChange                  = SPEICHERN
+home.setting.hlp.city                               = Bitte gültige Stadt eingeben (mind. 2 Zeichen)
+home.setting.hlp.street                             = Bitte gültige Strasse incl. Hausnummer eingeben (mind. 2 Zeichen)
+home.setting.hlp.zip                                = Bitte gültige Postleitzahl eingeben
+home.setting.lbl.zip                                = Postleitzahl
+home.setting.lbl.city                               = Stadt
+home.setting.lbl.street                             = Strasse mit Hausnummer
+home.setting.lbl.country                            = Land
+home.setting.plh.zip                                = PLZ
+home.setting.plh.city                               = Musterstadt
+home.setting.plh.street                             = Musterweg
+home.setting.plh.country                            = Musterland
+home.setting.contactChange.failure.dlg.hdg          = Fehler bei der Aktualisierung
+home.setting.contactChange.success.dlg.text         = Die Kontaktdaten wurden erfolgreich aktualisiert.
+home.setting.btn.req.pwChange                       = PASSWORT ÄNDERN
+home.setting.pwChange.failure.dlg.hdg               = Fehler bei der Aktualisierung
+home.setting.pwChange.success.dlg.hdg               = Aktualisierung erfolgt
+home.setting.pwChange.success.dlg.text              = Passwort wurde erfolgreich aktualisiert.
+
+
+###
+# Usecase: Home Search
+###
+home.search.hint                                    = Name des Turniers oder Vereins
+home.search.label                                   = Turniersuche
+home.search.dlg.hdg                                 = Fehler bei der Suche 
+home.search.headline                                = Herzlich Willkommen!
+home.search.info                                    = Bitte Suchbegriff eingeben und dann Click auf ENTER/RETURN. Die gefunden Turnier werden angezeigt und können angeklickt werden.
+home.search.noEntryMsg                              = Leider kein passendes Turnier gefunden.
+home.search.table.date                              = Datum
+home.search.table.club                              = Verein
+home.search.table.tourney                           = Turnier
+home.search.lbl.typ                                 = <strong>Sportart</strong>
+home.search.lbl.year                                = <strong>Jahr</strong>
+home.search.lbl.string                              = <strong>Turniersuche</strong>
+home.search.plh.string                              = Name des Turniers oder Vereins
+
+
+###
+# Usecase Common
+###
+common.certificate.noentry                            = Bisher keine Endergebnisse vorhanden
+common.certificate.hdr.place                          = Platzierung
+common.certificate.hdr.name                           = Name
+common.certificate.hdr.club                           = Verein
+common.certificate.place                              = {0} Platz
+
+###
+#  Invoice Messages
+###
+invoice.title                                       = Turnier-Service Rechnung
+invoice.lang                                        = de
+invoice.literally                                   = Rechnung
+invoice.myaddress.name                              = Robert Lichtenegger
+invoice.myaddress.street                            = Finkenstr. 36a
+invoice.myaddress.zip                               = 85356
+invoice.myaddress.city                              = Freising
+invoice.myaddress.country                           = Deutschland
+invoice.taxNr                                       = 115/244/90953
+invoice.description                                 = Position
+invoice.amount                                      = Betrag
+invoice.label.date                                  = Rechnungsdatum: 
+invoice.label.number                                = Rechnungsnummer:
+invoice.label.bank.name                             = Bank
+invoice.label.bank.iban                             = IBAN
+invoice.label.bank.bicSwift                         = BIC/Swift
+invoice.label.bank.recipient                        = Empfänger
+invoice.label.duedate                               = Zahlungsfrist:
+invoice.duedate                                     = Zahlbar innerhalb von 30 Tagen
+invoice.bank.url                                    = https://www.ing.de/
+invoice.bank.name                                   = ING
+invoice.bank.iban                                   = DE97 5001 0517 0216 8999 55
+invoice.bank.bicSwift                               = INGDDEFFXXX
+invoice.bank.recipient                              = Robert Lichtenegger
+invoice.label.vat                                   = Im Rechnungsbetrag sind 19 % Umsatzsteuer enthalten
+invoice.label.paypal.recipient                      = <span style="color:#0000FF">Pay</span><span style="color:#1E90FF">Pal</span>
+invoice.paypal.recipient                            = robert.lichtenegger@icloud.com
+invoice.transfer.withInvoiceNumber                  = Bitte Rechnungsnummer als Verwendungszweck angeben
+invoice.footer.thanks                               = Danke für den Kauf der Lizenz und viel Freude beim Durchführen der Turniere. Fragen und Verbesserungsvorschläge bitte an <a href= 'mailto:info@turnier-serivce.org'>info@turnier-service.org</a>
+invoice.footer.url                                  = Internet:&nbsp;<a href="https://www.turnier-service.info"><span style="text-decoration: underline;">www.turnier-service.info</span></a>
+invoice.label.taxNr                                 = Steuernummer:
+invoice.label.total                                 = Gesamtsumme:
+invoice.label.transferTo                            = Bitte überweisen Sie die Gesamtsumme an:
+invoice.label.alternativ                            = oder:
+invoice.vat                                         = 19.00
+invoice.currency                                    = EUR
+invoice.item1.description                           = Turnierprogramm Lizenz(full)
+invoice.item1.price                                 = 39.50
+invoice.email.name                                  = Rechnung.pdf
+

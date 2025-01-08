@@ -8,6 +8,11 @@ import scala.sys.process._
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import NativePackagerHelper._
 
+val appVersion = sys.env.getOrElse("APP_VERSION", "001")
+val appDate    = sys.env.getOrElse("APP_DATE", "1970-01-01")
+ThisBuild / version  := sys.env.getOrElse("APP_VERSION", "001")
+server / maintainer  := sys.env.getOrElse("APP_MAINTAINER", "Joe Doe <joe.doe@example.com>")
+
 // resolvers in ThisBuild  += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 resolvers in ThisBuild  += "Atlassian's Maven Public Repository" at "https://packages.atlassian.com/maven-public/"
 
@@ -16,45 +21,31 @@ resolvers in ThisBuild  += "Atlassian's Maven Public Repository" at "https://pac
 //ThisBuild / serverURL := "http://ubuntu1804"
 
 lazy val concMsgFiles = taskKey[Unit]("Concatenate message files")
-
 lazy val server = (project in file("server")).
   settings(
     commonSettings,
-    concMsgFiles := {  
-      val outputFileDE = file("server/conf/messages.de")
-      val inputFilesDE = Seq(file("server/conf/messages/de/01_app.de"), 
-                             file("server/conf/messages/de/02_general.de"), 
-                             file("server/conf/messages/de/03_dialog.de"), 
-                             file("server/conf/messages/de/04_sidebar.de"),
-                             file("server/conf/messages/de/05_email.de"),
-                             file("server/conf/messages/de/06_invoice.de"),
-                             file("server/conf/messages/de/07_referee.de"),
-                             file("server/conf/messages/de/10_home.de"),
-                             file("server/conf/messages/de/11_info.de"),
-                             file("server/conf/messages/de/12_organizer.de"),
-                             file("server/conf/messages/de/13_admin.de"),
-                             file("server/conf/messages/de/99_error.de"))
+    concMsgFiles := {
+      val msgFileDe = baseDirectory.value  / "conf" / "messages.de"
+      val msgFileEn = baseDirectory.value  / "conf" / "messages.en"
+      val infoDe = baseDirectory.value  / "conf" / "messages" / "de" / "00_info.de"
+      val infoEn = baseDirectory.value  / "conf" / "messages" / "en" / "00_info.en"
+      val ymd = appDate.split("-")
+      val yearMonth = s"${ymd(0)}-${ymd(1)}"
+      IO.write(infoDe, s"""
+                        |app.version = ${appVersion}DE${yearMonth}
+                        |app.date    = ${appDate}
+                        |\n""".stripMargin)
+      IO.write(infoEn, s"""
+                        |app.version = ${appVersion}EN${yearMonth}
+                        |app.date    = ${appDate}
+                        |\n""".stripMargin)
 
-      val outputFileEN = file("server/conf/messages.en")
-      val inputFilesEN = Seq(file("server/conf/messages/en/01_app.en"), 
-                             file("server/conf/messages/en/02_general.en"), 
-                             file("server/conf/messages/en/03_dialog.en"), 
-                             file("server/conf/messages/en/04_sidebar.en"),
-                             file("server/conf/messages/en/05_email.en"),
-                             file("server/conf/messages/en/06_invoice.en"),
-                             file("server/conf/messages/en/07_referee.en"),
-                             file("server/conf/messages/en/10_home.en"),
-                             file("server/conf/messages/en/11_info.en"),
-                             file("server/conf/messages/en/12_organizer.en"),
-                             file("server/conf/messages/en/13_admin.en"),
-                             file("server/conf/messages/en/99_error.en"))
-
-      IO.write(outputFileDE, inputFilesDE.map(IO.read(_)).reduceLeft(_ ++ _))
-      IO.write(outputFileEN, inputFilesEN.map(IO.read(_)).reduceLeft(_ ++ _))
-      println("Concatenating message files") 
+      val filesDe = (baseDirectory.value / "conf" / "messages" / "de" ** "*.de").get
+      val filesEn = (baseDirectory.value / "conf" / "messages" / "en" ** "*.en").get
+      IO.write(msgFileDe, filesDe.map(IO.read(_)).reduceLeft(_ ++ _))
+      IO.write(msgFileEn, filesEn.map(IO.read(_)).reduceLeft(_ ++ _))
     },
-    maintainer      := "Robert Lichtenegger <robert.lichtenegger@icloud.com>",
-    name            := Settings.name,
+    name            := "server",
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
@@ -62,7 +53,7 @@ lazy val server = (project in file("server")).
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     mappings in Universal ++= directory(baseDirectory.value / "public"),
-    mappings in Universal ++= directory(baseDirectory.value / "db"),
+    // mappings in Universal ++= directory(baseDirectory.value / "db"),
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-xml"                % "1.1.1",
       "com.mohiva" %% "play-silhouette"                      % "6.1.1",
@@ -172,7 +163,6 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
-
     
 lazy val testing = (project in file("testing"))
   .settings(
@@ -190,9 +180,9 @@ lazy val testing = (project in file("testing"))
   ) 
 
 lazy val commonSettings = Seq(
-  scalaVersion   := Settings.scalaVersion,
-  organization   := Settings.organization,
-  version        := Settings.version
+  javacOptions ++= Seq("-source", "11", "-target", "11"),
+  scalaVersion   := "2.13.5",
+  organization   := "org.turnier-service"
 )
 
 // loads the server project at sbt startup

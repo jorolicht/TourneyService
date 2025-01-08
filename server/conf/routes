@@ -1,1 +1,170 @@
-routes.debug
+# Routes
+# This file defines all application routes (Higher priority routes first)
+
+# for testing
++ nocsrf
+POST /svc/test/exec                       controllers.TestCtrl.exec(params: String?="")
+GET /test/invoice                          controllers.TestCtrl.invoice
+GET /test/trigger                          controllers.TestCtrl.trigger(id: String?="", toId:Long?=0L, msg: String?="Hallo")
+GET /test/qrco                             controllers.HomeCtrl.qrco(url: String)
+GET /test/sha1                             controllers.TestCtrl.sha1()
+GET /test/base64                           controllers.TestCtrl.base64()
+GET /test/dump                             controllers.TestCtrl.dump(toId: Long)
+
+GET   /                                    controllers.HomeCtrl.start(ucName: String ?="HomeMain", ucParam: String ?="", ucInfo: String ?="SETUP")
+GET   /start                               controllers.HomeCtrl.start(ucName: String ?="HomeMain", ucParam: String ?="", ucInfo: String ?="") 
+GET   /console                             controllers.HomeCtrl.console()
+GET   /trigger                             controllers.HomeCtrl.trigger(id: String)
+GET   /getCtx                              controllers.HomeCtrl.getCtx()
+GET   /register                            controllers.HomeCtrl.register()
+GET   /ping                                controllers.HomeCtrl.ping()
+GET   /getIpAddress                        controllers.HomeCtrl.getIpAddress()
+GET   /version                             controllers.HomeCtrl.version()
+GET   /setLang                             controllers.HomeCtrl.setLang(lang: String ?="de")
+GET   /getMessages                         controllers.HomeCtrl.getMessages
+GET   /getErrCodes                         controllers.HomeCtrl.getErrCodes(lang: String ?="de")
+
+# ---
+# Authentication (Login/Logout) Interface
+# ---
+GET   /authenticate/logout                 controllers.AuthenticateCtrl.authLogout(redirect: Boolean ?= false)
+GET   /authenticate/google                 controllers.AuthenticateCtrl.authGoogle
+GET   /authenticate/basic                  controllers.AuthenticateCtrl.authBasic(params: String ?="")
+GET   /authenticate/external               controllers.AuthenticateCtrl.authExternal
+GET   /authenticate/reset                  controllers.AuthenticateCtrl.authReset(params: String ?="")
+POST  /authenticate/change                 controllers.AuthenticateCtrl.authChange(params: String ?="")
+POST  /authenticate/update                 controllers.AuthenticateCtrl.authUpdate(params: String ?="")
+
+
+# ---
+# CONTENT Use Cases / View
+# ---
+GET   /content/:p1                         controllers.HomeCtrl.content(p1: String, p2: String ?="", p3: String ?="",      p4: String ?="", p5: String ?="", p6: String ?="")
+GET   /content/:p1/:p2                     controllers.HomeCtrl.content(p1: String, p2: String,      p3: String ?="",      p4: String ?="", p5: String ?="", p6: String ?="")
+GET   /content/:p1/:p2/:p3                 controllers.HomeCtrl.content(p1: String, p2: String,      p3: String,           p4: String ?="", p5: String ?="", p6: String ?="")
+GET   /content/:p1/:p2/:p3/:p4             controllers.HomeCtrl.content(p1: String, p2: String,      p3: String,           p4: String,      p5: String ?="", p6: String ?="")
+GET   /content/:p1/:p2/:p3/:p4/:p5         controllers.HomeCtrl.content(p1: String, p2: String,      p3: String,           p4: String,      p5: String,      p6: String ?="")
+GET   /content/:p1/:p2/:p3/:p4/:p5/:p6     controllers.HomeCtrl.content(p1: String, p2: String,      p3: String,           p4: String,      p5: String,      p6: String)
+
+# ---
+# Directorys of clubs and users
+# ---
+GET /club/:orgdir/:date/qrcode             controllers.HomeCtrl.qrcode(orgdir: String, date: Int, url: String)
+GET /club/:orgdir/:date/playfield          controllers.HomeCtrl.playfield(orgdir: String, date: Int)
+GET /club/:orgdir/:date/home               controllers.HomeCtrl.tourney(orgdir: String, date: Int)
+GET /club/:orgdir/:date/reload             controllers.HomeCtrl.reloadTourney(orgdir: String, date: Int, ucName: String ?="HomeMain")
+
+# ---
+# Administration Controller for admin interface
+# ---
+POST  /admin/uploadLic                     controllers.AdminCtrl.uploadLic
+GET   /admin/exportLic                     controllers.AdminCtrl.exportLic
+GET   /admin/exportDB                      controllers.AdminCtrl.exportDB(params: String)
+
+# ---
+# User License Controller
+# ---
+POST  /license/request                     controllers.LicenseCtrl.request(params: String="")
+POST  /license/delete                      controllers.LicenseCtrl.delete(params: String="")
+POST  /license/update                      controllers.LicenseCtrl.update(params: String)
+GET   /license/has                         controllers.LicenseCtrl.has(params: String)
+GET   /license/getEmail                    controllers.LicenseCtrl.getEmail(params: String)
+GET   /license/available                   controllers.LicenseCtrl.available(params: String)
+GET   /license/getAll                      controllers.LicenseCtrl.getAll(params: String)
+GET   /license/getOwn                      controllers.LicenseCtrl.getOwn(params: String="")
+GET   /license/sendVerifyCode              controllers.LicenseCtrl.sendVerifyCode(params: String)
+POST  /license/sendLicense                 controllers.LicenseCtrl.sendLicense(params: String)
+POST  /license/invoice                     controllers.LicenseCtrl.invoice(params: String)
+
+# ---
+# Service Interface
+# ---
+POST /service/postAction                   controllers.PostActionCtrl.postAction(params: String)
++ nocsp
+GET  /service/getAction                    controllers.GetActionCtrl.getAction(params: String)
+
+GET  /service/getInvitation                controllers.FileCtrl.getInvitation(orgDir: String, startDate: Int)
+POST /service/uploadFile                   controllers.FileCtrl.uploadFile(params: String?="")
+POST /service/sendCttFile                  controllers.FileCtrl.sendCttFile(params: String?="")
++ nocsp
+GET  /service/downloadFile                 controllers.FileCtrl.downloadFile(params: String?="")
++ nocsrf
+POST /service/provideCertTemplFile         controllers.FileCtrl.provideCertTemplFile(params: String?="")
++ nocsrf
+POST /service/genCertFile                  controllers.FileCtrl.genCertFile(params: String?="")
+
+
+# ---
+# Service Interface for external programs to setup/maintain tourney
+# ---
+GET   /svc/trigger                           controllers.RemoteCtrl.trigger(toId: Long, cmd: String)
+GET   /svc/getTournBase                      controllers.RemoteCtrl.getTournBase(toId: Long)
+GET   /svc/getReferee/:toId/:coId/:coPhId/:gameNo/:nonce  controllers.RemoteCtrl.getReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, nonce: Long, test: Boolean?=false)
+
+
+GET   /content/:p1                         controllers.HomeCtrl.content(p1: String, p2: String ?="", p3: String ?="",      p4: String ?="", p5: String ?="", p6: String ?="")
+
+
++ nocsrf
+POST /svc/save                               controllers.RemoteCtrl.save(toId: Long)
++ nocsrf
+POST /svc/regTournBase                       controllers.RemoteCtrl.regTournBase()
++ nocsrf
+POST /svc/delTourney                         controllers.RemoteCtrl.delTourney(sDate: Int)
++ nocsrf
+POST /svc/setPlayfields                      controllers.RemoteCtrl.setPlayfields(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST /svc/delPlayfields                      controllers.RemoteCtrl.delPlayfields(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST /svc/updComps                           controllers.RemoteCtrl.updComps(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST /svc/setCompStatus                      controllers.RemoteCtrl.setCompStatus(toId: Long, coId: Long, status: Int, trigger: Boolean?=false)
++ nocsrf 
+POST /svc/delComps                           controllers.RemoteCtrl.delComps(toId: Long, coId: Long?=0, trigger: Boolean?=false)
+
++ nocsrf
+POST  /svc/setClubs                          controllers.RemoteCtrl.setClubs(toId: Long, trigger:Boolean?=false)
++ nocsrf
+POST  /svc/delClubs                          controllers.RemoteCtrl.delClubs(toId: Long, trigger:Boolean?=false)
++ nocsrf
+POST  /svc/updPlayers                        controllers.RemoteCtrl.updPlayers(toId: Long, trigger:Boolean?=false)
++ nocsrf
+POST  /svc/delPlayers                        controllers.RemoteCtrl.delPlayers(toId: Long, trigger:Boolean?=false)
++ nocsrf
+POST  /svc/setPant2Comps                     controllers.RemoteCtrl.setPant2Comps(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST  /svc/delPant2Comps                     controllers.RemoteCtrl.delPant2Comps(toId: Long, coId: Long?=0, trigger: Boolean?=false)
+
++ nocsrf
+POST  /svc/setCompPhase                      controllers.RemoteCtrl.setCompPhase(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST  /svc/delCompPhases                     controllers.RemoteCtrl.delCompPhases(toId: Long, coId: Long?=0, trigger: Boolean?=false)
+
++ nocsrf
+POST  /svc/setXMatch                         controllers.RemoteCtrl.setXMatch(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST  /svc/setXMatches                       controllers.RemoteCtrl.setXMatches(toId: Long, trigger: Boolean?=false)
++ nocsrf
+POST  /svc/resetXMatches                     controllers.RemoteCtrl.resetXMatches(toId: Long, trigger: Boolean?=false)
+
++ nocsrf
+POST  /svc/setReferee                        controllers.RemoteCtrl.setReferee(toId: Long, coId: Long, coPhId: Int, gameNo: Int, nonce: Int, test:Boolean?=false)
+
+
+# ---
+# Map static resources from the /public folder to the /assets URL path
+# ---
+#GET     /assets/*file                     controllers.Assets.versioned(file)
+GET     /assets/*file                      controllers.Assets.at(path="/public", file)
+GET     /public/*file                      controllers.Assets.at(path="/public/content", file)
+
+# ->      /webjars                           webjars.Routes
+
+# This mapping is in production environment done by nginx
+GET     /doc/overview/                     controllers.Assets.at(path="/public/doc/overview", file = "index.html")
+GET     /doc/overview/*file                controllers.Assets.at(path="/public/doc/overview", file)
+GET     /doc/download/                     controllers.Assets.at(path="/public/doc/download", file = "index.html")
+GET     /doc/download/*file                controllers.Assets.at(path="/public/doc/download", file)
+GET     /doc/                              controllers.Assets.at(path="/public/doc", file = "index.html")
+GET     /doc/*file                         controllers.Assets.at(path="/public/doc", file)
+GET     /images/*file                      controllers.Assets.at(path="/public/doc/images", file)

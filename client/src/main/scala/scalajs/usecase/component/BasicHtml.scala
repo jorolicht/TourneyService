@@ -280,9 +280,9 @@ class BasicHtml
         case _:Int    => elem.getAttribute(s"data-${name}").toIntOption.getOrElse(default.asInstanceOf[Int]).asInstanceOf[A]
         case _:Long   => elem.getAttribute(s"data-${name}").toLongOption.getOrElse(default.asInstanceOf[Long]).asInstanceOf[A]
         case _:String => elem.getAttribute(s"data-${name}").asInstanceOf[A]
-        case _        => { AppEnv.error("getData", s"elem: ${elem} default: ${default}"); default }
+        case _        => { AppEnv.error("getData", s"elem: ${elem} default: {default}"); default }
       }
-    }  catch { case _: Throwable => AppEnv.error("getData", s"elem: ${elem} name: ${name} default: ${default}"); default }
+    }  catch { case _: Throwable => AppEnv.error("getData", s"elem: ${elem} name: {name} default: ${default}"); default }
   }
 
   def setData[A](elem: HTMLElement, attr: String, value: A) = {

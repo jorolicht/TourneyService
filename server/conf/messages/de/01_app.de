@@ -10,8 +10,6 @@ config.cookie.confirmation    = false
 config.LogLevel    = debug
 
 app.mockup                                          = false
-app.version = 2024-03DE181
-app.date    = 2024-03-07
 app.url.home                                        = https://www.turnier-service.info
 app.url.doc                                         = https://turnier-service.org/handbook/
 app.url.download                                    = https://turnier-service.org/download/  

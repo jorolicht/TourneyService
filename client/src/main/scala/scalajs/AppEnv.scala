@@ -70,6 +70,7 @@ object AppEnv extends BasicHtml
        case _       => setLocalStorage("AppEnv.LogLevel", "");       logger = org.scalajs.logging.NullLogger; debugMode = false 
     }
   } 
+  
 
   def debug(func: => String, msg: =>String) = logger.debug(s"${func}-> ${msg}")
   def info(func:  => String, msg: =>String) = logger.info(s"${func}-> ${msg}")
